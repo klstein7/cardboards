@@ -6,8 +6,8 @@ export function useCreateBoard() {
 
   return useMutation({
     mutationFn: api.board.create,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["boards"] });
+    onSuccess: ({ projectId }) => {
+      void queryClient.invalidateQueries({ queryKey: ["boards", projectId] });
     },
   });
 }

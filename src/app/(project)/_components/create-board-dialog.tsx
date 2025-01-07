@@ -50,7 +50,7 @@ export function CreateBoardDialog({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
-      color: "#3B82F6",
+      color: "",
     },
   });
 
@@ -87,7 +87,11 @@ export function CreateBoardDialog({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Board name" {...field} />
+                    <Input
+                      placeholder="E.g. Event Planning"
+                      autoComplete="off"
+                      {...field}
+                    />
                   </FormControl>
                   <FormDescription>
                     What do you want to call this board?

@@ -43,7 +43,11 @@ async function get(boardId: string) {
   const board = await db.query.boards.findFirst({
     where: eq(boards.id, boardId),
     with: {
-      columns: true,
+      columns: {
+        with: {
+          cards: true,
+        },
+      },
     },
   });
 

@@ -42,7 +42,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
         <CreateBoardDialog
           trigger={
             <Button variant="ghost" size="icon">
-              <Plus />
+              <Plus className="h-4 w-4" />
             </Button>
           }
           projectId={projectId}

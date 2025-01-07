@@ -6,9 +6,9 @@ export function useCreateCard() {
 
   return useMutation({
     mutationFn: api.card.create,
-    onSuccess: (data) => {
+    onSuccess: ({ columnId }) => {
       void queryClient.invalidateQueries({
-        queryKey: ["cards", data.columnId],
+        queryKey: ["cards", columnId],
       });
     },
   });
