@@ -7,7 +7,7 @@ import { useEffect } from "react";
 import { type DropData } from "../_types";
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
-import { useTaskRegistry } from "../_store/task-registry";
+import { useCardRegistry } from "../_store/card-registry";
 import { retryFlash } from "~/lib/utils";
 
 interface CardListProps {
@@ -19,7 +19,7 @@ export function CardList({ columnId }: CardListProps) {
 
   const moveCardMutation = useMoveCard();
 
-  const { get } = useTaskRegistry();
+  const { get } = useCardRegistry();
 
   useEffect(() => {
     return monitorForElements({
@@ -68,9 +68,11 @@ export function CardList({ columnId }: CardListProps) {
 
   return (
     <div className="flex flex-col divide-y border-y">
-      {cards.data.map((card) => (
-        <CardItem key={card.id} card={card} />
-      ))}
+      {cards.data
+        .sort((a, b) => a.order - b.order)
+        .map((card) => (
+          <CardItem key={card.id} card={card} />
+        ))}
     </div>
   );
 }

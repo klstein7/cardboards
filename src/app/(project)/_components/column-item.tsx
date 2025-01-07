@@ -3,7 +3,7 @@ import { Button } from "~/components/ui/button";
 import { type api } from "~/server/api";
 import { CreateCardDialog } from "./create-card-dialog";
 import { CardList } from "./card-list";
-import { TaskRegistryProvider } from "../_store/task-registry";
+import { CardRegistryProvider } from "../_store/card-registry";
 
 interface ColumnItemProps {
   column: Awaited<ReturnType<typeof api.column.list>>[number];
@@ -11,7 +11,7 @@ interface ColumnItemProps {
 
 export function ColumnItem({ column }: ColumnItemProps) {
   return (
-    <TaskRegistryProvider>
+    <CardRegistryProvider>
       <div className="flex flex-1 flex-col gap-3 rounded-md border bg-secondary/20 p-4">
         <span className="text-sm font-medium uppercase text-muted-foreground">
           {column.name}
@@ -27,6 +27,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
           columnId={column.id}
         />
       </div>
-    </TaskRegistryProvider>
+    </CardRegistryProvider>
   );
 }

@@ -12,7 +12,7 @@ import {
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { type DragData } from "../_types";
 import { DropIndicator } from "./drop-indicator";
-import { useTaskRegistry } from "../_store/task-registry";
+import { useCardRegistry } from "../_store/card-registry";
 
 interface CardItemProps {
   card: Awaited<ReturnType<typeof api.card.list>>[number];
@@ -22,7 +22,7 @@ export function CardItem({ card }: CardItemProps) {
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const elementRef = useRef<HTMLDivElement>(null);
 
-  const { register, unregister } = useTaskRegistry();
+  const { register, unregister } = useCardRegistry();
 
   useEffect(() => {
     if (!elementRef.current) {

@@ -2,9 +2,9 @@
 
 import { createContext, useCallback, useContext, useRef } from "react";
 
-type TaskRegistry = Record<string, HTMLElement>;
+type CardRegistry = Record<string, HTMLElement>;
 
-export const TaskRegistryContext = createContext<{
+export const CardRegistryContext = createContext<{
   register: (id: string, element: HTMLElement) => void;
   get: (id: string) => HTMLElement | undefined;
   unregister: (id: string) => void;
@@ -14,12 +14,12 @@ export const TaskRegistryContext = createContext<{
   unregister: () => undefined,
 });
 
-export function TaskRegistryProvider({
+export function CardRegistryProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const registry = useRef<TaskRegistry>({});
+  const registry = useRef<CardRegistry>({});
 
   const register = useCallback((id: string, element: HTMLElement) => {
     registry.current[id] = element;
@@ -34,12 +34,12 @@ export function TaskRegistryProvider({
   }, []);
 
   return (
-    <TaskRegistryContext.Provider value={{ register, get, unregister }}>
+    <CardRegistryContext.Provider value={{ register, get, unregister }}>
       {children}
-    </TaskRegistryContext.Provider>
+    </CardRegistryContext.Provider>
   );
 }
 
-export function useTaskRegistry() {
-  return useContext(TaskRegistryContext);
+export function useCardRegistry() {
+  return useContext(CardRegistryContext);
 }
