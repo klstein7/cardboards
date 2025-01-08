@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "~/server/api";
 
-type Card = Awaited<ReturnType<typeof api.card.list>>[number];
+import { type Card } from "~/app/(project)/_types";
+import { api } from "~/server/api";
 
 export function useMoveCard() {
   const queryClient = useQueryClient();
@@ -12,10 +12,13 @@ export function useMoveCard() {
       await queryClient.cancelQueries({
         queryKey: ["cards", variables.destinationColumnId],
       });
+      await queryClient.cancelQueries({
+        queryKey: ["cards", variables.sourceColumnId],
+      });
 
       const previousSourceCards = queryClient.getQueryData<Card[]>([
         "cards",
-        variables.cardId,
+        variables.sourceColumnId,
       ]);
       const previousDestCards = queryClient.getQueryData<Card[]>([
         "cards",
@@ -23,22 +26,34 @@ export function useMoveCard() {
       ]);
 
       queryClient.setQueryData(
+        ["cards", variables.sourceColumnId],
+        (old: Card[] = []) => {
+          const filteredCards = old.filter(
+            (card) => card.id !== variables.cardId,
+          );
+          return filteredCards.map((card, index) => ({
+            ...card,
+            order: index + 1,
+          }));
+        },
+      );
+
+      queryClient.setQueryData(
         ["cards", variables.destinationColumnId],
         (old: Card[] = []) => {
           const newCards = [...old];
-          const cardToMove = old.find((card) => card.id === variables.cardId);
+          const cardToMove = previousSourceCards?.find(
+            (card) => card.id === variables.cardId,
+          );
 
           if (cardToMove) {
-            const filteredCards = newCards.filter(
-              (card) => card.id !== variables.cardId,
-            );
-
-            filteredCards.splice(variables.newOrder - 1, 0, {
+            newCards.splice(variables.newOrder - 1, 0, {
               ...cardToMove,
+              columnId: variables.destinationColumnId,
               order: variables.newOrder,
             });
 
-            return filteredCards.map((card, index) => ({
+            return newCards.map((card, index) => ({
               ...card,
               order: index + 1,
             }));
@@ -53,7 +68,7 @@ export function useMoveCard() {
     onError: (_err, variables, context) => {
       if (context?.previousSourceCards) {
         queryClient.setQueryData(
-          ["cards", variables.cardId],
+          ["cards", variables.sourceColumnId],
           context.previousSourceCards,
         );
       }

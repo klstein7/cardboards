@@ -1,21 +1,22 @@
 "use client";
 
-import { type api } from "~/server/api";
-import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { useEffect, useRef, useState } from "react";
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import {
   attachClosestEdge,
   type Edge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { type DragData } from "../_types";
-import { DropIndicator } from "./drop-indicator";
+import { useEffect, useRef, useState } from "react";
+
 import { useCardRegistry } from "../_store/card-registry";
+import { type DragData, type DropData } from "../_types";
+import { type Card } from "../_types";
+import { DropIndicator } from "./drop-indicator";
 
 interface CardItemProps {
-  card: Awaited<ReturnType<typeof api.card.list>>[number];
+  card: Card;
 }
 
 export function CardItem({ card }: CardItemProps) {
@@ -30,6 +31,8 @@ export function CardItem({ card }: CardItemProps) {
     }
 
     const element = elementRef.current;
+
+    console.log("Registering card", card.id);
 
     register(card.id, element);
 
@@ -49,7 +52,7 @@ export function CardItem({ card }: CardItemProps) {
             {
               type: "card",
               payload: card,
-            } satisfies DragData,
+            } satisfies DropData,
             {
               element,
               input,
@@ -78,6 +81,7 @@ export function CardItem({ card }: CardItemProps) {
         },
       }),
       () => {
+        console.log("Unregistering card", card.id);
         unregister(card.id);
       },
     );

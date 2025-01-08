@@ -1,6 +1,8 @@
 "use client";
 
 import { useColumns } from "~/lib/hooks";
+
+import { CardRegistryProvider } from "../_store/card-registry";
 import { ColumnItem } from "./column-item";
 
 interface ColumnListProps {
@@ -15,10 +17,12 @@ export function ColumnList({ boardId }: ColumnListProps) {
   if (columns.isPending) return <div>Loading...</div>;
 
   return (
-    <div className="flex items-start gap-6">
-      {columns.data.map((column) => (
-        <ColumnItem key={column.id} column={column} />
-      ))}
-    </div>
+    <CardRegistryProvider>
+      <div className="flex items-start gap-6">
+        {columns.data.map((column) => (
+          <ColumnItem key={column.id} column={column} />
+        ))}
+      </div>
+    </CardRegistryProvider>
   );
 }

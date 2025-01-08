@@ -2,10 +2,10 @@
 
 import { cardService } from "~/server/services";
 import {
+  type CardCreate,
   CardCreateSchema,
   type CardMove,
   CardMoveSchema,
-  type CardCreate,
 } from "~/server/zod";
 
 export async function create(data: CardCreate) {

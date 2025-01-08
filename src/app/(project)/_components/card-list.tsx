@@ -1,14 +1,16 @@
 "use client";
 
-import { useCards, useMoveCard } from "~/lib/hooks";
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { CardItem } from "./card-item";
-import { useEffect } from "react";
-import { type DropData } from "../_types";
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
-import { useCardRegistry } from "../_store/card-registry";
+import { useEffect } from "react";
+
+import { useCards, useMoveCard } from "~/lib/hooks";
 import { retryFlash } from "~/lib/utils";
+
+import { useCardRegistry } from "../_store/card-registry";
+import { type DropData } from "../_types";
+import { CardItem } from "./card-item";
 
 interface CardListProps {
   columnId: string;
@@ -24,12 +26,22 @@ export function CardList({ columnId }: CardListProps) {
   useEffect(() => {
     return monitorForElements({
       onDrop: ({ source, location }) => {
+        const isColumnDroppable =
+          location.current.dropTargets.length === 1 &&
+          location.current.dropTargets.some(
+            (target) => (target.data as unknown as DropData).type === "column",
+          );
+
+        if (isColumnDroppable) return;
+
         const target = location.current.dropTargets[0];
 
         if (!target) return;
 
         const sourceData = source.data as unknown as DropData;
         const targetData = target.data as unknown as DropData;
+
+        if (sourceData.type !== "card" || targetData.type !== "card") return;
 
         const closestEdge = extractClosestEdge(
           targetData as unknown as Record<string, unknown>,
@@ -44,15 +56,15 @@ export function CardList({ columnId }: CardListProps) {
 
         moveCardMutation.mutate({
           cardId: sourceData.payload.id,
-          destinationColumnId:
-            targetData.type === "column"
-              ? targetData.payload.id
-              : targetData.payload.columnId,
+          destinationColumnId: targetData.payload.columnId,
+          sourceColumnId: sourceData.payload.columnId,
           newOrder,
         });
 
         retryFlash(sourceData.payload.id, {
           getElement: (cardId) => get(cardId),
+          isCrossColumnMove:
+            sourceData.payload.columnId !== targetData.payload.columnId,
         });
       },
     });

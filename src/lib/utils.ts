@@ -1,4 +1,4 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
@@ -41,8 +41,8 @@ export function retryFlash(
   cardId: string,
   {
     maxRetries = 5,
-    initialDelay = 50,
-    backoffFactor = 1.5,
+    initialDelay = 10,
+    backoffFactor = 1.1,
     isCrossColumnMove = false,
     getElement,
   }: RetryFlashOptions,

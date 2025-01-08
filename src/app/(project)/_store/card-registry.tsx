@@ -26,6 +26,7 @@ export function CardRegistryProvider({
   }, []);
 
   const get = useCallback((id: string) => {
+    console.log(registry.current);
     return registry.current[id];
   }, []);
 

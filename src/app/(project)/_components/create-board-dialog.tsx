@@ -1,10 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
+import { Button } from "~/components/ui/button";
+import { ColorPicker } from "~/components/ui/color-picker";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +16,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -25,7 +26,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { ColorPicker } from "~/components/ui/color-picker";
 import { useCreateBoard } from "~/lib/hooks/board/use-create-board";
 
 const formSchema = z.object({
