@@ -28,38 +28,35 @@ export function useMoveCard() {
       queryClient.setQueryData(
         ["cards", variables.sourceColumnId],
         (old: Card[] = []) => {
-          const filteredCards = old.filter(
-            (card) => card.id !== variables.cardId,
-          );
-          return filteredCards.map((card, index) => ({
-            ...card,
-            order: index + 1,
-          }));
+          return old
+            .filter((card) => card.id !== variables.cardId)
+            .map((card, index) => ({
+              ...card,
+              order: index + 1,
+            }));
         },
       );
 
       queryClient.setQueryData(
         ["cards", variables.destinationColumnId],
         (old: Card[] = []) => {
-          const newCards = [...old];
           const cardToMove = previousSourceCards?.find(
             (card) => card.id === variables.cardId,
           );
 
-          if (cardToMove) {
-            newCards.splice(variables.newOrder - 1, 0, {
-              ...cardToMove,
-              columnId: variables.destinationColumnId,
-              order: variables.newOrder,
-            });
+          if (!cardToMove) return old;
 
-            return newCards.map((card, index) => ({
-              ...card,
-              order: index + 1,
-            }));
-          }
+          const newCards = [...old];
+          newCards.splice(variables.newOrder, 0, {
+            ...cardToMove,
+            columnId: variables.destinationColumnId,
+            order: variables.newOrder + 1,
+          });
 
-          return old;
+          return newCards.map((card, index) => ({
+            ...card,
+            order: index + 1,
+          }));
         },
       );
 

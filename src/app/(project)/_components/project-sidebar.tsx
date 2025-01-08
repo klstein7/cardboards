@@ -1,10 +1,12 @@
 "use client";
 
 import { ChartArea, Kanban, Plus, Star } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { CreateBoardDialog } from "./create-board-dialog";
-import { useBoards } from "~/lib/hooks";
 import Link from "next/link";
+
+import { Button } from "~/components/ui/button";
+import { useBoards } from "~/lib/hooks";
+
+import { CreateBoardDialog } from "./create-board-dialog";
 
 interface ProjectSidebarProps {
   projectId: string;

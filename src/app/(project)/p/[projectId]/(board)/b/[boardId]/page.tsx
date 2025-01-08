@@ -3,7 +3,8 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { ColumnList } from "~/app/(project)/_components/column-list";
+
+import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/column-list";
 import { api } from "~/server/api";
 
 interface BoardPageProps {

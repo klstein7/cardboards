@@ -1,8 +1,10 @@
 import "server-only";
+
+import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
+
 import { db } from "../db";
-import { type CardMove, type CardCreate } from "../zod";
 import { cards } from "../db/schema";
-import { asc, desc, eq, and, gt, gte, lt, lte, sql } from "drizzle-orm";
+import { type CardCreate, type CardMove } from "../zod";
 
 async function getLastCardOrder(columnId: string) {
   const lastCard = await db.query.cards.findFirst({
