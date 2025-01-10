@@ -3,9 +3,19 @@ import { z } from "zod";
 
 import { cards } from "~/server/db/schema";
 
-export const CardCreateSchema = createInsertSchema(cards).omit({
-  order: true,
-});
+export const CardCreateSchema = createInsertSchema(cards)
+  .omit({
+    order: true,
+    labels: true,
+  })
+  .extend({
+    labels: z.array(
+      z.object({
+        id: z.string(),
+        text: z.string(),
+      }),
+    ),
+  });
 
 export const CardMoveSchema = z.object({
   cardId: z.string(),

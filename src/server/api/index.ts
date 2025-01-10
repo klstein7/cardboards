@@ -1,8 +1,9 @@
 import {
   boardController,
+  cardController,
   columnController,
   projectController,
-  cardController,
+  projectUserController,
 } from "./controllers";
 
 export const api = {
@@ -10,4 +11,5 @@ export const api = {
   board: boardController,
   column: columnController,
   card: cardController,
+  projectUser: projectUserController,
 };

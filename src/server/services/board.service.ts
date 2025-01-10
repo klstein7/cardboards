@@ -1,8 +1,10 @@
 import "server-only";
-import { type BoardCreate } from "../zod";
+
+import { eq } from "drizzle-orm";
+
 import { db } from "../db";
 import { boards } from "../db/schema";
-import { eq } from "drizzle-orm";
+import { type BoardCreate } from "../zod";
 import { columnService } from "./column.service";
 
 async function create(data: BoardCreate) {
@@ -45,7 +47,15 @@ async function get(boardId: string) {
     with: {
       columns: {
         with: {
-          cards: true,
+          cards: {
+            with: {
+              assignedTo: {
+                with: {
+                  user: true,
+                },
+              },
+            },
+          },
         },
       },
     },

@@ -1,6 +1,9 @@
 "use client";
 
-import { SortableContext } from "@dnd-kit/sortable";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 import { useCards, useMoveCard } from "~/lib/hooks";
 
@@ -22,8 +25,11 @@ export function CardList({ columnId }: CardListProps) {
   }
 
   return (
-    <SortableContext items={cards.data.map((card) => card.id)}>
-      <div className="flex flex-col gap-3">
+    <SortableContext
+      items={cards.data.map((card) => card.id)}
+      strategy={verticalListSortingStrategy}
+    >
+      <div className="flex flex-col [&>*:not(:first-child)]:mt-[-1px]">
         {cards.data
           .sort((a, b) => a.order - b.order)
           .map((card) => (

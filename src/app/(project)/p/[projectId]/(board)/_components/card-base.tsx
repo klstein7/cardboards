@@ -1,7 +1,12 @@
 "use client";
 
+import { format, formatDistanceToNow } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { memo } from "react";
+
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { useActiveCard } from "~/lib/hooks/utils/use-active-card";
-import { cn } from "~/lib/utils";
+import { cn, getColor, getPriorityByValue } from "~/lib/utils";
 
 import { type Card } from "../../../../_types";
 
@@ -11,18 +16,73 @@ interface CardBaseProps {
   isDragging?: boolean;
 }
 
-export function CardBase({ card, className, isDragging }: CardBaseProps) {
-  const { activeCard } = useActiveCard();
+export const CardBase = memo(
+  ({ card, className, isDragging }: CardBaseProps) => {
+    const { activeCard } = useActiveCard();
 
-  return (
-    <div
-      className={cn(
-        "relative rounded border bg-secondary/20 p-4",
-        activeCard?.id === card.id && !isDragging && "opacity-50",
-        className,
-      )}
-    >
-      {card.title}
-    </div>
-  );
-}
+    const priority = getPriorityByValue(card.priority);
+
+    return (
+      <div
+        className={cn(
+          "relative flex flex-col gap-3 border bg-secondary/20 p-4",
+          activeCard?.id === card.id && !isDragging && "opacity-30",
+          priority && "border-l-2",
+          className,
+        )}
+        style={
+          priority ? { borderLeftColor: getColor(priority.value) } : undefined
+        }
+      >
+        <div className="flex items-center justify-between text-xs text-muted-foreground">
+          <div>{formatDistanceToNow(card.createdAt, { addSuffix: true })}</div>
+          {card.dueDate && (
+            <div className="flex items-center gap-1.5">
+              <CalendarIcon className="h-3.5 w-3.5" />
+              <span>{format(card.dueDate, "MMM d")}</span>
+            </div>
+          )}
+        </div>
+        <div className="flex flex-col">
+          <span className="font-medium">{card.title}</span>
+          <span className="text-sm text-muted-foreground">
+            {card.description}
+          </span>
+        </div>
+        <div className="flex flex-col gap-2">
+          {card.labels && card.labels.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {card.labels.map((label, index) => (
+                <div
+                  key={index}
+                  className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="flex items-end justify-between">
+            {priority && (
+              <div
+                className={cn("flex items-center gap-1")}
+                style={{ color: getColor(priority.value) }}
+              >
+                <priority.icon className="h-4 w-4" />
+                <span className="text-xs">{priority.label}</span>
+              </div>
+            )}
+            {card.assignedTo && (
+              <Avatar className="h-7 w-7">
+                <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
+                <AvatarFallback>{card.assignedTo.user.name[0]}</AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  },
+);
+
+CardBase.displayName = "CardBase";

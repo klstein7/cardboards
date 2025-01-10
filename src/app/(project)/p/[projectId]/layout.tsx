@@ -3,8 +3,10 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { ProjectSidebar } from "../../_components/project-sidebar";
+
 import { api } from "~/server/api";
+
+import { ProjectSidebar } from "../../_components/project-sidebar";
 
 interface ProjectLayoutProps {
   children: React.ReactNode;
@@ -21,9 +23,14 @@ export default async function ProjectLayout({
 
   const { projectId } = await params;
 
-  await queryClient.prefetchQuery({
+  void queryClient.prefetchQuery({
     queryKey: ["boards", projectId],
     queryFn: () => api.board.list(projectId),
+  });
+
+  void queryClient.prefetchQuery({
+    queryKey: ["project-users", projectId],
+    queryFn: () => api.projectUser.list(projectId),
   });
 
   return (

@@ -23,6 +23,7 @@ async function create(data: CardCreate) {
     .values({
       ...data,
       order: lastCardOrder + 1,
+      labels: data.labels.map((label) => label.text),
     })
     .returning();
 
@@ -36,6 +37,13 @@ async function create(data: CardCreate) {
 async function list(columnId: string) {
   return db.query.cards.findMany({
     where: eq(cards.columnId, columnId),
+    with: {
+      assignedTo: {
+        with: {
+          user: true,
+        },
+      },
+    },
     orderBy: asc(cards.order),
   });
 }

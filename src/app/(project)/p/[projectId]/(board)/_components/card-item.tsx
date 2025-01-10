@@ -18,6 +18,10 @@ export function CardItem({ card }: CardItemProps) {
         type: "card",
         payload: card,
       },
+      transition: {
+        duration: 100,
+        easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)",
+      },
     });
 
   const style = {

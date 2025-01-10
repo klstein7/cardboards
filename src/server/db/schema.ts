@@ -1,14 +1,16 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
+import { relations } from "drizzle-orm";
 import {
   index,
   integer,
   pgTableCreator,
+  text,
   timestamp,
+  unique,
   varchar,
 } from "drizzle-orm/pg-core";
-import { relations } from "drizzle-orm";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -82,6 +84,16 @@ export const cards = createTable(
     title: varchar("title", { length: 255 }).notNull(),
     description: varchar("description", { length: 1000 }),
     order: integer("order").notNull(),
+    dueDate: timestamp("due_date"),
+    priority: varchar("priority", {
+      length: 20,
+      enum: ["low", "medium", "high", "urgent"],
+    }),
+    assignedToId: varchar("assigned_to_id", { length: 255 }).references(
+      () => projectUsers.id,
+      { onDelete: "set null" },
+    ),
+    labels: text("labels").array(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -90,11 +102,72 @@ export const cards = createTable(
   (table) => [
     index("card_column_id_idx").on(table.columnId),
     index("card_order_idx").on(table.order),
+    index("card_assigned_to_idx").on(table.assignedToId),
+    index("card_due_date_idx").on(table.dueDate),
   ],
+);
+
+export const users = createTable("user", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).unique().notNull(),
+  imageUrl: varchar("image_url", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdateFn(() => new Date()),
+});
+
+export const projectUsers = createTable(
+  "project_user",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    projectId: varchar("project_id", { length: 255 })
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: varchar("role", { length: 255, enum: ["admin", "member"] }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    unique("project_user_project_id_user_id_idx").on(
+      table.projectId,
+      table.userId,
+    ),
+    index("project_user_project_id_idx").on(table.projectId),
+    index("project_user_user_id_idx").on(table.userId),
+  ],
+);
+
+export const userRelations = relations(users, ({ many }) => ({
+  projectUsers: many(projectUsers),
+}));
+
+export const projectUserRelations = relations(
+  projectUsers,
+  ({ one, many }) => ({
+    project: one(projects, {
+      fields: [projectUsers.projectId],
+      references: [projects.id],
+    }),
+    user: one(users, {
+      fields: [projectUsers.userId],
+      references: [users.id],
+    }),
+    assignedCards: many(cards),
+  }),
 );
 
 export const projectRelations = relations(projects, ({ many }) => ({
   boards: many(boards),
+  projectUsers: many(projectUsers),
 }));
 
 export const boardRelations = relations(boards, ({ many, one }) => ({
@@ -117,5 +190,9 @@ export const cardRelations = relations(cards, ({ one }) => ({
   column: one(columns, {
     fields: [cards.columnId],
     references: [columns.id],
+  }),
+  assignedTo: one(projectUsers, {
+    fields: [cards.assignedToId],
+    references: [projectUsers.id],
   }),
 }));

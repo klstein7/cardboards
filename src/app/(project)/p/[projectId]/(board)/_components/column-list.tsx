@@ -1,16 +1,19 @@
 "use client";
 
 import {
+  closestCenter,
   closestCorners,
   DndContext,
   DragOverlay,
   KeyboardSensor,
   PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 
 import { useColumns, useMoveCard } from "~/lib/hooks";
 import { useActiveCard } from "~/lib/hooks/utils/use-active-card";
@@ -46,7 +49,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={pointerWithin}
       onDragStart={({ active }) => {
         const activeData = active.data.current as DragData;
         setActiveCard(activeData.payload);

@@ -27,6 +27,11 @@ export default async function BoardPage({ params }: BoardPageProps) {
   });
 
   void queryClient.prefetchQuery({
+    queryKey: ["project-users", projectId],
+    queryFn: () => api.projectUser.list(projectId),
+  });
+
+  void queryClient.prefetchQuery({
     queryKey: ["columns", boardId],
     queryFn: () =>
       Promise.resolve(columns.map(({ cards, ...column }) => column)),
