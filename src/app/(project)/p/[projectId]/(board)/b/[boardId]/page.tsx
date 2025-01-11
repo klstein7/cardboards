@@ -7,6 +7,8 @@ import {
 import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/column-list";
 import { api } from "~/server/api";
 
+import { BoardStateProvider } from "../../_components/board-state-provider";
+
 interface BoardPageProps {
   params: Promise<{
     projectId: string;
@@ -52,11 +54,13 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex grow">
-        <div className="flex w-full max-w-7xl flex-col gap-6 p-6">
-          <ColumnList boardId={boardId} />
+      <BoardStateProvider>
+        <div className="flex grow">
+          <div className="flex w-full max-w-7xl flex-col gap-6 p-6">
+            <ColumnList boardId={boardId} />
+          </div>
         </div>
-      </div>
+      </BoardStateProvider>
     </HydrationBoundary>
   );
 }

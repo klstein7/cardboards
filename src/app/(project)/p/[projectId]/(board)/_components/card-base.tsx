@@ -5,10 +5,10 @@ import { CalendarIcon } from "lucide-react";
 import { memo } from "react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { useActiveCard } from "~/lib/hooks/utils/use-active-card";
 import { cn, getColor, getPriorityByValue } from "~/lib/utils";
 
 import { type Card } from "../../../../_types";
+import { useBoardState } from "./board-state-provider";
 
 interface CardBaseProps {
   card: Card;
@@ -18,7 +18,7 @@ interface CardBaseProps {
 
 export const CardBase = memo(
   ({ card, className, isDragging }: CardBaseProps) => {
-    const { activeCard } = useActiveCard();
+    const { activeCard } = useBoardState();
 
     const priority = getPriorityByValue(card.priority);
 

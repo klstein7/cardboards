@@ -1,20 +1,23 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { type Card } from "~/app/(project)/_types";
+import { useBoardState } from "~/app/(project)/p/[projectId]/(board)/_components/board-state-provider";
+import { retryFlash } from "~/lib/utils";
 import { api } from "~/server/api";
 
 export function useMoveCard() {
   const queryClient = useQueryClient();
 
+  const { getCard } = useBoardState();
+
   return useMutation({
     mutationFn: api.card.move,
     onMutate: async (variables) => {
-      await queryClient.cancelQueries({
-        queryKey: ["cards", variables.destinationColumnId],
-      });
-      await queryClient.cancelQueries({
-        queryKey: ["cards", variables.sourceColumnId],
-      });
+      console.log("Starting optimistic update");
+      console.log(`Looking for card ${variables.cardId}`);
+      console.log(`In source column ${variables.sourceColumnId}`);
+
+      await queryClient.cancelQueries({ queryKey: ["cards"] });
 
       const previousSourceCards = queryClient.getQueryData<Card[]>([
         "cards",
@@ -25,40 +28,62 @@ export function useMoveCard() {
         variables.destinationColumnId,
       ]);
 
-      queryClient.setQueryData(
-        ["cards", variables.sourceColumnId],
-        (old: Card[] = []) => {
-          return old
-            .filter((card) => card.id !== variables.cardId)
-            .map((card, index) => ({
-              ...card,
-              order: index + 1,
-            }));
-        },
+      if (!previousSourceCards || !previousDestCards) return;
+
+      const sourceCard = previousSourceCards.find(
+        (card) => card.id === variables.cardId,
       );
 
-      queryClient.setQueryData(
-        ["cards", variables.destinationColumnId],
-        (old: Card[] = []) => {
-          const cardToMove = previousSourceCards?.find(
-            (card) => card.id === variables.cardId,
-          );
+      if (!sourceCard) return;
 
-          if (!cardToMove) return old;
+      if (variables.destinationColumnId !== variables.sourceColumnId) {
+        queryClient.setQueryData<Card[]>(
+          ["cards", variables.sourceColumnId],
+          (old = []) => {
+            return old
+              .filter((card) => card.id !== variables.cardId)
+              .map((card, index) => ({ ...card, order: index }));
+          },
+        );
 
-          const newCards = [...old];
-          newCards.splice(variables.newOrder, 0, {
-            ...cardToMove,
-            columnId: variables.destinationColumnId,
-            order: variables.newOrder + 1,
-          });
+        queryClient.setQueryData<Card[]>(
+          ["cards", variables.destinationColumnId],
+          (old = []) => {
+            return [
+              ...old.slice(0, variables.newOrder),
+              {
+                ...sourceCard,
+                order: variables.newOrder,
+                columnId: variables.destinationColumnId,
+              },
+              ...old.slice(variables.newOrder),
+            ].map((card, index) => ({ ...card, order: index }));
+          },
+        );
+      } else {
+        queryClient.setQueryData<Card[]>(
+          ["cards", variables.sourceColumnId],
+          (old = []) => {
+            const filteredOld = old.filter(
+              (card) => card.id !== variables.cardId,
+            );
+            return [
+              ...filteredOld.slice(0, variables.newOrder),
+              {
+                ...sourceCard,
+                order: variables.newOrder,
+              },
+              ...filteredOld.slice(variables.newOrder),
+            ].map((card, index) => ({ ...card, order: index }));
+          },
+        );
+      }
 
-          return newCards.map((card, index) => ({
-            ...card,
-            order: index + 1,
-          }));
-        },
-      );
+      retryFlash(variables.cardId, {
+        getElement: () => getCard(variables.cardId),
+        isCrossColumnMove:
+          variables.destinationColumnId !== variables.sourceColumnId,
+      });
 
       return { previousSourceCards, previousDestCards };
     },
@@ -69,17 +94,19 @@ export function useMoveCard() {
           context.previousSourceCards,
         );
       }
-      if (context?.previousDestCards) {
-        queryClient.setQueryData(
-          ["cards", variables.destinationColumnId],
-          context.previousDestCards,
-        );
+
+      if (variables.destinationColumnId !== variables.sourceColumnId) {
+        if (context?.previousDestCards) {
+          queryClient.setQueryData(
+            ["cards", variables.destinationColumnId],
+            context.previousDestCards,
+          );
+        }
       }
     },
     onSettled: (result) => {
       if (!result) return;
       const { previousColumnId, newColumnId } = result;
-
       void queryClient.invalidateQueries({
         queryKey: ["cards", previousColumnId],
       });
