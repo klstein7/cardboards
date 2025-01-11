@@ -8,6 +8,7 @@ import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/co
 import { api } from "~/server/api";
 
 import { BoardStateProvider } from "../../_components/board-state-provider";
+import { CardDetails } from "../../_components/card-details";
 
 interface BoardPageProps {
   params: Promise<{
@@ -23,34 +24,38 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
   const { columns, ...board } = await api.board.get(boardId);
 
-  void queryClient.prefetchQuery({
-    queryKey: ["board", boardId],
-    queryFn: () => Promise.resolve(board),
-  });
-
-  void queryClient.prefetchQuery({
-    queryKey: ["project-users", projectId],
-    queryFn: () => api.projectUser.list(projectId),
-  });
-
-  void queryClient.prefetchQuery({
-    queryKey: ["columns", boardId],
-    queryFn: () =>
-      Promise.resolve(columns.map(({ cards, ...column }) => column)),
-  });
-
-  await Promise.all(
-    columns.map(({ cards, ...column }) => {
-      void queryClient.prefetchQuery({
-        queryKey: ["column", column.id],
-        queryFn: () => Promise.resolve(column),
-      });
-      void queryClient.prefetchQuery({
-        queryKey: ["cards", column.id],
-        queryFn: () => Promise.resolve(cards),
-      });
+  await Promise.all([
+    queryClient.prefetchQuery({
+      queryKey: ["board", boardId],
+      queryFn: () => Promise.resolve(board),
     }),
-  );
+
+    queryClient.prefetchQuery({
+      queryKey: ["project-users", projectId],
+      queryFn: () => api.projectUser.list(projectId),
+    }),
+
+    queryClient.prefetchQuery({
+      queryKey: ["columns", boardId],
+      queryFn: () =>
+        Promise.resolve(columns.map(({ cards, ...column }) => column)),
+    }),
+
+    Promise.all(
+      columns.map(({ cards, ...column }) => {
+        return Promise.all([
+          queryClient.prefetchQuery({
+            queryKey: ["column", column.id],
+            queryFn: () => Promise.resolve(column),
+          }),
+          queryClient.prefetchQuery({
+            queryKey: ["cards", column.id],
+            queryFn: () => Promise.resolve(cards),
+          }),
+        ]);
+      }),
+    ),
+  ]);
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
@@ -60,6 +65,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
             <ColumnList boardId={boardId} />
           </div>
         </div>
+        <CardDetails />
       </BoardStateProvider>
     </HydrationBoundary>
   );

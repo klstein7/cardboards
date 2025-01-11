@@ -1,4 +1,4 @@
-import { createInsertSchema } from "drizzle-zod";
+import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
 import { cards } from "~/server/db/schema";
@@ -18,11 +18,24 @@ export const CardCreateSchema = createInsertSchema(cards)
   });
 
 export const CardMoveSchema = z.object({
-  cardId: z.string(),
+  cardId: z.number(),
   destinationColumnId: z.string(),
   sourceColumnId: z.string(),
   newOrder: z.number(),
 });
 
+export const CardUpdatePayloadSchema = createSelectSchema(cards)
+  .omit({
+    id: true,
+  })
+  .partial();
+
+export const CardUpdateSchema = z.object({
+  cardId: z.number(),
+  data: CardUpdatePayloadSchema,
+});
+
 export type CardCreate = z.infer<typeof CardCreateSchema>;
 export type CardMove = z.infer<typeof CardMoveSchema>;
+export type CardUpdatePayload = z.infer<typeof CardUpdatePayloadSchema>;
+export type CardUpdate = z.infer<typeof CardUpdateSchema>;

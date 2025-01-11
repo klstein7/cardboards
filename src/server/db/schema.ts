@@ -1,11 +1,13 @@
 // Example model schema from the Drizzle docs
 // https://orm.drizzle.team/docs/sql-schema-declaration
 
+import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import {
   index,
   integer,
   pgTableCreator,
+  serial,
   text,
   timestamp,
   unique,
@@ -23,7 +25,7 @@ export const createTable = pgTableCreator((name) => `kanban_${name}`);
 export const projects = createTable("project", {
   id: varchar("id", { length: 255 })
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => createId()),
   name: varchar("name", { length: 255 }).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
@@ -36,7 +38,7 @@ export const boards = createTable(
   {
     id: varchar("id", { length: 255 })
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => createId()),
     projectId: varchar("project_id", { length: 255 })
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),
@@ -55,7 +57,7 @@ export const columns = createTable(
   {
     id: varchar("id", { length: 255 })
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => createId()),
     boardId: varchar("board_id", { length: 255 })
       .notNull()
       .references(() => boards.id, { onDelete: "cascade" }),
@@ -75,9 +77,7 @@ export const columns = createTable(
 export const cards = createTable(
   "card",
   {
-    id: varchar("id", { length: 255 })
-      .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+    id: serial("id").primaryKey(),
     columnId: varchar("column_id", { length: 255 })
       .notNull()
       .references(() => columns.id, { onDelete: "cascade" }),

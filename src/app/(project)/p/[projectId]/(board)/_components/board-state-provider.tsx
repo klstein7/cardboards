@@ -8,9 +8,9 @@ import { type Card } from "~/app/(project)/_types";
 export type BoardState = {
   activeCard: Card | null;
   setActiveCard: (card: Card | null) => void;
-  getCard: (cardId: string) => HTMLDivElement | null;
-  registerCard: (cardId: string, card: HTMLDivElement) => void;
-  unregisterCard: (cardId: string) => void;
+  getCard: (cardId: number) => HTMLDivElement | null;
+  registerCard: (cardId: number, card: HTMLDivElement) => void;
+  unregisterCard: (cardId: number) => void;
 };
 
 export const BoardStateContext = createContext<BoardState | null>(null);
@@ -21,17 +21,17 @@ export function BoardStateProvider({
   children: React.ReactNode;
 }) {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
-  const cardRegistry = useRef<Map<string, HTMLDivElement>>(new Map());
+  const cardRegistry = useRef<Map<number, HTMLDivElement>>(new Map());
 
-  function getCard(cardId: string) {
+  function getCard(cardId: number) {
     return cardRegistry.current.get(cardId) ?? null;
   }
 
-  function registerCard(cardId: string, card: HTMLDivElement) {
+  function registerCard(cardId: number, card: HTMLDivElement) {
     cardRegistry.current.set(cardId, card);
   }
 
-  function unregisterCard(cardId: string) {
+  function unregisterCard(cardId: number) {
     cardRegistry.current.delete(cardId);
   }
 

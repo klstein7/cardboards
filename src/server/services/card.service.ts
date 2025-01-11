@@ -4,7 +4,12 @@ import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
 import { db } from "../db";
 import { cards } from "../db/schema";
-import { type CardCreate, type CardMove } from "../zod";
+import {
+  type CardCreate,
+  type CardMove,
+  type CardUpdate,
+  type CardUpdatePayload,
+} from "../zod";
 
 async function getLastCardOrder(columnId: string) {
   const lastCard = await db.query.cards.findFirst({
@@ -126,8 +131,48 @@ async function move(data: CardMove) {
   });
 }
 
+async function get(cardId: number) {
+  const card = await db.query.cards.findFirst({
+    where: eq(cards.id, cardId),
+    with: {
+      column: {
+        with: {
+          board: true,
+        },
+      },
+      assignedTo: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  });
+
+  if (!card) {
+    throw new Error("Card not found");
+  }
+
+  return card;
+}
+
+async function update(cardId: number, data: CardUpdatePayload) {
+  const [card] = await db
+    .update(cards)
+    .set(data)
+    .where(eq(cards.id, cardId))
+    .returning();
+
+  if (!card) {
+    throw new Error("Card not found");
+  }
+
+  return card;
+}
+
 export const cardService = {
   create,
   list,
   move,
+  get,
+  update,
 };

@@ -9,9 +9,10 @@ import {
   type Edge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
-import { type Card, type Position } from "~/app/(project)/_types";
+import { type Card } from "~/app/(project)/_types";
 import { DropIndicator } from "~/components/ui/drop-indicator";
 import { cn } from "~/lib/utils";
 
@@ -21,15 +22,17 @@ import { CardBase } from "./card-base";
 interface CardItemProps {
   card: Card;
   index: number;
-  position: Position;
+
   columnId: string;
 }
 
-export function CardItem({ card, index, position, columnId }: CardItemProps) {
+export function CardItem({ card, index, columnId }: CardItemProps) {
   const { activeCard, setActiveCard, registerCard, unregisterCard } =
     useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
+
+  const [, setSelectedCardId] = useQueryState("cardId");
 
   useEffect(() => {
     const cardElement = cardElementRef.current;
@@ -102,12 +105,11 @@ export function CardItem({ card, index, position, columnId }: CardItemProps) {
     <div
       ref={cardElementRef}
       className={cn(
-        "relative flex cursor-pointer select-none flex-col gap-3 border bg-secondary/20 p-4",
-        position === "first" && "rounded-t-md",
-        position === "last" && "rounded-b-md",
-        position === "only" && "rounded-md",
+        "relative flex cursor-pointer select-none flex-col gap-3",
+
         activeCard?.id === card.id && "opacity-50",
       )}
+      onClick={() => setSelectedCardId(card.id.toString())}
     >
       <CardBase card={card} isDragging={activeCard?.id === card.id} />
       {closestEdge && <DropIndicator edge={closestEdge} gap={2} />}

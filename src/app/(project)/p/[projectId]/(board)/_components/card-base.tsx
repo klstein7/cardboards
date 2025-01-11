@@ -27,7 +27,7 @@ export const CardBase = memo(
         className={cn(
           "relative flex flex-col gap-3 border bg-secondary/20 p-4",
           activeCard?.id === card.id && !isDragging && "opacity-30",
-          priority && "border-l-2",
+          priority && "border-l-4",
           className,
         )}
         style={

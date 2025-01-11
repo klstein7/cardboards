@@ -5,6 +5,7 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
 } from "lucide-react";
+import { customAlphabet } from "nanoid";
 import { twMerge } from "tailwind-merge";
 
 interface RetryFlashOptions {
@@ -12,11 +13,17 @@ interface RetryFlashOptions {
   initialDelay?: number;
   backoffFactor?: number;
   isCrossColumnMove?: boolean;
-  getElement: (taskId: string) => HTMLElement | undefined | null;
+  getElement: (cardId: number) => HTMLElement | undefined | null;
 }
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+const nanoid = customAlphabet("123456789ABCDEFGHJKLMNPQRSTUVWXYZ", 8);
+
+export function generateId() {
+  return nanoid();
 }
 
 export const PRIORITIES = [
@@ -94,7 +101,7 @@ export function triggerPostMoveFlash(element: HTMLElement) {
 }
 
 export function retryFlash(
-  taskId: string,
+  cardId: number,
   {
     maxRetries = 5,
     initialDelay = 50,
@@ -104,7 +111,7 @@ export function retryFlash(
   }: RetryFlashOptions,
 ) {
   const attempt = (retriesLeft: number, currentDelay: number) => {
-    const element = getElement(taskId);
+    const element = getElement(cardId);
 
     if (element) {
       triggerPostMoveFlash(element);

@@ -2,6 +2,7 @@
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { attachClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
@@ -34,12 +35,19 @@ export function ColumnItem({ column }: ColumnItemProps) {
         canDrop({ source }) {
           return source.data.type === "card";
         },
-        getData() {
-          return {
-            type: "column",
-            payload: column,
-            columnId: column.id,
-          };
+        getData({ input }) {
+          return attachClosestEdge(
+            {
+              type: "column",
+              payload: column,
+              columnId: column.id,
+            },
+            {
+              element: columnElement,
+              input,
+              allowedEdges: ["top", "bottom"],
+            },
+          );
         },
         onDragEnter() {
           setIsDropping(true);

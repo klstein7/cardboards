@@ -3,20 +3,15 @@
 
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { getReorderDestinationIndex } from "@atlaskit/pragmatic-drag-and-drop-hitbox/util/get-reorder-destination-index";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import invariant from "tiny-invariant";
+import { useEffect } from "react";
 
 import {
   type Card,
   type CardDragData,
   type CardDropData,
-  type Column,
   type ColumnDropData,
   type DragData,
-  type DropData,
-  type Position,
 } from "~/app/(project)/_types";
 import { useCards, useMoveCard } from "~/lib/hooks";
 
@@ -60,24 +55,18 @@ export function CardList({ columnId }: CardListProps) {
           let newOrder: number;
           if (edge === "top") {
             if (isSameColumn && sourceOrder < targetOrder) {
-              // Moving up in same column
               newOrder = targetOrder - 1;
             } else if (isSameColumn && sourceOrder > targetOrder) {
-              // Moving down in same column
               newOrder = targetOrder;
             } else {
-              // Different column, dropping above target
               newOrder = targetOrder;
             }
           } else {
             if (isSameColumn && sourceOrder < targetOrder) {
-              // Moving up in same column
               newOrder = targetOrder;
             } else if (isSameColumn && sourceOrder > targetOrder) {
-              // Moving down in same column
               newOrder = targetOrder + 1;
             } else {
-              // Different column, dropping below target
               newOrder = targetOrder + 1;
             }
           }
@@ -129,17 +118,6 @@ export function CardList({ columnId }: CardListProps) {
     });
   }, [cards.data, columnId, moveCardMutation, queryClient]);
 
-  const getItemPosition = useCallback(
-    (index: number): Position => {
-      if (!cards.data?.length) return "only";
-      if (cards.data.length === 1) return "only";
-      if (index === 0) return "first";
-      if (index === cards.data.length - 1) return "last";
-      return "middle";
-    },
-    [cards.data?.length],
-  );
-
   if (cards.error) throw cards.error;
   if (cards.isPending) return <div>Loading...</div>;
   if (!cards.data.length)
@@ -154,7 +132,6 @@ export function CardList({ columnId }: CardListProps) {
             key={card.id}
             card={card}
             index={index}
-            position={getItemPosition(index)}
             columnId={columnId}
           />
         ))}
