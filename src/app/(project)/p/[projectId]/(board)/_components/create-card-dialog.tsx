@@ -27,6 +27,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Textarea } from "~/components/ui/textarea";
+import { Tiptap } from "~/components/ui/tiptap";
 import { useCreateCard } from "~/lib/hooks";
 import { type CardCreate, CardCreateSchema } from "~/server/zod";
 
@@ -70,7 +71,11 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        className="max-w-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>Create a card</DialogTitle>
           <DialogDescription>
@@ -112,12 +117,9 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Textarea
-                        className="resize-none"
-                        rows={4}
-                        placeholder="e.g. To add a login with Google button to the login page, we need to..."
-                        {...field}
+                      <Tiptap
                         value={field.value ?? ""}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormDescription>

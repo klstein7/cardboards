@@ -79,7 +79,7 @@ export function Tiptap({
     editorProps: {
       attributes: {
         class: cn(
-          "w-full rounded-md bg-transparent outline-none",
+          "w-full rounded-md bg-transparent outline-none min-h-[100px]",
           "prose prose-invert max-w-none",
           "[&_p]:my-2.5 [&_p]:leading-7",
           "[&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:pl-4",
@@ -256,10 +256,7 @@ export function Tiptap({
           </ToggleGroupItem>
         </ToggleGroup>
       </div>
-      <EditorContent
-        editor={editor}
-        className="min-h-[100px] px-3 py-2 outline-none"
-      />
+      <EditorContent editor={editor} className="px-3 py-2 outline-none" />
     </div>
   );
 }

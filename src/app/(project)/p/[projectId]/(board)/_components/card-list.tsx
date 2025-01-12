@@ -19,9 +19,10 @@ import { CardItem } from "./card-item";
 
 interface CardListProps {
   columnId: string;
+  isCompleted: boolean;
 }
 
-export function CardList({ columnId }: CardListProps) {
+export function CardList({ columnId, isCompleted }: CardListProps) {
   const cards = useCards(columnId);
   const moveCardMutation = useMoveCard();
   const queryClient = useQueryClient();

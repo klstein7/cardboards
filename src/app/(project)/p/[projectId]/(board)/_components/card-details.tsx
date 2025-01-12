@@ -18,6 +18,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { Tiptap } from "~/components/ui/tiptap";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
+import { type Priority } from "~/lib/utils";
 
 import { CardPrioritySelect } from "./card-priority-select";
 
@@ -59,7 +60,11 @@ export function CardDetails() {
       }}
     >
       {card.isPending ? (
-        <DialogContent className="md:max-w-2xl">
+        <DialogContent
+          className="md:max-w-2xl"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle asChild>
               <Skeleton className="h-10 w-36" />
@@ -103,7 +108,11 @@ export function CardDetails() {
           </div>
         </DialogContent>
       ) : (
-        <DialogContent className="md:max-w-2xl">
+        <DialogContent
+          className="md:max-w-2xl"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
           <DialogHeader>
             <DialogTitle>
               {card.data?.column.board.name?.slice(0, 2).toUpperCase()}-
@@ -216,7 +225,7 @@ export function CardDetails() {
                   onChange={(value) => {
                     updateCardMutation.mutate({
                       cardId: Number(selectedCardId),
-                      data: { priority: value },
+                      data: { priority: value as Priority["value"] },
                     });
                   }}
                 />

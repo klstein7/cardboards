@@ -22,11 +22,16 @@ import { CardBase } from "./card-base";
 interface CardItemProps {
   card: Card;
   index: number;
-
+  isCompleted: boolean;
   columnId: string;
 }
 
-export function CardItem({ card, index, columnId }: CardItemProps) {
+export function CardItem({
+  card,
+  index,
+  isCompleted,
+  columnId,
+}: CardItemProps) {
   const { activeCard, setActiveCard, registerCard, unregisterCard } =
     useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
@@ -111,7 +116,11 @@ export function CardItem({ card, index, columnId }: CardItemProps) {
       )}
       onClick={() => setSelectedCardId(card.id.toString())}
     >
-      <CardBase card={card} isDragging={activeCard?.id === card.id} />
+      <CardBase
+        card={card}
+        isDragging={activeCard?.id === card.id}
+        isCompleted={isCompleted}
+      />
       {closestEdge && <DropIndicator edge={closestEdge} gap={2} />}
     </div>
   );

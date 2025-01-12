@@ -77,7 +77,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
       <span className="text-sm font-medium uppercase text-muted-foreground">
         {column.name}
       </span>
-      <CardList columnId={column.id} />
+      <CardList columnId={column.id} isCompleted={column.isCompleted} />
       <CreateCardDialog
         trigger={
           <Button variant="outline" className="bg-transparent">

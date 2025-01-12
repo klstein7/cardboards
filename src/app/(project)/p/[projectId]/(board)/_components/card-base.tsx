@@ -14,10 +14,11 @@ interface CardBaseProps {
   card: Card;
   className?: string;
   isDragging?: boolean;
+  isCompleted?: boolean;
 }
 
 export const CardBase = memo(
-  ({ card, className, isDragging }: CardBaseProps) => {
+  ({ card, className, isDragging, isCompleted }: CardBaseProps) => {
     const { activeCard } = useBoardState();
 
     const priority = getPriorityByValue(card.priority);
@@ -27,6 +28,7 @@ export const CardBase = memo(
         className={cn(
           "relative flex flex-col gap-3 border bg-secondary/20 p-4",
           activeCard?.id === card.id && !isDragging && "opacity-30",
+          isCompleted && "opacity-25",
           priority && "border-l-4",
           className,
         )}
@@ -44,10 +46,13 @@ export const CardBase = memo(
           )}
         </div>
         <div className="flex flex-col">
-          <span className="font-medium">{card.title}</span>
-          <span className="text-sm text-muted-foreground">
-            {card.description}
+          <span className={cn(isCompleted && "line-through")}>
+            {card.title}
           </span>
+          <div
+            className="prose prose-sm prose-invert line-clamp-2 text-muted-foreground"
+            dangerouslySetInnerHTML={{ __html: card.description ?? "" }}
+          />
         </div>
         <div className="flex flex-col gap-2">
           {card.labels && card.labels.length > 0 && (

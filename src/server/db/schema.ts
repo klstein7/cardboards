@@ -4,6 +4,7 @@
 import { createId } from "@paralleldrive/cuid2";
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -63,6 +64,7 @@ export const columns = createTable(
       .references(() => boards.id, { onDelete: "cascade" }),
     name: varchar("name", { length: 255 }).notNull(),
     order: integer("order").notNull(),
+    isCompleted: boolean("is_completed").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()

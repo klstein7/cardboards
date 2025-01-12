@@ -29,6 +29,7 @@ async function create(data: BoardCreate) {
       boardId: board.id,
       name: "Done",
       order: 2,
+      isCompleted: true,
     },
   ]);
 
