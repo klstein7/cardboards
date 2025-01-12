@@ -19,8 +19,6 @@ export function ProjectUserSelect({ value, onChange }: ProjectUserSelectProps) {
   const projectId = useCurrentProjectId();
   const projectUsers = useProjectUsers(projectId);
 
-  console.log(projectUsers.data);
-
   return (
     <Select value={value} onValueChange={onChange}>
       <SelectTrigger>

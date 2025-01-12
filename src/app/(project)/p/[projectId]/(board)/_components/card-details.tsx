@@ -1,5 +1,6 @@
 "use client";
 
+import { format, formatDistance } from "date-fns";
 import { type Tag, TagInput } from "emblor";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -13,6 +14,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { Tiptap } from "~/components/ui/tiptap";
@@ -20,6 +22,8 @@ import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
 import { type Priority } from "~/lib/utils";
 
+import { CardDetailsCommentList } from "./card-details-comment-list";
+import { CardDetailsCreateCommentForm } from "./card-details-create-comment-form";
 import { CardPrioritySelect } from "./card-priority-select";
 
 export function CardDetails() {
@@ -34,7 +38,9 @@ export function CardDetails() {
 
   const updateCardMutation = useUpdateCard();
 
-  const [editing, setEditing] = useState<"title" | "description" | null>(null);
+  const [editing, setEditing] = useState<
+    "title" | "description" | "dueDate" | null
+  >(null);
 
   useEffect(() => {
     if (editing === "title") {
@@ -127,22 +133,26 @@ export function CardDetails() {
             <div className="flex flex-col gap-1">
               <span className="text-sm text-muted-foreground">Title</span>
               {editing === "title" ? (
-                <Textarea
-                  className="resize-none"
-                  ref={titleRef}
-                  defaultValue={card.data?.title}
-                  onBlur={(e) => {
-                    if (e.target.value !== card.data?.title) {
-                      updateCardMutation.mutate({
-                        cardId: Number(selectedCardId),
-                        data: {
-                          title: e.target.value,
-                        },
-                      });
-                    }
-                    setEditing(null);
-                  }}
-                />
+                updateCardMutation.isPending ? (
+                  <Skeleton className="h-[56px] w-full" />
+                ) : (
+                  <Textarea
+                    className="resize-none"
+                    ref={titleRef}
+                    defaultValue={card.data?.title}
+                    onBlur={async (e) => {
+                      if (e.target.value !== card.data?.title) {
+                        await updateCardMutation.mutateAsync({
+                          cardId: Number(selectedCardId),
+                          data: {
+                            title: e.target.value,
+                          },
+                        });
+                      }
+                      setEditing(null);
+                    }}
+                  />
+                )
               ) : (
                 <div
                   role="button"
@@ -161,21 +171,25 @@ export function CardDetails() {
             <div className="flex flex-col gap-1">
               <span className="text-sm text-muted-foreground">Description</span>
               {editing === "description" ? (
-                <Tiptap
-                  value={card.data?.description ?? ""}
-                  onBlur={(content) => {
-                    if (content !== card.data?.description) {
-                      updateCardMutation.mutate({
-                        cardId: Number(selectedCardId),
-                        data: {
-                          description: content,
-                        },
-                      });
-                    }
-                    setEditing(null);
-                  }}
-                  autoFocus
-                />
+                updateCardMutation.isPending ? (
+                  <Skeleton className="h-[150px] w-full" />
+                ) : (
+                  <Tiptap
+                    value={card.data?.description ?? ""}
+                    onBlur={async (content) => {
+                      if (content !== card.data?.description) {
+                        await updateCardMutation.mutateAsync({
+                          cardId: Number(selectedCardId),
+                          data: {
+                            description: content,
+                          },
+                        });
+                      }
+                      setEditing(null);
+                    }}
+                    autoFocus
+                  />
+                )
               ) : (
                 <div
                   role="button"
@@ -195,40 +209,68 @@ export function CardDetails() {
             </div>
             <div className="flex flex-col gap-1">
               <span className="text-sm text-muted-foreground">Due date</span>
-              <DatePicker
-                value={card.data?.dueDate ?? undefined}
-                onChange={(date) => {
-                  updateCardMutation.mutate({
-                    cardId: Number(selectedCardId),
-                    data: { dueDate: date },
-                  });
-                }}
-              />
+              {editing === "dueDate" ? (
+                updateCardMutation.isPending ? (
+                  <Skeleton className="h-10 w-[240px]" />
+                ) : (
+                  <DatePicker
+                    value={card.data?.dueDate ?? undefined}
+                    onChange={async (date) => {
+                      await updateCardMutation.mutateAsync({
+                        cardId: Number(selectedCardId),
+                        data: { dueDate: date },
+                      });
+                      setEditing(null);
+                    }}
+                  />
+                )
+              ) : (
+                <div
+                  role="button"
+                  onClick={() => setEditing("dueDate")}
+                  className="rounded-md"
+                >
+                  {card.data?.dueDate
+                    ? format(card.data.dueDate, "MMM d, yyyy")
+                    : "Click to set due date"}
+                </div>
+              )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1">
                 <span className="text-sm text-muted-foreground">Assignee</span>
-                <ProjectUserSelect
-                  value={card.data?.assignedToId ?? ""}
-                  onChange={(value) => {
-                    updateCardMutation.mutate({
-                      cardId: Number(selectedCardId),
-                      data: { assignedToId: value },
-                    });
-                  }}
-                />
+                {updateCardMutation.isPending &&
+                updateCardMutation.variables?.data.assignedToId !==
+                  undefined ? (
+                  <Skeleton className="h-9 w-full" />
+                ) : (
+                  <ProjectUserSelect
+                    value={card.data?.assignedToId ?? ""}
+                    onChange={async (value) => {
+                      await updateCardMutation.mutateAsync({
+                        cardId: Number(selectedCardId),
+                        data: { assignedToId: value },
+                      });
+                    }}
+                  />
+                )}
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-sm text-muted-foreground">Priority</span>
-                <CardPrioritySelect
-                  value={card.data?.priority ?? ""}
-                  onChange={(value) => {
-                    updateCardMutation.mutate({
-                      cardId: Number(selectedCardId),
-                      data: { priority: value as Priority["value"] },
-                    });
-                  }}
-                />
+                {updateCardMutation.isPending &&
+                updateCardMutation.variables?.data.priority !== undefined ? (
+                  <Skeleton className="h-9 w-full" />
+                ) : (
+                  <CardPrioritySelect
+                    value={card.data?.priority ?? ""}
+                    onChange={async (value) => {
+                      await updateCardMutation.mutateAsync({
+                        cardId: Number(selectedCardId),
+                        data: { priority: value as Priority["value"] },
+                      });
+                    }}
+                  />
+                )}
               </div>
             </div>
             <div className="flex flex-col gap-1">
@@ -245,14 +287,14 @@ export function CardDetails() {
                 }}
                 placeholder="Enter a topic"
                 maxTags={5}
-                onTagAdd={(tag) => {
-                  updateCardMutation.mutate({
+                onTagAdd={async (tag) => {
+                  await updateCardMutation.mutateAsync({
                     cardId: Number(selectedCardId),
                     data: { labels: [...tags.map((t) => t.text), tag] },
                   });
                 }}
-                onTagRemove={(tag) => {
-                  updateCardMutation.mutate({
+                onTagRemove={async (tag) => {
+                  await updateCardMutation.mutateAsync({
                     cardId: Number(selectedCardId),
                     data: {
                       labels: tags.map((t) => t.text).filter((t) => t !== tag),
@@ -261,6 +303,10 @@ export function CardDetails() {
                 }}
               />
             </div>
+            <Separator />
+            <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
+            <Separator />
+            <CardDetailsCommentList cardId={Number(selectedCardId)} />
           </div>
         </DialogContent>
       )}

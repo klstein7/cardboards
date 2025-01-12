@@ -1,5 +1,6 @@
 export * from "./board.service";
 export * from "./card.service";
+export * from "./card-comment.service";
 export * from "./column.service";
 export * from "./project.service";
 export * from "./project-user.service";

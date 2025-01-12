@@ -109,6 +109,23 @@ export const cards = createTable(
   ],
 );
 
+export const cardComments = createTable("card_comment", {
+  id: varchar("id", { length: 255 })
+    .primaryKey()
+    .$defaultFn(() => createId()),
+  cardId: integer("card_id")
+    .notNull()
+    .references(() => cards.id, { onDelete: "cascade" }),
+  projectUserId: varchar("project_user_id", { length: 255 })
+    .notNull()
+    .references(() => projectUsers.id, { onDelete: "cascade" }),
+  content: varchar("content", { length: 1000 }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdateFn(() => new Date()),
+});
+
 export const users = createTable("user", {
   id: varchar("id", { length: 255 }).primaryKey(),
   name: varchar("name", { length: 255 }).notNull(),
@@ -188,13 +205,25 @@ export const columnRelations = relations(columns, ({ one, many }) => ({
   cards: many(cards),
 }));
 
-export const cardRelations = relations(cards, ({ one }) => ({
+export const cardRelations = relations(cards, ({ one, many }) => ({
   column: one(columns, {
     fields: [cards.columnId],
     references: [columns.id],
   }),
   assignedTo: one(projectUsers, {
     fields: [cards.assignedToId],
+    references: [projectUsers.id],
+  }),
+  comments: many(cardComments),
+}));
+
+export const cardCommentRelations = relations(cardComments, ({ one }) => ({
+  card: one(cards, {
+    fields: [cardComments.cardId],
+    references: [cards.id],
+  }),
+  projectUser: one(projectUsers, {
+    fields: [cardComments.projectUserId],
     references: [projectUsers.id],
   }),
 }));

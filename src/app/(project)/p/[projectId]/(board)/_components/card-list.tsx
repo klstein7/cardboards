@@ -4,6 +4,7 @@
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { useQueryClient } from "@tanstack/react-query";
+import { FileText } from "lucide-react";
 import { useEffect } from "react";
 
 import {
@@ -122,7 +123,13 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   if (cards.error) throw cards.error;
   if (cards.isPending) return <div>Loading...</div>;
   if (!cards.data.length)
-    return <div className="flex flex-col gap-3">No cards</div>;
+    return (
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-muted px-4 py-6 text-sm text-muted-foreground">
+        <FileText className="h-8 w-8 opacity-50" />
+        <p>No cards</p>
+        <p>Add a card to get started</p>
+      </div>
+    );
 
   return (
     <div className="flex flex-col [&>*:not(:first-child)]:mt-[-1px]">

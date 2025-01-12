@@ -50,7 +50,10 @@ export const CardBase = memo(
             {card.title}
           </span>
           <div
-            className="prose prose-sm prose-invert line-clamp-2 text-muted-foreground"
+            className={cn(
+              "prose prose-sm prose-invert line-clamp-2 text-muted-foreground",
+              isCompleted && "line-clamp-1 line-through",
+            )}
             dangerouslySetInnerHTML={{ __html: card.description ?? "" }}
           />
         </div>

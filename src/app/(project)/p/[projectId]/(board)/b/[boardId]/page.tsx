@@ -50,8 +50,15 @@ export default async function BoardPage({ params }: BoardPageProps) {
           }),
           queryClient.prefetchQuery({
             queryKey: ["cards", column.id],
-            queryFn: () => Promise.resolve(cards),
+            queryFn: () =>
+              Promise.resolve(cards.map(({ comments, ...card }) => card)),
           }),
+          ...cards.map(({ comments, ...card }) =>
+            queryClient.prefetchQuery({
+              queryKey: ["card-comments", card.id],
+              queryFn: () => Promise.resolve(comments),
+            }),
+          ),
         ]);
       }),
     ),

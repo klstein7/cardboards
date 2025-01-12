@@ -7,19 +7,19 @@ export function useUpdateCard() {
 
   return useMutation({
     mutationFn: api.card.update,
-    onSuccess: ({ columnId: newColumnId, id: cardId }, variables) => {
+    onSuccess: async ({ columnId: newColumnId, id: cardId }, variables) => {
       const oldColumnId = variables.data.columnId;
 
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["cards", newColumnId],
       });
 
-      void queryClient.invalidateQueries({
+      await queryClient.invalidateQueries({
         queryKey: ["card", cardId],
       });
 
       if (oldColumnId && oldColumnId !== newColumnId) {
-        void queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: ["cards", oldColumnId],
         });
       }

@@ -78,15 +78,17 @@ export function ColumnItem({ column }: ColumnItemProps) {
         {column.name}
       </span>
       <CardList columnId={column.id} isCompleted={column.isCompleted} />
-      <CreateCardDialog
-        trigger={
-          <Button variant="outline" className="bg-transparent">
-            <Plus className="h-4 w-4" />
-            <span>Card</span>
-          </Button>
-        }
-        columnId={column.id}
-      />
+      {!column.isCompleted && (
+        <CreateCardDialog
+          trigger={
+            <Button variant="outline" className="bg-transparent">
+              <Plus className="h-4 w-4" />
+              <span>Card</span>
+            </Button>
+          }
+          columnId={column.id}
+        />
+      )}
     </div>
   );
 }

@@ -1,9 +1,9 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { db } from "../db";
-import { boards } from "../db/schema";
+import { boards, cardComments } from "../db/schema";
 import { type BoardCreate } from "../zod";
 import { columnService } from "./column.service";
 
@@ -50,6 +50,16 @@ async function get(boardId: string) {
         with: {
           cards: {
             with: {
+              comments: {
+                orderBy: desc(cardComments.createdAt),
+                with: {
+                  projectUser: {
+                    with: {
+                      user: true,
+                    },
+                  },
+                },
+              },
               assignedTo: {
                 with: {
                   user: true,
