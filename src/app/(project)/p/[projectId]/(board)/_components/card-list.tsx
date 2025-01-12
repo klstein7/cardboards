@@ -133,6 +133,7 @@ export function CardList({ columnId }: CardListProps) {
             card={card}
             index={index}
             columnId={columnId}
+            isCompleted={isCompleted}
           />
         ))}
     </div>
