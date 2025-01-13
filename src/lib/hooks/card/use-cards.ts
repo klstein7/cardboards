@@ -1,12 +1,10 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useQueryState } from "nuqs";
 
-import { useDebounce } from "~/lib/hooks/utils";
+import { useDebouncedSearch } from "~/lib/hooks/utils";
 import { api } from "~/server/api";
 
 export function useCards(columnId: string) {
-  const [search] = useQueryState("search");
-  const debouncedSearch = useDebounce(search);
+  const debouncedSearch = useDebouncedSearch();
 
   return useQuery({
     queryKey: ["cards", columnId, debouncedSearch],

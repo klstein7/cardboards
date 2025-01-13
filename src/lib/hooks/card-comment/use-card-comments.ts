@@ -6,6 +6,5 @@ export function useCardComments(cardId: number) {
   return useQuery({
     queryKey: ["card-comments", cardId],
     queryFn: () => api.cardComment.list(cardId),
-    placeholderData: [],
   });
 }

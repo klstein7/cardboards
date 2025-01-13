@@ -2,8 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { api } from "~/server/api";
 
+import { useDebouncedSearch } from "../utils";
+
 export function useUpdateCard() {
   const queryClient = useQueryClient();
+  const debouncedSearch = useDebouncedSearch();
 
   return useMutation({
     mutationFn: api.card.update,
@@ -11,7 +14,7 @@ export function useUpdateCard() {
       const oldColumnId = variables.data.columnId;
 
       await queryClient.invalidateQueries({
-        queryKey: ["cards", newColumnId],
+        queryKey: ["cards", newColumnId, debouncedSearch],
       });
 
       await queryClient.invalidateQueries({
@@ -20,7 +23,7 @@ export function useUpdateCard() {
 
       if (oldColumnId && oldColumnId !== newColumnId) {
         await queryClient.invalidateQueries({
-          queryKey: ["cards", oldColumnId],
+          queryKey: ["cards", oldColumnId, debouncedSearch],
         });
       }
     },

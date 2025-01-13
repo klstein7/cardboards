@@ -3,7 +3,6 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
 
 import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/column-list";
 import {
@@ -13,25 +12,30 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "~/components/ui/breadcrumb";
-import { Button } from "~/components/ui/button";
 import { api } from "~/server/api";
 
 import { BoardFilters } from "../../_components/board-filters";
 import { BoardStateProvider } from "../../_components/board-state-provider";
 import { CardDetails } from "../../_components/card-details";
-import { CreateCardDialog } from "../../_components/create-card-dialog";
 
 interface BoardPageProps {
   params: Promise<{
     projectId: string;
     boardId: string;
   }>;
+  searchParams: Promise<{
+    search: string;
+  }>;
 }
 
-export default async function BoardPage({ params }: BoardPageProps) {
+export default async function BoardPage({
+  params,
+  searchParams,
+}: BoardPageProps) {
   const queryClient = new QueryClient();
 
   const { projectId, boardId } = await params;
+  const { search } = await searchParams;
 
   const { columns, ...board } = await api.board.get(boardId);
   const project = await api.project.get(projectId);
@@ -48,28 +52,26 @@ export default async function BoardPage({ params }: BoardPageProps) {
 
     queryClient.prefetchQuery({
       queryKey: ["columns", boardId],
-      queryFn: () =>
-        Promise.resolve(columns.map(({ cards, ...column }) => column)),
+      queryFn: () => Promise.resolve(columns),
     }),
 
     Promise.all(
-      columns.map(({ cards, ...column }) => {
+      columns.map((column) => {
         return Promise.all([
           queryClient.prefetchQuery({
             queryKey: ["column", column.id],
             queryFn: () => Promise.resolve(column),
           }),
           queryClient.prefetchQuery({
-            queryKey: ["cards", column.id],
+            queryKey: ["cards", column.id, search],
             queryFn: () =>
-              Promise.resolve(cards.map(({ comments, ...card }) => card)),
+              api.card.list({
+                columnId: column.id,
+                search: {
+                  search,
+                },
+              }),
           }),
-          ...cards.map(({ comments, ...card }) =>
-            queryClient.prefetchQuery({
-              queryKey: ["card-comments", card.id],
-              queryFn: () => Promise.resolve(comments),
-            }),
-          ),
         ]);
       }),
     ),

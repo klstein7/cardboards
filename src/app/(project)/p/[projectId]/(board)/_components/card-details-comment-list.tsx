@@ -4,13 +4,24 @@ import { Separator } from "~/components/ui/separator";
 import { useCardComments } from "~/lib/hooks";
 
 import { CardDetailsCommentItem } from "./card-details-comment-item";
+import { CardDetailsCommentSkeleton } from "./card-details-comment-skeleton";
 
 export function CardDetailsCommentList({ cardId }: { cardId: number }) {
   const cardComments = useCardComments(cardId);
 
   if (cardComments.isError) throw cardComments.error;
 
-  if (cardComments.isPending) return <div>Loading...</div>;
+  if (cardComments.isPending)
+    return (
+      <>
+        <Separator />
+        <div className="flex flex-col gap-6">
+          <CardDetailsCommentSkeleton />
+          <CardDetailsCommentSkeleton />
+          <CardDetailsCommentSkeleton />
+        </div>
+      </>
+    );
 
   if (cardComments.data.length === 0) return null;
 

@@ -17,6 +17,7 @@ import {
 import { useCards, useMoveCard } from "~/lib/hooks";
 
 import { CardItem } from "./card-item";
+import { CardSkeleton } from "./card-skeleton";
 
 interface CardListProps {
   columnId: string;
@@ -121,7 +122,14 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   }, [cards.data, columnId, moveCardMutation, queryClient]);
 
   if (cards.error) throw cards.error;
-  if (cards.isPending) return <div>Loading...</div>;
+  if (cards.isPending)
+    return (
+      <div className="flex flex-col [&>*:not(:first-child)]:mt-[-1px]">
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
+      </div>
+    );
   if (!cards.data.length)
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-muted px-4 py-6 text-sm text-muted-foreground">

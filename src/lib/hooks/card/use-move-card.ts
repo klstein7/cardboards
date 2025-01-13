@@ -5,9 +5,11 @@ import { useBoardState } from "~/app/(project)/p/[projectId]/(board)/_components
 import { retryFlash } from "~/lib/utils";
 import { api } from "~/server/api";
 
+import { useDebouncedSearch } from "../utils";
+
 export function useMoveCard() {
   const queryClient = useQueryClient();
-
+  const debouncedSearch = useDebouncedSearch();
   const { getCard } = useBoardState();
 
   return useMutation({
@@ -22,10 +24,12 @@ export function useMoveCard() {
       const previousSourceCards = queryClient.getQueryData<Card[]>([
         "cards",
         variables.sourceColumnId,
+        debouncedSearch,
       ]);
       const previousDestCards = queryClient.getQueryData<Card[]>([
         "cards",
         variables.destinationColumnId,
+        debouncedSearch,
       ]);
 
       if (!previousSourceCards || !previousDestCards) return;
@@ -38,7 +42,7 @@ export function useMoveCard() {
 
       if (variables.destinationColumnId !== variables.sourceColumnId) {
         queryClient.setQueryData<Card[]>(
-          ["cards", variables.sourceColumnId],
+          ["cards", variables.sourceColumnId, debouncedSearch],
           (old = []) => {
             return old
               .filter((card) => card.id !== variables.cardId)
@@ -47,7 +51,7 @@ export function useMoveCard() {
         );
 
         queryClient.setQueryData<Card[]>(
-          ["cards", variables.destinationColumnId],
+          ["cards", variables.destinationColumnId, debouncedSearch],
           (old = []) => {
             return [
               ...old.slice(0, variables.newOrder),
@@ -62,7 +66,7 @@ export function useMoveCard() {
         );
       } else {
         queryClient.setQueryData<Card[]>(
-          ["cards", variables.sourceColumnId],
+          ["cards", variables.sourceColumnId, debouncedSearch],
           (old = []) => {
             const filteredOld = old.filter(
               (card) => card.id !== variables.cardId,
@@ -90,7 +94,7 @@ export function useMoveCard() {
     onError: (_err, variables, context) => {
       if (context?.previousSourceCards) {
         queryClient.setQueryData(
-          ["cards", variables.sourceColumnId],
+          ["cards", variables.sourceColumnId, debouncedSearch],
           context.previousSourceCards,
         );
       }
@@ -98,7 +102,7 @@ export function useMoveCard() {
       if (variables.destinationColumnId !== variables.sourceColumnId) {
         if (context?.previousDestCards) {
           queryClient.setQueryData(
-            ["cards", variables.destinationColumnId],
+            ["cards", variables.destinationColumnId, debouncedSearch],
             context.previousDestCards,
           );
         }

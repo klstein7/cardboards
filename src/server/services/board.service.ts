@@ -46,29 +46,7 @@ async function get(boardId: string) {
   const board = await db.query.boards.findFirst({
     where: eq(boards.id, boardId),
     with: {
-      columns: {
-        with: {
-          cards: {
-            with: {
-              comments: {
-                orderBy: desc(cardComments.createdAt),
-                with: {
-                  projectUser: {
-                    with: {
-                      user: true,
-                    },
-                  },
-                },
-              },
-              assignedTo: {
-                with: {
-                  user: true,
-                },
-              },
-            },
-          },
-        },
-      },
+      columns: true,
     },
   });
 
