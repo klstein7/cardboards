@@ -1,6 +1,7 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
+import { eq } from "drizzle-orm";
 
 import { db } from "../db";
 import { projects } from "../db/schema";
@@ -31,7 +32,20 @@ async function list() {
   });
 }
 
+async function get(projectId: string) {
+  const project = await db.query.projects.findFirst({
+    where: eq(projects.id, projectId),
+  });
+
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  return project;
+}
+
 export const projectService = {
   create,
   list,
+  get,
 };

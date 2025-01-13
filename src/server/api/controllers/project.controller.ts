@@ -1,7 +1,7 @@
 "use server";
 
-import { ProjectCreateSchema, type ProjectCreate } from "~/server/zod";
 import { projectService } from "~/server/services";
+import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
 
 export async function create(data: ProjectCreate) {
   return projectService.create(ProjectCreateSchema.parse(data));
@@ -9,4 +9,8 @@ export async function create(data: ProjectCreate) {
 
 export async function list() {
   return projectService.list();
+}
+
+export async function get(projectId: string) {
+  return projectService.get(projectId);
 }

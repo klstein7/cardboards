@@ -83,7 +83,9 @@ export const CardBase = memo(
             {card.assignedTo && (
               <Avatar className="h-7 w-7">
                 <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-                <AvatarFallback>{card.assignedTo.user.name[0]}</AvatarFallback>
+                <AvatarFallback>
+                  {card.assignedTo.user.name?.[0] ?? ""}
+                </AvatarFallback>
               </Avatar>
             )}
           </div>

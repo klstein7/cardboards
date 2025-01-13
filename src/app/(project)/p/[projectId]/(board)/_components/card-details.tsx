@@ -305,7 +305,6 @@ export function CardDetails() {
             </div>
             <Separator />
             <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
-            <Separator />
             <CardDetailsCommentList cardId={Number(selectedCardId)} />
           </div>
         </DialogContent>

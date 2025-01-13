@@ -35,7 +35,18 @@ export const CardUpdateSchema = z.object({
   data: CardUpdatePayloadSchema,
 });
 
+export const CardSearchSchemaPayload = z.object({
+  search: z.string().optional(),
+});
+
+export const CardListSchema = z.object({
+  columnId: z.string(),
+  search: CardSearchSchemaPayload.optional(),
+});
+
 export type CardCreate = z.infer<typeof CardCreateSchema>;
 export type CardMove = z.infer<typeof CardMoveSchema>;
 export type CardUpdatePayload = z.infer<typeof CardUpdatePayloadSchema>;
 export type CardUpdate = z.infer<typeof CardUpdateSchema>;
+export type CardSearchPayload = z.infer<typeof CardSearchSchemaPayload>;
+export type CardList = z.infer<typeof CardListSchema>;

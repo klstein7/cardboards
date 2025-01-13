@@ -1,12 +1,24 @@
 import "server-only";
 
-import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  getTableColumns,
+  gt,
+  gte,
+  lt,
+  lte,
+  sql,
+} from "drizzle-orm";
 
 import { db } from "../db";
-import { cards } from "../db/schema";
+import { cards, projectUsers, users } from "../db/schema";
 import {
   type CardCreate,
   type CardMove,
+  type CardSearchPayload,
   type CardUpdate,
   type CardUpdatePayload,
 } from "../zod";
@@ -39,18 +51,116 @@ async function create(data: CardCreate) {
   return card;
 }
 
-async function list(columnId: string) {
-  return db.query.cards.findMany({
-    where: eq(cards.columnId, columnId),
-    with: {
-      assignedTo: {
-        with: {
-          user: true,
+async function list(columnId: string, searchPayload?: CardSearchPayload) {
+  if (!searchPayload?.search) {
+    return db.query.cards.findMany({
+      where: eq(cards.columnId, columnId),
+      with: {
+        assignedTo: {
+          with: {
+            user: true,
+          },
         },
       },
-    },
-    orderBy: asc(cards.order),
-  });
+      orderBy: asc(cards.order),
+    });
+  }
+
+  const searchQuery = searchPayload.search
+    .trim()
+    .toLowerCase()
+    .split(/\s+/)
+    .map((word) => `${word}:*`)
+    .join(" & ");
+
+  if (!searchQuery) {
+    return db.query.cards.findMany({
+      where: eq(cards.columnId, columnId),
+      with: {
+        assignedTo: {
+          with: {
+            user: true,
+          },
+        },
+      },
+      orderBy: asc(cards.order),
+    });
+  }
+
+  try {
+    const results = await db
+      .select({
+        ...getTableColumns(cards),
+        userId: users.id,
+        name: users.name,
+        email: users.email,
+        imageUrl: users.imageUrl,
+        searchRank: sql`ts_rank(
+          setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
+          setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
+          setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
+          setweight(to_tsvector('simple', COALESCE((
+            SELECT string_agg(lower(content), ' ') 
+            FROM kanban_card_comment 
+            WHERE card_id = ${cards.id}
+          ), '')), 'D'),
+          to_tsquery('simple', ${searchQuery})
+        )`,
+      })
+      .from(cards)
+      .leftJoin(projectUsers, eq(cards.assignedToId, projectUsers.id))
+      .leftJoin(users, eq(projectUsers.userId, users.id))
+      .where(
+        and(
+          eq(cards.columnId, columnId),
+          sql`(
+            setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
+            setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
+            setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
+            setweight(to_tsvector('simple', COALESCE((
+              SELECT string_agg(lower(content), ' ') 
+              FROM kanban_card_comment 
+              WHERE card_id = ${cards.id}
+            ), '')), 'D')
+          ) @@ to_tsquery('simple', ${searchQuery})`,
+        ),
+      )
+      .orderBy(
+        desc(
+          sql`ts_rank(
+            setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
+            setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
+            setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
+            setweight(to_tsvector('simple', COALESCE((
+              SELECT string_agg(lower(content), ' ') 
+              FROM kanban_card_comment 
+              WHERE card_id = ${cards.id}
+            ), '')), 'D'),
+            to_tsquery('simple', ${searchQuery})
+          )`,
+        ),
+        asc(cards.order),
+      );
+
+    return results.map(
+      ({ searchRank, userId, name, email, imageUrl, ...cardFields }) => ({
+        ...cardFields,
+        assignedTo: cardFields.assignedToId
+          ? {
+              user: {
+                id: userId,
+                name,
+                email,
+                imageUrl,
+              },
+            }
+          : null,
+      }),
+    );
+  } catch (error) {
+    console.error("Error in search query:", error);
+    return [];
+  }
 }
 
 async function move(data: CardMove) {
