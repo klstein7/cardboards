@@ -17,6 +17,7 @@ import { api } from "~/server/api";
 import { BoardFilters } from "../../_components/board-filters";
 import { BoardStateProvider } from "../../_components/board-state-provider";
 import { CardDetails } from "../../_components/card-details";
+import { GenerateCardsDialog } from "../../_components/generate-cards-dialog";
 
 interface BoardPageProps {
   params: Promise<{
@@ -105,7 +106,10 @@ export default async function BoardPage({
             </BreadcrumbList>
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold">{board.name}</h1>
-              <BoardFilters />
+              <div className="flex items-center gap-2">
+                <BoardFilters />
+                <GenerateCardsDialog boardId={boardId} />
+              </div>
             </div>
             <ColumnList boardId={boardId} />
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { format, formatDistance } from "date-fns";
+import { formatDistance } from "date-fns";
 import { useState } from "react";
 
 import { type CardComment } from "~/app/(project)/_types";
@@ -17,7 +17,6 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { useRemoveCardComment, useUpdateCardComment } from "~/lib/hooks";
 

@@ -15,10 +15,19 @@ interface CardBaseProps {
   className?: string;
   isDragging?: boolean;
   isCompleted?: boolean;
+  onClick?: () => void;
+  style?: React.CSSProperties;
 }
 
 export const CardBase = memo(
-  ({ card, className, isDragging, isCompleted }: CardBaseProps) => {
+  ({
+    card,
+    className,
+    isDragging,
+    isCompleted,
+    onClick,
+    style,
+  }: CardBaseProps) => {
     const { activeCard } = useBoardState();
 
     const priority = getPriorityByValue(card.priority);
@@ -32,9 +41,11 @@ export const CardBase = memo(
           priority && "border-l-4",
           className,
         )}
-        style={
-          priority ? { borderLeftColor: getColor(priority.value) } : undefined
-        }
+        style={{
+          borderLeftColor: priority ? getColor(card.priority) : undefined,
+          ...style,
+        }}
+        onClick={onClick}
       >
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div>{formatDistanceToNow(card.createdAt, { addSuffix: true })}</div>

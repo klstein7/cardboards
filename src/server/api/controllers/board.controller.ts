@@ -1,7 +1,7 @@
 "use server";
 
 import { boardService } from "~/server/services";
-import { BoardCreateSchema, type BoardCreate } from "~/server/zod";
+import { type BoardCreate, BoardCreateSchema } from "~/server/zod";
 
 export async function create(data: BoardCreate) {
   return boardService.create(BoardCreateSchema.parse(data));

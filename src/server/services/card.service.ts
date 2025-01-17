@@ -1,5 +1,8 @@
 import "server-only";
 
+import { google } from "@ai-sdk/google";
+import { streamObject } from "ai";
+import { createStreamableValue } from "ai/rsc";
 import {
   and,
   asc,
@@ -12,16 +15,21 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
+import { z } from "zod";
 
 import { db } from "../db";
 import { cards, projectUsers, users } from "../db/schema";
 import {
   type CardCreate,
+  type CardCreateMany,
+  type CardCreateManyPayload,
+  CardGenerateResponseSchema,
   type CardMove,
   type CardSearchPayload,
-  type CardUpdate,
   type CardUpdatePayload,
 } from "../zod";
+import { boardService } from "./board.service";
+import { columnService } from "./column.service";
 
 async function getLastCardOrder(columnId: string) {
   const lastCard = await db.query.cards.findFirst({
@@ -49,6 +57,32 @@ async function create(data: CardCreate) {
   }
 
   return card;
+}
+
+async function createMany(boardId: string, data: CardCreateManyPayload) {
+  if (data.length === 0) return [];
+
+  let columnId = data[0]!.columnId;
+
+  if (!columnId) {
+    const firstColumn = await columnService.getFirstColumnByBoardId(boardId);
+
+    columnId = firstColumn.id;
+  }
+
+  const lastCardOrder = await getLastCardOrder(columnId);
+
+  return db
+    .insert(cards)
+    .values(
+      data.map((card, index) => ({
+        ...card,
+        columnId,
+        order: lastCardOrder + index + 1,
+        labels: card.labels.map((label) => label.text),
+      })),
+    )
+    .returning();
 }
 
 async function list(columnId: string, searchPayload?: CardSearchPayload) {
@@ -279,10 +313,93 @@ async function update(cardId: number, data: CardUpdatePayload) {
   return card;
 }
 
+async function generate(boardId: string, prompt: string) {
+  const stream = createStreamableValue();
+
+  const board = await boardService.get(boardId);
+
+  (async () => {
+    const { partialObjectStream } = streamObject({
+      model: google("gemini-2.0-flash-exp"),
+      system: `
+        You are an AI project management assistant specializing in Kanban methodology. 
+        Generate cards that align with our system's structure and constraints:
+
+        Card Properties:
+        - title: Required, max 255 characters, clear and actionable
+        - description: Optional, max 1000 characters, with acceptance criteria. Must be in valid HTML format:
+          * Use <p> for paragraphs
+          * Use <ul>/<li> for lists
+          * Use <strong> for bold text
+          * Use <em> for italic text
+          * Use <h1>, <h2>, <h3> for headings
+          * Use <a href="..."> for links
+          * No markdown syntax allowed
+        - priority: Optional, one of ["low", "medium", "high", "urgent"]
+        - dueDate: Optional, valid timestamp
+        - labels: Optional array of text labels for categorization
+        - order: Required, integer for card positioning
+        - columnId: Required, must match an existing column
+
+        Description Format Example:
+        <h3>Objective</h3>
+        <p>Implement user authentication system</p>
+        <h3>Acceptance Criteria</h3>
+        <ul>
+          <li><strong>Required:</strong> Email/password login</li>
+          <li><strong>Required:</strong> Password reset flow</li>
+          <li><em>Optional:</em> Social login integration</li>
+        </ul>
+
+        Guidelines for Generation:
+        1. Title Format:
+           - Start with action verb
+           - Be specific and measurable
+           - Stay under 255 char limit
+
+        2. Description Format:
+           - Use proper HTML structure
+           - Include clear acceptance criteria in lists
+           - Add implementation details if relevant
+           - Stay under 1000 char limit
+           - Ensure all HTML tags are properly closed
+
+        3. Priority Assignment:
+           - urgent: Immediate attention required
+           - high: Important for current sprint
+           - medium: Standard priority
+           - low: Nice to have
+
+        4. Labels:
+           - Use consistent terminology
+           - Keep labels concise
+           - Align with project context
+
+        Board Context:
+        - ${JSON.stringify(board)}
+
+        Based on the provided board context and prompt, generate cards that follow these specifications while maintaining data integrity.
+      `,
+      prompt,
+      schema: CardGenerateResponseSchema,
+    });
+
+    for await (const partialObject of partialObjectStream) {
+      stream.update(partialObject);
+    }
+
+    stream.done();
+  })().catch(console.error);
+
+  return { object: stream.value };
+}
+
 export const cardService = {
   create,
+  createMany,
   list,
   move,
   get,
   update,
+  generate,
 };

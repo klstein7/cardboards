@@ -57,8 +57,24 @@ async function get(boardId: string) {
   return board;
 }
 
+async function getWithDetails(boardId: string) {
+  const board = await db.query.boards.findFirst({
+    where: eq(boards.id, boardId),
+    with: {
+      columns: {
+        with: {
+          cards: true,
+        },
+      },
+    },
+  });
+
+  return board;
+}
+
 export const boardService = {
   create,
   list,
   get,
+  getWithDetails,
 };
