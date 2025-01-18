@@ -17,6 +17,7 @@ interface CardBaseProps {
   isCompleted?: boolean;
   onClick?: () => void;
   style?: React.CSSProperties;
+  children?: React.ReactNode;
 }
 
 export const CardBase = memo(
@@ -27,6 +28,7 @@ export const CardBase = memo(
     isCompleted,
     onClick,
     style,
+    children,
   }: CardBaseProps) => {
     const { activeCard } = useBoardState();
 
@@ -47,6 +49,7 @@ export const CardBase = memo(
         }}
         onClick={onClick}
       >
+        {children}
         <div className="flex items-center justify-between text-xs text-muted-foreground">
           <div>{formatDistanceToNow(card.createdAt, { addSuffix: true })}</div>
           {card.dueDate && (

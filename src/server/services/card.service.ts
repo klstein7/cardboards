@@ -316,7 +316,7 @@ async function update(cardId: number, data: CardUpdatePayload) {
 async function generate(boardId: string, prompt: string) {
   const stream = createStreamableValue();
 
-  const board = await boardService.get(boardId);
+  const board = await boardService.getWithDetails(boardId);
 
   (async () => {
     const { partialObjectStream } = streamObject({
@@ -324,6 +324,8 @@ async function generate(boardId: string, prompt: string) {
       system: `
         You are an AI project management assistant specializing in Kanban methodology. 
         Generate cards that align with our system's structure and constraints:
+
+        IMPORTANT: Avoid generating duplicate cards. Each card should be unique and distinct from existing cards on the board.
 
         Card Properties:
         - title: Required, max 255 characters, clear and actionable
@@ -341,36 +343,31 @@ async function generate(boardId: string, prompt: string) {
         - order: Required, integer for card positioning
         - columnId: Required, must match an existing column
 
-        Description Format Example:
-        <h3>Objective</h3>
-        <p>Implement user authentication system</p>
-        <h3>Acceptance Criteria</h3>
-        <ul>
-          <li><strong>Required:</strong> Email/password login</li>
-          <li><strong>Required:</strong> Password reset flow</li>
-          <li><em>Optional:</em> Social login integration</li>
-        </ul>
-
         Guidelines for Generation:
-        1. Title Format:
+        1. Uniqueness:
+           - Check existing board cards to avoid duplicates
+           - Ensure each new card represents a distinct task or feature
+           - If similar tasks exist, focus on different aspects or approaches
+
+        2. Title Format:
            - Start with action verb
            - Be specific and measurable
            - Stay under 255 char limit
 
-        2. Description Format:
+        3. Description Format:
            - Use proper HTML structure
            - Include clear acceptance criteria in lists
            - Add implementation details if relevant
            - Stay under 1000 char limit
            - Ensure all HTML tags are properly closed
 
-        3. Priority Assignment:
+        4. Priority Assignment:
            - urgent: Immediate attention required
            - high: Important for current sprint
            - medium: Standard priority
            - low: Nice to have
 
-        4. Labels:
+        5. Labels:
            - Use consistent terminology
            - Keep labels concise
            - Align with project context

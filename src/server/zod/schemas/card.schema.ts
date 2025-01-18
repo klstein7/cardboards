@@ -62,17 +62,17 @@ export const CardGenerateSchema = z.object({
   prompt: z.string(),
 });
 
+export const GeneratedCardSchema = z.object({
+  title: z.string().describe("A short concise title for the card"),
+  description: z
+    .string()
+    .describe("A detailed description of the card in HTML format."),
+  priority: z.string().describe("The priority of the card"),
+  labels: z.array(z.string()).describe("The labels of the card"),
+});
+
 export const CardGenerateResponseSchema = z.object({
-  cards: z.array(
-    z.object({
-      title: z.string().describe("A short concise title for the card"),
-      description: z
-        .string()
-        .describe("A detailed description of the card in HTML format."),
-      priority: z.string().describe("The priority of the card"),
-      labels: z.array(z.string()).describe("The labels of the card"),
-    }),
-  ),
+  cards: z.array(GeneratedCardSchema),
 });
 
 export type CardCreate = z.infer<typeof CardCreateSchema>;

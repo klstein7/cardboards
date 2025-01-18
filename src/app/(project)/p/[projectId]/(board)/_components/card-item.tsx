@@ -110,8 +110,7 @@ export function CardItem({
     <div
       ref={cardElementRef}
       className={cn(
-        "relative flex cursor-pointer select-none flex-col gap-3",
-
+        "relative flex cursor-pointer select-none flex-col gap-2 p-1 sm:gap-3 sm:p-0",
         activeCard?.id === card.id && "opacity-50",
       )}
       onClick={() => setSelectedCardId(card.id.toString())}
@@ -121,7 +120,7 @@ export function CardItem({
         isDragging={activeCard?.id === card.id}
         isCompleted={isCompleted}
       />
-      {closestEdge && <DropIndicator edge={closestEdge} gap={2} />}
+      {closestEdge && <DropIndicator edge={closestEdge} gap={1} />}
     </div>
   );
 }

@@ -132,15 +132,15 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
     );
   if (!cards.data.length)
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-muted px-4 py-6 text-sm text-muted-foreground">
-        <FileText className="h-8 w-8 opacity-50" />
+      <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-md border border-dashed border-muted px-2 py-4 text-xs text-muted-foreground sm:px-4 sm:py-6 sm:text-sm">
+        <FileText className="h-6 w-6 opacity-50 sm:h-8 sm:w-8" />
         <p>No cards</p>
         <p>Add a card to get started</p>
       </div>
     );
 
   return (
-    <div className="flex flex-col [&>*:not(:first-child)]:mt-[-1px]">
+    <div className="flex min-w-[250px] max-w-full flex-col sm:min-w-[300px] [&>*:not(:first-child)]:mt-[-1px]">
       {cards.data
         .sort((a, b) => a.order - b.order)
         .map((card, index) => (
