@@ -20,7 +20,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   if (boards.isPending) return <div>Loading...</div>;
 
   return (
-    <div className="flex w-14 shrink-0 flex-col items-center gap-12 border-r py-6">
+    <div className="hidden w-14 shrink-0 flex-col items-center gap-12 border-r py-6 sm:flex">
       <Star className="fill-yellow-500 text-yellow-500" />
       <div className="flex flex-col gap-3">
         <Button variant="ghost" size="icon">

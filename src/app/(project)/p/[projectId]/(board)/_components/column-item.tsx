@@ -68,7 +68,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex flex-1 flex-col gap-3 rounded-md border bg-secondary/20 p-4",
+        "flex w-full flex-col gap-3 rounded-md border bg-secondary/20 p-4",
         isDropping &&
           "ring-2 ring-primary ring-offset-2 ring-offset-background",
       )}

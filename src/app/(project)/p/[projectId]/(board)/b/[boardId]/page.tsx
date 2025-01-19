@@ -81,9 +81,9 @@ export default async function BoardPage({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <BoardStateProvider>
-        <div className="flex grow">
-          <div className="flex w-full max-w-7xl flex-col gap-6 p-6">
-            <BreadcrumbList>
+        <div className="flex h-[100dvh] w-full">
+          <div className="flex w-full max-w-7xl flex-col">
+            <BreadcrumbList className="p-6">
               <BreadcrumbItem>
                 <BreadcrumbLink href={`/projects`}>Projects</BreadcrumbLink>
               </BreadcrumbItem>
@@ -104,8 +104,16 @@ export default async function BoardPage({
                 <BreadcrumbPage>{board.name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-            <div className="flex items-center justify-between">
-              <h1 className="text-2xl font-bold">{board.name}</h1>
+            <div className="flex items-center justify-between border-b px-6 pb-6">
+              <div className="flex items-center gap-3">
+                <div
+                  className="h-4 w-4 rounded-full"
+                  style={{
+                    backgroundColor: board.color,
+                  }}
+                />
+                <h1 className="text-2xl font-bold">{board.name}</h1>
+              </div>
               <div className="flex items-center gap-2">
                 <BoardFilters />
                 <GenerateCardsDialog boardId={boardId} />

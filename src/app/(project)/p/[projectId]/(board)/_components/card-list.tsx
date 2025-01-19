@@ -140,7 +140,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
     );
 
   return (
-    <div className="flex min-w-[250px] max-w-full flex-col sm:min-w-[300px] [&>*:not(:first-child)]:mt-[-1px]">
+    <div className="flex max-w-full flex-col [&>*:not(:first-child)]:mt-[-1px]">
       {cards.data
         .sort((a, b) => a.order - b.order)
         .map((card, index) => (

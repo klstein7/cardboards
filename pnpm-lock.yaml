@@ -14,6 +14,9 @@ importers:
       '@atlaskit/pragmatic-drag-and-drop':
         specifier: ^1.4.0
         version: 1.4.0
+      '@atlaskit/pragmatic-drag-and-drop-auto-scroll':
+        specifier: ^2.1.0
+        version: 2.1.0
       '@atlaskit/pragmatic-drag-and-drop-flourish':
         specifier: ^1.1.2
         version: 1.1.2(@types/react@18.3.18)(react@18.3.1)
@@ -272,6 +275,9 @@ packages:
 
   '@atlaskit/platform-feature-flags@0.3.0':
     resolution: {integrity: sha512-/0u5fFJ0Rw2j4M5wzsXgaHO6Ey12oekPCDTRvmmAIp4GO9T2Swbl80bavLAPSOmSHMhHTSuvRxiJveZXfQ21IQ==}
+
+  '@atlaskit/pragmatic-drag-and-drop-auto-scroll@2.1.0':
+    resolution: {integrity: sha512-E52y8/0BTTf4ai6BJyFYgdVHFgQ1AES33KvAVQpZ41jMkoukLIq6UoCudOXku7xs3qoPygQdpC+vitVUuEFJXw==}
 
   '@atlaskit/pragmatic-drag-and-drop-flourish@1.1.2':
     resolution: {integrity: sha512-8x8YjW1oZNDbdDYYRVZfOY1fOcX4sF6pmYsflTJ4j0QtEGMl2Ae2DmXGqw13m0mJoMPIZvToWfKncTCZejKyDw==}
@@ -4321,6 +4327,11 @@ snapshots:
 
   '@atlaskit/platform-feature-flags@0.3.0':
     dependencies:
+      '@babel/runtime': 7.26.0
+
+  '@atlaskit/pragmatic-drag-and-drop-auto-scroll@2.1.0':
+    dependencies:
+      '@atlaskit/pragmatic-drag-and-drop': 1.4.0
       '@babel/runtime': 7.26.0
 
   '@atlaskit/pragmatic-drag-and-drop-flourish@1.1.2(@types/react@18.3.18)(react@18.3.1)':

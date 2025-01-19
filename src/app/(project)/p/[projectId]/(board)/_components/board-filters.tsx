@@ -10,9 +10,9 @@ export function BoardFilters() {
 
   return (
     <div className="flex items-center gap-2">
-      <div className="relative">
+      <div className="relative hidden sm:block">
         <Input
-          className="w-[300px] pl-9"
+          className="pl-9"
           placeholder="Search"
           defaultValue={search ?? undefined}
           onChange={(e) => {
