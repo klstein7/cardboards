@@ -82,7 +82,7 @@ export default async function BoardPage({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <BoardStateProvider>
         <div className="flex h-[100dvh] w-full">
-          <div className="flex w-full max-w-7xl flex-col">
+          <div className="flex w-full flex-col">
             <BreadcrumbList className="p-6">
               <BreadcrumbItem>
                 <BreadcrumbLink href={`/projects`}>Projects</BreadcrumbLink>
@@ -104,7 +104,7 @@ export default async function BoardPage({
                 <BreadcrumbPage>{board.name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-            <div className="flex items-center justify-between border-b px-6 pb-6">
+            <div className="flex max-w-7xl items-center justify-between px-6 pb-6">
               <div className="flex items-center gap-3">
                 <div
                   className="h-4 w-4 rounded-full"
