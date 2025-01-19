@@ -22,6 +22,7 @@
   "dependencies": {
     "@ai-sdk/google": "^1.0.16",
     "@atlaskit/pragmatic-drag-and-drop": "^1.4.0",
+    "@atlaskit/pragmatic-drag-and-drop-auto-scroll": "^2.1.0",
     "@atlaskit/pragmatic-drag-and-drop-flourish": "^1.1.2",
     "@atlaskit/pragmatic-drag-and-drop-hitbox": "^1.0.3",
     "@atlaskit/pragmatic-drag-and-drop-live-region": "^1.2.0",
