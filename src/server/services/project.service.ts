@@ -29,12 +29,20 @@ async function create(data: ProjectCreate) {
 async function list() {
   return db.query.projects.findMany({
     orderBy: (projects, { desc }) => [desc(projects.createdAt)],
+    with: {
+      boards: true,
+      projectUsers: true,
+    },
   });
 }
 
 async function get(projectId: string) {
   const project = await db.query.projects.findFirst({
     where: eq(projects.id, projectId),
+    with: {
+      boards: true,
+      projectUsers: true,
+    },
   });
 
   if (!project) {
@@ -44,8 +52,13 @@ async function get(projectId: string) {
   return project;
 }
 
+async function del(projectId: string) {
+  await db.delete(projects).where(eq(projects.id, projectId));
+}
+
 export const projectService = {
   create,
   list,
   get,
+  del,
 };

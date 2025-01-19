@@ -14,3 +14,7 @@ export async function list() {
 export async function get(projectId: string) {
   return projectService.get(projectId);
 }
+
+export async function del(projectId: string) {
+  return projectService.del(projectId);
+}

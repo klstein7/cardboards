@@ -1,8 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+
 import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader } from "~/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -22,10 +26,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateProject } from "~/lib/hooks";
-import { useState } from "react";
+import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
 
 export function CreateProjectDialog() {
   const [open, setOpen] = useState(false);
@@ -47,10 +49,12 @@ export function CreateProjectDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <Plus className="h-4 w-4" />
-          <span>Project</span>
-        </Button>
+        <button className="flex w-full items-center justify-center rounded-lg border border-dashed p-4 transition-all hover:bg-muted/50 sm:w-[400px]">
+          <div className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
+            <span className="text-lg">Create new project</span>
+          </div>
+        </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

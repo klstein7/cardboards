@@ -1,11 +1,14 @@
-import { api } from "~/server/api";
-import { CreateProjectDialog } from "../_components/create-project-dialog";
-import { ProjectList } from "../_components/project-list";
 import {
+  dehydrate,
   HydrationBoundary,
   QueryClient,
-  dehydrate,
 } from "@tanstack/react-query";
+
+import { Logo } from "~/components/brand/logo";
+import { api } from "~/server/api";
+
+import { CreateProjectDialog } from "../_components/create-project-dialog";
+import { ProjectList } from "../_components/project-list";
 
 export default async function ProjectsPage() {
   const queryClient = new QueryClient();
@@ -17,8 +20,8 @@ export default async function ProjectsPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex flex-col gap-6">
-        <span>Projects</span>
+      <div className="flex h-[100dvh] flex-col items-center justify-center gap-12 p-6">
+        <Logo />
         <ProjectList />
         <CreateProjectDialog />
       </div>
