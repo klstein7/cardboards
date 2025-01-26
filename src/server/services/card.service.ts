@@ -83,122 +83,31 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
     .returning();
 }
 
-async function list(columnId: string, searchPayload?: CardSearchPayload) {
-  console.log(searchPayload);
-  if (!searchPayload?.search) {
-    return db.query.cards.findMany({
-      where: eq(cards.columnId, columnId),
-      with: {
-        assignedTo: {
-          with: {
-            user: true,
-          },
+async function list(columnId: string) {
+  return db.query.cards.findMany({
+    where: eq(cards.columnId, columnId),
+    with: {
+      assignedTo: {
+        with: {
+          user: true,
         },
       },
-      orderBy: asc(cards.order),
-    });
-  }
+    },
+  });
+}
 
-  const searchQuery = searchPayload.search
-    .trim()
-    .toLowerCase()
-    .split(/\s+/)
-    .map((word) => `${word}:*`)
-    .join(" & ");
+async function normalizeColumnOrders(columnId: string) {
+  const columnCards = await db.query.cards.findMany({
+    where: eq(cards.columnId, columnId),
+    orderBy: asc(cards.order),
+  });
 
-  if (!searchQuery) {
-    return db.query.cards.findMany({
-      where: eq(cards.columnId, columnId),
-      with: {
-        assignedTo: {
-          with: {
-            user: true,
-          },
-        },
-      },
-      orderBy: asc(cards.order),
-    });
-  }
-
-  try {
-    const results = await db
-      .select({
-        ...getTableColumns(cards),
-        userId: users.id,
-        name: users.name,
-        email: users.email,
-        imageUrl: users.imageUrl,
-        searchRank: sql`ts_rank(
-          setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
-          setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
-          setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
-          setweight(to_tsvector('simple', COALESCE((
-            SELECT string_agg(lower(content), ' ') 
-            FROM kanban_card_comment 
-            WHERE card_id = ${cards.id}
-          ), '')), 'D'),
-          to_tsquery('simple', ${searchQuery})
-        )`,
-      })
-      .from(cards)
-      .leftJoin(projectUsers, eq(cards.assignedToId, projectUsers.id))
-      .leftJoin(users, eq(projectUsers.userId, users.id))
-      .where(
-        and(
-          eq(cards.columnId, columnId),
-          searchPayload?.labels?.length
-            ? sql`${cards.labels} @> ${searchPayload.labels}`
-            : undefined,
-          searchQuery
-            ? sql`(
-              setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
-              setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
-              setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
-              setweight(to_tsvector('simple', COALESCE((
-                SELECT string_agg(lower(content), ' ') 
-                FROM kanban_card_comment 
-                WHERE card_id = ${cards.id}
-              ), '')), 'D')
-            ) @@ to_tsquery('simple', ${searchQuery})`
-            : undefined,
-        ),
-      )
-      .orderBy(
-        desc(
-          sql`ts_rank(
-            setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
-            setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
-            setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
-            setweight(to_tsvector('simple', COALESCE((
-              SELECT string_agg(lower(content), ' ') 
-              FROM kanban_card_comment 
-              WHERE card_id = ${cards.id}
-            ), '')), 'D'),
-            to_tsquery('simple', ${searchQuery})
-          )`,
-        ),
-        asc(cards.order),
-      );
-
-    return results.map(
-      ({ searchRank, userId, name, email, imageUrl, ...cardFields }) => ({
-        ...cardFields,
-        assignedTo: cardFields.assignedToId
-          ? {
-              user: {
-                id: userId,
-                name,
-                email,
-                imageUrl,
-              },
-            }
-          : null,
-      }),
-    );
-  } catch (error) {
-    console.error("Error in search query:", error);
-    return [];
-  }
+  // Update all cards in the column with normalized orders (1, 2, 3...)
+  await Promise.all(
+    columnCards.map((card, index) =>
+      db.update(cards).set({ order: index }).where(eq(cards.id, card.id)),
+    ),
+  );
 }
 
 async function move(data: CardMove) {
@@ -269,6 +178,11 @@ async function move(data: CardMove) {
 
     if (!updatedCard) {
       throw new Error("Failed to update card");
+    }
+
+    await normalizeColumnOrders(destinationColumnId);
+    if (isNewColumn) {
+      await normalizeColumnOrders(card.columnId);
     }
 
     return {

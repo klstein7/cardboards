@@ -29,14 +29,10 @@ interface BoardPageProps {
   }>;
 }
 
-export default async function BoardPage({
-  params,
-  searchParams,
-}: BoardPageProps) {
+export default async function BoardPage({ params }: BoardPageProps) {
   const queryClient = new QueryClient();
 
   const { projectId, boardId } = await params;
-  const { search } = await searchParams;
 
   const { columns, ...board } = await api.board.get(boardId);
   const project = await api.project.get(projectId);
@@ -64,14 +60,8 @@ export default async function BoardPage({
             queryFn: () => Promise.resolve(column),
           }),
           queryClient.prefetchQuery({
-            queryKey: ["cards", column.id, search],
-            queryFn: () =>
-              api.card.list({
-                columnId: column.id,
-                search: {
-                  search,
-                },
-              }),
+            queryKey: ["cards", column.id],
+            queryFn: () => api.card.list(column.id),
           }),
         ]);
       }),

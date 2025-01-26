@@ -32,21 +32,21 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   if (boards.isPending) return <div>Loading...</div>;
 
   return (
-    <TooltipProvider>
-      <div className="hidden w-14 shrink-0 flex-col items-center gap-12 border-r pb-3 pt-6 sm:flex">
-        <div className="flex flex-1 flex-col items-center gap-12">
-          <Star className="fill-yellow-500 text-yellow-500" />
-          <div className="flex flex-col gap-3">
-            <Button variant="ghost" size="icon">
-              <Kanban />
-            </Button>
-            <Button variant="ghost" size="icon">
-              <ChartArea />
-            </Button>
-          </div>
-          <div className="flex flex-col gap-1">
-            {boards.data.map((board) => (
-              <Tooltip key={board.id} delayDuration={100}>
+    <div className="hidden w-14 shrink-0 flex-col items-center gap-12 border-r pb-3 pt-6 sm:flex">
+      <div className="flex flex-1 flex-col items-center gap-12">
+        <Star className="fill-yellow-500 text-yellow-500" />
+        <div className="flex flex-col gap-3">
+          <Button variant="ghost" size="icon">
+            <Kanban />
+          </Button>
+          <Button variant="ghost" size="icon">
+            <ChartArea />
+          </Button>
+        </div>
+        <div className="flex flex-col gap-1">
+          {boards.data.map((board) => (
+            <TooltipProvider key={board.id}>
+              <Tooltip delayDuration={100}>
                 <TooltipTrigger asChild>
                   <Link key={board.id} href={`/p/${projectId}/b/${board.id}`}>
                     <Button
@@ -72,18 +72,20 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                   <p>{board.name}</p>
                 </TooltipContent>
               </Tooltip>
-            ))}
-            <CreateBoardDialog
-              trigger={
-                <Button variant="ghost" size="icon">
-                  <Plus className="h-4 w-4" />
-                </Button>
-              }
-              projectId={projectId}
-            />
-          </div>
+            </TooltipProvider>
+          ))}
+          <CreateBoardDialog
+            trigger={
+              <Button variant="ghost" size="icon">
+                <Plus className="h-4 w-4" />
+              </Button>
+            }
+            projectId={projectId}
+          />
         </div>
-        <div className="flex flex-col items-center gap-3">
+      </div>
+      <div className="flex flex-col items-center gap-3">
+        <TooltipProvider>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Link href={`/p/${projectId}/settings`}>
@@ -96,9 +98,9 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
               <p>Settings</p>
             </TooltipContent>
           </Tooltip>
-          <UserButton />
-        </div>
+        </TooltipProvider>
+        <UserButton />
       </div>
-    </TooltipProvider>
+    </div>
   );
 }

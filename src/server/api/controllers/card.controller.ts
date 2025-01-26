@@ -20,9 +20,8 @@ export async function create(data: CardCreate) {
   return cardService.create(CardCreateSchema.parse(data));
 }
 
-export async function list(data: CardList) {
-  const { columnId, search } = CardListSchema.parse(data);
-  return cardService.list(columnId, search);
+export async function list(columnId: string) {
+  return cardService.list(columnId);
 }
 
 export async function move(data: CardMove) {
