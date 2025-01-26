@@ -50,6 +50,7 @@ export const CardUpdateSchema = z.object({
 
 export const CardSearchSchemaPayload = z.object({
   search: z.string().optional(),
+  labels: z.array(z.string()).optional(),
 });
 
 export const CardListSchema = z.object({

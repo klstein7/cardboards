@@ -15,13 +15,11 @@ import {
   lte,
   sql,
 } from "drizzle-orm";
-import { z } from "zod";
 
 import { db } from "../db";
 import { cards, projectUsers, users } from "../db/schema";
 import {
   type CardCreate,
-  type CardCreateMany,
   type CardCreateManyPayload,
   CardGenerateResponseSchema,
   type CardMove,
@@ -86,6 +84,7 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
 }
 
 async function list(columnId: string, searchPayload?: CardSearchPayload) {
+  console.log(searchPayload);
   if (!searchPayload?.search) {
     return db.query.cards.findMany({
       where: eq(cards.columnId, columnId),
@@ -147,16 +146,21 @@ async function list(columnId: string, searchPayload?: CardSearchPayload) {
       .where(
         and(
           eq(cards.columnId, columnId),
-          sql`(
-            setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
-            setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
-            setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
-            setweight(to_tsvector('simple', COALESCE((
-              SELECT string_agg(lower(content), ' ') 
-              FROM kanban_card_comment 
-              WHERE card_id = ${cards.id}
-            ), '')), 'D')
-          ) @@ to_tsquery('simple', ${searchQuery})`,
+          searchPayload?.labels?.length
+            ? sql`${cards.labels} @> ${searchPayload.labels}`
+            : undefined,
+          searchQuery
+            ? sql`(
+              setweight(to_tsvector('simple', lower(${cards.title})), 'A') ||
+              setweight(to_tsvector('simple', COALESCE(lower(${cards.description}), '')), 'B') ||
+              setweight(to_tsvector('simple', COALESCE(array_to_string(${cards.labels}, ' '), '')), 'C') ||
+              setweight(to_tsvector('simple', COALESCE((
+                SELECT string_agg(lower(content), ' ') 
+                FROM kanban_card_comment 
+                WHERE card_id = ${cards.id}
+              ), '')), 'D')
+            ) @@ to_tsquery('simple', ${searchQuery})`
+            : undefined,
         ),
       )
       .orderBy(

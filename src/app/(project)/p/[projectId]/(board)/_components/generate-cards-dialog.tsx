@@ -15,16 +15,11 @@ import {
 } from "~/components/ui/dialog";
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
-import { Skeleton } from "~/components/ui/skeleton";
 import { Textarea } from "~/components/ui/textarea";
 import { useCreateManyCards } from "~/lib/hooks";
-import { cn, getColor, type Priority } from "~/lib/utils";
+import { cn, type Priority } from "~/lib/utils";
 import { api } from "~/server/api";
-import {
-  type CardGenerateResponse,
-  CardGenerateResponseSchema,
-  GeneratedCardSchema,
-} from "~/server/zod";
+import { type CardGenerateResponse, GeneratedCardSchema } from "~/server/zod";
 
 import { CardBase } from "./card-base";
 import { CardSkeleton } from "./card-skeleton";

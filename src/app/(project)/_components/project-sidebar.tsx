@@ -1,7 +1,7 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import { ChartArea, Cog, Kanban, Plus, Settings, Star } from "lucide-react";
+import { ChartArea, Kanban, Plus, Settings, Star } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
