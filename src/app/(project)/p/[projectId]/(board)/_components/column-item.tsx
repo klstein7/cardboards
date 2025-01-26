@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { type Column } from "~/app/(project)/_types";
 import { Button } from "~/components/ui/button";
-import { useCards, useMoveCard } from "~/lib/hooks";
+import { useCards, useCurrentBoard, useMoveCard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { CardList } from "./card-list";
@@ -24,6 +24,8 @@ export function ColumnItem({ column }: ColumnItemProps) {
 
   const cards = useCards(column.id);
   const moveCardMutation = useMoveCard();
+
+  const board = useCurrentBoard();
 
   useEffect(() => {
     const columnElement = columnRef.current;
@@ -68,10 +70,18 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex w-full flex-col gap-3 rounded-md border bg-secondary/20 p-4",
-        isDropping &&
-          "ring-2 ring-primary ring-offset-2 ring-offset-background",
+        "flex w-full flex-col gap-3 rounded-md border bg-secondary/20 p-4 transition-colors",
+        isDropping && "ring-2 ring-offset-2 ring-offset-background",
       )}
+      style={
+        isDropping
+          ? ({
+              boxShadow: `0 0 0 2px ${board.data?.color ?? "#000000"}, 0 0 0 4px var(--background)`,
+              borderColor: board.data?.color ?? "#000000",
+              backgroundColor: `${board.data?.color}10`,
+            } as React.CSSProperties)
+          : undefined
+      }
       aria-describedby={`${column.name}-column`}
     >
       <span className="text-sm font-medium uppercase text-muted-foreground">

@@ -24,9 +24,10 @@ interface DropIndicatorProps {
   gap: number;
   className?: string;
   style?: CSSProperties;
+  color?: string;
 }
 
-const Terminal = ({ edge }: { edge: Edge }) => {
+const Terminal = ({ edge, color }: { edge: Edge; color?: string }) => {
   const orientation = edgeToOrientationMap[edge];
   const styleMap = {
     horizontal: { left: -terminalSize / 2 },
@@ -38,7 +39,7 @@ const Terminal = ({ edge }: { edge: Edge }) => {
     height: terminalSize,
     position: "absolute",
     borderRadius: "50%",
-    backgroundColor: "hsl(var(--primary))",
+    backgroundColor: color ?? "hsl(var(--primary))",
     ...styleMap[orientation],
   };
 
@@ -50,6 +51,7 @@ export function DropIndicator({
   gap,
   className,
   style: initialStyle,
+  color,
 }: DropIndicatorProps) {
   const orientation = edgeToOrientationMap[edge];
   const styleMap = {
@@ -70,7 +72,7 @@ export function DropIndicator({
     [edge]: -(gap + line.thickness / 2),
     ...styleMap[orientation],
     borderRadius: line.borderRadius,
-    backgroundColor: "hsl(var(--primary))",
+    backgroundColor: color ?? "hsl(var(--primary))",
     zIndex: 9999,
   };
 
@@ -88,7 +90,7 @@ export function DropIndicator({
         ...style,
       }}
     >
-      <Terminal edge={edge} />
+      <Terminal edge={edge} color={color} />
     </div>
   );
 }

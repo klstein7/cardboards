@@ -22,7 +22,7 @@ const DialogOverlay = React.forwardRef<
     ref={ref}
     className={cn(
       "fixed inset-0 z-50 bg-black/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      "grid place-items-center overflow-y-auto py-16",
+      "scrollbar-thin scrollbar-thumb-rounded-full scrollbar-thumb-secondary/50 scrollbar-track-transparent grid place-items-center overflow-y-auto py-16",
       className,
     )}
     {...props}

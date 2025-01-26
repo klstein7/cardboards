@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { type Card } from "~/app/(project)/_types";
 import { DropIndicator } from "~/components/ui/drop-indicator";
+import { useCurrentBoard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
@@ -32,6 +33,7 @@ export function CardItem({
   isCompleted,
   columnId,
 }: CardItemProps) {
+  const board = useCurrentBoard();
   const { activeCard, setActiveCard, registerCard, unregisterCard } =
     useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
@@ -120,7 +122,9 @@ export function CardItem({
         isDragging={activeCard?.id === card.id}
         isCompleted={isCompleted}
       />
-      {closestEdge && <DropIndicator edge={closestEdge} gap={1} />}
+      {closestEdge && (
+        <DropIndicator edge={closestEdge} gap={1} color={board.data?.color} />
+      )}
     </div>
   );
 }

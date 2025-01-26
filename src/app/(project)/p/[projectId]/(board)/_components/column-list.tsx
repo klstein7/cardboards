@@ -29,7 +29,10 @@ export function ColumnList({ boardId }: ColumnListProps) {
   if (columns.isPending) return <div>Loading...</div>;
 
   return (
-    <div ref={ref} className="overflow-y-auto border-t">
+    <div
+      ref={ref}
+      className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-thumb-secondary/50 scrollbar-track-transparent overflow-y-auto border-t"
+    >
       <div className="flex w-full max-w-7xl flex-col items-start gap-3 overflow-x-auto p-6 sm:flex-row sm:gap-6">
         {columns.data.map((column) => (
           <ColumnItem key={column.id} column={column} />

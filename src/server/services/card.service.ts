@@ -37,7 +37,7 @@ async function getLastCardOrder(columnId: string) {
     orderBy: desc(cards.order),
   });
 
-  return lastCard?.order ?? 0;
+  return lastCard?.order ?? -1;
 }
 
 async function create(data: CardCreate) {
@@ -66,11 +66,11 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
 
   if (!columnId) {
     const firstColumn = await columnService.getFirstColumnByBoardId(boardId);
-
     columnId = firstColumn.id;
   }
 
   const lastCardOrder = await getLastCardOrder(columnId);
+  const startOrder = lastCardOrder === -1 ? 0 : lastCardOrder + 1;
 
   return db
     .insert(cards)
@@ -78,7 +78,7 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
       data.map((card, index) => ({
         ...card,
         columnId,
-        order: lastCardOrder + index + 1,
+        order: startOrder + index,
         labels: card.labels.map((label) => label.text),
       })),
     )

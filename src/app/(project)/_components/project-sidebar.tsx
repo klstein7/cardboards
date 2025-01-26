@@ -1,5 +1,6 @@
 "use client";
 
+import { UserButton } from "@clerk/nextjs";
 import { ChartArea, Cog, Kanban, Plus, Settings, Star } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -62,7 +63,12 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                     </Button>
                   </Link>
                 </TooltipTrigger>
-                <TooltipContent side="right">
+                <TooltipContent
+                  side="right"
+                  style={{
+                    backgroundColor: board.color,
+                  }}
+                >
                   <p>{board.name}</p>
                 </TooltipContent>
               </Tooltip>
@@ -77,7 +83,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
             />
           </div>
         </div>
-        <div className="flex flex-col gap-12">
+        <div className="flex flex-col items-center gap-3">
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>
               <Link href={`/p/${projectId}/settings`}>
@@ -90,6 +96,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
               <p>Settings</p>
             </TooltipContent>
           </Tooltip>
+          <UserButton />
         </div>
       </div>
     </TooltipProvider>

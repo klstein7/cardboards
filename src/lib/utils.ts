@@ -14,6 +14,7 @@ interface RetryFlashOptions {
   backoffFactor?: number;
   isCrossColumnMove?: boolean;
   getElement: (cardId: number) => HTMLElement | undefined | null;
+  color?: string;
 }
 
 export function cn(...inputs: ClassValue[]) {
@@ -76,14 +77,14 @@ export function getColor(value?: string | null) {
   return colorMap[value as keyof typeof colorMap];
 }
 
-export function triggerPostMoveFlash(element: HTMLElement) {
+export function triggerPostMoveFlash(element: HTMLElement, color?: string) {
   setTimeout(() => {
     requestAnimationFrame(() => {
       if (element && document.body.contains(element)) {
         element.animate(
           [
             {
-              backgroundColor: "hsl(var(--secondary))",
+              backgroundColor: color ? `${color}20` : "hsl(var(--secondary))",
             },
             {
               backgroundColor: "transparent",
@@ -108,13 +109,14 @@ export function retryFlash(
     backoffFactor = 1.5,
     isCrossColumnMove = false,
     getElement,
+    color,
   }: RetryFlashOptions,
 ) {
   const attempt = (retriesLeft: number, currentDelay: number) => {
     const element = getElement(cardId);
 
     if (element) {
-      triggerPostMoveFlash(element);
+      triggerPostMoveFlash(element, color);
     } else if (retriesLeft > 0) {
       const nextDelay =
         isCrossColumnMove && retriesLeft === maxRetries

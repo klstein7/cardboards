@@ -4,6 +4,8 @@ import { type Metadata } from "next";
 import { Jost } from "next/font/google";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
+import { Toaster } from "~/components/ui/sonner";
+
 import Providers from "./providers";
 
 const font = Jost({
@@ -26,6 +28,7 @@ export default function RootLayout({
         <NuqsAdapter>
           <Providers>{children}</Providers>
         </NuqsAdapter>
+        <Toaster />
       </body>
     </html>
   );

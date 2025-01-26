@@ -5,8 +5,13 @@ export type Card = Awaited<ReturnType<typeof api.card.list>>[number];
 export type CardComment = Awaited<
   ReturnType<typeof api.cardComment.list>
 >[number];
+
 export type Column = Awaited<ReturnType<typeof api.column.list>>[number];
+export type Board = Awaited<ReturnType<typeof api.board.list>>[number];
 export type Project = Awaited<ReturnType<typeof api.project.list>>[number];
+export type ProjectUser = Awaited<
+  ReturnType<typeof api.projectUser.list>
+>[number];
 
 export type Position = "first" | "last" | "middle" | "only";
 

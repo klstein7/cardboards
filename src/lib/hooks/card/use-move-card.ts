@@ -5,9 +5,11 @@ import { useBoardState } from "~/app/(project)/p/[projectId]/(board)/_components
 import { retryFlash } from "~/lib/utils";
 import { api } from "~/server/api";
 
+import { useCurrentBoard } from "../board";
 import { useDebouncedSearch } from "../utils";
 
 export function useMoveCard() {
+  const board = useCurrentBoard();
   const queryClient = useQueryClient();
   const debouncedSearch = useDebouncedSearch();
   const { getCard } = useBoardState();
@@ -87,6 +89,7 @@ export function useMoveCard() {
         getElement: () => getCard(variables.cardId),
         isCrossColumnMove:
           variables.destinationColumnId !== variables.sourceColumnId,
+        color: board.data?.color,
       });
 
       return { previousSourceCards, previousDestCards };

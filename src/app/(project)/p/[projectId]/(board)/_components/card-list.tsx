@@ -55,6 +55,9 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
           const sourceOrder = sourceData.payload.order;
           const targetOrder = targetData.payload.order;
 
+          console.log("sourceOrder", sourceOrder);
+          console.log("targetOrder", targetOrder);
+
           let newOrder: number;
           if (edge === "top") {
             if (isSameColumn && sourceOrder < targetOrder) {

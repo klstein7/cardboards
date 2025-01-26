@@ -152,9 +152,13 @@ export function GenerateCardsDialog({ boardId }: GenerateCardsDialogProps) {
                       updatedAt: null,
                     }}
                     className={cn(
-                      "relative cursor-pointer",
-                      selectedCards.includes(index) &&
-                        "border-2 border-primary/80 bg-primary/5",
+                      "relative cursor-pointer transition-all hover:shadow-md",
+                      selectedCards.includes(index) && [
+                        "ring-2 ring-primary",
+                        "bg-primary/5 dark:bg-primary/10",
+                        "scale-[1.02]",
+                        "shadow-md",
+                      ],
                       card.priority && "border-l-4",
                     )}
                     onClick={() =>
@@ -167,8 +171,8 @@ export function GenerateCardsDialog({ boardId }: GenerateCardsDialogProps) {
                     }
                   >
                     {selectedCards.includes(index) && (
-                      <div className="absolute right-2 top-2 rounded-full bg-primary p-0.5">
-                        <Check className="h-5 w-5 text-primary-foreground" />
+                      <div className="absolute right-2 top-2 rounded-full bg-primary p-1 shadow-sm">
+                        <Check className="h-4 w-4 text-primary-foreground" />
                       </div>
                     )}
                   </CardBase>
