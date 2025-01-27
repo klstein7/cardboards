@@ -1,11 +1,11 @@
 import "server-only";
 
-import { db } from "../db";
+import { type Database, db, type Transaction } from "../db";
 import { users } from "../db/schema";
 import { type UserSync } from "../zod";
 
-async function sync(data: UserSync) {
-  const [user] = await db
+async function sync(data: UserSync, tx: Transaction | Database = db) {
+  const [user] = await tx
     .insert(users)
     .values(data)
     .onConflictDoUpdate({

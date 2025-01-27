@@ -94,7 +94,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
                 <BreadcrumbPage>{board.name}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
-            <div className="flex max-w-7xl flex-col gap-3 px-6 pb-3">
+            <div className="flex max-w-7xl justify-between px-6 pb-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
                   <div
@@ -105,9 +105,11 @@ export default async function BoardPage({ params }: BoardPageProps) {
                   />
                   <h1 className="text-2xl font-bold">{board.name}</h1>
                 </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <BoardFilters />
                 <GenerateCardsDialog boardId={boardId} />
               </div>
-              <BoardFilters />
             </div>
             <ColumnList boardId={boardId} />
           </div>

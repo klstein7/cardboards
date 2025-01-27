@@ -1,49 +1,52 @@
 import "server-only";
 
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
-import { db } from "../db";
-import { boards, cardComments } from "../db/schema";
+import { type Database, db, type Transaction } from "../db";
+import { boards } from "../db/schema";
 import { type BoardCreate, type BoardUpdatePayload } from "../zod";
 import { columnService } from "./column.service";
 
-async function create(data: BoardCreate) {
-  const [board] = await db.insert(boards).values(data).returning();
+async function create(data: BoardCreate, tx: Transaction | Database = db) {
+  const [board] = await tx.insert(boards).values(data).returning();
 
   if (!board) {
     throw new Error("Failed to create board");
   }
 
-  await columnService.createMany([
-    {
-      boardId: board.id,
-      name: "Todo",
-      order: 0,
-    },
-    {
-      boardId: board.id,
-      name: "In Progress",
-      order: 1,
-    },
-    {
-      boardId: board.id,
-      name: "Done",
-      order: 2,
-      isCompleted: true,
-    },
-  ]);
+  await columnService.createMany(
+    [
+      {
+        boardId: board.id,
+        name: "Todo",
+        order: 0,
+      },
+      {
+        boardId: board.id,
+        name: "In Progress",
+        order: 1,
+      },
+      {
+        boardId: board.id,
+        name: "Done",
+        order: 2,
+        isCompleted: true,
+      },
+    ],
+    tx,
+  );
 
   return board;
 }
 
-async function list(projectId: string) {
-  return db.query.boards.findMany({
+async function list(projectId: string, tx: Transaction | Database = db) {
+  return tx.query.boards.findMany({
     where: eq(boards.projectId, projectId),
   });
 }
 
-async function get(boardId: string) {
-  const board = await db.query.boards.findFirst({
+async function get(boardId: string, tx: Transaction | Database = db) {
+  const board = await tx.query.boards.findFirst({
     where: eq(boards.id, boardId),
     with: {
       columns: true,
@@ -57,8 +60,11 @@ async function get(boardId: string) {
   return board;
 }
 
-async function getWithDetails(boardId: string) {
-  const board = await db.query.boards.findFirst({
+async function getWithDetails(
+  boardId: string,
+  tx: Transaction | Database = db,
+) {
+  const board = await tx.query.boards.findFirst({
     where: eq(boards.id, boardId),
     with: {
       columns: {
@@ -72,8 +78,12 @@ async function getWithDetails(boardId: string) {
   return board;
 }
 
-async function update(boardId: string, data: BoardUpdatePayload) {
-  const [board] = await db
+async function update(
+  boardId: string,
+  data: BoardUpdatePayload,
+  tx: Transaction | Database = db,
+) {
+  const [board] = await tx
     .update(boards)
     .set(data)
     .where(eq(boards.id, boardId))
@@ -86,8 +96,8 @@ async function update(boardId: string, data: BoardUpdatePayload) {
   return board;
 }
 
-async function del(boardId: string) {
-  const [board] = await db
+async function del(boardId: string, tx: Transaction | Database = db) {
+  const [board] = await tx
     .delete(boards)
     .where(eq(boards.id, boardId))
     .returning();

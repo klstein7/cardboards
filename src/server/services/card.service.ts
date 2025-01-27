@@ -3,34 +3,25 @@ import "server-only";
 import { google } from "@ai-sdk/google";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  getTableColumns,
-  gt,
-  gte,
-  lt,
-  lte,
-  sql,
-} from "drizzle-orm";
+import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
-import { db } from "../db";
-import { cards, projectUsers, users } from "../db/schema";
+import { type Database, db, type Transaction } from "../db";
+import { cards } from "../db/schema";
 import {
   type CardCreate,
   type CardCreateManyPayload,
   CardGenerateResponseSchema,
   type CardMove,
-  type CardSearchPayload,
   type CardUpdatePayload,
 } from "../zod";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
 
-async function getLastCardOrder(columnId: string) {
-  const lastCard = await db.query.cards.findFirst({
+async function getLastCardOrder(
+  columnId: string,
+  tx: Transaction | Database = db,
+) {
+  const lastCard = await tx.query.cards.findFirst({
     where: eq(cards.columnId, columnId),
     orderBy: desc(cards.order),
   });
@@ -38,10 +29,10 @@ async function getLastCardOrder(columnId: string) {
   return lastCard?.order ?? -1;
 }
 
-async function create(data: CardCreate) {
-  const lastCardOrder = await getLastCardOrder(data.columnId);
+async function create(data: CardCreate, tx: Transaction | Database = db) {
+  const lastCardOrder = await getLastCardOrder(data.columnId, tx);
 
-  const [card] = await db
+  const [card] = await tx
     .insert(cards)
     .values({
       ...data,
@@ -57,7 +48,11 @@ async function create(data: CardCreate) {
   return card;
 }
 
-async function createMany(boardId: string, data: CardCreateManyPayload) {
+async function createMany(
+  boardId: string,
+  data: CardCreateManyPayload,
+  tx: Transaction | Database = db,
+) {
   if (data.length === 0) return [];
 
   let columnId = data[0]!.columnId;
@@ -67,10 +62,10 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
     columnId = firstColumn.id;
   }
 
-  const lastCardOrder = await getLastCardOrder(columnId);
+  const lastCardOrder = await getLastCardOrder(columnId, tx);
   const startOrder = lastCardOrder === -1 ? 0 : lastCardOrder + 1;
 
-  return db
+  return tx
     .insert(cards)
     .values(
       data.map((card, index) => ({
@@ -83,8 +78,8 @@ async function createMany(boardId: string, data: CardCreateManyPayload) {
     .returning();
 }
 
-async function list(columnId: string) {
-  return db.query.cards.findMany({
+async function list(columnId: string, tx: Transaction | Database = db) {
+  return tx.query.cards.findMany({
     where: eq(cards.columnId, columnId),
     with: {
       assignedTo: {
@@ -96,21 +91,22 @@ async function list(columnId: string) {
   });
 }
 
-async function normalizeColumnOrders(columnId: string) {
-  const columnCards = await db.query.cards.findMany({
+async function normalizeColumnOrders(
+  columnId: string,
+  tx: Transaction | Database = db,
+) {
+  const columnCards = await tx.query.cards.findMany({
     where: eq(cards.columnId, columnId),
     orderBy: asc(cards.order),
   });
-
-  // Update all cards in the column with normalized orders (1, 2, 3...)
   await Promise.all(
     columnCards.map((card, index) =>
-      db.update(cards).set({ order: index }).where(eq(cards.id, card.id)),
+      tx.update(cards).set({ order: index }).where(eq(cards.id, card.id)),
     ),
   );
 }
 
-async function move(data: CardMove) {
+async function move(data: CardMove, tx: Transaction | Database = db) {
   const { cardId, destinationColumnId, newOrder } = data;
 
   const card = await db.query.cards.findFirst({
@@ -123,7 +119,7 @@ async function move(data: CardMove) {
 
   const isNewColumn = card.columnId !== destinationColumnId;
 
-  return await db.transaction(async (tx) => {
+  return await tx.transaction(async (tx) => {
     if (isNewColumn) {
       await tx
         .update(cards)
@@ -180,9 +176,9 @@ async function move(data: CardMove) {
       throw new Error("Failed to update card");
     }
 
-    await normalizeColumnOrders(destinationColumnId);
+    await normalizeColumnOrders(destinationColumnId, tx);
     if (isNewColumn) {
-      await normalizeColumnOrders(card.columnId);
+      await normalizeColumnOrders(card.columnId, tx);
     }
 
     return {
@@ -193,8 +189,8 @@ async function move(data: CardMove) {
   });
 }
 
-async function get(cardId: number) {
-  const card = await db.query.cards.findFirst({
+async function get(cardId: number, tx: Transaction | Database = db) {
+  const card = await tx.query.cards.findFirst({
     where: eq(cards.id, cardId),
     with: {
       column: {
@@ -217,8 +213,12 @@ async function get(cardId: number) {
   return card;
 }
 
-async function update(cardId: number, data: CardUpdatePayload) {
-  const [card] = await db
+async function update(
+  cardId: number,
+  data: CardUpdatePayload,
+  tx: Transaction | Database = db,
+) {
+  const [card] = await tx
     .update(cards)
     .set(data)
     .where(eq(cards.id, cardId))

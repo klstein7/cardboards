@@ -1,7 +1,7 @@
 "use client";
 
-import { UserButton } from "@clerk/nextjs";
 import { ChartArea, Kanban, Plus, Settings, Star } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
@@ -20,6 +20,14 @@ import { CreateBoardDialog } from "./create-board-dialog";
 interface ProjectSidebarProps {
   projectId: string;
 }
+
+const UserButton = dynamic(
+  () => import("@clerk/nextjs").then((mod) => mod.UserButton),
+  {
+    ssr: false,
+    loading: () => <div className="h-8 w-8 rounded-full bg-muted" />,
+  },
+);
 
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const params = useParams();

@@ -3,7 +3,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq } from "drizzle-orm";
 
-import { db } from "../db";
+import { type Database, db, type Transaction } from "../db";
 import {
   boards,
   cardComments,
@@ -14,14 +14,17 @@ import {
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
 
-async function create(data: CardCommentCreate) {
+async function create(
+  data: CardCommentCreate,
+  tx: Transaction | Database = db,
+) {
   const { userId } = await auth();
 
   if (!userId) {
     throw new Error("User is not authenticated");
   }
 
-  const [project] = await db
+  const [project] = await tx
     .select({
       projectId: projects.id,
     })
@@ -37,7 +40,7 @@ async function create(data: CardCommentCreate) {
 
   const { projectId } = project;
 
-  const [projectUser] = await db
+  const [projectUser] = await tx
     .select({
       projectUserId: projectUsers.id,
     })
@@ -53,7 +56,7 @@ async function create(data: CardCommentCreate) {
     throw new Error("User is not a member of the project");
   }
 
-  const [comment] = await db
+  const [comment] = await tx
     .insert(cardComments)
     .values({
       ...data,
@@ -68,8 +71,8 @@ async function create(data: CardCommentCreate) {
   return comment;
 }
 
-async function list(cardId: number) {
-  return db.query.cardComments.findMany({
+async function list(cardId: number, tx: Transaction | Database = db) {
+  return tx.query.cardComments.findMany({
     where: eq(cardComments.cardId, cardId),
     with: {
       projectUser: {
@@ -82,8 +85,8 @@ async function list(cardId: number) {
   });
 }
 
-async function remove(id: string) {
-  const [comment] = await db
+async function remove(id: string, tx: Transaction | Database = db) {
+  const [comment] = await tx
     .delete(cardComments)
     .where(eq(cardComments.id, id))
     .returning();
@@ -95,8 +98,12 @@ async function remove(id: string) {
   return comment;
 }
 
-async function update(id: string, data: CardCommentUpdatePayload) {
-  const [comment] = await db
+async function update(
+  id: string,
+  data: CardCommentUpdatePayload,
+  tx: Transaction | Database = db,
+) {
+  const [comment] = await tx
     .update(cardComments)
     .set(data)
     .where(eq(cardComments.id, id))
