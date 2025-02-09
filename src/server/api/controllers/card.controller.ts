@@ -46,3 +46,7 @@ export async function createMany(data: CardCreateMany) {
   const { boardId, data: payload } = CardCreateManySchema.parse(data);
   return cardService.createMany(boardId, payload);
 }
+
+export async function del(cardId: number) {
+  return cardService.del(cardId);
+}

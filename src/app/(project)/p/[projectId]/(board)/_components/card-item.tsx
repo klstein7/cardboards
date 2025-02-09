@@ -9,12 +9,30 @@ import {
   type Edge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { Trash, User, UserCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
 import { type Card } from "~/app/(project)/_types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "~/components/ui/alert-dialog";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from "~/components/ui/context-menu";
 import { DropIndicator } from "~/components/ui/drop-indicator";
-import { useCurrentBoard } from "~/lib/hooks";
+import { useCurrentBoard, useDeleteCard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
@@ -40,6 +58,8 @@ export function CardItem({
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
 
   const [, setSelectedCardId] = useQueryState("cardId");
+
+  const deleteCardMutation = useDeleteCard();
 
   useEffect(() => {
     const cardElement = cardElementRef.current;
@@ -109,22 +129,68 @@ export function CardItem({
   }, [card, index, columnId, setActiveCard, registerCard, unregisterCard]);
 
   return (
-    <div
-      ref={cardElementRef}
-      className={cn(
-        "relative flex cursor-pointer select-none flex-col gap-2 p-1 sm:gap-3 sm:p-0",
-        activeCard?.id === card.id && "opacity-50",
-      )}
-      onClick={() => setSelectedCardId(card.id.toString())}
-    >
-      <CardBase
-        card={card}
-        isDragging={activeCard?.id === card.id}
-        isCompleted={isCompleted}
-      />
-      {closestEdge && (
-        <DropIndicator edge={closestEdge} gap={1} color={board.data?.color} />
-      )}
-    </div>
+    <AlertDialog>
+      <ContextMenu modal={false}>
+        <ContextMenuTrigger asChild>
+          <div
+            ref={cardElementRef}
+            className={cn(
+              "relative flex cursor-pointer select-none flex-col gap-2 p-1 sm:gap-3 sm:p-0",
+              activeCard?.id === card.id && "opacity-50",
+            )}
+            onClick={() => setSelectedCardId(card.id.toString())}
+          >
+            <CardBase
+              card={card}
+              isDragging={activeCard?.id === card.id}
+              isCompleted={isCompleted}
+            />
+            {closestEdge && (
+              <DropIndicator
+                edge={closestEdge}
+                gap={1}
+                color={board.data?.color}
+              />
+            )}
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent>
+          <AlertDialogTrigger asChild>
+            <ContextMenuItem asChild>
+              <div className="flex items-center gap-2">
+                <Trash className="size-4" />
+                <span>Delete</span>
+              </div>
+            </ContextMenuItem>
+          </AlertDialogTrigger>
+          <ContextMenuItem asChild>
+            <div className="flex items-center gap-2">
+              <UserCircle className="size-4" />
+              <span>Assign to me</span>
+            </div>
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete card</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this card?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={deleteCardMutation.isPending}
+            className="bg-destructive text-destructive-foreground"
+            onClick={async () => {
+              await deleteCardMutation.mutateAsync(card.id);
+            }}
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

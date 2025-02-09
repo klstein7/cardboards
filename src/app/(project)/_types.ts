@@ -9,6 +9,7 @@ export type CardComment = Awaited<
 export type Column = Awaited<ReturnType<typeof api.column.list>>[number];
 export type Board = Awaited<ReturnType<typeof api.board.list>>[number];
 export type Project = Awaited<ReturnType<typeof api.project.list>>[number];
+export type ProjectDetail = Awaited<ReturnType<typeof api.project.get>>;
 export type ProjectUser = Awaited<
   ReturnType<typeof api.projectUser.list>
 >[number];

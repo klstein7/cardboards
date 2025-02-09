@@ -2,7 +2,7 @@
 
 import { readStreamableValue } from "ai/rsc";
 import { Check, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -26,9 +26,13 @@ import { CardSkeleton } from "./card-skeleton";
 
 interface GenerateCardsDialogProps {
   boardId: string;
+  trigger: React.ReactNode;
 }
 
-export function GenerateCardsDialog({ boardId }: GenerateCardsDialogProps) {
+export function GenerateCardsDialog({
+  boardId,
+  trigger,
+}: GenerateCardsDialogProps) {
   const [open, setOpen] = useState(false);
   const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -72,60 +76,84 @@ export function GenerateCardsDialog({ boardId }: GenerateCardsDialogProps) {
   const handleAddCards = async () => {
     await createManyCardsMutation.mutateAsync({
       boardId,
-      data: generatedCards.map((card) => ({
-        title: card.title,
-        description: card.description,
-        priority: card.priority as Priority["value"],
-        labels: card.labels.map((label) => ({
-          id: label,
-          text: label,
+      data: generatedCards
+        .filter((_, index) => selectedCards.includes(index))
+        .map((card) => ({
+          title: card.title,
+          description: card.description,
+          priority: card.priority as Priority["value"],
+          labels: card.labels.map((label) => ({
+            id: label,
+            text: label,
+          })),
         })),
-      })),
     });
     setOpen(false);
   };
 
+  useEffect(() => {
+    if (!open) {
+      setPrompt("");
+      setGeneratedCards([]);
+      setSelectedCards([]);
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline">
-          <Sparkles className="h-4 w-4" />
-          Generate cards
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Generate cards</DialogTitle>
-          <DialogDescription>
-            Need help getting started? Let&apos;s generate some cards for you.
+          <DialogTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Generate AI cards
+          </DialogTitle>
+          <DialogDescription className="text-base">
+            Describe your project needs and we&apos;ll generate starter cards.
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-3">
-            <Label htmlFor="prompt">Prompt</Label>
+        <div className="flex flex-col gap-4">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="prompt" className="text-sm font-medium">
+                Project description
+              </Label>
+              <span className="text-xs text-muted-foreground">
+                {prompt.length}/500 characters
+              </span>
+            </div>
             <Textarea
               id="prompt"
-              placeholder="E.g. I want to add authentication to my Next.js app via Clerk"
-              className="resize-none"
-              rows={4}
+              placeholder="Example: 'I need to add user authentication using NextAuth.js with Google and GitHub providers'"
+              className="min-h-[120px] resize-none border-2"
               value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
+              onChange={(e) => setPrompt(e.target.value.slice(0, 500))}
             />
-            <span className="text-sm text-muted-foreground">
-              We&apos;ll generate cards based on the prompt you provide.
-            </span>
           </div>
-          <Button onClick={handleGenerate} disabled={isGenerating}>
-            {isGenerating ? "Generating..." : "Generate"}
+
+          <Button
+            onClick={handleGenerate}
+            isLoading={isGenerating}
+            variant="secondary"
+            className="gap-2 font-semibold"
+          >
+            <Sparkles className="h-4 w-4" />
+            {isGenerating ? "Generating ideas..." : "Generate cards"}
           </Button>
 
           {generatedCards.length > 0 && (
             <>
-              <Separator />
-              <div>
-                <h3 className="text-lg font-medium">Generated cards</h3>
+              <Separator className="my-4 bg-border/50" />
+              <div className="space-y-2">
+                <h3 className="flex items-center gap-2 text-lg font-semibold">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Suggested cards
+                  <span className="ml-2 text-sm text-muted-foreground">
+                    ({generatedCards.length} generated)
+                  </span>
+                </h3>
                 <p className="text-sm text-muted-foreground">
-                  Select the cards you want to add to your board.
+                  Click cards to select/deselect
                 </p>
               </div>
               <div className="flex flex-col gap-3">
@@ -182,8 +210,10 @@ export function GenerateCardsDialog({ boardId }: GenerateCardsDialogProps) {
                     selectedCards.length === 0 ||
                     createManyCardsMutation.isPending
                   }
+                  className="mt-4 w-full gap-2 font-semibold"
                 >
-                  Add {selectedCards.length} cards
+                  <Check className="h-4 w-4" />
+                  Add {selectedCards.length} selected cards to board
                 </Button>
               )}
             </>

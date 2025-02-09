@@ -44,9 +44,11 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
       <div className="flex flex-1 flex-col items-center gap-12">
         <Star className="fill-yellow-500 text-yellow-500" />
         <div className="flex flex-col gap-3">
-          <Button variant="ghost" size="icon">
-            <Kanban />
-          </Button>
+          <Link href={`/p/${projectId}`}>
+            <Button variant="ghost" size="icon">
+              <Kanban />
+            </Button>
+          </Link>
           <Button variant="ghost" size="icon">
             <ChartArea />
           </Button>

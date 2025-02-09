@@ -81,6 +81,7 @@ async function createMany(
 async function list(columnId: string, tx: Transaction | Database = db) {
   return tx.query.cards.findMany({
     where: eq(cards.columnId, columnId),
+    orderBy: asc(cards.order),
     with: {
       assignedTo: {
         with: {
@@ -268,15 +269,15 @@ async function generate(boardId: string, prompt: string) {
            - If similar tasks exist, focus on different aspects or approaches
 
         2. Title Format:
-           - Start with action verb
+           - Start with an action verb
            - Be specific and measurable
-           - Stay under 255 char limit
+           - Stay under 255 character limit
 
         3. Description Format:
            - Use proper HTML structure
            - Include clear acceptance criteria in lists
            - Add implementation details if relevant
-           - Stay under 1000 char limit
+           - Stay under 1000 character limit
            - Ensure all HTML tags are properly closed
 
         4. Priority Assignment:
@@ -289,6 +290,9 @@ async function generate(boardId: string, prompt: string) {
            - Use consistent terminology
            - Keep labels concise
            - Align with project context
+
+        6. Maximum Cards:
+           - Generate no more than 10 cards.
 
         Board Context:
         - ${JSON.stringify(board)}
@@ -309,6 +313,16 @@ async function generate(boardId: string, prompt: string) {
   return { object: stream.value };
 }
 
+async function del(cardId: number, tx: Transaction | Database = db) {
+  const [card] = await tx.delete(cards).where(eq(cards.id, cardId)).returning();
+
+  if (!card) {
+    throw new Error("Error deleting card");
+  }
+
+  return card;
+}
+
 export const cardService = {
   create,
   createMany,
@@ -317,4 +331,5 @@ export const cardService = {
   get,
   update,
   generate,
+  del,
 };

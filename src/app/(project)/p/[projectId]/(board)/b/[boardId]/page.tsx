@@ -17,7 +17,7 @@ import { api } from "~/server/api";
 import { BoardFilters } from "../../_components/board-filters";
 import { BoardStateProvider } from "../../_components/board-state-provider";
 import { CardDetails } from "../../_components/card-details";
-import { GenerateCardsDialog } from "../../_components/generate-cards-dialog";
+import { GenerateDropdownMenu } from "../../_components/generate-dropdown-menu";
 
 interface BoardPageProps {
   params: Promise<{
@@ -108,7 +108,7 @@ export default async function BoardPage({ params }: BoardPageProps) {
               </div>
               <div className="flex items-center gap-3">
                 <BoardFilters />
-                <GenerateCardsDialog boardId={boardId} />
+                <GenerateDropdownMenu boardId={boardId} />
               </div>
             </div>
             <ColumnList boardId={boardId} />
