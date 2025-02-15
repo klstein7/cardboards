@@ -1,3 +1,4 @@
+export * from "./use-assign-to-current-user";
 export * from "./use-cached-cards-by-current-board";
 export * from "./use-card";
 export * from "./use-cards";

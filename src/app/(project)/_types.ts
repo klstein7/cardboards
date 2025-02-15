@@ -1,4 +1,5 @@
 // src/app/(project)/_types.ts
+import { type ChartConfig } from "~/components/ui/chart";
 import { type api } from "~/server/api";
 
 export type Card = Awaited<ReturnType<typeof api.card.list>>[number];
@@ -13,6 +14,14 @@ export type ProjectDetail = Awaited<ReturnType<typeof api.project.get>>;
 export type ProjectUser = Awaited<
   ReturnType<typeof api.projectUser.list>
 >[number];
+
+export type AnalyticsData = {
+  config: ChartConfig;
+  series: Array<{
+    name: string;
+    data: Array<{ name: string; value: number }>;
+  }>;
+};
 
 export type Position = "first" | "last" | "middle" | "only";
 

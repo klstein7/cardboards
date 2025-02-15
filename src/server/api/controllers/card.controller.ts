@@ -8,8 +8,6 @@ import {
   CardCreateSchema,
   type CardGenerate,
   CardGenerateSchema,
-  type CardList,
-  CardListSchema,
   type CardMove,
   CardMoveSchema,
   type CardUpdate,
@@ -49,4 +47,8 @@ export async function createMany(data: CardCreateMany) {
 
 export async function del(cardId: number) {
   return cardService.del(cardId);
+}
+
+export async function assignToCurrentUser(cardId: number) {
+  return cardService.assignToCurrentUser(cardId);
 }

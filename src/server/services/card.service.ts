@@ -1,6 +1,7 @@
 import "server-only";
 
 import { google } from "@ai-sdk/google";
+import { auth } from "@clerk/nextjs/server";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
@@ -16,6 +17,8 @@ import {
 } from "../zod";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
+import { projectService } from "./project.service";
+import { projectUserService } from "./project-user.service";
 
 async function getLastCardOrder(
   columnId: string,
@@ -323,6 +326,41 @@ async function del(cardId: number, tx: Transaction | Database = db) {
   return card;
 }
 
+async function assignToCurrentUser(
+  cardId: number,
+  tx: Transaction | Database = db,
+) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("User not found");
+  }
+
+  const projectId = await projectService.getProjectIdByCardId(cardId, tx);
+  const projectUser = await projectUserService.getByProjectIdAndUserId(
+    projectId,
+    userId,
+    tx,
+  );
+
+  const card = await get(cardId, tx);
+
+  const [updated] = await tx
+    .update(cards)
+    .set({
+      assignedToId:
+        card.assignedToId === projectUser.id ? null : projectUser.id,
+    })
+    .where(eq(cards.id, cardId))
+    .returning();
+
+  if (!updated) {
+    throw new Error("Card not found");
+  }
+
+  return updated;
+}
+
 export const cardService = {
   create,
   createMany,
@@ -332,4 +370,5 @@ export const cardService = {
   update,
   generate,
   del,
+  assignToCurrentUser,
 };

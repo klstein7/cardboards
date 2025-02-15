@@ -1,3 +1,4 @@
+export * as analyticsController from "./analytics.controller";
 export * as boardController from "./board.controller";
 export * as cardController from "./card.controller";
 export * as cardCommentController from "./card-comment.controller";

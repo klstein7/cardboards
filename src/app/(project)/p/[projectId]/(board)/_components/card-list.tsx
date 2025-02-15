@@ -3,6 +3,7 @@
 
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
+import { useUser } from "@clerk/nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import { FileText } from "lucide-react";
 import { useEffect } from "react";
@@ -28,6 +29,9 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const cards = useCards(columnId);
   const moveCardMutation = useMoveCard();
   const queryClient = useQueryClient();
+  const user = useUser();
+
+  console.log("user", user);
 
   useEffect(() => {
     return monitorForElements({

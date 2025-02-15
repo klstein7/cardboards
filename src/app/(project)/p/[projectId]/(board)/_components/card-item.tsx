@@ -32,7 +32,11 @@ import {
   ContextMenuTrigger,
 } from "~/components/ui/context-menu";
 import { DropIndicator } from "~/components/ui/drop-indicator";
-import { useCurrentBoard, useDeleteCard } from "~/lib/hooks";
+import {
+  useAssignToCurrentUser,
+  useCurrentBoard,
+  useDeleteCard,
+} from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
@@ -60,6 +64,7 @@ export function CardItem({
   const [, setSelectedCardId] = useQueryState("cardId");
 
   const deleteCardMutation = useDeleteCard();
+  const assignToCurrentUserMutation = useAssignToCurrentUser();
 
   useEffect(() => {
     const cardElement = cardElementRef.current;
@@ -154,7 +159,19 @@ export function CardItem({
             )}
           </div>
         </ContextMenuTrigger>
-        <ContextMenuContent>
+        <ContextMenuContent className="min-w-[200px]">
+          <ContextMenuItem asChild>
+            <div
+              role="button"
+              className="flex items-center gap-2"
+              onClick={() => {
+                assignToCurrentUserMutation.mutate(card.id);
+              }}
+            >
+              <UserCircle className="size-4" />
+              <span>Assign to me</span>
+            </div>
+          </ContextMenuItem>
           <AlertDialogTrigger asChild>
             <ContextMenuItem asChild>
               <div className="flex items-center gap-2">
@@ -163,12 +180,6 @@ export function CardItem({
               </div>
             </ContextMenuItem>
           </AlertDialogTrigger>
-          <ContextMenuItem asChild>
-            <div className="flex items-center gap-2">
-              <UserCircle className="size-4" />
-              <span>Assign to me</span>
-            </div>
-          </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
       <AlertDialogContent>

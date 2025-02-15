@@ -37,21 +37,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
           </BreadcrumbItem>
         </BreadcrumbList>
 
-        <div className="flex max-w-7xl justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold">{project.name}</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <CreateBoardDialog
-              trigger={
-                <Button size="sm" className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  New board
-                </Button>
-              }
-              projectId={projectId}
-            />
-          </div>
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-bold">{project.name}</h1>
+          <CreateBoardDialog
+            trigger={
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                New board
+              </Button>
+            }
+            projectId={projectId}
+          />
         </div>
         <ProjectStats
           boardCount={project.boards.length}

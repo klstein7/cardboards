@@ -49,9 +49,11 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
               <Kanban />
             </Button>
           </Link>
-          <Button variant="ghost" size="icon">
-            <ChartArea />
-          </Button>
+          <Link href={`/p/${projectId}/analytics`}>
+            <Button variant="ghost" size="icon">
+              <ChartArea />
+            </Button>
+          </Link>
         </div>
         <div className="flex flex-col gap-1">
           {boards.data.map((board) => (

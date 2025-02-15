@@ -1,4 +1,5 @@
 import {
+  analyticsController,
   boardController,
   cardCommentController,
   cardController,
@@ -14,4 +15,5 @@ export const api = {
   card: cardController,
   cardComment: cardCommentController,
   projectUser: projectUserController,
+  analytics: analyticsController,
 };

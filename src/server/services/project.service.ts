@@ -1,13 +1,13 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { eq, sql, count } from "drizzle-orm";
+import { count, eq, sql } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
-import { projects, boards, columns, cards } from "../db/schema";
+import { boards, cards, columns, projects } from "../db/schema";
+import { projectUsers } from "../db/schema";
 import { type ProjectCreate } from "../zod";
 import { projectUserService } from "./project-user.service";
-import { projectUsers } from "../db/schema";
 
 async function create(data: ProjectCreate, tx: Transaction | Database = db) {
   const { userId } = await auth();
@@ -101,9 +101,30 @@ async function del(projectId: string, tx: Transaction | Database = db) {
   await tx.delete(projects).where(eq(projects.id, projectId));
 }
 
+async function getProjectIdByCardId(
+  cardId: number,
+  tx: Transaction | Database = db,
+) {
+  const [result] = await tx
+    .select({
+      projectId: boards.projectId,
+    })
+    .from(cards)
+    .innerJoin(columns, eq(cards.columnId, columns.id))
+    .innerJoin(boards, eq(columns.boardId, boards.id))
+    .where(eq(cards.id, cardId));
+
+  if (!result) {
+    throw new Error("Project not found");
+  }
+
+  return result.projectId;
+}
+
 export const projectService = {
   create,
   list,
   get,
   del,
+  getProjectIdByCardId,
 };

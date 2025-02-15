@@ -1,6 +1,6 @@
 import "server-only";
 
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
@@ -28,7 +28,27 @@ async function create(
   return projectUser;
 }
 
+async function getByProjectIdAndUserId(
+  projectId: string,
+  userId: string,
+  tx: Transaction | Database = db,
+) {
+  const projectUser = await tx.query.projectUsers.findFirst({
+    where: and(
+      eq(projectUsers.projectId, projectId),
+      eq(projectUsers.userId, userId),
+    ),
+  });
+
+  if (!projectUser) {
+    throw new Error("Project user not found");
+  }
+
+  return projectUser;
+}
+
 export const projectUserService = {
   list,
   create,
+  getByProjectIdAndUserId,
 };

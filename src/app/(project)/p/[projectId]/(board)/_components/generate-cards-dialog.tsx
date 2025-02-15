@@ -106,17 +106,17 @@ export function GenerateCardsDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-primary" />
-            Generate AI cards
+            Generate cards
           </DialogTitle>
           <DialogDescription className="text-base">
-            Describe your project needs and we&apos;ll generate starter cards.
+            Let&apos;s kickstart your project with some cards.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="prompt" className="text-sm font-medium">
-                Project description
+                Description
               </Label>
               <span className="text-xs text-muted-foreground">
                 {prompt.length}/500 characters
