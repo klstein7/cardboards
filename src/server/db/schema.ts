@@ -165,6 +165,47 @@ export const projectUsers = createTable(
   ],
 );
 
+export const invitations = createTable(
+  "invitation",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    projectId: varchar("project_id", { length: 255 })
+      .notNull()
+      .references(() => projects.id, { onDelete: "cascade" }),
+    invitedById: varchar("invited_by_id", { length: 255 })
+      .notNull()
+      .references(() => projectUsers.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at")
+      .notNull()
+      .$defaultFn(() => {
+        const date = new Date();
+        date.setDate(date.getDate() + 1);
+        return date;
+      }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index("invitation_project_id_idx").on(table.projectId),
+    index("invitation_invited_by_id_idx").on(table.invitedById),
+  ],
+);
+
+export const invitationRelations = relations(invitations, ({ one }) => ({
+  project: one(projects, {
+    fields: [invitations.projectId],
+    references: [projects.id],
+  }),
+  invitedBy: one(projectUsers, {
+    fields: [invitations.invitedById],
+    references: [projectUsers.id],
+  }),
+}));
+
 export const userRelations = relations(users, ({ many }) => ({
   projectUsers: many(projectUsers),
 }));

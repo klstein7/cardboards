@@ -18,11 +18,5 @@ export function ProjectUsersDataTable({
 
   if (projectUsers.error) return <div>Error</div>;
 
-  return (
-    <DataTable
-      className="max-w-xl"
-      columns={columns}
-      data={projectUsers.data}
-    />
-  );
+  return <DataTable columns={columns} data={projectUsers.data} />;
 }

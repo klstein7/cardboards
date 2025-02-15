@@ -4,6 +4,7 @@ import {
   cardCommentController,
   cardController,
   columnController,
+  invitationController,
   projectController,
   projectUserController,
 } from "./controllers";
@@ -16,4 +17,5 @@ export const api = {
   cardComment: cardCommentController,
   projectUser: projectUserController,
   analytics: analyticsController,
+  invitation: invitationController,
 };
