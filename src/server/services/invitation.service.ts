@@ -1,11 +1,10 @@
 import "server-only";
 
-import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
-import { db } from "../db";
+import { type Database, db, type Transaction } from "../db";
 import { invitations } from "../db/schema";
-import { projectUserService } from "./";
+import { projectUserService, userService } from "./";
 
 async function create(projectId: string, invitedById: string) {
   const projectUser = await projectUserService.getByProjectIdAndUserId(
@@ -44,7 +43,31 @@ async function get(invitationId: string) {
   return invitation;
 }
 
+async function accept(
+  invitationId: string,
+  userId: string,
+  tx: Transaction | Database = db,
+) {
+  const invitation = await get(invitationId);
+
+  if (invitation.expiresAt.getTime() < Date.now()) {
+    throw new Error("Invitation expired");
+  }
+
+  await userService.syncCurrentUser(tx);
+
+  await projectUserService.create(
+    {
+      projectId: invitation.projectId,
+      userId,
+      role: "member",
+    },
+    tx,
+  );
+}
+
 export const invitationService = {
   create,
   get,
+  accept,
 };

@@ -17,3 +17,13 @@ export async function create(projectId: string) {
 export async function get(invitationId: string) {
   return invitationService.get(invitationId);
 }
+
+export async function accept(invitationId: string) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return invitationService.accept(invitationId, userId);
+}

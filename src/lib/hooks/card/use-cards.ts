@@ -4,10 +4,12 @@ import { matchSorter } from "match-sorter";
 import { api } from "~/server/api";
 
 import { useDebouncedLabels, useDebouncedSearch } from "../utils";
+import { useDebouncedAssignedTo } from "../utils/use-debounded-assigned-to";
 
 export function useCards(columnId: string) {
   const debouncedSearch = useDebouncedSearch();
   const debouncedLabels = useDebouncedLabels();
+  const debouncedAssignedTo = useDebouncedAssignedTo();
 
   return useQuery({
     queryKey: ["cards", columnId],
@@ -27,6 +29,14 @@ export function useCards(columnId: string) {
       if (debouncedLabels.length > 0) {
         filteredData = filteredData.filter((card) =>
           debouncedLabels.some((label) => card.labels?.includes(label)),
+        );
+      }
+
+      if (debouncedAssignedTo && debouncedAssignedTo.length > 0) {
+        filteredData = filteredData.filter((card) =>
+          debouncedAssignedTo.some((assignedTo) =>
+            card.assignedToId?.includes(assignedTo),
+          ),
         );
       }
 

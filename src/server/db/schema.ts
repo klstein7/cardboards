@@ -142,7 +142,7 @@ export const projectUsers = createTable(
   {
     id: varchar("id", { length: 255 })
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => createId()),
     projectId: varchar("project_id", { length: 255 })
       .notNull()
       .references(() => projects.id, { onDelete: "cascade" }),

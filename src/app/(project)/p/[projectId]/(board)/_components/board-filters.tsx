@@ -11,6 +11,7 @@ import {
   useCurrentProjectId,
   useProjectUsers,
 } from "~/lib/hooks";
+import { cn } from "~/lib/utils";
 
 export function BoardFilters() {
   const projectId = useCurrentProjectId();
@@ -18,6 +19,10 @@ export function BoardFilters() {
   const [search, setSearch] = useQueryState("search", parseAsString);
   const [labels, setLabels] = useQueryState(
     "labels",
+    parseAsArrayOf(parseAsString),
+  );
+  const [assignedTo, setAssignedTo] = useQueryState(
+    "assignedTo",
     parseAsArrayOf(parseAsString),
   );
 
@@ -36,11 +41,29 @@ export function BoardFilters() {
 
   return (
     <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-3 -space-x-2">
-        {projectUsers.data?.map((user) => (
-          <Avatar key={user.user.id} className="size-8">
-            <AvatarImage src={user.user.imageUrl ?? undefined} />
-            <AvatarFallback>{user.user.name.charAt(0)}</AvatarFallback>
+      <div className="flex items-center -space-x-2">
+        {projectUsers.data?.map((projectUser) => (
+          <Avatar
+            key={projectUser.user.id}
+            className={cn(
+              "size-9 cursor-pointer transition-all duration-150 hover:z-10 hover:-translate-y-1 hover:shadow-md hover:brightness-150",
+              assignedTo?.includes(projectUser.id) && "ring-2 ring-foreground",
+            )}
+            onClick={() => {
+              if (assignedTo?.includes(projectUser.id)) {
+                const filteredAssignedTo = assignedTo?.filter(
+                  (id) => id !== projectUser.id,
+                );
+                void setAssignedTo(
+                  filteredAssignedTo.length > 0 ? filteredAssignedTo : null,
+                );
+              } else {
+                void setAssignedTo([...(assignedTo ?? []), projectUser.id]);
+              }
+            }}
+          >
+            <AvatarImage src={projectUser.user.imageUrl ?? undefined} />
+            <AvatarFallback>{projectUser.user.name.charAt(0)}</AvatarFallback>
           </Avatar>
         ))}
       </div>

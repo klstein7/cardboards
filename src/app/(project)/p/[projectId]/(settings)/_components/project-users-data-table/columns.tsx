@@ -5,13 +5,8 @@ import { format } from "date-fns";
 
 import { type ProjectUser } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+
+import { ProjectUserRoleSelect } from "./project-user-role-select";
 
 export const columns: ColumnDef<ProjectUser>[] = [
   {
@@ -39,15 +34,11 @@ export const columns: ColumnDef<ProjectUser>[] = [
     header: "Role",
     cell: ({ row }) => {
       return (
-        <Select defaultValue={row.original.role}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select role" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="admin">Admin</SelectItem>
-            <SelectItem value="member">Member</SelectItem>
-          </SelectContent>
-        </Select>
+        <ProjectUserRoleSelect
+          role={row.original.role}
+          projectId={row.original.projectId}
+          userId={row.original.userId}
+        />
       );
     },
   },
