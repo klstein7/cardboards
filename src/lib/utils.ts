@@ -68,10 +68,10 @@ export function getColor(value?: string | null) {
   if (!value) return undefined;
 
   const colorMap = {
-    low: "#bef264",
-    medium: "#fde047",
-    high: "#fda4af",
-    urgent: "#f87171",
+    low: "var(--priority-low)",
+    medium: "var(--priority-medium)",
+    high: "var(--priority-high)",
+    urgent: "var(--priority-urgent)",
   } as const;
 
   return colorMap[value as keyof typeof colorMap];

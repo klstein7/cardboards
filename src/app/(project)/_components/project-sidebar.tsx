@@ -17,6 +17,13 @@ import { cn } from "~/lib/utils";
 
 import { CreateBoardDialog } from "./create-board-dialog";
 
+const ThemeToggle = dynamic(
+  () => import("./theme-toggle").then((mod) => mod.ThemeToggle),
+  {
+    ssr: false,
+  },
+);
+
 interface ProjectSidebarProps {
   projectId: string;
 }
@@ -97,6 +104,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
         </div>
       </div>
       <div className="flex flex-col items-center gap-3">
+        <ThemeToggle />
         <TooltipProvider>
           <Tooltip delayDuration={100}>
             <TooltipTrigger asChild>

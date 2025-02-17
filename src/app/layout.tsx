@@ -23,7 +23,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${font.className} dark`}>
+    <html
+      lang="en"
+      className={`${font.className} dark`}
+      suppressHydrationWarning
+    >
       <body>
         <NuqsAdapter>
           <Providers>{children}</Providers>

@@ -4,31 +4,35 @@
 
 @layer base {
   :root {
-    --background: 229 57% 100%;
+    --background: 229 57% 93%;
     --foreground: 229 63% 4%;
-    --muted: 229 12% 86%;
+    --muted: 229 12% 78%;
     --muted-foreground: 229 10% 37%;
-    --popover: 0 0% 99%;
+    --popover: 0 0% 92%;
     --popover-foreground: 229 63% 3%;
-    --card: 0 0% 99%;
+    --card: 0 0% 92%;
     --card-foreground: 229 63% 3%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
+    --border: 220 13% 83%;
+    --input: 220 13% 83%;
     --primary: 229 100% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 229 20% 90%;
+    --secondary: 229 20% 98%;
     --secondary-foreground: 229 20% 30%;
-    --accent: 229 28% 85%;
+    --accent: 229 28% 78%;
     --accent-foreground: 229 28% 25%;
     --destructive: 3 100% 50%;
     --destructive-foreground: 3 0% 100%;
     --ring: 229 100% 62%;
     --chart-1: 229 100% 62%;
-    --chart-2: 229 20% 90%;
-    --chart-3: 229 28% 85%;
-    --chart-4: 229 20% 93%;
+    --chart-2: 229 20% 98%;
+    --chart-3: 229 28% 80%;
+    --chart-4: 229 20% 87%;
     --chart-5: 229 103% 62%;
     --radius: 0.5rem;
+    --priority-low: #86b91c;
+    --priority-medium: #eab308;
+    --priority-high: #e5284f;
+    --priority-urgent: #dc2626;
   }
 
   .dark {
@@ -56,6 +60,10 @@
     --chart-3: 229 23% 17%;
     --chart-4: 229 14% 11%;
     --chart-5: 229 103% 62%;
+    --priority-low: #bef264;
+    --priority-medium: #fde047;
+    --priority-high: #fda4af;
+    --priority-urgent: #f87171;
   }
 }
 

@@ -36,7 +36,7 @@ export function SettingsSidebar({ projectId }: { projectId: string }) {
   const isBoards = normalizedPath.endsWith("/settings/boards");
 
   return (
-    <div className="flex h-full w-full max-w-[200px] flex-col gap-2 border-r border-r-border/25 pr-2 pt-6">
+    <div className="flex h-full w-full max-w-[200px] flex-col gap-2 border-r border-r-border/25 pr-3 pt-6">
       <SettingsSidebarItem
         title="General"
         href={`/p/${projectId}/settings`}

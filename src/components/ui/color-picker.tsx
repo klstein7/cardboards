@@ -36,7 +36,7 @@ export function ColorPicker({ color, onChange, className }: ColorPickerProps) {
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-1.5 rounded-md bg-secondary/25 p-3",
+        "flex flex-wrap gap-1.5 rounded-md bg-secondary/40 p-3",
         className,
       )}
     >
