@@ -19,7 +19,7 @@ function SettingsSidebarItem({
       href={href}
       className={cn(
         "rounded-md px-4 py-2 text-muted-foreground hover:text-foreground",
-        isActive && "bg-secondary/50 font-bold text-secondary-foreground",
+        isActive && "bg-secondary/75 font-bold text-secondary-foreground",
       )}
     >
       {title}

@@ -18,20 +18,9 @@ export function ProjectStats({
         icon={LayoutGridIcon}
         value={boardCount}
         label="Active boards"
-        className="border-chart-1/20 bg-chart-1/5"
       />
-      <StatCard
-        icon={UsersIcon}
-        value={memberCount}
-        label="Team members"
-        className="border-chart-2/20 bg-chart-2/5"
-      />
-      <StatCard
-        icon={FileText}
-        value={cardCount}
-        label="Total cards"
-        className="border-chart-3/20 bg-chart-3/5"
-      />
+      <StatCard icon={UsersIcon} value={memberCount} label="Team members" />
+      <StatCard icon={FileText} value={cardCount} label="Total cards" />
     </div>
   );
 }
