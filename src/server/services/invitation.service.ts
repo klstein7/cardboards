@@ -4,17 +4,10 @@ import { eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { invitations } from "../db/schema";
-import { projectUserService, userService } from "./";
+import { authService, projectUserService, userService } from "./";
 
-async function create(projectId: string, invitedById: string) {
-  const projectUser = await projectUserService.getByProjectIdAndUserId(
-    projectId,
-    invitedById,
-  );
-
-  if (!projectUser) {
-    throw new Error("Project user not found");
-  }
+async function create(projectId: string) {
+  const projectUser = await authService.getCurrentProjectUser(projectId);
 
   const [invitation] = await db
     .insert(invitations)

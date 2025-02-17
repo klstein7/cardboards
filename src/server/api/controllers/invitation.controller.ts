@@ -2,16 +2,12 @@
 
 import { auth } from "@clerk/nextjs/server";
 
-import { invitationService } from "~/server/services";
+import { authService, invitationService } from "~/server/services";
 
 export async function create(projectId: string) {
-  const { userId } = await auth();
+  await authService.requireProjectAdmin(projectId);
 
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
-  return invitationService.create(projectId, userId);
+  return invitationService.create(projectId);
 }
 
 export async function get(invitationId: string) {

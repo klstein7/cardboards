@@ -14,6 +14,19 @@ import {
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
 
+async function get(id: string, tx: Transaction | Database = db) {
+  const [comment] = await tx
+    .select()
+    .from(cardComments)
+    .where(eq(cardComments.id, id));
+
+  if (!comment) {
+    throw new Error("Card comment not found");
+  }
+
+  return comment;
+}
+
 async function create(
   data: CardCommentCreate,
   tx: Transaction | Database = db,
@@ -118,6 +131,7 @@ async function update(
 
 export const cardCommentService = {
   create,
+  get,
   list,
   remove,
   update,

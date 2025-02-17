@@ -46,7 +46,7 @@ export function BoardFilters() {
           <Avatar
             key={projectUser.user.id}
             className={cn(
-              "size-9 cursor-pointer transition-all duration-150 hover:z-10 hover:-translate-y-1 hover:shadow-md hover:brightness-150",
+              "size-9 cursor-pointer transition-all duration-150 hover:z-10 hover:-translate-y-0.5 hover:shadow-md hover:brightness-150",
               assignedTo?.includes(projectUser.id) && "ring-2 ring-foreground",
             )}
             onClick={() => {

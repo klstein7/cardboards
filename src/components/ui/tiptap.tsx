@@ -80,7 +80,7 @@ export function Tiptap({
       attributes: {
         class: cn(
           "w-full rounded-md bg-transparent outline-none min-h-[100px]",
-          "prose prose-invert max-w-none",
+          "prose dark:prose-invert max-w-none",
           "[&_p]:my-2.5 [&_p]:leading-7",
           "[&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:pl-4",
           "[&_ol]:my-2.5 [&_ol]:list-decimal [&_ol]:pl-4",

@@ -193,7 +193,7 @@ export function CardDetails() {
               ) : (
                 <div
                   role="button"
-                  className="prose prose-invert max-w-none"
+                  className="prose max-w-none dark:prose-invert"
                   onClick={() => {
                     setEditing("description");
                   }}
