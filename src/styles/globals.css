@@ -48,8 +48,8 @@
     --input: 215 27.9% 20%;
     --primary: 229 100% 62%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 229 14% 8%;
-    --secondary-foreground: 229 14% 68%;
+    --secondary: 229 14% 16%;
+    --secondary-foreground: 229 14% 90%;
     --accent: 229 23% 17%;
     --accent-foreground: 229 23% 77%;
     --destructive: 3 89% 54%;
@@ -74,4 +74,19 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }

@@ -20,10 +20,16 @@ export default async function ProjectsPage() {
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <div className="flex h-[100dvh] flex-col items-center justify-center gap-12 p-6">
-        <Logo />
-        <ProjectList />
-        <CreateProjectDialog />
+      <div className="flex min-h-[100dvh] items-center justify-center">
+        <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-16 px-6 py-24">
+          <Logo />
+          <div className="w-full max-w-5xl">
+            <ProjectList />
+          </div>
+          <div className="flex w-full max-w-5xl justify-center">
+            <CreateProjectDialog />
+          </div>
+        </div>
       </div>
     </HydrationBoundary>
   );

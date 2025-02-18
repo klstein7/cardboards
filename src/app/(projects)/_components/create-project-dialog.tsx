@@ -48,12 +48,19 @@ export function CreateProjectDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button className="flex w-full items-center justify-center rounded-lg border border-dashed p-4 transition-all hover:bg-muted/50 sm:w-[480px]">
-          <div className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            <span className="text-lg">Create new project</span>
+        <Button
+          variant="ghost"
+          className="h-auto w-full border border-dashed border-muted-foreground/25 bg-card/50 p-6 shadow-sm transition-all hover:border-primary/50 hover:bg-card hover:shadow-md sm:w-[480px]"
+        >
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-primary/10 p-2">
+              <Plus className="h-5 w-5 text-primary" />
+            </div>
+            <span className="text-lg font-medium text-muted-foreground">
+              Create new project
+            </span>
           </div>
-        </button>
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
