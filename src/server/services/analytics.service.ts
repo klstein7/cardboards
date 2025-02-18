@@ -1,11 +1,12 @@
 import "server-only";
 
+import { format, startOfWeek } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { type AnalyticsData } from "~/app/(project)/_types";
 
 import { db } from "../db";
-import { columns, projects, projectUsers } from "../db/schema";
+import { projects, projectUsers } from "../db/schema";
 
 async function getProjectProgress(projectId: string): Promise<AnalyticsData> {
   const project = await db.query.projects.findFirst({
@@ -93,24 +94,27 @@ async function getTaskCompletionTrend(
 
   completedCards.forEach((card) => {
     const updatedAt = card.updatedAt ?? new Date();
-    const weekStart = new Date(updatedAt);
-    weekStart.setHours(0, 0, 0, 0);
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const weekKey = weekStart.toISOString().split("T")[0];
-    weeklyData.set(weekKey!, (weeklyData.get(weekKey!) ?? 0) + 1);
+    const weekStart = startOfWeek(updatedAt);
+    const weekKey = format(weekStart, "yyyy-MM-dd");
+    weeklyData.set(weekKey, (weeklyData.get(weekKey) ?? 0) + 1);
   });
 
   const dates = [...weeklyData.keys()].map((d) => new Date(d));
-  const latestDate = new Date(Math.max(...dates.map((d) => d.getTime())));
+  const latestDate =
+    dates.length > 0
+      ? new Date(Math.max(...dates.map((d) => d.getTime())))
+      : new Date();
 
   const data: { name: string; value: number }[] = [];
   for (let i = 4; i >= 0; i--) {
-    const weekStart = new Date(latestDate);
-    weekStart.setDate(weekStart.getDate() - i * 7);
-    const weekKey = weekStart.toISOString().split("T")[0];
+    const currentDate = new Date(latestDate);
+    currentDate.setDate(currentDate.getDate() - i * 7);
+    const weekStart = startOfWeek(currentDate);
+    const weekKey = format(weekStart, "yyyy-MM-dd");
+
     data.push({
       name: `Week ${5 - i}`,
-      value: weeklyData.get(weekKey!) ?? 0,
+      value: weeklyData.get(weekKey) ?? 0,
     });
   }
 

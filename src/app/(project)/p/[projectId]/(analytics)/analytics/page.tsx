@@ -29,7 +29,7 @@ export default async function AnalyticsPage({
   const activity = await api.analytics.getUserActivity(projectId);
 
   return (
-    <div className="flex h-[100dvh] w-full">
+    <div className="flex h-[100dvh] w-full overflow-y-auto">
       <div className="flex w-full max-w-7xl flex-col gap-6 px-6 pt-6">
         <BreadcrumbList>
           <BreadcrumbItem>

@@ -49,7 +49,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   return (
     <div className="hidden w-14 shrink-0 flex-col items-center gap-12 border-r pb-3 pt-6 sm:flex">
       <div className="flex flex-1 flex-col items-center gap-12">
-        <Star className="fill-yellow-500 text-yellow-500" />
+        <Star className="fill-yellow-400 stroke-foreground text-yellow-400 dark:stroke-none" />
         <div className="flex flex-col gap-3">
           <Link href={`/p/${projectId}`}>
             <Button variant="ghost" size="icon">

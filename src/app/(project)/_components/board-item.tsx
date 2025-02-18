@@ -1,4 +1,4 @@
-import { FileText, Kanban, LayoutGridIcon, ListChecks } from "lucide-react";
+import { FileText, LayoutGridIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Card } from "~/components/ui/card";

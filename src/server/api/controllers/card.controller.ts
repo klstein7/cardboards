@@ -3,7 +3,11 @@
 import { authService, cardService } from "~/server/services";
 import {
   type CardCreate,
+  type CardCreateMany,
+  CardCreateManySchema,
   CardCreateSchema,
+  type CardGenerate,
+  CardGenerateSchema,
   type CardMove,
   CardMoveSchema,
   type CardUpdate,
@@ -16,9 +20,10 @@ export async function create(data: CardCreate) {
   return cardService.create(parsed);
 }
 
-export async function createMany(boardId: string, data: CardCreate[]) {
+export async function createMany(data: CardCreateMany) {
+  const { boardId, data: payload } = CardCreateManySchema.parse(data);
   await authService.canAccessBoard(boardId);
-  return cardService.createMany(boardId, data);
+  return cardService.createMany(boardId, payload);
 }
 
 export async function get(cardId: number) {
@@ -48,7 +53,8 @@ export async function list(columnId: string) {
   return cardService.list(columnId);
 }
 
-export async function generate(boardId: string, prompt: string) {
+export async function generate(data: CardGenerate) {
+  const { boardId, prompt } = CardGenerateSchema.parse(data);
   await authService.canAccessBoard(boardId);
   return cardService.generate(boardId, prompt);
 }

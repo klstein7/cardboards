@@ -104,11 +104,8 @@ export function GenerateCardsDialog({
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            Generate cards
-          </DialogTitle>
-          <DialogDescription className="text-base">
+          <DialogTitle>Generate cards</DialogTitle>
+          <DialogDescription>
             Let&apos;s kickstart your project with some cards.
           </DialogDescription>
         </DialogHeader>
@@ -125,7 +122,7 @@ export function GenerateCardsDialog({
             <Textarea
               id="prompt"
               placeholder="Example: 'I need to add user authentication using NextAuth.js with Google and GitHub providers'"
-              className="min-h-[120px] resize-none border-2"
+              className="min-h-[120px] resize-none"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value.slice(0, 500))}
             />
@@ -135,9 +132,7 @@ export function GenerateCardsDialog({
             onClick={handleGenerate}
             isLoading={isGenerating}
             variant="secondary"
-            className="gap-2 font-semibold"
           >
-            <Sparkles className="h-4 w-4" />
             {isGenerating ? "Generating ideas..." : "Generate cards"}
           </Button>
 
@@ -145,8 +140,7 @@ export function GenerateCardsDialog({
             <>
               <Separator className="my-4 bg-border/50" />
               <div className="space-y-2">
-                <h3 className="flex items-center gap-2 text-lg font-semibold">
-                  <Sparkles className="h-4 w-4 text-primary" />
+                <h3 className="text-lg font-semibold">
                   Suggested cards
                   <span className="ml-2 text-sm text-muted-foreground">
                     ({generatedCards.length} generated)
@@ -210,9 +204,8 @@ export function GenerateCardsDialog({
                     selectedCards.length === 0 ||
                     createManyCardsMutation.isPending
                   }
-                  className="mt-4 w-full gap-2 font-semibold"
+                  className="mt-4 w-full"
                 >
-                  <Check className="h-4 w-4" />
                   Add {selectedCards.length} selected cards to board
                 </Button>
               )}
