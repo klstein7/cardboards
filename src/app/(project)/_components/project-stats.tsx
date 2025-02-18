@@ -39,21 +39,20 @@ function StatCard({
   return (
     <Card
       className={cn(
-        "h-full p-6",
-        "border bg-card/80 backdrop-blur-sm",
+        "group border-border/80 bg-secondary/20 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl",
         className,
       )}
     >
-      <div className="flex h-full flex-col justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="rounded-xl bg-foreground/5 p-2">
-            <Icon className="h-6 w-6 text-muted-foreground" />
-          </div>
-          <div className="text-3xl font-semibold tabular-nums text-card-foreground">
+      <div className="relative flex items-center gap-4 p-6">
+        <div className="rounded-full bg-primary/10 p-3 shadow-sm transition-colors group-hover:bg-primary/20">
+          <Icon className="h-6 w-6 text-primary" />
+        </div>
+        <div className="space-y-1">
+          <div className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
             {value.toLocaleString()}
           </div>
+          <p className="text-sm font-medium text-muted-foreground">{label}</p>
         </div>
-        <div className="text-sm font-medium text-muted-foreground">{label}</div>
       </div>
     </Card>
   );
