@@ -49,18 +49,16 @@ export function CreateProjectDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button
-          variant="ghost"
-          className="h-auto w-full max-w-[450px] p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+          variant="outline"
+          className="h-auto w-full max-w-[450px] rounded-lg border-2 border-dashed bg-background p-8 hover:border-primary hover:bg-secondary/10"
         >
-          <div className="group w-full rounded-lg border border-border/80 bg-secondary/20 p-6 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
-                <Plus className="h-5 w-5 text-primary" />
-              </div>
-              <span className="text-xl font-semibold text-muted-foreground group-hover:text-primary">
-                Create new project
-              </span>
+          <div className="flex items-center gap-4">
+            <div className="rounded-full bg-primary/10 p-2.5">
+              <Plus className="h-6 w-6 text-primary" />
             </div>
+            <span className="text-xl font-medium text-muted-foreground">
+              Create new project
+            </span>
           </div>
         </Button>
       </DialogTrigger>
