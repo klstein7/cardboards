@@ -1,39 +1,20 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
+import { Sparkles, Wrench } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 
-import { Button } from "~/components/ui/button";
-import { ColorPicker } from "~/components/ui/color-picker";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { useCreateBoard } from "~/lib/hooks/board/use-create-board";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-const formSchema = z.object({
-  name: z.string().min(1, "Board name is required"),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format"),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { CreateBoardForm } from "./create-board-form";
+import { GenerateBoardForm } from "./generate-board-form";
 
 interface CreateBoardDialogProps {
   trigger: React.ReactNode;
@@ -46,25 +27,6 @@ export function CreateBoardDialog({
 }: CreateBoardDialogProps) {
   const [open, setOpen] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      color: "",
-    },
-  });
-
-  const createBoardMutation = useCreateBoard();
-
-  async function onSubmit(values: FormValues) {
-    await createBoardMutation.mutateAsync({
-      projectId,
-      name: values.name,
-      color: values.color,
-    });
-    setOpen(false);
-  }
-
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
@@ -75,60 +37,36 @@ export function CreateBoardDialog({
             A board is a collection of columns and cards to manage your project.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-          >
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="E.g. Event Planning"
-                      autoComplete="off"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    What do you want to call this board?
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <Tabs defaultValue="auto" className="w-full">
+          <TabsList>
+            <TabsTrigger value="auto">
+              <div className="flex items-center gap-2">
+                <Sparkles className="size-4" />
+                Create with AI
+              </div>
+            </TabsTrigger>
+            <TabsTrigger value="manual">
+              <div className="flex items-center gap-2">
+                <Wrench className="size-4" />
+                Manual
+              </div>
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent className="pt-2" value="auto">
+            <GenerateBoardForm
+              projectId={projectId}
+              open={open}
+              setOpen={setOpen}
             />
-            <FormField
-              control={form.control}
-              name="color"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Color</FormLabel>
-                  <FormControl>
-                    <ColorPicker
-                      color={field.value}
-                      onChange={field.onChange}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    The color is used to easily identify the board.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+          </TabsContent>
+          <TabsContent className="pt-2" value="manual">
+            <CreateBoardForm
+              open={open}
+              projectId={projectId}
+              setOpen={setOpen}
             />
-            <DialogFooter>
-              <Button variant="secondary" onClick={() => setOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" isLoading={createBoardMutation.isPending}>
-                Create
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

@@ -1,11 +1,10 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { count, eq, sql } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";
-import { projectUsers } from "../db/schema";
 import { type ProjectCreate } from "../zod";
 import { projectUserService } from "./project-user.service";
 

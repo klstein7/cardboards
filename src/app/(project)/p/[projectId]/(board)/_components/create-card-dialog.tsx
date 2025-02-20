@@ -66,7 +66,7 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
     if (!open) {
       form.reset();
     }
-  }, [open]);
+  }, [open, form]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

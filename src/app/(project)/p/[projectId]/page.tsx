@@ -1,4 +1,4 @@
-import { CalendarIcon, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import {
   BreadcrumbItem,
@@ -14,13 +14,9 @@ import { BoardList } from "../../_components/board-list";
 import { CreateBoardDialog } from "../../_components/create-board-dialog";
 import { ProjectStats } from "../../_components/project-stats";
 
-interface ProjectPageProps {
-  params: Promise<{
-    projectId: string;
-  }>;
-}
+type Params = Promise<{ projectId: string }>;
 
-export default async function ProjectPage({ params }: ProjectPageProps) {
+export default async function ProjectPage({ params }: { params: Params }) {
   const { projectId } = await params;
   const project = await api.project.get(projectId);
 

@@ -19,17 +19,12 @@ import { BoardStateProvider } from "../../_components/board-state-provider";
 import { CardDetails } from "../../_components/card-details";
 import { GenerateDropdownMenu } from "../../_components/generate-dropdown-menu";
 
-interface BoardPageProps {
-  params: Promise<{
-    projectId: string;
-    boardId: string;
-  }>;
-  searchParams: Promise<{
-    search: string;
-  }>;
-}
+type Params = Promise<{
+  projectId: string;
+  boardId: string;
+}>;
 
-export default async function BoardPage({ params }: BoardPageProps) {
+export default async function BoardPage({ params }: { params: Params }) {
   const queryClient = new QueryClient();
 
   const { projectId, boardId } = await params;
@@ -81,12 +76,6 @@ export default async function BoardPage({ params }: BoardPageProps) {
               <BreadcrumbItem>
                 <BreadcrumbLink href={`/p/${projectId}`}>
                   {project.name}
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator>/</BreadcrumbSeparator>
-              <BreadcrumbItem>
-                <BreadcrumbLink href={`/p/${projectId}/boards`}>
-                  Boards
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator>/</BreadcrumbSeparator>

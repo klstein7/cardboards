@@ -13,7 +13,7 @@ export function ProjectItem({ project }: { project: Project }) {
   return (
     <Link
       href={`/p/${project.id}`}
-      className="w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20 sm:w-full"
+      className="w-full max-w-[450px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
     >
       <Card className="group border-border/80 bg-secondary/20 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl">
         <CardHeader className="pb-6">

@@ -1,4 +1,3 @@
-import { auth } from "@clerk/nextjs/server";
 import { type Metadata } from "next";
 
 import { FeaturesSection } from "~/app/_components/features";

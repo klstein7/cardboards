@@ -50,15 +50,17 @@ export function CreateProjectDialog() {
       <DialogTrigger asChild>
         <Button
           variant="ghost"
-          className="h-auto w-full border border-dashed border-muted-foreground/25 bg-card/50 p-6 shadow-sm transition-all hover:border-primary/50 hover:bg-card hover:shadow-md sm:w-[480px]"
+          className="h-auto w-full max-w-[450px] p-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
         >
-          <div className="flex items-center gap-3">
-            <div className="rounded-full bg-primary/10 p-2">
-              <Plus className="h-5 w-5 text-primary" />
+          <div className="group w-full rounded-lg border border-border/80 bg-secondary/20 p-6 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl">
+            <div className="flex items-center gap-3">
+              <div className="rounded-full bg-primary/10 p-2 transition-colors group-hover:bg-primary/20">
+                <Plus className="h-5 w-5 text-primary" />
+              </div>
+              <span className="text-xl font-semibold text-muted-foreground group-hover:text-primary">
+                Create new project
+              </span>
             </div>
-            <span className="text-lg font-medium text-muted-foreground">
-              Create new project
-            </span>
           </div>
         </Button>
       </DialogTrigger>

@@ -10,15 +10,13 @@ import { api } from "~/server/api";
 import { CreateInvitationButton } from "../../_components/create-invitation-button";
 import { ProjectUsersDataTable } from "../../_components/project-users-data-table/project-users-data-table";
 
-interface ProjectSettingsMembersPageProps {
-  params: Promise<{
-    projectId: string;
-  }>;
-}
+type Params = Promise<{ projectId: string }>;
 
 export default async function ProjectSettingsMembersPage({
   params,
-}: ProjectSettingsMembersPageProps) {
+}: {
+  params: Params;
+}) {
   const queryClient = new QueryClient();
 
   const { projectId } = await params;

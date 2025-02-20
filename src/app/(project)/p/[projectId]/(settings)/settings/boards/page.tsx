@@ -5,15 +5,13 @@ import { api } from "~/server/api";
 
 import { SettingsBoardList } from "../../_components/settings-board-list";
 
-interface ProjectSettingsBoardsPageProps {
-  params: Promise<{
-    projectId: string;
-  }>;
-}
+type Params = Promise<{ projectId: string }>;
 
 export default async function ProjectSettingsBoardsPage({
   params,
-}: ProjectSettingsBoardsPageProps) {
+}: {
+  params: Params;
+}) {
   const queryClient = new QueryClient();
   const { projectId } = await params;
 

@@ -2,15 +2,13 @@ import { api } from "~/server/api";
 
 import { SettingsGeneralForm } from "../_components/settings-general-form";
 
-interface ProjectSettingsPageProps {
-  params: Promise<{
-    projectId: string;
-  }>;
-}
+type Params = Promise<{ projectId: string }>;
 
 export default async function ProjectSettingsPage({
   params,
-}: ProjectSettingsPageProps) {
+}: {
+  params: Params;
+}) {
   const { projectId } = await params;
 
   const project = await api.project.get(projectId);

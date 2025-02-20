@@ -1,6 +1,6 @@
 "use client";
 
-import { format, formatDistance } from "date-fns";
+import { format } from "date-fns";
 import { type Tag, TagInput } from "emblor";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";

@@ -4,7 +4,6 @@ import { LayoutGridIcon } from "lucide-react";
 
 import { useProjects } from "~/lib/hooks";
 
-import { CreateProjectDialog } from "./create-project-dialog";
 import { ProjectItem } from "./project-item";
 
 function EmptyState() {
@@ -34,10 +33,12 @@ export function ProjectList() {
   }
 
   return (
-    <div className="grid w-full grid-cols-1 gap-6 md:grid-cols-2">
-      {projects.data.map((project) => (
-        <ProjectItem key={project.id} project={project} />
-      ))}
+    <div className="flex w-full justify-center">
+      <div className="flex w-full max-w-[1000px] flex-wrap justify-center gap-6">
+        {projects.data.map((project) => (
+          <ProjectItem key={project.id} project={project} />
+        ))}
+      </div>
     </div>
   );
 }

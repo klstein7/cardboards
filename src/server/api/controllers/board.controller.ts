@@ -4,6 +4,8 @@ import { authService, boardService } from "~/server/services";
 import {
   type BoardCreate,
   BoardCreateSchema,
+  type BoardGenerate,
+  BoardGenerateSchema,
   type BoardUpdate,
   BoardUpdateSchema,
 } from "~/server/zod";
@@ -33,4 +35,10 @@ export async function update(data: BoardUpdate) {
 export async function del(boardId: string) {
   await authService.canAccessBoard(boardId);
   return boardService.del(boardId);
+}
+
+export async function generate(data: BoardGenerate) {
+  const { projectId, prompt } = BoardGenerateSchema.parse(data);
+  await authService.canAccessProject(projectId);
+  return boardService.generate(projectId, prompt);
 }

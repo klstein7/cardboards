@@ -120,10 +120,35 @@ async function canAccessColumn(
   return result.projectUser;
 }
 
+async function canAccessProject(
+  projectId: string,
+  tx: Transaction | Database = db,
+) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized: User not authenticated");
+  }
+
+  const projectUser = await tx.query.projectUsers.findFirst({
+    where: and(
+      eq(projectUsers.projectId, projectId),
+      eq(projectUsers.userId, userId),
+    ),
+  });
+
+  if (!projectUser) {
+    throw new Error("Unauthorized: Cannot access this project");
+  }
+
+  return projectUser;
+}
+
 export const authService = {
   getCurrentProjectUser,
   requireProjectAdmin,
   canAccessBoard,
   canAccessCard,
   canAccessColumn,
+  canAccessProject,
 };

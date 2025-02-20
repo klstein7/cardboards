@@ -17,12 +17,10 @@ import { ProjectProgressChart } from "../_components/project-progress-chart";
 import { TaskCompletionTrendChart } from "../_components/task-completion-trend-chart";
 import { UserActivityChart } from "../_components/user-activity-chart";
 
-export default async function AnalyticsPage({
-  params,
-}: {
-  params: { projectId: string };
-}) {
-  const { projectId } = params;
+type Params = Promise<{ projectId: string }>;
+
+export default async function AnalyticsPage({ params }: { params: Params }) {
+  const { projectId } = await params;
   const project = await api.project.get(projectId);
   const progress = await api.analytics.getProjectProgress(projectId);
   const trend = await api.analytics.getTaskCompletionTrend(projectId);

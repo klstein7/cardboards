@@ -4,11 +4,7 @@ import { and, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
-import {
-  type ProjectUserCreate,
-  type ProjectUserUpdate,
-  type ProjectUserUpdatePayload,
-} from "../zod";
+import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
 
 async function list(projectId: string, tx: Transaction | Database = db) {
   return tx.query.projectUsers.findMany({
