@@ -4,10 +4,10 @@ import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
-import { and, asc, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
-import { cards } from "../db/schema";
+import { boards, cards, columns } from "../db/schema";
 import {
   type CardCreate,
   type CardCreateManyPayload,
@@ -361,6 +361,33 @@ async function assignToCurrentUser(
   return updated;
 }
 
+async function countByBoardId(
+  boardId: string,
+  tx: Transaction | Database = db,
+) {
+  const [result] = await tx
+    .select({ count: count() })
+    .from(cards)
+    .innerJoin(columns, eq(cards.columnId, columns.id))
+    .where(eq(columns.boardId, boardId));
+
+  return result?.count ?? 0;
+}
+
+async function countByProjectId(
+  projectId: string,
+  tx: Transaction | Database = db,
+) {
+  const [result] = await tx
+    .select({ count: count() })
+    .from(cards)
+    .innerJoin(columns, eq(cards.columnId, columns.id))
+    .innerJoin(boards, eq(columns.boardId, boards.id))
+    .where(eq(boards.projectId, projectId));
+
+  return result?.count ?? 0;
+}
+
 export const cardService = {
   create,
   createMany,
@@ -371,4 +398,6 @@ export const cardService = {
   generate,
   del,
   assignToCurrentUser,
+  countByBoardId,
+  countByProjectId,
 };

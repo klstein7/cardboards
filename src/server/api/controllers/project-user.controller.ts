@@ -12,3 +12,8 @@ export async function update({ projectId, userId, data }: ProjectUserUpdate) {
   await authService.requireProjectAdmin(projectId);
   return projectUserService.update(projectId, userId, data);
 }
+
+export async function countByProjectId(projectId: string) {
+  await authService.canAccessProject(projectId);
+  return projectUserService.countByProjectId(projectId);
+}

@@ -63,3 +63,13 @@ export async function assignToCurrentUser(cardId: number) {
   await authService.canAccessCard(cardId);
   return cardService.assignToCurrentUser(cardId);
 }
+
+export async function countByBoardId(boardId: string) {
+  await authService.canAccessBoard(boardId);
+  return cardService.countByBoardId(boardId);
+}
+
+export async function countByProjectId(projectId: string) {
+  await authService.canAccessProject(projectId);
+  return cardService.countByProjectId(projectId);
+}

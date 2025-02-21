@@ -1,26 +1,43 @@
+"use client";
+
 import { FileText, LayoutGridIcon, UsersIcon } from "lucide-react";
 
 import { Card } from "~/components/ui/card";
+import {
+  useBoardCountByProjectId,
+  useCardCountByProjectId,
+  useProjectUserCountByProjectId,
+} from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
-export function ProjectStats({
-  boardCount,
-  memberCount,
-  cardCount,
-}: {
-  boardCount: number;
-  memberCount: number;
-  cardCount: number;
-}) {
+interface ProjectStatsProps {
+  projectId: string;
+}
+
+export function ProjectStats({ projectId }: ProjectStatsProps) {
+  const boardCount = useBoardCountByProjectId(projectId);
+  const memberCount = useProjectUserCountByProjectId(projectId);
+  const cardCount = useCardCountByProjectId(projectId);
+
+  console.log(boardCount.data, memberCount.data, cardCount.data);
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <StatCard
         icon={LayoutGridIcon}
-        value={boardCount}
+        value={boardCount.data ?? 0}
         label="Active boards"
       />
-      <StatCard icon={UsersIcon} value={memberCount} label="Team members" />
-      <StatCard icon={FileText} value={cardCount} label="Total cards" />
+      <StatCard
+        icon={UsersIcon}
+        value={memberCount.data ?? 0}
+        label="Team members"
+      />
+      <StatCard
+        icon={FileText}
+        value={cardCount.data ?? 0}
+        label="Total cards"
+      />
     </div>
   );
 }

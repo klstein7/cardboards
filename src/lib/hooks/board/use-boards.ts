@@ -6,6 +6,5 @@ export function useBoards(projectId: string) {
   return useQuery({
     queryKey: ["boards", projectId],
     queryFn: () => api.board.list(projectId),
-    placeholderData: [],
   });
 }

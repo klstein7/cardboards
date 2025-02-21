@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq } from "drizzle-orm";
+import { and, count, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
@@ -80,9 +80,22 @@ async function update(
   return projectUser;
 }
 
+async function countByProjectId(
+  projectId: string,
+  tx: Transaction | Database = db,
+) {
+  const [result] = await tx
+    .select({ count: count() })
+    .from(projectUsers)
+    .where(eq(projectUsers.projectId, projectId));
+
+  return result?.count ?? 0;
+}
+
 export const projectUserService = {
   list,
   create,
   getByProjectIdAndUserId,
   update,
+  countByProjectId,
 };

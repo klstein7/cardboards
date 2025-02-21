@@ -42,3 +42,8 @@ export async function generate(data: BoardGenerate) {
   await authService.canAccessProject(projectId);
   return boardService.generate(projectId, prompt);
 }
+
+export async function countByProjectId(projectId: string) {
+  await authService.canAccessProject(projectId);
+  return boardService.countByProjectId(projectId);
+}

@@ -3,37 +3,29 @@
 import { LayoutGridIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
+import { useBoards } from "~/lib/hooks";
 
 import { BoardItem } from "./board-item";
 import { CreateBoardDialog } from "./create-board-dialog";
 
-export function BoardList({
-  projectId,
-  boards,
-}: {
+interface BoardListProps {
   projectId: string;
-  boards: Array<{
-    id: string;
-    name: string;
-    color: string;
-    columns: Array<{
-      id: string;
-      name: string;
-    }>;
-    _count?: { cards: number };
-  }>;
-}) {
+}
+
+export function BoardList({ projectId }: BoardListProps) {
+  const boards = useBoards(projectId);
+
   return (
     <div className="mt-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-xl font-semibold">Boards</h2>
       </div>
 
-      {boards.length === 0 ? (
+      {boards.data?.length === 0 ? (
         <EmptyState projectId={projectId} />
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {boards.map((board) => (
+          {boards.data?.map((board) => (
             <BoardItem key={board.id} projectId={projectId} board={board} />
           ))}
         </div>

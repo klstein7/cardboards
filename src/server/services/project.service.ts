@@ -42,58 +42,13 @@ async function list(tx: Transaction | Database = db) {
 async function get(projectId: string, tx: Transaction | Database = db) {
   const project = await tx.query.projects.findFirst({
     where: eq(projects.id, projectId),
-    with: {
-      boards: {
-        with: {
-          columns: true,
-        },
-      },
-      projectUsers: true,
-    },
   });
 
   if (!project) {
     throw new Error("Project not found");
   }
 
-  const [result] = await tx
-    .select({ count: count() })
-    .from(cards)
-    .innerJoin(columns, eq(cards.columnId, columns.id))
-    .innerJoin(boards, eq(columns.boardId, boards.id))
-    .where(eq(boards.projectId, projectId));
-
-  if (!result) {
-    throw new Error("Failed to count cards");
-  }
-
-  const boardCounts = await tx
-    .select({
-      boardId: boards.id,
-      count: count(),
-    })
-    .from(cards)
-    .innerJoin(columns, eq(cards.columnId, columns.id))
-    .innerJoin(boards, eq(columns.boardId, boards.id))
-    .where(eq(boards.projectId, projectId))
-    .groupBy(boards.id);
-
-  const boardCountsMap = new Map(
-    boardCounts.map((bc) => [bc.boardId, bc.count]),
-  );
-
-  const boardsWithCount = project.boards.map((board) => ({
-    ...board,
-    _count: {
-      cards: boardCountsMap.get(board.id) ?? 0,
-    },
-  }));
-
-  return {
-    ...project,
-    boards: boardsWithCount,
-    _count: { cards: result.count },
-  };
+  return project;
 }
 
 async function del(projectId: string, tx: Transaction | Database = db) {

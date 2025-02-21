@@ -2,7 +2,7 @@ import "server-only";
 
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { eq } from "drizzle-orm";
+import { count, eq } from "drizzle-orm";
 
 import { type Color, COLORS } from "~/lib/utils";
 
@@ -252,6 +252,18 @@ async function generate(
   });
 }
 
+async function countByProjectId(
+  projectId: string,
+  tx: Transaction | Database = db,
+) {
+  const [result] = await tx
+    .select({ count: count() })
+    .from(boards)
+    .where(eq(boards.projectId, projectId));
+
+  return result?.count ?? 0;
+}
+
 export const boardService = {
   create,
   list,
@@ -260,4 +272,5 @@ export const boardService = {
   update,
   del,
   generate,
+  countByProjectId,
 };
