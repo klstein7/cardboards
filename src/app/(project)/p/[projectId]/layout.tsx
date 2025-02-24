@@ -23,15 +23,28 @@ export default async function ProjectLayout({
 
   const { projectId } = await params;
 
-  void queryClient.prefetchQuery({
+  const boards = await api.board.list(projectId);
+
+  await queryClient.prefetchQuery({
     queryKey: ["boards", projectId],
-    queryFn: () => api.board.list(projectId),
+    queryFn: () => Promise.resolve(boards),
   });
 
-  void queryClient.prefetchQuery({
+  await queryClient.prefetchQuery({
     queryKey: ["project-users", projectId],
     queryFn: () => api.projectUser.list(projectId),
   });
+
+  await Promise.all(
+    boards.map((board) => {
+      return Promise.all([
+        queryClient.prefetchQuery({
+          queryKey: ["columns", board.id],
+          queryFn: () => api.column.list(board.id),
+        }),
+      ]);
+    }),
+  );
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

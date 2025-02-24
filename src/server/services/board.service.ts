@@ -35,7 +35,7 @@ async function create(
     .insert(boards)
     .values({
       ...data,
-      color: randomColorHex,
+      color: data.color ?? randomColorHex,
     })
     .returning();
 
@@ -87,9 +87,6 @@ async function list(projectId: string, tx: Transaction | Database = db) {
 async function get(boardId: string, tx: Transaction | Database = db) {
   const board = await tx.query.boards.findFirst({
     where: eq(boards.id, boardId),
-    with: {
-      columns: true,
-    },
   });
 
   if (!board) {

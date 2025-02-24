@@ -36,11 +36,13 @@ import {
 import { Form } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
-import { useDeleteBoard, useUpdateBoard } from "~/lib/hooks";
+import { useColumns, useDeleteBoard, useUpdateBoard } from "~/lib/hooks";
 import {
   type BoardUpdatePayload,
   BoardUpdatePayloadSchema,
 } from "~/server/zod";
+
+import { SettingsColumnList } from "./settings-column-list";
 
 interface SettingsBoardItemProps {
   board: Board;
@@ -53,6 +55,8 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
     resolver: zodResolver(BoardUpdatePayloadSchema),
     defaultValues: board,
   });
+
+  const columns = useColumns(board.id);
 
   const updateBoardMutation = useUpdateBoard();
   const deleteBoardMutation = useDeleteBoard();
@@ -123,6 +127,19 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
             </Form>
 
             <div className="space-y-6">
+              <div className="space-y-4 rounded-lg border bg-secondary/25 p-4">
+                <div>
+                  <h3 className="text-lg font-medium">Columns</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Manage the columns of the board.
+                  </p>
+                </div>
+
+                <Separator />
+
+                <SettingsColumnList boardId={board.id} />
+              </div>
+
               <div>
                 <h3 className="text-lg font-medium">Danger Zone</h3>
                 <p className="text-sm text-muted-foreground">

@@ -3,16 +3,23 @@
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { attachClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { Plus } from "lucide-react";
+import { Ellipsis, Pencil, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type Column } from "~/app/(project)/_types";
 import { Button } from "~/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/components/ui/dropdown-menu";
 import { useCards, useCurrentBoard, useMoveCard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { CardList } from "./card-list";
 import { CreateCardDialog } from "./create-card-dialog";
+import { EditColumnDialog } from "./edit-column-dialog";
 
 interface ColumnItemProps {
   column: Column;
@@ -21,6 +28,7 @@ interface ColumnItemProps {
 export function ColumnItem({ column }: ColumnItemProps) {
   const columnRef = useRef<HTMLDivElement>(null);
   const [isDropping, setIsDropping] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const cards = useCards(column.id);
   const moveCardMutation = useMoveCard();
@@ -70,7 +78,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex w-full flex-col gap-3 rounded-md border bg-secondary/20 p-4 transition-colors",
+        "flex h-full w-full min-w-[350px] flex-col gap-3 overflow-y-auto rounded-md border bg-secondary/20 p-4 transition-colors",
         isDropping && "ring-2 ring-offset-2 ring-offset-background",
       )}
       style={
@@ -84,9 +92,32 @@ export function ColumnItem({ column }: ColumnItemProps) {
       }
       aria-describedby={`${column.name}-column`}
     >
-      <span className="text-sm font-medium uppercase text-muted-foreground">
-        {column.name}
-      </span>
+      <div className="flex items-start justify-between">
+        <span className="text-sm font-medium uppercase text-muted-foreground">
+          {column.name}
+        </span>
+        <DropdownMenu modal={false}>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Ellipsis className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent side="bottom" align="end">
+            <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
+              <div className="flex items-center gap-2">
+                <Pencil className="h-4 w-4" />
+                <span>Edit</span>
+              </div>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <EditColumnDialog
+          column={column}
+          open={isEditOpen}
+          onOpenChange={setIsEditOpen}
+        />
+      </div>
       <CardList columnId={column.id} isCompleted={column.isCompleted} />
       {!column.isCompleted && (
         <CreateCardDialog

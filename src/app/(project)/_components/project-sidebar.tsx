@@ -16,6 +16,7 @@ import { useBoards } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 import { CreateBoardDialog } from "./create-board-dialog";
+import { ProjectSidebarSkeleton } from "./project-sidebar-skeleton";
 
 const ThemeToggle = dynamic(
   () => import("./theme-toggle").then((mod) => mod.ThemeToggle),
@@ -44,7 +45,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
 
   if (boards.isError) throw boards.error;
 
-  if (boards.isPending) return <div>Loading...</div>;
+  if (boards.isPending) return <ProjectSidebarSkeleton />;
 
   return (
     <div className="hidden w-14 shrink-0 flex-col items-center gap-12 border-r pb-3 pt-6 sm:flex">

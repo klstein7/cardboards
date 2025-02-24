@@ -29,7 +29,8 @@ export default async function BoardPage({ params }: { params: Params }) {
 
   const { projectId, boardId } = await params;
 
-  const { columns, ...board } = await api.board.get(boardId);
+  const board = await api.board.get(boardId);
+  const columns = await api.column.list(boardId);
   const project = await api.project.get(projectId);
   await Promise.all([
     queryClient.prefetchQuery({

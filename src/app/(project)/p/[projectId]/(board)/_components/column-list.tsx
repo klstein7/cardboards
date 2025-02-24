@@ -17,12 +17,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
 
   useEffect(() => {
     if (!ref.current) return;
-
-    const element = ref.current;
-
-    return autoScrollForElements({
-      element,
-    });
+    return autoScrollForElements({ element: ref.current });
   }, []);
 
   if (columns.isError) throw columns.error;
@@ -31,9 +26,9 @@ export function ColumnList({ boardId }: ColumnListProps) {
   return (
     <div
       ref={ref}
-      className="scrollbar-thin scrollbar-thumb-rounded-full scrollbar-thumb-secondary/50 scrollbar-track-transparent overflow-y-auto border-t"
+      className="scrollbar-thumb-rounded-full h-full overflow-x-auto border-t scrollbar-thin scrollbar-track-transparent scrollbar-thumb-secondary/50"
     >
-      <div className="flex w-full max-w-7xl flex-col items-start gap-3 overflow-x-auto p-6 sm:flex-row sm:gap-6">
+      <div className="flex max-w-7xl items-start gap-6 p-6">
         {columns.data.map((column) => (
           <ColumnItem key={column.id} column={column} />
         ))}
