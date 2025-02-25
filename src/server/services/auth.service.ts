@@ -5,36 +5,16 @@ import { and, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { boards, cards, columns, projectUsers } from "../db/schema";
-
-async function getCurrentProjectUser(
-  projectId: string,
-  tx: Transaction | Database = db,
-) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
-  }
-
-  const projectUser = await tx.query.projectUsers.findFirst({
-    where: and(
-      eq(projectUsers.projectId, projectId),
-      eq(projectUsers.userId, userId),
-    ),
-  });
-
-  if (!projectUser) {
-    throw new Error("Unauthorized: User is not a member of this project");
-  }
-
-  return projectUser;
-}
+import { projectUserService } from "./project-user.service";
 
 async function requireProjectAdmin(
   projectId: string,
   tx: Transaction | Database = db,
 ) {
-  const projectUser = await getCurrentProjectUser(projectId, tx);
+  const projectUser = await projectUserService.getCurrentProjectUser(
+    projectId,
+    tx,
+  );
 
   console.log("projectUser", projectUser);
 
@@ -145,7 +125,6 @@ async function canAccessProject(
 }
 
 export const authService = {
-  getCurrentProjectUser,
   requireProjectAdmin,
   canAccessBoard,
   canAccessCard,

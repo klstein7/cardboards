@@ -3,15 +3,17 @@
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { attachClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import { Ellipsis, Pencil, Plus } from "lucide-react";
+import { Ellipsis, Pencil, Plus, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { type Column } from "~/app/(project)/_types";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { useCards, useCurrentBoard, useMoveCard } from "~/lib/hooks";
@@ -74,11 +76,13 @@ export function ColumnItem({ column }: ColumnItemProps) {
 
   if (cards.isError) throw cards.error;
 
+  const cardCount = cards.data?.length ?? 0;
+
   return (
     <div
       ref={columnRef}
       className={cn(
-        "flex h-full w-full min-w-[350px] flex-col gap-3 overflow-y-auto rounded-md border bg-secondary/20 p-4 transition-colors",
+        "flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card/30 shadow-sm transition-all duration-200",
         isDropping && "ring-2 ring-offset-2 ring-offset-background",
       )}
       style={
@@ -92,22 +96,28 @@ export function ColumnItem({ column }: ColumnItemProps) {
       }
       aria-describedby={`${column.name}-column`}
     >
-      <div className="flex items-start justify-between">
-        <span className="text-sm font-medium uppercase text-muted-foreground">
-          {column.name}
-        </span>
+      <div className="flex items-center justify-between border-b bg-card/50 p-3">
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-foreground">{column.name}</span>
+          <Badge variant="secondary" className="ml-1 text-xs">
+            {cardCount}
+          </Badge>
+        </div>
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
               <Ellipsis className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="end">
+          <DropdownMenuContent side="bottom" align="end" className="w-48">
             <DropdownMenuItem onClick={() => setIsEditOpen(true)}>
-              <div className="flex items-center gap-2">
-                <Pencil className="h-4 w-4" />
-                <span>Edit</span>
-              </div>
+              <Pencil className="mr-2 h-4 w-4" />
+              <span>Edit column</span>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive focus:text-destructive">
+              <Trash2 className="mr-2 h-4 w-4" />
+              <span>Delete column</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -118,17 +128,26 @@ export function ColumnItem({ column }: ColumnItemProps) {
           onOpenChange={setIsEditOpen}
         />
       </div>
-      <CardList columnId={column.id} isCompleted={column.isCompleted} />
+
+      <div className="flex-1 overflow-y-auto p-2">
+        <CardList columnId={column.id} isCompleted={column.isCompleted} />
+      </div>
+
       {!column.isCompleted && (
-        <CreateCardDialog
-          trigger={
-            <Button variant="outline" className="bg-transparent">
-              <Plus className="h-4 w-4" />
-              <span>Card</span>
-            </Button>
-          }
-          columnId={column.id}
-        />
+        <div className="border-t p-2">
+          <CreateCardDialog
+            trigger={
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-muted-foreground hover:text-foreground"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                <span>Add card</span>
+              </Button>
+            }
+            columnId={column.id}
+          />
+        </div>
       )}
     </div>
   );

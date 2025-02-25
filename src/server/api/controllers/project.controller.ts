@@ -1,6 +1,10 @@
 "use server";
 
-import { authService, projectService } from "~/server/services";
+import {
+  authService,
+  projectService,
+  projectUserService,
+} from "~/server/services";
 import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
 
 export async function create(data: ProjectCreate) {
@@ -13,7 +17,7 @@ export async function list() {
 }
 
 export async function get(projectId: string) {
-  await authService.getCurrentProjectUser(projectId);
+  await projectUserService.getCurrentProjectUser(projectId);
   return projectService.get(projectId);
 }
 

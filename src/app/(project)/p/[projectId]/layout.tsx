@@ -50,7 +50,7 @@ export default async function ProjectLayout({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <div className="flex h-[100dvh] w-full overflow-hidden">
         <ProjectSidebar projectId={projectId} />
-        {children}
+        <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
       </div>
     </HydrationBoundary>
   );

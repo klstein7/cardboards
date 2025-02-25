@@ -1,5 +1,6 @@
 import "server-only";
 
+import { auth } from "@clerk/nextjs/server";
 import { and, count, eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
@@ -92,10 +93,35 @@ async function countByProjectId(
   return result?.count ?? 0;
 }
 
+async function getCurrentProjectUser(
+  projectId: string,
+  tx: Transaction | Database = db,
+) {
+  const { userId } = await auth();
+
+  if (!userId) {
+    throw new Error("Unauthorized: User not authenticated");
+  }
+
+  const projectUser = await tx.query.projectUsers.findFirst({
+    where: and(
+      eq(projectUsers.projectId, projectId),
+      eq(projectUsers.userId, userId),
+    ),
+  });
+
+  if (!projectUser) {
+    throw new Error("Unauthorized: User is not a member of this project");
+  }
+
+  return projectUser;
+}
+
 export const projectUserService = {
   list,
   create,
   getByProjectIdAndUserId,
   update,
   countByProjectId,
+  getCurrentProjectUser,
 };

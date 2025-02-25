@@ -4,7 +4,7 @@ import { authService, projectUserService } from "~/server/services";
 import { type ProjectUserUpdate } from "~/server/zod";
 
 export async function list(projectId: string) {
-  await authService.getCurrentProjectUser(projectId);
+  await projectUserService.getCurrentProjectUser(projectId);
   return projectUserService.list(projectId);
 }
 
@@ -16,4 +16,8 @@ export async function update({ projectId, userId, data }: ProjectUserUpdate) {
 export async function countByProjectId(projectId: string) {
   await authService.canAccessProject(projectId);
   return projectUserService.countByProjectId(projectId);
+}
+
+export async function getCurrentProjectUser(projectId: string) {
+  return projectUserService.getCurrentProjectUser(projectId);
 }

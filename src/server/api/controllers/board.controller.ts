@@ -1,6 +1,10 @@
 "use server";
 
-import { authService, boardService } from "~/server/services";
+import {
+  authService,
+  boardService,
+  projectUserService,
+} from "~/server/services";
 import {
   type BoardCreate,
   BoardCreateSchema,
@@ -12,12 +16,12 @@ import {
 
 export async function create(data: BoardCreate) {
   const parsed = BoardCreateSchema.parse(data);
-  await authService.getCurrentProjectUser(parsed.projectId);
+  await projectUserService.getCurrentProjectUser(parsed.projectId);
   return boardService.create(parsed);
 }
 
 export async function list(projectId: string) {
-  await authService.getCurrentProjectUser(projectId);
+  await projectUserService.getCurrentProjectUser(projectId);
   return boardService.list(projectId);
 }
 
