@@ -28,7 +28,11 @@ import { Input } from "~/components/ui/input";
 import { useCreateProject } from "~/lib/hooks";
 import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
 
-export function CreateProjectDialog() {
+interface CreateProjectDialogProps {
+  children?: React.ReactNode;
+}
+
+export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<ProjectCreate>({
@@ -47,21 +51,23 @@ export function CreateProjectDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="h-auto w-full max-w-[450px] rounded-lg border-2 border-dashed bg-background p-8 hover:border-primary hover:bg-secondary/10"
-        >
-          <div className="flex items-center gap-4">
-            <div className="rounded-full bg-primary/10 p-2.5">
-              <Plus className="h-6 w-6 text-primary" />
+      {children ?? (
+        <DialogTrigger asChild>
+          <Button
+            variant="outline"
+            className="h-auto w-full max-w-[450px] rounded-lg border-2 border-dashed bg-background p-8 hover:border-primary hover:bg-secondary/10"
+          >
+            <div className="flex items-center gap-4">
+              <div className="rounded-full bg-primary/10 p-2.5">
+                <Plus className="h-6 w-6 text-primary" />
+              </div>
+              <span className="text-xl font-medium text-muted-foreground">
+                Create new project
+              </span>
             </div>
-            <span className="text-xl font-medium text-muted-foreground">
-              Create new project
-            </span>
-          </div>
-        </Button>
-      </DialogTrigger>
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create a new project</DialogTitle>

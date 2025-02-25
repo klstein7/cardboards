@@ -13,9 +13,9 @@ export function ProjectItem({ project }: { project: Project }) {
   return (
     <Link
       href={`/p/${project.id}`}
-      className="w-full max-w-[450px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+      className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
     >
-      <Card className="group border-border/80 bg-secondary/20 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl">
+      <Card className="group flex h-[250px] max-w-[450px] flex-col border-border/80 bg-secondary/20 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl">
         <CardHeader className="pb-6">
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1.5">
@@ -40,7 +40,7 @@ export function ProjectItem({ project }: { project: Project }) {
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className="flex flex-1 flex-col justify-end">
           <div className="flex items-center justify-between">
             <div className="space-y-2">
               <div className="flex items-center gap-2">

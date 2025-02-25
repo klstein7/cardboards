@@ -26,9 +26,6 @@ export default async function ProjectsPage() {
           <div className="w-full max-w-5xl">
             <ProjectList />
           </div>
-          <div className="flex w-full max-w-5xl justify-center">
-            <CreateProjectDialog />
-          </div>
         </div>
       </div>
     </HydrationBoundary>
