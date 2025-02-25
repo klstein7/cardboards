@@ -7,7 +7,6 @@ import {
 import { Logo } from "~/components/brand/logo";
 import { api } from "~/server/api";
 
-import { CreateProjectDialog } from "../_components/create-project-dialog";
 import { ProjectList } from "../_components/project-list";
 
 export default async function ProjectsPage() {

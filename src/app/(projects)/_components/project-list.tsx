@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { LayoutGridIcon, Loader2, Plus } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
-import { Dialog, DialogTrigger } from "~/components/ui/dialog";
+import { DialogTrigger } from "~/components/ui/dialog";
 import { useProjects } from "~/lib/hooks";
 
 import { CreateProjectDialog } from "./create-project-dialog";

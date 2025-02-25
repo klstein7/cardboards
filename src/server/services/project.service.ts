@@ -1,7 +1,7 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { count, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { type Database, db, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";

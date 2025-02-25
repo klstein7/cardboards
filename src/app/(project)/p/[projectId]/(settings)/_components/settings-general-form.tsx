@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-import { type Project } from "~/app/(project)/_types";
+import { type Project, type ProjectDetail } from "~/app/(project)/_types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +32,7 @@ import { useDeleteProject } from "~/lib/hooks";
 import { type ProjectUpdate, ProjectUpdateSchema } from "~/server/zod";
 
 interface SettingsGeneralFormProps {
-  project: Project;
+  project: ProjectDetail;
 }
 
 export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {

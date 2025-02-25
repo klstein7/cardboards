@@ -36,7 +36,7 @@ import {
 import { Form } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
-import { useColumns, useDeleteBoard, useUpdateBoard } from "~/lib/hooks";
+import { useDeleteBoard, useUpdateBoard } from "~/lib/hooks";
 import {
   type BoardUpdatePayload,
   BoardUpdatePayloadSchema,
@@ -55,8 +55,6 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
     resolver: zodResolver(BoardUpdatePayloadSchema),
     defaultValues: board,
   });
-
-  const columns = useColumns(board.id);
 
   const updateBoardMutation = useUpdateBoard();
   const deleteBoardMutation = useDeleteBoard();

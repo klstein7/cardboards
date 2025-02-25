@@ -1,10 +1,8 @@
 "use client";
 
 import autoAnimate from "@formkit/auto-animate";
-import { Plus } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Button } from "~/components/ui/button";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useColumns } from "~/lib/hooks";
 

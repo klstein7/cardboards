@@ -19,8 +19,6 @@ export function ProjectStats({ projectId }: ProjectStatsProps) {
   const memberCount = useProjectUserCountByProjectId(projectId);
   const cardCount = useCardCountByProjectId(projectId);
 
-  console.log(boardCount.data, memberCount.data, cardCount.data);
-
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <StatCard
