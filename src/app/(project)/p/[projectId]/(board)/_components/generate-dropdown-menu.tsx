@@ -20,18 +20,16 @@ export function GenerateDropdownMenu({ boardId }: GenerateDropdownMenuProps) {
   return (
     <DropdownMenu modal={false}>
       <DropdownMenuTrigger asChild>
-        <Button size="icon" variant="outline">
+        <Button variant="ghost" size="icon" className="h-9 w-9">
           <Sparkles className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent side="bottom" align="end" sideOffset={8}>
+      <DropdownMenuContent side="bottom" align="end" className="w-48">
         <GenerateCardsDialog
           trigger={
             <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                Generate cards
-              </div>
+              <Sparkles className="mr-2 h-4 w-4" />
+              <span>Generate cards</span>
             </DropdownMenuItem>
           }
           boardId={boardId}

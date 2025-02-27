@@ -23,16 +23,31 @@
     --destructive: 3 100% 50%;
     --destructive-foreground: 3 0% 100%;
     --ring: 229 100% 62%;
-    --chart-1: 229 100% 62%;
-    --chart-2: 229 20% 98%;
-    --chart-3: 229 28% 80%;
-    --chart-4: 229 20% 87%;
-    --chart-5: 229 103% 62%;
+
+    --chart-blue: 210 100% 56%;
+    --chart-green: 142 69% 49%;
+    --chart-purple: 262 83% 58%;
+    --chart-amber: 35 100% 53%;
+    --chart-red: 358 83% 58%;
+    --chart-cyan: 182 85% 42%;
+    --chart-indigo: 243 75% 59%;
+    --chart-pink: 330 81% 60%;
+    --chart-lime: 85 80% 44%;
+    --chart-emerald: 160 84% 39%;
+
+    --priority-low: 140 69% 49%; /* Emerald-500 */
+    --priority-medium: 43 96% 58%; /* Amber-400 */
+    --priority-high: 326 81% 54%; /* Pink-500 */
+    --priority-urgent: 0 91% 58%; /* Red-500 */
+    --priority-none: 220 9% 46%; /* Gray-500 */
+
+    --due-overdue: 0 91% 58%; /* Red-500 */
+    --due-today: 43 96% 58%; /* Amber-400 */
+    --due-week: 142 69% 46%; /* Green-500 */
+    --due-later: 221 83% 53%; /* Blue-500 */
+    --due-none: 220 9% 46%; /* Gray-500 */
+
     --radius: 0.5rem;
-    --priority-low: #86b91c;
-    --priority-medium: #eab308;
-    --priority-high: #e5284f;
-    --priority-urgent: #dc2626;
   }
 
   .dark {
@@ -55,15 +70,29 @@
     --destructive: 3 89% 54%;
     --destructive-foreground: 0 0% 100%;
     --ring: 229 100% 62%;
-    --chart-1: 229 100% 62%;
-    --chart-2: 229 14% 8%;
-    --chart-3: 229 23% 17%;
-    --chart-4: 229 14% 11%;
-    --chart-5: 229 103% 62%;
-    --priority-low: #bef264;
-    --priority-medium: #fde047;
-    --priority-high: #fda4af;
-    --priority-urgent: #f87171;
+
+    --chart-blue: 210 100% 66%;
+    --chart-green: 142 69% 59%;
+    --chart-purple: 262 83% 68%;
+    --chart-amber: 35 100% 63%;
+    --chart-red: 358 83% 68%;
+    --chart-cyan: 182 85% 52%;
+    --chart-indigo: 243 75% 69%;
+    --chart-pink: 330 81% 70%;
+    --chart-lime: 85 80% 54%;
+    --chart-emerald: 160 84% 49%;
+
+    --priority-low: 140 69% 59%; /* Emerald-400 */
+    --priority-medium: 43 96% 68%; /* Amber-300 */
+    --priority-high: 326 81% 64%; /* Pink-400 */
+    --priority-urgent: 0 91% 68%; /* Red-400 */
+    --priority-none: 220 9% 56%; /* Gray-400 */
+
+    --due-overdue: 0 91% 68%; /* Red-400 */
+    --due-today: 43 96% 68%; /* Amber-300 */
+    --due-week: 142 69% 56%; /* Green-400 */
+    --due-later: 221 83% 63%; /* Blue-400 */
+    --due-none: 220 9% 56%; /* Gray-400 */
   }
 }
 
@@ -90,8 +119,6 @@
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }
-
-
 
 @layer base {
   * {
