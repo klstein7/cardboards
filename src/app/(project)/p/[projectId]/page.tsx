@@ -3,7 +3,7 @@ import {
   HydrationBoundary,
   QueryClient,
 } from "@tanstack/react-query";
-import { LayoutGrid, List, Plus, Search } from "lucide-react";
+import { LayoutGrid, List, Search } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -18,7 +18,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { api } from "~/server/api";
 
 import { BoardList } from "../../_components/board-list";
-import { CreateBoardDialog } from "../../_components/create-board-dialog";
 import { ProjectStats } from "../../_components/project-stats";
 import { ProjectActivity } from "./_components/project-activity";
 import { ProjectHeader } from "./_components/project-header";
@@ -114,16 +113,6 @@ export default async function ProjectPage({ params }: { params: Params }) {
                         Manage and organize your project boards
                       </p>
                     </div>
-
-                    <CreateBoardDialog
-                      trigger={
-                        <Button size="sm" className="gap-2">
-                          <Plus className="h-4 w-4" />
-                          New board
-                        </Button>
-                      }
-                      projectId={projectId}
-                    />
                   </div>
 
                   <div className="p-4 pt-5 sm:p-6">

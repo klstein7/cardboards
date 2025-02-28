@@ -2,6 +2,7 @@
 
 import { Filter } from "lucide-react";
 
+import { BaseToolbar } from "~/components/shared/base-toolbar";
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -21,44 +22,60 @@ interface BoardToolbarProps {
 }
 
 export function BoardToolbar({ boardId }: BoardToolbarProps) {
-  return (
-    <div className="flex w-full flex-wrap items-center justify-between gap-3">
-      {/* Mobile view */}
-      <div className="flex items-center gap-2 sm:hidden">
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-1.5"
-            >
-              <Filter className="h-4 w-4" />
-              <span>Filters</span>
-              <FilterIndicator className="ml-1.5" />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="px-4 pb-6">
-            <DrawerHeader>
-              <DrawerTitle>Filter Board</DrawerTitle>
-              <DrawerDescription>
-                Filter cards by label, assignee, or search.
-              </DrawerDescription>
-            </DrawerHeader>
-            <BoardFilters />
-          </DrawerContent>
-        </Drawer>
+  // Mobile filters
+  const mobileFilters = (
+    <div className="flex items-center gap-2 sm:hidden">
+      <Drawer>
+        <DrawerTrigger asChild>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-1.5"
+          >
+            <Filter className="h-4 w-4" />
+            <span>Filters</span>
+            <FilterIndicator className="ml-1.5" />
+          </Button>
+        </DrawerTrigger>
+        <DrawerContent className="px-4 pb-6">
+          <DrawerHeader>
+            <DrawerTitle>Filter Board</DrawerTitle>
+            <DrawerDescription>
+              Filter cards by label, assignee, or search.
+            </DrawerDescription>
+          </DrawerHeader>
+          <BoardFilters />
+        </DrawerContent>
+      </Drawer>
 
-        <GenerateDropdownMenu boardId={boardId} />
-      </div>
-
-      {/* Desktop view */}
-      <div className="hidden grow sm:block">
-        <BoardFilters />
-      </div>
-
-      <div className="ml-auto hidden sm:block">
-        <GenerateDropdownMenu boardId={boardId} />
-      </div>
+      <GenerateDropdownMenu boardId={boardId} />
     </div>
+  );
+
+  // Desktop filters
+  const desktopFilters = (
+    <div className="hidden grow sm:block">
+      <BoardFilters />
+    </div>
+  );
+
+  // Generate button for desktop
+  const desktopGenerate = (
+    <div className="ml-auto hidden sm:block">
+      <GenerateDropdownMenu boardId={boardId} />
+    </div>
+  );
+
+  return (
+    <BaseToolbar
+      left={
+        <>
+          {mobileFilters}
+          {desktopFilters}
+        </>
+      }
+      right={desktopGenerate}
+      className="flex-wrap"
+    />
   );
 }
