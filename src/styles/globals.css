@@ -4,25 +4,29 @@
 
 @layer base {
   :root {
-    --background: 229 57% 91%;
-    --foreground: 229 63% 4%;
-    --muted: 229 12% 78%;
-    --muted-foreground: 229 10% 37%;
-    --popover: 0 0% 92%;
-    --popover-foreground: 229 63% 3%;
-    --card: 0 0% 92%;
-    --card-foreground: 229 63% 3%;
-    --border: 220 13% 72%;
-    --input: 220 13% 72%;
-    --primary: 229 100% 62%;
+    --background: 220 30% 96%;
+    --foreground: 220 45% 12%;
+    --muted: 220 15% 85%;
+    --muted-foreground: 220 25% 35%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 45% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 45% 12%;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+
+    --primary: 230 85% 60%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 229 20% 100%;
-    --secondary-foreground: 229 20% 30%;
-    --accent: 229 28% 78%;
-    --accent-foreground: 229 28% 25%;
-    --destructive: 3 100% 50%;
-    --destructive-foreground: 3 0% 100%;
-    --ring: 229 100% 62%;
+
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 220 35% 25%;
+
+    --accent: 262 83% 94%;
+    --accent-foreground: 262 60% 30%;
+
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 230 85% 60%;
 
     --chart-blue: 210 100% 56%;
     --chart-green: 142 69% 49%;
@@ -35,41 +39,61 @@
     --chart-lime: 85 80% 44%;
     --chart-emerald: 160 84% 39%;
 
-    --priority-low: 140 69% 49%; /* Emerald-500 */
-    --priority-medium: 43 96% 58%; /* Amber-400 */
-    --priority-high: 326 81% 54%; /* Pink-500 */
-    --priority-urgent: 0 91% 58%; /* Red-500 */
-    --priority-none: 220 9% 46%; /* Gray-500 */
+    --priority-low: 142 76% 42%;
+    --priority-medium: 38 92% 50%;
+    --priority-high: 326 85% 48%;
+    --priority-urgent: 0 95% 50%;
+    --priority-none: 220 13% 45%;
 
-    --due-overdue: 0 91% 58%; /* Red-500 */
-    --due-today: 43 96% 58%; /* Amber-400 */
-    --due-week: 142 69% 46%; /* Green-500 */
-    --due-later: 221 83% 53%; /* Blue-500 */
-    --due-none: 220 9% 46%; /* Gray-500 */
+    --due-overdue: 0 95% 50%;
+    --due-today: 38 92% 50%;
+    --due-week: 142 76% 40%;
+    --due-later: 221 83% 45%;
+    --due-none: 220 13% 45%;
 
     --radius: 0.5rem;
+
+    --priority-low-color: hsl(142 76% 42%);
+    --priority-medium-color: hsl(38 92% 50%);
+    --priority-high-color: hsl(326 85% 48%);
+    --priority-urgent-color: hsl(0 95% 50%);
+    --priority-none-color: hsl(220 13% 45%);
+
+    --chart-blue-color: hsl(210 100% 56%);
+    --chart-green-color: hsl(142 76% 42%);
+    --chart-purple-color: hsl(262 83% 58%);
+    --chart-amber-color: hsl(38 92% 50%);
+    --chart-red-color: hsl(358 83% 58%);
+    --chart-cyan-color: hsl(182 85% 42%);
+    --chart-indigo-color: hsl(243 75% 59%);
+    --chart-pink-color: hsl(330 81% 60%);
+    --primary-color: hsl(230 85% 60%);
   }
 
   .dark {
-    --background: 229 41% 4%;
-    --foreground: 229 23% 99%;
-    --muted: 229 12% 14%;
-    --muted-foreground: 229 10% 63%;
-    --popover: 229 41% 5%;
-    --popover-foreground: 0 0% 100%;
-    --card: 229 41% 5%;
-    --card-foreground: 0 0% 100%;
-    --border: 215 27.9% 20%;
-    --input: 215 27.9% 20%;
-    --primary: 229 100% 62%;
+    --background: 220 35% 8%;
+    --foreground: 220 15% 95%;
+    --muted: 220 25% 16%;
+    --muted-foreground: 220 15% 65%;
+    --popover: 220 35% 11%;
+    --popover-foreground: 220 15% 95%;
+    --card: 220 35% 11%;
+    --card-foreground: 220 15% 95%;
+    --border: 220 25% 20%;
+    --input: 220 25% 20%;
+
+    --primary: 230 85% 65%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 229 14% 16%;
-    --secondary-foreground: 229 14% 90%;
-    --accent: 229 23% 17%;
-    --accent-foreground: 229 23% 77%;
-    --destructive: 3 89% 54%;
+
+    --secondary: 220 30% 16%;
+    --secondary-foreground: 220 20% 90%;
+
+    --accent: 262 70% 20%;
+    --accent-foreground: 262 60% 90%;
+
+    --destructive: 0 85% 60%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 229 100% 62%;
+    --ring: 230 85% 65%;
 
     --chart-blue: 210 100% 66%;
     --chart-green: 142 69% 59%;
@@ -82,23 +106,39 @@
     --chart-lime: 85 80% 54%;
     --chart-emerald: 160 84% 49%;
 
-    --priority-low: 140 69% 59%; /* Emerald-400 */
-    --priority-medium: 43 96% 68%; /* Amber-300 */
-    --priority-high: 326 81% 64%; /* Pink-400 */
-    --priority-urgent: 0 91% 68%; /* Red-400 */
-    --priority-none: 220 9% 56%; /* Gray-400 */
+    --priority-low: 140 69% 59%;
+    --priority-medium: 38 96% 68%;
+    --priority-high: 326 81% 64%;
+    --priority-urgent: 0 91% 68%;
+    --priority-none: 220 10% 60%;
 
-    --due-overdue: 0 91% 68%; /* Red-400 */
-    --due-today: 43 96% 68%; /* Amber-300 */
-    --due-week: 142 69% 56%; /* Green-400 */
-    --due-later: 221 83% 63%; /* Blue-400 */
-    --due-none: 220 9% 56%; /* Gray-400 */
+    --due-overdue: 0 91% 68%;
+    --due-today: 38 96% 68%;
+    --due-week: 142 69% 56%;
+    --due-later: 221 83% 63%;
+    --due-none: 220 10% 60%;
+
+    --priority-low-color: hsl(140 69% 59%);
+    --priority-medium-color: hsl(38 96% 68%);
+    --priority-high-color: hsl(326 81% 64%);
+    --priority-urgent-color: hsl(0 91% 68%);
+    --priority-none-color: hsl(220 10% 60%);
+
+    --chart-blue-color: hsl(210 100% 66%);
+    --chart-green-color: hsl(142 69% 59%);
+    --chart-purple-color: hsl(262 83% 68%);
+    --chart-amber-color: hsl(35 100% 63%);
+    --chart-red-color: hsl(358 83% 68%);
+    --chart-cyan-color: hsl(182 85% 52%);
+    --chart-indigo-color: hsl(243 75% 69%);
+    --chart-pink-color: hsl(330 81% 70%);
+    --primary-color: hsl(230 85% 65%);
   }
 }
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
@@ -118,13 +158,4 @@
 
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
 }

@@ -56,25 +56,110 @@ export const PRIORITIES = [
 
 export type Priority = (typeof PRIORITIES)[number];
 
-export function getPriorityByValue(
-  value?: string | null,
-): Priority | undefined {
-  if (!value) return undefined;
+export function getPriorityByValue(value: number | string | null | undefined) {
+  if (value === null || value === undefined) return null;
 
-  return PRIORITIES.find((priority) => priority.value === value);
+  if (typeof value === "string" && isNaN(parseInt(value, 10))) {
+    switch (value.toLowerCase()) {
+      case "low":
+        return { value: 1, label: "Low", icon: ArrowDownIcon };
+      case "medium":
+        return { value: 2, label: "Medium", icon: ArrowRightIcon };
+      case "high":
+        return { value: 3, label: "High", icon: ArrowUpIcon };
+      case "urgent":
+        return { value: 4, label: "Urgent", icon: AlertTriangleIcon };
+      default:
+        return null;
+    }
+  }
+
+  const priorityValue = typeof value === "string" ? parseInt(value, 10) : value;
+
+  switch (priorityValue) {
+    case 1:
+      return { value: 1, label: "Low", icon: ArrowDownIcon };
+    case 2:
+      return { value: 2, label: "Medium", icon: ArrowRightIcon };
+    case 3:
+      return { value: 3, label: "High", icon: ArrowUpIcon };
+    case 4:
+      return { value: 4, label: "Urgent", icon: AlertTriangleIcon };
+    default:
+      return null;
+  }
 }
 
-export function getColor(value?: string | null) {
-  if (!value) return undefined;
+export function getColor(value: number | string | null | undefined): string {
+  if (value === undefined || value === null)
+    return "var(--priority-none-color)";
 
-  const colorMap = {
-    low: "var(--priority-low)",
-    medium: "var(--priority-medium)",
-    high: "var(--priority-high)",
-    urgent: "var(--priority-urgent)",
-  } as const;
+  if (
+    typeof value === "string" &&
+    !value.startsWith("#") &&
+    !value.startsWith("rgb") &&
+    !value.startsWith("hsl")
+  ) {
+    if (!isNaN(Number(value))) {
+      value = Number(value);
+    } else {
+      switch (value.toLowerCase()) {
+        case "low":
+          return "var(--priority-low-color)";
+        case "medium":
+          return "var(--priority-medium-color)";
+        case "high":
+          return "var(--priority-high-color)";
+        case "urgent":
+          return "var(--priority-urgent-color)";
+      }
+    }
+  }
 
-  return colorMap[value as keyof typeof colorMap];
+  if (typeof value === "number") {
+    switch (value) {
+      case 1:
+        return "var(--priority-low-color)";
+      case 2:
+        return "var(--priority-medium-color)";
+      case 3:
+        return "var(--priority-high-color)";
+      case 4:
+        return "var(--priority-urgent-color)";
+      default:
+        return "var(--priority-none-color)";
+    }
+  }
+
+  if (
+    typeof value === "string" &&
+    (value.startsWith("#") ||
+      value.startsWith("rgb") ||
+      value.startsWith("hsl"))
+  ) {
+    return value;
+  }
+
+  switch (value) {
+    case "blue":
+      return "var(--chart-blue-color)";
+    case "green":
+      return "var(--chart-green-color)";
+    case "red":
+      return "var(--chart-red-color)";
+    case "purple":
+      return "var(--chart-purple-color)";
+    case "amber":
+      return "var(--chart-amber-color)";
+    case "pink":
+      return "var(--chart-pink-color)";
+    case "indigo":
+      return "var(--chart-indigo-color)";
+    case "cyan":
+      return "var(--chart-cyan-color)";
+    default:
+      return "var(--primary-color)";
+  }
 }
 
 export function triggerPostMoveFlash(element: HTMLElement, color?: string) {
@@ -84,15 +169,29 @@ export function triggerPostMoveFlash(element: HTMLElement, color?: string) {
         element.animate(
           [
             {
-              backgroundColor: color ? `${color}20` : "hsl(var(--secondary))",
+              transform: "scale(1.005)",
+              backgroundColor: color
+                ? `${color}15`
+                : "hsl(var(--secondary)/0.1)",
+              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
             },
             {
+              transform: "scale(0.998)",
+              backgroundColor: color
+                ? `${color}08`
+                : "hsl(var(--secondary)/0.05)",
+              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.03)",
+              offset: 0.65,
+            },
+            {
+              transform: "scale(1)",
               backgroundColor: "transparent",
+              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
             },
           ],
           {
-            duration: 500,
-            easing: "cubic-bezier(0.25, 0.1, 0.25, 1.0)",
+            duration: 400,
+            easing: "cubic-bezier(0.16, 0.1, 0.16, 1.0)",
             iterations: 1,
           },
         );
