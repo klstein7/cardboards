@@ -29,13 +29,9 @@ import { useProjectUsers } from "~/lib/hooks";
 
 interface ProjectToolbarProps {
   projectId: string;
-  projectName?: string;
 }
 
-export function ProjectToolbar({
-  projectId,
-  projectName,
-}: ProjectToolbarProps) {
+export function ProjectToolbar({ projectId }: ProjectToolbarProps) {
   const projectUsers = useProjectUsers(projectId);
   const userCount = projectUsers.data?.length ?? 0;
 

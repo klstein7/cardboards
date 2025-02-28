@@ -43,11 +43,9 @@ export function PriorityChart({ data, chartConfig }: PriorityChartProps) {
               startAngle={0}
               endAngle={360}
               label={({
-                name,
                 value,
                 percent,
               }: {
-                name: string;
                 value: number;
                 percent: number;
               }) =>

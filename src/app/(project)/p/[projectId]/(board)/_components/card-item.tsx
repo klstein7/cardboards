@@ -14,7 +14,6 @@ import {
   Copy,
   Edit,
   ExternalLink,
-  MoreHorizontal,
   Trash,
   UserCircle,
 } from "lucide-react";

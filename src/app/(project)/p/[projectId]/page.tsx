@@ -80,7 +80,7 @@ export default async function ProjectPage({ params }: { params: Params }) {
         <ProjectHeader projectName={project.name} />
 
         <div className="flex w-full border-b border-t px-4 py-3 sm:px-6 lg:px-8">
-          <ProjectToolbar projectId={projectId} projectName={project.name} />
+          <ProjectToolbar projectId={projectId} />
         </div>
 
         <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">

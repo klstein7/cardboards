@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
-import { type Project, type ProjectDetail } from "~/app/(project)/_types";
+import { type ProjectDetail } from "~/app/(project)/_types";
 import {
   AlertDialog,
   AlertDialogAction,

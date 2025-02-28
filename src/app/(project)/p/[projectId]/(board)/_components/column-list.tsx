@@ -1,10 +1,8 @@
 "use client";
 
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
-import { Plus } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-import { Button } from "~/components/ui/button";
 import { useColumns, useCurrentBoard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 

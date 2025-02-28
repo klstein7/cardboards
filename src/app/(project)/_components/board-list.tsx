@@ -4,7 +4,6 @@ import { LayoutGridIcon, PlusIcon } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
 import { useBoards } from "~/lib/hooks";
-import { cn } from "~/lib/utils";
 
 import { BoardItem } from "./board-item";
 import { CreateBoardDialog } from "./create-board-dialog";
