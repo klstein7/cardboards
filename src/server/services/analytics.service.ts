@@ -1,12 +1,11 @@
 import "server-only";
 
 import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
-import { and, eq, gte, lte, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { db } from "../db";
-import { boards, cards, columns, projects, projectUsers } from "../db/schema";
+import { columns, projects, projectUsers } from "../db/schema";
 
-// Helper to filter data by date range
 function filterByDateRange<T extends { updatedAt?: Date | null }>(
   data: T[],
   startDate?: Date | null,
@@ -15,7 +14,7 @@ function filterByDateRange<T extends { updatedAt?: Date | null }>(
   if (!startDate || !endDate) return data;
 
   return data.filter((item) => {
-    const date = item.updatedAt || new Date();
+    const date = item.updatedAt ?? new Date();
     return isWithinInterval(date, { start: startDate, end: endDate });
   });
 }
@@ -55,22 +54,18 @@ async function getProjectProgress(
 
   if (!project) throw new Error("Project not found");
 
-  // Ensure boards exist before mapping
   if (!project.boards || project.boards.length === 0) {
     return [];
   }
 
   return project.boards.map((board) => {
-    // Handle potential null values
     if (!board?.columns) {
       return { name: "Unknown Board", value: 0 };
     }
 
-    // Filter cards by date range if provided
     const allCards = board.columns.flatMap((col) => col.cards || []);
     const filteredCards = filterByDateRange(allCards, startDate, endDate);
 
-    // Get all cards and completed cards within the date range
     const completedCards = board.columns
       .filter((col) => col.isCompleted)
       .flatMap((col) => filterByDateRange(col.cards || [], startDate, endDate));
@@ -94,9 +89,8 @@ async function getTaskCompletionTrend(
 ): Promise<DataPoint[]> {
   if (!projectId) throw new Error("Project ID is required");
 
-  // Default to last 30 days if no dates provided
-  const end = endDate || new Date();
-  const start = startDate || subDays(end, 30);
+  const end = endDate ?? new Date();
+  const start = startDate ?? subDays(end, 30);
 
   const project = await db.query.projects.findFirst({
     where: eq(projects.id, projectId),
@@ -133,7 +127,6 @@ async function getTaskCompletionTrend(
         card.updatedAt && card.updatedAt >= start && card.updatedAt <= end,
     );
 
-  // Group cards by week
   const weeklyData = new Map<string, number>();
   completedCards.forEach((card) => {
     if (!card.updatedAt) return;
@@ -141,10 +134,9 @@ async function getTaskCompletionTrend(
     const updatedAt = card.updatedAt;
     const weekStart = startOfWeek(updatedAt);
     const weekKey = format(weekStart, "yyyy-MM-dd");
-    weeklyData.set(weekKey, (weeklyData.get(weekKey) || 0) + 1);
+    weeklyData.set(weekKey, (weeklyData.get(weekKey) ?? 0) + 1);
   });
 
-  // Get an array of weeks between start and end dates
   const weeks: Date[] = [];
   const currentWeek = startOfWeek(start);
   const endWeek = startOfWeek(end);
@@ -154,12 +146,11 @@ async function getTaskCompletionTrend(
     currentWeek.setDate(currentWeek.getDate() + 7);
   }
 
-  // Sort weeks and get data for chart
   return weeks.map((weekDate, i) => {
     const weekKey = format(weekDate, "yyyy-MM-dd");
     return {
       name: `Week ${i + 1}`,
-      value: weeklyData.get(weekKey) || 0,
+      value: weeklyData.get(weekKey) ?? 0,
     };
   });
 }
@@ -187,28 +178,24 @@ async function getUserActivity(
     return [];
   }
 
-  // Filter cards by date range if provided
-  return (
-    projectUsersWithCards
-      .map((user) => {
-        if (!user?.assignedCards) {
-          return { name: "Unknown User", value: 0 };
-        }
+  return projectUsersWithCards
+    .map((user) => {
+      if (!user?.assignedCards) {
+        return { name: "Unknown User", value: 0 };
+      }
 
-        const filteredCards = filterByDateRange(
-          user.assignedCards,
-          startDate,
-          endDate,
-        );
+      const filteredCards = filterByDateRange(
+        user.assignedCards,
+        startDate,
+        endDate,
+      );
 
-        return {
-          name: user.user?.name || "Unknown",
-          value: filteredCards.length,
-        };
-      })
-      // Sort by most active users first
-      .sort((a, b) => b.value - a.value)
-  );
+      return {
+        name: user.user?.name || "Unknown",
+        value: filteredCards.length,
+      };
+    })
+    .sort((a, b) => b.value - a.value);
 }
 
 async function getPriorityDistribution(
@@ -246,15 +233,12 @@ async function getPriorityDistribution(
     ];
   }
 
-  // Get all cards across all boards
   const allCards = project.boards
     .flatMap((board) => board.columns || [])
     .flatMap((column) => column.cards || []);
 
-  // Filter by date if provided
   const filteredCards = filterByDateRange(allCards, startDate, endDate);
 
-  // Count cards by priority
   const priorityCounts = {
     low: 0,
     medium: 0,
@@ -317,15 +301,12 @@ async function getTasksPerDueDate(
     ];
   }
 
-  // Get all cards across all boards
   const allCards = project.boards
     .flatMap((board) => board.columns || [])
     .flatMap((column) => column.cards || []);
 
-  // Filter by card creation/update date if provided
   const filteredCards = filterByDateRange(allCards, startDate, endDate);
 
-  // Categorize cards by due date status
   const overdue = filteredCards.filter(
     (card) => card.dueDate && card.dueDate < today,
   ).length;
