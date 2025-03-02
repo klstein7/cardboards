@@ -32,7 +32,6 @@ export const cardCommentRouter = createTRPCRouter({
   update: authedProcedure
     .input(CardCommentUpdateSchema)
     .mutation(async ({ input }) => {
-      const comment = await cardCommentService.get(input.cardCommentId);
       return cardCommentService.update(input.cardCommentId, input.data);
     }),
 });

@@ -1,8 +1,3 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
 import { LayoutGrid, List, Search } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
@@ -15,7 +10,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-import { api } from "~/server/api";
+import { HydrateClient, trpc } from "~/trpc/server";
 
 import { BoardList } from "../../_components/board-list";
 import { ProjectStats } from "../../_components/project-stats";
@@ -26,56 +21,29 @@ import { ProjectToolbar } from "./_components/project-toolbar";
 type Params = Promise<{ projectId: string }>;
 
 export default async function ProjectPage({ params }: { params: Params }) {
-  const queryClient = new QueryClient();
-
   const { projectId } = await params;
 
-  const project = await api.project.get(projectId);
-  const boards = await api.board.list(projectId);
-
+  // Prefetch all needed data
   await Promise.all([
-    queryClient.prefetchQuery({
-      queryKey: ["project", projectId],
-      queryFn: () => Promise.resolve(project),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["project-users", projectId],
-      queryFn: () => api.projectUser.list(projectId),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["boards", projectId],
-      queryFn: () => Promise.resolve(boards),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["board-count-by-project-id", projectId],
-      queryFn: () => api.board.countByProjectId(projectId),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["project-user-count-by-project-id", projectId],
-      queryFn: () => api.projectUser.countByProjectId(projectId),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["card-count-by-project-id", projectId],
-      queryFn: () => api.card.countByProjectId(projectId),
-    }),
-
-    Promise.all(
-      boards.map((board) =>
-        queryClient.prefetchQuery({
-          queryKey: ["card-count-by-board-id", board.id],
-          queryFn: () => api.card.countByBoardId(board.id),
-        }),
-      ),
-    ),
+    trpc.project.get.prefetch(projectId),
+    trpc.board.list.prefetch(projectId),
+    trpc.projectUser.list.prefetch(projectId),
+    trpc.board.countByProjectId.prefetch(projectId),
+    trpc.projectUser.countByProjectId.prefetch(projectId),
+    trpc.card.countByProjectId.prefetch(projectId),
   ]);
 
+  // Get data directly for rendering and further prefetching
+  const project = await trpc.project.get(projectId);
+  const boards = await trpc.board.list(projectId);
+
+  // Prefetch card count for each board
+  await Promise.all(
+    boards.map((board) => trpc.card.countByBoardId.prefetch(board.id)),
+  );
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <div className="flex h-[100dvh] w-full flex-col">
         <ProjectHeader projectName={project.name} />
 
@@ -190,6 +158,6 @@ export default async function ProjectPage({ params }: { params: Params }) {
           </div>
         </main>
       </div>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

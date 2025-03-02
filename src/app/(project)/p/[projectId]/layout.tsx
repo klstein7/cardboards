@@ -1,10 +1,4 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-
-import { api } from "~/server/api";
+import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectSidebar } from "../../_components/project-sidebar";
 
@@ -19,39 +13,30 @@ export default async function ProjectLayout({
   children,
   params,
 }: ProjectLayoutProps) {
-  const queryClient = new QueryClient();
-
   const { projectId } = await params;
 
-  const boards = await api.board.list(projectId);
+  // Prefetch all needed data
+  await Promise.all([
+    trpc.board.list.prefetch(projectId),
+    trpc.projectUser.list.prefetch(projectId),
+  ]);
 
-  await queryClient.prefetchQuery({
-    queryKey: ["boards", projectId],
-    queryFn: () => Promise.resolve(boards),
-  });
+  // Get boards directly as we need them for further prefetching
+  const boards = await trpc.board.list(projectId);
 
-  await queryClient.prefetchQuery({
-    queryKey: ["project-users", projectId],
-    queryFn: () => api.projectUser.list(projectId),
-  });
-
+  // Prefetch column data for each board
   await Promise.all(
     boards.map((board) => {
-      return Promise.all([
-        queryClient.prefetchQuery({
-          queryKey: ["columns", board.id],
-          queryFn: () => api.column.list(board.id),
-        }),
-      ]);
+      return trpc.column.list.prefetch(board.id);
     }),
   );
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <div className="flex h-[100dvh] w-full overflow-hidden">
         <ProjectSidebar projectId={projectId} />
         <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
       </div>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

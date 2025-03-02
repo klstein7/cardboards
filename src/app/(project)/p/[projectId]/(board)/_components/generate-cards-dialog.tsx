@@ -17,9 +17,8 @@ import {
 import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
-import { useCreateManyCards } from "~/lib/hooks";
+import { useCreateManyCards, useGenerateCards } from "~/lib/hooks";
 import { cn, type Priority } from "~/lib/utils";
-import { api } from "~/server/api";
 import { type CardGenerateResponse, GeneratedCardSchema } from "~/server/zod";
 
 import { CardBase } from "./card-base";
@@ -43,11 +42,12 @@ export function GenerateCardsDialog({
   >([]);
 
   const createManyCardsMutation = useCreateManyCards();
+  const generateCardsMutation = useGenerateCards();
 
   const handleGenerate = async () => {
     setIsGenerating(true);
     setGeneratedCards([]);
-    const { object } = await api.card.generate({
+    const { object } = await generateCardsMutation.mutateAsync({
       prompt,
       boardId,
     });
