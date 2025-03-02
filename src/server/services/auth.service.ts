@@ -3,131 +3,157 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { and, eq } from "drizzle-orm";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projectUsers } from "../db/schema";
+import { BaseService } from "./base.service";
 import { projectUserService } from "./project-user.service";
 
-async function requireProjectAdmin(
-  projectId: string,
-  tx: Transaction | Database = db,
-) {
-  const projectUser = await projectUserService.getCurrentProjectUser(
-    projectId,
-    tx,
-  );
+/**
+ * Service for handling authorization and authentication
+ */
+class AuthService extends BaseService {
+  /**
+   * Verify the current user has admin rights in the project
+   */
+  async requireProjectAdmin(
+    projectId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const projectUser = await projectUserService.getCurrentProjectUser(
+        projectId,
+        txOrDb,
+      );
 
-  console.log("projectUser", projectUser);
+      if (projectUser.role !== "admin") {
+        throw new Error("Unauthorized: Admin access required");
+      }
 
-  if (projectUser.role !== "admin") {
-    throw new Error("Unauthorized: Admin access required");
+      return projectUser;
+    }, tx);
   }
 
-  return projectUser;
+  /**
+   * Verify the current user can access the specified board
+   */
+  async canAccessBoard(boardId: string, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: You must be logged in");
+      }
+
+      const [board] = await txOrDb
+        .select({
+          id: boards.id,
+          projectId: boards.projectId,
+        })
+        .from(boards)
+        .where(eq(boards.id, boardId));
+
+      if (!board) {
+        throw new Error("Board not found");
+      }
+
+      await this.canAccessProject(board.projectId, txOrDb);
+
+      return board;
+    }, tx);
+  }
+
+  /**
+   * Verify the current user can access the specified card
+   */
+  async canAccessCard(cardId: number, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: You must be logged in");
+      }
+
+      const [card] = await txOrDb
+        .select({
+          id: cards.id,
+          columnId: cards.columnId,
+        })
+        .from(cards)
+        .where(eq(cards.id, cardId));
+
+      if (!card) {
+        throw new Error("Card not found");
+      }
+
+      await this.canAccessColumn(card.columnId, txOrDb);
+
+      return card;
+    }, tx);
+  }
+
+  /**
+   * Verify the current user can access the specified column
+   */
+  async canAccessColumn(
+    columnId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: You must be logged in");
+      }
+
+      const [column] = await txOrDb
+        .select({
+          id: columns.id,
+          boardId: columns.boardId,
+        })
+        .from(columns)
+        .where(eq(columns.id, columnId));
+
+      if (!column) {
+        throw new Error("Column not found");
+      }
+
+      await this.canAccessBoard(column.boardId, txOrDb);
+
+      return column;
+    }, tx);
+  }
+
+  /**
+   * Verify the current user can access the specified project
+   */
+  async canAccessProject(
+    projectId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: You must be logged in");
+      }
+
+      const [projectUser] = await txOrDb
+        .select()
+        .from(projectUsers)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        );
+
+      if (!projectUser) {
+        throw new Error("Unauthorized: You don't have access to this project");
+      }
+
+      return projectUser;
+    }, tx);
+  }
 }
 
-async function canAccessBoard(
-  boardId: string,
-  tx: Transaction | Database = db,
-) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
-  }
-
-  const [result] = await tx
-    .select({
-      projectUser: projectUsers,
-    })
-    .from(boards)
-    .innerJoin(projectUsers, eq(boards.projectId, projectUsers.projectId))
-    .where(and(eq(boards.id, boardId), eq(projectUsers.userId, userId)));
-
-  if (!result) {
-    throw new Error("Unauthorized: Cannot access this board");
-  }
-
-  return result.projectUser;
-}
-
-async function canAccessCard(cardId: number, tx: Transaction | Database = db) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
-  }
-
-  const [result] = await tx
-    .select({
-      projectUser: projectUsers,
-    })
-    .from(cards)
-    .innerJoin(columns, eq(cards.columnId, columns.id))
-    .innerJoin(boards, eq(columns.boardId, boards.id))
-    .innerJoin(projectUsers, eq(boards.projectId, projectUsers.projectId))
-    .where(and(eq(cards.id, cardId), eq(projectUsers.userId, userId)));
-
-  if (!result) {
-    throw new Error("Unauthorized: Cannot access this card");
-  }
-
-  return result.projectUser;
-}
-
-async function canAccessColumn(
-  columnId: string,
-  tx: Transaction | Database = db,
-) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
-  }
-
-  const [result] = await tx
-    .select({
-      projectUser: projectUsers,
-    })
-    .from(columns)
-    .innerJoin(boards, eq(columns.boardId, boards.id))
-    .innerJoin(projectUsers, eq(boards.projectId, projectUsers.projectId))
-    .where(and(eq(columns.id, columnId), eq(projectUsers.userId, userId)));
-
-  if (!result) {
-    throw new Error("Unauthorized: Cannot access this column");
-  }
-
-  return result.projectUser;
-}
-
-async function canAccessProject(
-  projectId: string,
-  tx: Transaction | Database = db,
-) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
-  }
-
-  const projectUser = await tx.query.projectUsers.findFirst({
-    where: and(
-      eq(projectUsers.projectId, projectId),
-      eq(projectUsers.userId, userId),
-    ),
-  });
-
-  if (!projectUser) {
-    throw new Error("Unauthorized: Cannot access this project");
-  }
-
-  return projectUser;
-}
-
-export const authService = {
-  requireProjectAdmin,
-  canAccessBoard,
-  canAccessCard,
-  canAccessColumn,
-  canAccessProject,
-};
+export const authService = new AuthService();

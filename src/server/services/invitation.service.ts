@@ -5,62 +5,80 @@ import { eq } from "drizzle-orm";
 import { type Database, db, type Transaction } from "../db";
 import { invitations } from "../db/schema";
 import { projectUserService, userService } from "./";
+import { BaseService } from "./base.service";
 
-async function create(projectId: string) {
-  const projectUser = await projectUserService.getCurrentProjectUser(projectId);
+/**
+ * Service for managing invitation-related operations
+ */
+class InvitationService extends BaseService {
+  /**
+   * Create a new invitation
+   */
+  async create(projectId: string) {
+    return this.executeWithTx(async (txOrDb) => {
+      const projectUser =
+        await projectUserService.getCurrentProjectUser(projectId);
 
-  const [invitation] = await db
-    .insert(invitations)
-    .values({
-      projectId,
-      invitedById: projectUser.id,
-    })
-    .returning();
+      const [invitation] = await txOrDb
+        .insert(invitations)
+        .values({
+          projectId,
+          invitedById: projectUser.id,
+        })
+        .returning();
 
-  if (!invitation) {
-    throw new Error("Failed to create invitation");
+      if (!invitation) {
+        throw new Error("Failed to create invitation");
+      }
+
+      return invitation;
+    });
   }
 
-  return invitation;
-}
+  /**
+   * Get an invitation by ID
+   */
+  async get(invitationId: string) {
+    return this.executeWithTx(async (txOrDb) => {
+      const invitation = await txOrDb.query.invitations.findFirst({
+        where: eq(invitations.id, invitationId),
+      });
 
-async function get(invitationId: string) {
-  const invitation = await db.query.invitations.findFirst({
-    where: eq(invitations.id, invitationId),
-  });
+      if (!invitation) {
+        throw new Error("Invitation not found");
+      }
 
-  if (!invitation) {
-    throw new Error("Invitation not found");
+      return invitation;
+    });
   }
 
-  return invitation;
-}
+  /**
+   * Accept an invitation
+   */
+  async accept(
+    invitationId: string,
+    userId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const invitation = await this.get(invitationId);
 
-async function accept(
-  invitationId: string,
-  userId: string,
-  tx: Transaction | Database = db,
-) {
-  const invitation = await get(invitationId);
+      if (invitation.expiresAt.getTime() < Date.now()) {
+        throw new Error("Invitation expired");
+      }
 
-  if (invitation.expiresAt.getTime() < Date.now()) {
-    throw new Error("Invitation expired");
+      await userService.syncCurrentUser(txOrDb);
+
+      await projectUserService.create(
+        {
+          projectId: invitation.projectId,
+          userId,
+          role: "member",
+        },
+        txOrDb,
+      );
+    }, tx);
   }
-
-  await userService.syncCurrentUser(tx);
-
-  await projectUserService.create(
-    {
-      projectId: invitation.projectId,
-      userId,
-      role: "member",
-    },
-    tx,
-  );
 }
 
-export const invitationService = {
-  create,
-  get,
-  accept,
-};
+export const invitationService = new InvitationService();

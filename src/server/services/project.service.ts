@@ -3,82 +3,107 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";
 import { type ProjectCreate } from "../zod";
+import { BaseService } from "./base.service";
 import { projectUserService } from "./project-user.service";
 
-async function create(data: ProjectCreate, tx: Transaction | Database = db) {
-  const { userId } = await auth();
+/**
+ * Service for managing project-related operations
+ */
+class ProjectService extends BaseService {
+  /**
+   * Create a new project
+   */
+  async create(data: ProjectCreate, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
 
-  const [project] = await tx.insert(projects).values(data).returning();
+      const [project] = await txOrDb.insert(projects).values(data).returning();
 
-  if (!project || !userId) {
-    throw new Error("Failed to create project");
+      if (!project || !userId) {
+        throw new Error("Failed to create project");
+      }
+
+      await projectUserService.create(
+        {
+          projectId: project.id,
+          userId,
+          role: "admin",
+        },
+        txOrDb,
+      );
+
+      return project;
+    }, tx);
   }
 
-  await projectUserService.create(
-    {
-      projectId: project.id,
-      userId,
-      role: "admin",
-    },
-    tx,
-  );
-
-  return project;
-}
-
-async function list(tx: Transaction | Database = db) {
-  return tx.query.projects.findMany({
-    orderBy: (projects, { desc }) => [desc(projects.createdAt)],
-    with: {
-      boards: true,
-      projectUsers: true,
-    },
-  });
-}
-
-async function get(projectId: string, tx: Transaction | Database = db) {
-  const project = await tx.query.projects.findFirst({
-    where: eq(projects.id, projectId),
-  });
-
-  if (!project) {
-    throw new Error("Project not found");
+  /**
+   * List all projects
+   */
+  async list(tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      return txOrDb.query.projects.findMany({
+        orderBy: (projects, { desc }) => [desc(projects.createdAt)],
+        with: {
+          boards: true,
+          projectUsers: true,
+        },
+      });
+    }, tx);
   }
 
-  return project;
-}
+  /**
+   * Get a project by ID
+   */
+  async get(projectId: string, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const project = await txOrDb.query.projects.findFirst({
+        where: eq(projects.id, projectId),
+      });
 
-async function del(projectId: string, tx: Transaction | Database = db) {
-  await tx.delete(projects).where(eq(projects.id, projectId));
-}
+      if (!project) {
+        throw new Error("Project not found");
+      }
 
-async function getProjectIdByCardId(
-  cardId: number,
-  tx: Transaction | Database = db,
-) {
-  const [result] = await tx
-    .select({
-      projectId: boards.projectId,
-    })
-    .from(cards)
-    .innerJoin(columns, eq(cards.columnId, columns.id))
-    .innerJoin(boards, eq(columns.boardId, boards.id))
-    .where(eq(cards.id, cardId));
-
-  if (!result) {
-    throw new Error("Project not found");
+      return project;
+    }, tx);
   }
 
-  return result.projectId;
+  /**
+   * Delete a project
+   */
+  async del(projectId: string, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      await txOrDb.delete(projects).where(eq(projects.id, projectId));
+    }, tx);
+  }
+
+  /**
+   * Get a project ID from a card ID
+   */
+  async getProjectIdByCardId(
+    cardId: number,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [result] = await txOrDb
+        .select({
+          projectId: boards.projectId,
+        })
+        .from(cards)
+        .innerJoin(columns, eq(cards.columnId, columns.id))
+        .innerJoin(boards, eq(columns.boardId, boards.id))
+        .where(eq(cards.id, cardId));
+
+      if (!result) {
+        throw new Error("Project not found");
+      }
+
+      return result.projectId;
+    }, tx);
+  }
 }
 
-export const projectService = {
-  create,
-  list,
-  get,
-  del,
-  getProjectIdByCardId,
-};
+export const projectService = new ProjectService();

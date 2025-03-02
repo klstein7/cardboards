@@ -6,122 +6,148 @@ import { and, count, eq } from "drizzle-orm";
 import { type Database, db, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
 import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
+import { BaseService } from "./base.service";
 
-async function list(projectId: string, tx: Transaction | Database = db) {
-  return tx.query.projectUsers.findMany({
-    where: eq(projectUsers.projectId, projectId),
-    with: {
-      user: true,
-    },
-  });
-}
-
-async function create(
-  data: ProjectUserCreate,
-  tx: Transaction | Database = db,
-) {
-  const [projectUser] = await tx
-    .insert(projectUsers)
-    .values(data)
-    .onConflictDoUpdate({
-      target: [projectUsers.projectId, projectUsers.userId],
-      set: {
-        role: data.role,
-      },
-    })
-    .returning();
-
-  if (!projectUser) {
-    throw new Error("Failed to create project user");
+/**
+ * Service for managing project user operations
+ */
+class ProjectUserService extends BaseService {
+  /**
+   * List all users for a project
+   */
+  async list(projectId: string, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      return txOrDb.query.projectUsers.findMany({
+        where: eq(projectUsers.projectId, projectId),
+        with: {
+          user: true,
+        },
+      });
+    }, tx);
   }
 
-  return projectUser;
-}
+  /**
+   * Create a new project user
+   */
+  async create(data: ProjectUserCreate, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [projectUser] = await txOrDb
+        .insert(projectUsers)
+        .values(data)
+        .onConflictDoUpdate({
+          target: [projectUsers.projectId, projectUsers.userId],
+          set: {
+            role: data.role,
+          },
+        })
+        .returning();
 
-async function getByProjectIdAndUserId(
-  projectId: string,
-  userId: string,
-  tx: Transaction | Database = db,
-) {
-  const projectUser = await tx.query.projectUsers.findFirst({
-    where: and(
-      eq(projectUsers.projectId, projectId),
-      eq(projectUsers.userId, userId),
-    ),
-  });
+      if (!projectUser) {
+        throw new Error("Failed to create project user");
+      }
 
-  if (!projectUser) {
-    throw new Error("Project user not found");
+      return projectUser;
+    }, tx);
   }
 
-  return projectUser;
-}
+  /**
+   * Get project user by project ID and user ID
+   */
+  async getByProjectIdAndUserId(
+    projectId: string,
+    userId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const projectUser = await txOrDb.query.projectUsers.findFirst({
+        where: and(
+          eq(projectUsers.projectId, projectId),
+          eq(projectUsers.userId, userId),
+        ),
+      });
 
-async function update(
-  projectId: string,
-  userId: string,
-  data: ProjectUserUpdatePayload,
-  tx: Transaction | Database = db,
-) {
-  const [projectUser] = await tx
-    .update(projectUsers)
-    .set(data)
-    .where(
-      and(
-        eq(projectUsers.projectId, projectId),
-        eq(projectUsers.userId, userId),
-      ),
-    )
-    .returning();
+      if (!projectUser) {
+        throw new Error("Project user not found");
+      }
 
-  if (!projectUser) {
-    throw new Error("Failed to update project user");
+      return projectUser;
+    }, tx);
   }
 
-  return projectUser;
-}
+  /**
+   * Update a project user
+   */
+  async update(
+    projectId: string,
+    userId: string,
+    data: ProjectUserUpdatePayload,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [projectUser] = await txOrDb
+        .update(projectUsers)
+        .set(data)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        )
+        .returning();
 
-async function countByProjectId(
-  projectId: string,
-  tx: Transaction | Database = db,
-) {
-  const [result] = await tx
-    .select({ count: count() })
-    .from(projectUsers)
-    .where(eq(projectUsers.projectId, projectId));
+      if (!projectUser) {
+        throw new Error("Failed to update project user");
+      }
 
-  return result?.count ?? 0;
-}
-
-async function getCurrentProjectUser(
-  projectId: string,
-  tx: Transaction | Database = db,
-) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized: User not authenticated");
+      return projectUser;
+    }, tx);
   }
 
-  const projectUser = await tx.query.projectUsers.findFirst({
-    where: and(
-      eq(projectUsers.projectId, projectId),
-      eq(projectUsers.userId, userId),
-    ),
-  });
+  /**
+   * Count project users by project ID
+   */
+  async countByProjectId(
+    projectId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [result] = await txOrDb
+        .select({ count: count() })
+        .from(projectUsers)
+        .where(eq(projectUsers.projectId, projectId));
 
-  if (!projectUser) {
-    throw new Error("Unauthorized: User is not a member of this project");
+      return result?.count ?? 0;
+    }, tx);
   }
 
-  return projectUser;
+  /**
+   * Get the current user's project user record
+   */
+  async getCurrentProjectUser(
+    projectId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: User not authenticated");
+      }
+
+      const projectUser = await txOrDb.query.projectUsers.findFirst({
+        where: and(
+          eq(projectUsers.projectId, projectId),
+          eq(projectUsers.userId, userId),
+        ),
+      });
+
+      if (!projectUser) {
+        throw new Error("Unauthorized: User is not a member of this project");
+      }
+
+      return projectUser;
+    }, tx);
+  }
 }
 
-export const projectUserService = {
-  list,
-  create,
-  getByProjectIdAndUserId,
-  update,
-  countByProjectId,
-  getCurrentProjectUser,
-};
+export const projectUserService = new ProjectUserService();
