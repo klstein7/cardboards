@@ -9,7 +9,9 @@ export function useCreateProject() {
   return useMutation({
     ...trpc.project.create.mutationOptions({
       onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: ["projects"] });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.project.list.queryKey(),
+        });
       },
     }),
   });

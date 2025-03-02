@@ -8,9 +8,9 @@ export function useDeleteBoard() {
 
   return useMutation({
     ...trpc.board.delete.mutationOptions({
-      onSuccess: async ({ projectId }) => {
-        await queryClient.invalidateQueries({
-          queryKey: ["boards", projectId],
+      onSuccess: (deletedBoard) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.board.list.queryKey(deletedBoard.projectId),
         });
       },
     }),

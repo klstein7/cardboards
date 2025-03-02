@@ -9,7 +9,9 @@ export function useDeleteProject() {
   return useMutation({
     ...trpc.project.delete.mutationOptions({
       onSuccess: () => {
-        void queryClient.invalidateQueries({ queryKey: ["projects"] });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.project.list.queryKey(),
+        });
       },
     }),
   });

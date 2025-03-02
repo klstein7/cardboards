@@ -8,9 +8,9 @@ export function useUpdateColumn() {
 
   return useMutation({
     ...trpc.column.update.mutationOptions({
-      onSuccess: async ({ boardId }) => {
-        await queryClient.invalidateQueries({
-          queryKey: ["columns", boardId],
+      onSuccess: (updatedColumn) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.column.list.queryKey(updatedColumn.boardId),
         });
       },
     }),

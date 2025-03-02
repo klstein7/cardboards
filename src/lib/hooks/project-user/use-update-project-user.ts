@@ -8,9 +8,9 @@ export function useUpdateProjectUser() {
 
   return useMutation({
     ...trpc.projectUser.update.mutationOptions({
-      onSuccess: async ({ projectId }) => {
-        await queryClient.invalidateQueries({
-          queryKey: ["project-users", projectId],
+      onSuccess: (updatedUser) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.projectUser.list.queryKey(updatedUser.projectId),
         });
       },
     }),

@@ -8,9 +8,9 @@ export function useUpdateCardComment() {
 
   return useMutation({
     ...trpc.cardComment.update.mutationOptions({
-      onSuccess: async ({ cardId }) => {
-        await queryClient.invalidateQueries({
-          queryKey: ["card-comments", cardId],
+      onSuccess: (updatedComment) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.cardComment.list.queryKey(updatedComment.cardId),
         });
       },
     }),

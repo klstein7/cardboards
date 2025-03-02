@@ -1,4 +1,4 @@
-import { api } from "~/server/api";
+import { trpc } from "~/trpc/server";
 
 import { SettingsGeneralForm } from "../_components/settings-general-form";
 
@@ -11,7 +11,11 @@ export default async function ProjectSettingsPage({
 }) {
   const { projectId } = await params;
 
-  const project = await api.project.get(projectId);
+  // Prefetch the project data
+  await trpc.project.get.prefetch(projectId);
+
+  // Get the project data
+  const project = await trpc.project.get(projectId);
 
   return (
     <div className="flex flex-col gap-6">

@@ -8,9 +8,9 @@ export function useCreateCardComment() {
 
   return useMutation({
     ...trpc.cardComment.create.mutationOptions({
-      onSuccess: ({ cardId }) => {
+      onSuccess: (comment) => {
         void queryClient.invalidateQueries({
-          queryKey: ["card-comments", cardId],
+          queryKey: trpc.cardComment.list.queryKey(comment.cardId),
         });
       },
     }),

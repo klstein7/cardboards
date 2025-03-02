@@ -1,19 +1,15 @@
 // src/app/(project)/_types.ts
 import { type ChartConfig } from "~/components/ui/chart";
-import { type api } from "~/server/api";
+import { type RouterOutputs } from "~/trpc/init";
 
-export type Card = Awaited<ReturnType<typeof api.card.list>>[number];
-export type CardComment = Awaited<
-  ReturnType<typeof api.cardComment.list>
->[number];
+export type Card = RouterOutputs["card"]["list"][number];
+export type CardComment = RouterOutputs["cardComment"]["list"][number];
 
-export type Column = Awaited<ReturnType<typeof api.column.list>>[number];
-export type Board = Awaited<ReturnType<typeof api.board.list>>[number];
-export type Project = Awaited<ReturnType<typeof api.project.list>>[number];
-export type ProjectDetail = Awaited<ReturnType<typeof api.project.get>>;
-export type ProjectUser = Awaited<
-  ReturnType<typeof api.projectUser.list>
->[number];
+export type Column = RouterOutputs["column"]["list"][number];
+export type Board = RouterOutputs["board"]["list"][number];
+export type Project = RouterOutputs["project"]["list"][number];
+export type ProjectDetail = RouterOutputs["project"]["get"];
+export type ProjectUser = RouterOutputs["projectUser"]["list"][number];
 
 export type AnalyticsData = {
   config: ChartConfig;

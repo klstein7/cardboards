@@ -8,8 +8,10 @@ export function useCreateColumn() {
 
   return useMutation({
     ...trpc.column.create.mutationOptions({
-      onSuccess: async ({ boardId }) => {
-        await queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
+      onSuccess: (newColumn) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.column.list.queryKey(newColumn.boardId),
+        });
       },
     }),
   });

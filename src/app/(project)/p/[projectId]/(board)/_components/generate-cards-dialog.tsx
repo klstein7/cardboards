@@ -1,6 +1,5 @@
 "use client";
 
-import { readStreamableValue } from "ai/rsc";
 import { Check, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -47,30 +46,31 @@ export function GenerateCardsDialog({
   const handleGenerate = async () => {
     setIsGenerating(true);
     setGeneratedCards([]);
-    const { object } = await generateCardsMutation.mutateAsync({
-      prompt,
-      boardId,
-    });
 
-    for await (const streamable of readStreamableValue<CardGenerateResponse>(
-      object,
-    )) {
-      if (!streamable) continue;
-      if (streamable.cards) {
-        streamable.cards.forEach((card) => {
-          const parsedCard = GeneratedCardSchema.safeParse(card);
-          if (parsedCard.success) {
-            setGeneratedCards((prev) => {
-              const exists = prev.some(
-                (c) => c.title === parsedCard.data.title,
-              );
-              return exists ? prev : [...prev, parsedCard.data];
-            });
-          }
-        });
+    try {
+      const cards = await generateCardsMutation.mutateAsync({
+        prompt,
+        boardId,
+      });
+
+      // Process the cards and update state
+      if (cards && cards.length > 0) {
+        const validCards = cards
+          .map((card) => {
+            const result = GeneratedCardSchema.safeParse(card);
+            return result.success ? result.data : null;
+          })
+          .filter(
+            (card): card is CardGenerateResponse["cards"][0] => card !== null,
+          );
+
+        setGeneratedCards(validCards);
       }
+    } catch (error) {
+      console.error("Error generating cards:", error);
+    } finally {
+      setIsGenerating(false);
     }
-    setIsGenerating(false);
   };
 
   const handleAddCards = async () => {

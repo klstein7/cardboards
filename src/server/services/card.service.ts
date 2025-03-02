@@ -2,7 +2,7 @@ import "server-only";
 
 import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
-import { streamObject } from "ai";
+import { generateObject, streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
@@ -322,17 +322,14 @@ class CardService extends BaseService {
   }
 
   /**
-   * Generate a card using AI
+   * Generate a cards using AI
    */
   async generate(boardId: string, prompt: string) {
-    const stream = createStreamableValue();
-
     const board = await boardService.getWithDetails(boardId);
 
-    (async () => {
-      const { partialObjectStream } = streamObject({
-        model: google("gemini-2.0-flash-exp"),
-        prompt: `
+    const { object } = await generateObject({
+      model: google("gemini-2.0-flash-exp"),
+      prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:
 
@@ -390,18 +387,14 @@ class CardService extends BaseService {
           - ${JSON.stringify(board)}
 
           Based on the provided board context and prompt, generate cards that follow these specifications while maintaining data integrity.
+
+          Prompt:
+          ${prompt}
         `,
-        schema: CardGenerateResponseSchema,
-      });
+      schema: CardGenerateResponseSchema,
+    });
 
-      for await (const partialObject of partialObjectStream) {
-        stream.update(partialObject);
-      }
-
-      stream.done();
-    })().catch(console.error);
-
-    return { object: stream.value };
+    return object.cards;
   }
 
   /**

@@ -10,7 +10,7 @@ export function useCreateCard() {
     ...trpc.card.create.mutationOptions({
       onSuccess: ({ columnId }) => {
         void queryClient.invalidateQueries({
-          queryKey: ["cards", columnId],
+          queryKey: trpc.card.list.queryKey(columnId),
         });
       },
     }),

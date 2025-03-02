@@ -10,7 +10,7 @@ export function useGenerateBoard() {
     ...trpc.board.generate.mutationOptions({
       onSuccess: async ({ projectId }) => {
         await queryClient.invalidateQueries({
-          queryKey: ["boards", projectId],
+          queryKey: trpc.board.list.queryKey(projectId),
         });
       },
     }),

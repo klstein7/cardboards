@@ -8,9 +8,9 @@ export function useRemoveCardComment() {
 
   return useMutation({
     ...trpc.cardComment.remove.mutationOptions({
-      onSuccess: async ({ cardId }) => {
-        await queryClient.invalidateQueries({
-          queryKey: ["card-comments", cardId],
+      onSuccess: (removedComment) => {
+        void queryClient.invalidateQueries({
+          queryKey: trpc.cardComment.list.queryKey(removedComment.cardId),
         });
       },
     }),

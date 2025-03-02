@@ -8,8 +8,17 @@ export function useDeleteCard() {
 
   return useMutation({
     ...trpc.card.delete.mutationOptions({
-      onSuccess: ({ columnId }) => {
-        void queryClient.invalidateQueries({ queryKey: ["cards", columnId] });
+      onSuccess: (_, cardId) => {
+        // Get the columnId from the card data
+        const cardData = queryClient.getQueryData<{ columnId: string }>(
+          trpc.card.get.queryKey(cardId),
+        );
+
+        if (cardData?.columnId) {
+          void queryClient.invalidateQueries({
+            queryKey: trpc.card.list.queryKey(cardData.columnId),
+          });
+        }
       },
     }),
   });

@@ -9,7 +9,9 @@ export function useCreateBoard() {
   return useMutation({
     ...trpc.board.create.mutationOptions({
       onSuccess: ({ projectId }) => {
-        void queryClient.invalidateQueries({ queryKey: ["boards", projectId] });
+        void queryClient.invalidateQueries({
+          queryKey: trpc.board.list.queryKey(projectId),
+        });
       },
     }),
   });

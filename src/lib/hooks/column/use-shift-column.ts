@@ -11,70 +11,88 @@ export function useShiftColumn() {
     ...trpc.column.shift.mutationOptions({
       onMutate: async ({ columnId, data: { direction } }) => {
         const queries = queryClient.getQueriesData<Column[]>({
-          queryKey: ["columns"],
-        });
-        const [, columns] =
-          queries.find(([_, data]) => data?.some((c) => c.id === columnId)) ??
-          [];
-        const column = columns?.find((c) => c.id === columnId);
-        if (!column?.boardId) return;
-
-        await queryClient.cancelQueries({
-          queryKey: ["columns", column.boardId],
+          queryKey: trpc.column.list.queryKey(),
+          exact: false,
         });
 
-        const previousColumns = queryClient.getQueryData<Column[]>([
-          "columns",
-          column.boardId,
-        ]);
-        if (!previousColumns) return;
-
-        const currentIndex = previousColumns.findIndex(
-          (c) => c.id === columnId,
+        const matchingQuery = queries.find(([, columns]) =>
+          columns?.some((c: Column) => c.id === columnId),
         );
-        if (currentIndex === -1) return;
+
+        if (!matchingQuery) return;
+
+        const [queryKey] = matchingQuery;
+        const queryKeyArray = queryKey as unknown[];
+
+        let boardId: string | undefined;
 
         if (
-          (direction === "up" && currentIndex === 0) ||
-          (direction === "down" && currentIndex === previousColumns.length - 1)
+          Array.isArray(queryKeyArray) &&
+          queryKeyArray.length > 1 &&
+          typeof queryKeyArray[1] === "object" &&
+          queryKeyArray[1] !== null
         ) {
-          return;
+          const queryData = queryKeyArray[1] as { input?: unknown };
+          if (queryData.input && typeof queryData.input === "string") {
+            boardId = queryData.input;
+          }
         }
 
-        const newColumns = [...previousColumns];
-        const adjacentIndex =
-          direction === "up" ? currentIndex - 1 : currentIndex + 1;
-        const isMovingToLast =
-          direction === "down" && adjacentIndex === previousColumns.length - 1;
-        const isMovingFromLast =
-          direction === "up" && currentIndex === previousColumns.length - 1;
+        if (!boardId) return;
 
-        const temp = { ...newColumns[currentIndex]! };
-        newColumns[currentIndex] = {
-          ...newColumns[adjacentIndex]!,
-          order: temp.order,
-          isCompleted: isMovingFromLast,
-        };
-        newColumns[adjacentIndex] = {
-          ...temp,
-          order: newColumns[adjacentIndex]!.order,
-          isCompleted: isMovingToLast,
-        };
+        await queryClient.cancelQueries({
+          queryKey: trpc.column.list.queryKey(boardId),
+        });
 
-        queryClient.setQueryData(["columns", column.boardId], newColumns);
+        const previousColumns = queryClient.getQueryData<Column[]>(
+          trpc.column.list.queryKey(boardId),
+        );
 
-        return { previousColumns, boardId: column.boardId };
+        if (!previousColumns) return { previousColumns: undefined };
+
+        queryClient.setQueryData<Column[]>(
+          trpc.column.list.queryKey(boardId),
+          (old = []) => {
+            const newColumns = [...old];
+            const fromIndex = newColumns.findIndex((c) => c.id === columnId);
+
+            if (fromIndex === -1) return old;
+
+            let toIndex;
+            if (direction === "up") {
+              toIndex = Math.max(0, fromIndex - 1);
+            } else {
+              toIndex = Math.min(newColumns.length - 1, fromIndex + 1);
+            }
+
+            if (fromIndex === toIndex) return old;
+
+            const removed = newColumns.splice(fromIndex, 1)[0];
+            if (!removed) return old;
+
+            newColumns.splice(toIndex, 0, removed);
+
+            return newColumns.map((c, index) => ({
+              ...c,
+              order: index,
+            }));
+          },
+        );
+
+        return { previousColumns, boardId };
       },
       onError: (_err, _variables, context) => {
-        if (context?.boardId) {
+        const contextBoardId = context?.boardId;
+        if (contextBoardId && context?.previousColumns) {
           queryClient.setQueryData(
-            ["columns", context.boardId],
+            trpc.column.list.queryKey(contextBoardId),
             context.previousColumns,
           );
+
+          void queryClient.invalidateQueries({
+            queryKey: trpc.column.list.queryKey(contextBoardId),
+          });
         }
-      },
-      onSuccess: async ({ boardId }) => {
-        await queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
       },
     }),
   });

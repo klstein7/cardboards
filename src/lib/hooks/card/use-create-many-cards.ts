@@ -11,7 +11,7 @@ export function useCreateManyCards() {
       onSuccess: async (cards) => {
         cards.forEach((card) => {
           void queryClient.invalidateQueries({
-            queryKey: ["cards", card.columnId],
+            queryKey: trpc.card.list.queryKey(card.columnId),
           });
         });
       },
