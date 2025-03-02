@@ -1,0 +1,68 @@
+---
+description: Guidelines for implementing and maintaining consistent procedure authorization patterns across your tRPC routers, ensuring proper access control at all levels.
+globs: trpc/init.ts, trpc/procedures.ts, trpc/**/*.{ts,tsx}
+alwaysApply: false
+---
+# tRPC Procedure Authorization Patterns
+
+This rule provides guidelines for implementing and maintaining consistent procedure authorization patterns across your tRPC routers.
+
+## Authorization Procedure Hierarchy
+
+- Maintain a clear hierarchy of procedures from least to most restrictive:
+  - `baseProcedure`: No authentication required
+  - `authedProcedure`: User must be authenticated
+  - `projectByIdProcedure`: Valid project ID required
+  - `projectMemberByIdProcedure`: User must be a member of the project
+  - `projectAdminByIdProcedure`: User must be an admin of the project
+  - Entity-specific procedures: Additional entities must exist and be accessible
+- Document the purpose and requirements of each procedure type
+- Create new procedures by extending existing ones, not from scratch
+- Keep middleware logic focused on a single responsibility
+
+## Middleware Implementation
+
+- Implement middleware that follows a consistent pattern:
+  - Check required conditions
+  - Throw appropriate errors when conditions are not met
+  - Add relevant data to the context
+  - Pass control to the next middleware or procedure
+- Use descriptive names for middleware functions
+- Group related middleware in logical modules
+- Document complex middleware behaviors
+
+## Context Enrichment
+
+- Establish consistent patterns for adding data to the context:
+  - Add entity IDs: `projectId`, `boardId`, `cardId`, etc.
+  - Add entity objects when needed: `project`, `board`, `card`, etc.
+  - Add auth-related information: `userId`, `isAdmin`, etc.
+- Avoid adding redundant data to the context
+- Document the shape of the context for each procedure type
+- Use proper TypeScript types for the context
+
+## Error Handling
+
+- Use consistent error types for authorization failures:
+  - Unauthenticated: User is not logged in
+  - Unauthorized: User doesn't have permission
+  - NotFound: Entity doesn't exist
+- Include appropriate HTTP status codes
+- Provide meaningful error messages
+- Avoid exposing sensitive details in error messages
+
+## Testing Authorization
+
+- Create tests for each procedure type
+- Test both success and failure scenarios
+- Mock context data appropriately
+- Test edge cases (e.g., user is a member but not admin)
+- Ensure authorization checks cannot be bypassed
+
+## Security Considerations
+
+- Always apply authorization at the router level, not just the service level
+- Never trust client-provided data for authorization decisions
+- Implement rate limiting for authentication-related procedures
+- Consider timeouts for security-sensitive operations
+- Audit authorization logs for suspicious patterns

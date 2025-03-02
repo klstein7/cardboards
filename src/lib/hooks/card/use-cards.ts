@@ -1,19 +1,19 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { matchSorter } from "match-sorter";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 import { useDebouncedLabels, useDebouncedSearch } from "../utils";
 import { useDebouncedAssignedTo } from "../utils/use-debounded-assigned-to";
 
 export function useCards(columnId: string) {
+  const trpc = useTRPC();
   const debouncedSearch = useDebouncedSearch();
   const debouncedLabels = useDebouncedLabels();
   const debouncedAssignedTo = useDebouncedAssignedTo();
 
   return useQuery({
-    queryKey: ["cards", columnId],
-    queryFn: () => api.card.list(columnId),
+    ...trpc.card.list.queryOptions(columnId),
     placeholderData: keepPreviousData,
     staleTime: 1000,
     select: (data) => {

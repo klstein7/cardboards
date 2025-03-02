@@ -1,9 +1,11 @@
 import { useMutation } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useCreateInvitation() {
+  const trpc = useTRPC();
+
   return useMutation({
-    mutationFn: api.invitation.create,
+    ...trpc.invitation.create.mutationOptions(),
   });
 }

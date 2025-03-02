@@ -1,16 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useAcceptInvitation() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.invitation.accept,
-    onSuccess: async (_, invitationId) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["invitation", invitationId],
-      });
-    },
+    ...trpc.invitation.accept.mutationOptions({
+      onSuccess: async (_, invitationId) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["invitation", invitationId],
+        });
+      },
+    }),
   });
 }

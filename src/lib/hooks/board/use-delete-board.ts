@@ -1,14 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useDeleteBoard() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.board.del,
-    onSuccess: async ({ projectId }) => {
-      await queryClient.invalidateQueries({ queryKey: ["boards", projectId] });
-    },
+    ...trpc.board.delete.mutationOptions({
+      onSuccess: async ({ projectId }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["boards", projectId],
+        });
+      },
+    }),
   });
 }

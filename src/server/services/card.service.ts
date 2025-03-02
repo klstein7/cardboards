@@ -1,12 +1,13 @@
 import "server-only";
 
 import { google } from "@ai-sdk/google";
+import { auth } from "@clerk/nextjs/server";
 import { streamObject } from "ai";
 import { createStreamableValue } from "ai/rsc";
 import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { boards, cards, columns } from "../db/schema";
+import { boards, cards, columns, projectUsers } from "../db/schema";
 import {
   type CardCreate,
   type CardCreateManyPayload,
@@ -17,6 +18,7 @@ import {
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
+import { projectUserService } from "./project-user.service";
 
 /**
  * Service for managing card-related operations
@@ -400,6 +402,71 @@ class CardService extends BaseService {
     })().catch(console.error);
 
     return { object: stream.value };
+  }
+
+  /**
+   * Assign a card to the current user
+   */
+  async assignToCurrentUser(
+    cardId: number,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("User is not authenticated");
+      }
+
+      // Get the card to find the project
+      const card = await this.get(cardId, txOrDb);
+
+      // Get column to find board and project
+      const [column] = await txOrDb
+        .select({
+          boardId: columns.boardId,
+        })
+        .from(columns)
+        .where(eq(columns.id, card.columnId));
+
+      if (!column) {
+        throw new Error("Column not found");
+      }
+
+      // Get board to find project
+      const [board] = await txOrDb
+        .select({
+          projectId: boards.projectId,
+        })
+        .from(boards)
+        .where(eq(boards.id, column.boardId));
+
+      if (!board) {
+        throw new Error("Board not found");
+      }
+
+      // Get the project user ID for the current user
+      const projectUser = await projectUserService.getCurrentProjectUser(
+        board.projectId,
+        txOrDb,
+      );
+
+      // Update the card with the project user ID
+      const [updatedCard] = await txOrDb
+        .update(cards)
+        .set({
+          assignedToId: projectUser.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(cards.id, cardId))
+        .returning();
+
+      if (!updatedCard) {
+        throw new Error("Card not found");
+      }
+
+      return updatedCard;
+    }, tx);
   }
 }
 

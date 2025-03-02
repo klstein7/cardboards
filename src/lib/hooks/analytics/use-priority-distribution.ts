@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function usePriorityDistribution(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["analytics", "priorities", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getPriorityDistribution(projectId, startDate, endDate),
+    ...trpc.analytics.getPriorityDistribution.queryOptions(projectId),
   });
 }

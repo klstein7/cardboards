@@ -1,0 +1,39 @@
+---
+description: Ensures proper usage of Next.js App Directory structure and promotes server components as the default for better performance.
+globs: app/**/*.{ts,tsx}
+alwaysApply: false
+---
+# Next.js App Directory Best Practices
+
+This rule ensures proper usage of Next.js App Directory structure and follows Modern Next.js 15+ patterns.
+
+## Server vs Client Components
+
+- Use server components by default (no "use client" directive) for better performance
+- Only add "use client" directive when you need client-side interactivity (useState, useEffect, event handlers)
+- Keep client components as small and focused as possible
+- Place client components in a separate file or directory (e.g., `app/components/client/`) when practical
+
+## Files Structure
+
+- Use `page.tsx` for route UI
+- Use `layout.tsx` for layouts that persist across routes
+- Use `loading.tsx` for loading states 
+- Use `error.tsx` for error boundaries
+- Use `route.ts` for API endpoints
+- Use `@folder-name` for route groups that don't affect URL structure
+- Use `[paramName]` for dynamic segments
+
+## Data Fetching
+
+- Use server components for data fetching when possible
+- Perform data fetching at the highest level needed to minimize waterfall requests
+- Use React Server Actions where appropriate for form submissions
+- Implement proper error handling in all data fetching
+
+## Performance
+
+- Keep client bundle size small by doing as much as possible on the server
+- Use proper image optimization with next/image
+- Implement proper caching strategies
+- Use suspense boundaries appropriately

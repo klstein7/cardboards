@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export const useInvitation = (invitationId: string) => {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["invitation", invitationId],
-    queryFn: () => api.invitation.get(invitationId),
+    ...trpc.invitation.get.queryOptions(invitationId),
   });
 };

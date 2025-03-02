@@ -1,11 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useColumns(boardId: string) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["columns", boardId],
-    queryFn: () => api.column.list(boardId),
+    ...trpc.column.list.queryOptions(boardId),
     placeholderData: [],
   });
 }

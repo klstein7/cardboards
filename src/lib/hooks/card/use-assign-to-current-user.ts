@@ -1,16 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useAssignToCurrentUser() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.card.assignToCurrentUser,
-    onSuccess: async ({ columnId }) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["cards", columnId],
-      });
-    },
+    ...trpc.card.assignToCurrentUser.mutationOptions({
+      onSuccess: async ({ columnId }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["cards", columnId],
+        });
+      },
+    }),
   });
 }

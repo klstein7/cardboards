@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useBoardCountByProjectId(projectId: string) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["board-count-by-project-id", projectId],
-    queryFn: () => api.board.countByProjectId(projectId),
+    ...trpc.board.countByProjectId.queryOptions(projectId),
   });
 }

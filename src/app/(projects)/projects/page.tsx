@@ -1,24 +1,13 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-
 import { Logo } from "~/components/brand/logo";
-import { api } from "~/server/api";
+import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectList } from "../_components/project-list";
 
 export default async function ProjectsPage() {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ["projects"],
-    queryFn: () => api.project.list(),
-  });
+  await trpc.project.list.prefetch();
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <div className="flex min-h-[100dvh] items-center justify-center">
         <div className="mx-auto flex w-full max-w-7xl flex-col items-center gap-16 px-6 py-24">
           <Logo />
@@ -27,6 +16,6 @@ export default async function ProjectsPage() {
           </div>
         </div>
       </div>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

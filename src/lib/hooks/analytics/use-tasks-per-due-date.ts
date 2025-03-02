@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useTasksPerDueDate(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["analytics", "dueDates", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getTasksPerDueDate(projectId, startDate, endDate),
+    ...trpc.analytics.getTasksPerDueDate.queryOptions(projectId),
   });
 }

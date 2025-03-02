@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useDeleteProject() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.project.del,
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["projects"] });
-    },
+    ...trpc.project.delete.mutationOptions({
+      onSuccess: () => {
+        void queryClient.invalidateQueries({ queryKey: ["projects"] });
+      },
+    }),
   });
 }

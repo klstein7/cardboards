@@ -1,16 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useCreateCard() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.card.create,
-    onSuccess: ({ columnId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["cards", columnId],
-      });
-    },
+    ...trpc.card.create.mutationOptions({
+      onSuccess: ({ columnId }) => {
+        void queryClient.invalidateQueries({
+          queryKey: ["cards", columnId],
+        });
+      },
+    }),
   });
 }

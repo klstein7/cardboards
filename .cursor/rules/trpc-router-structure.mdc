@@ -1,0 +1,83 @@
+---
+description: Guidelines for maintaining consistent tRPC router structure and organization for the Kanban application, focusing on domain-driven design and proper procedure usage.
+globs: server/api/routers/**/*.{ts,tsx}, trpc/**/*.{ts,tsx}
+alwaysApply: false
+---
+# tRPC Router Structure and Organization
+
+This rule provides guidelines for maintaining a consistent tRPC router structure and organization for the Kanban application.
+
+## Domain-Driven Router Organization
+
+- Maintain separate router files for each domain entity:
+  - `analytics`: Analytics and reporting features
+  - `board`: Board management
+  - `card`: Card operations
+  - `cardComment`: Comment functionality for cards
+  - `column`: Column management
+  - `invitation`: Project invitation handling
+  - `project`: Project management
+  - `projectUser`: User-project relationship management
+- Export routers from individual files and compose them in the main router file
+- Keep router files focused on a single domain concern
+- Place domain-specific validation schemas in the appropriate domain folder
+
+## Procedure Usage
+
+- Use appropriate procedure types based on authorization requirements:
+  - `baseProcedure`: Basic procedures with no authentication
+  - `authedProcedure`: Requires user authentication
+  - `projectMemberByIdProcedure`: Requires project membership
+  - `projectAdminByIdProcedure`: Requires project admin privileges
+  - `boardByIdProcedure`: Operations on a specific board
+  - `cardByIdProcedure`: Operations on a specific card
+  - `columnByIdProcedure`: Operations on a specific column
+- Create new procedure types when needed for reusable authorization patterns
+- Document custom procedure types clearly
+
+## API Endpoint Patterns
+
+- Maintain consistent naming conventions for CRUD operations:
+  - `create`: Create a new entity
+  - `get`: Get a single entity by ID
+  - `list`: Get a collection of entities
+  - `update`: Update an existing entity
+  - `delete`: Delete an entity (prefer using a consistent term, either `delete` or `remove`)
+- Use domain-specific operation names for non-CRUD operations (e.g., `move`, `shift`, `generate`)
+- Group related operations together in the router file
+- Prefix count operations with `countBy` followed by the filter criteria (e.g., `countByProjectId`)
+
+## Input Validation
+
+- Use Zod schemas for all input validation
+- Import schemas from a centralized location (`~/server/zod`)
+- Create consistent schema patterns:
+  - `EntityCreateSchema`: For creation operations
+  - `EntityUpdateSchema`: For update operations
+  - Add specialized schemas for domain-specific operations (e.g., `CardMoveSchema`)
+- Validate inputs at the router level, not just in the service
+
+## Service Integration
+
+- Keep business logic in service files, not in routers
+- Import services from a central location (`~/server/services`)
+- Routers should primarily handle:
+  - Input validation
+  - Authorization
+  - Delegating to the appropriate service method
+  - Error handling specific to the API layer
+
+## Error Handling
+
+- Implement consistent error handling across routers
+- Use appropriate HTTP status codes
+- Provide meaningful error messages
+- Handle common errors in a consistent way
+- Use custom error classes for domain-specific errors
+
+## Context Usage
+
+- Access context data using destructuring: `({ ctx, input }) => {...}`
+- Use context for passing authorization data between middlewares and procedures
+- Keep context access consistent across routers
+- Avoid duplicating context properties in input

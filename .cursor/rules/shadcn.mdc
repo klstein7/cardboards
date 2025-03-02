@@ -1,0 +1,68 @@
+---
+description: Guidelines for implementing, customizing, and extending shadcn/ui components while maintaining consistency and proper integration with your design system.
+globs: components/ui/**/*.{ts,tsx}, lib/utils.ts, styles/globals.css, tailwind.config.{js,ts}
+alwaysApply: false
+---
+# shadcn/ui Implementation Patterns
+
+This rule provides guidelines for implementing, customizing, and extending shadcn/ui components while maintaining consistency and proper integration with your design system.
+
+## Component Organization
+
+- Keep all shadcn/ui components in the `components/ui` directory
+- Maintain the original component file structure when adding new components
+- Follow the shadcn/ui naming conventions consistently
+- Create index files to export component variants and subcomponents
+- Document component customizations
+
+## Component Customization
+
+- Customize components at the theme level first (in `tailwind.config.js`)
+- Use the `cn()` utility from `lib/utils.ts` for class merging
+- Create proper component variants using class-variance-authority (cva)
+- Implement proper TypeScript types for customized components
+- Preserve accessibility features when customizing
+- Document custom variants
+
+## Theming and Design System
+
+- Implement a consistent color palette in your design tokens
+- Use CSS variables for theming following shadcn/ui conventions
+- Maintain dark mode compatibility in all customizations
+- Implement proper color contrast for accessibility
+- Create consistent spacing and sizing scales
+- Document theme customizations
+
+## Component Extension
+
+- Extend shadcn/ui components rather than rebuilding them
+- Preserve the original component API when extending
+- Implement proper TypeScript types for extended components
+- Create proper composition patterns for complex components
+- Document component extensions and their purpose
+- Maintain accessibility when extending components
+
+## Form Component Integration
+
+- Integrate shadcn/ui form components with react-hook-form correctly
+- Implement proper form validation feedback
+- Create consistent form layouts
+- Use form component composition patterns appropriately
+- Implement proper form state handling
+- Test form components thoroughly
+
+## Performance Considerations
+
+- Avoid unnecessary customizations that might affect performance
+- Monitor bundle size impact of customizations
+- Implement proper dynamic imports for large components
+- Use client components only when necessary
+- Test custom component performance
+
+## Code Reuse and Maintainability
+
+- Create reusable component variants
+- Implement proper documentation for custom components
+- Create a component showcase or storybook
+- Implement proper testing for custom components
+- Keep customizations maintainable for future shadcn/ui updates

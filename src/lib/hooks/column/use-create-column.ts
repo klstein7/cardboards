@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useCreateColumn() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.column.create,
-    onSuccess: async ({ boardId }) => {
-      await queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
-    },
+    ...trpc.column.create.mutationOptions({
+      onSuccess: async ({ boardId }) => {
+        await queryClient.invalidateQueries({ queryKey: ["columns", boardId] });
+      },
+    }),
   });
 }

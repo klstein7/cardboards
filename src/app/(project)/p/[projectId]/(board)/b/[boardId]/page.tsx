@@ -1,11 +1,6 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-
+import { type Column } from "~/app/(project)/_types";
 import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/column-list";
-import { api } from "~/server/api";
+import { HydrateClient, trpc } from "~/trpc/server";
 
 import { BoardHeader } from "../../_components/board-header";
 import { BoardStateProvider } from "../../_components/board-state-provider";
@@ -18,47 +13,28 @@ type Params = Promise<{
 }>;
 
 export default async function BoardPage({ params }: { params: Params }) {
-  const queryClient = new QueryClient();
-
   const { projectId, boardId } = await params;
 
-  const board = await api.board.get(boardId);
-  const columns = await api.column.list(boardId);
-  const project = await api.project.get(projectId);
+  // Prefetch all needed data
   await Promise.all([
-    queryClient.prefetchQuery({
-      queryKey: ["board", boardId],
-      queryFn: () => Promise.resolve(board),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["project-users", projectId],
-      queryFn: () => api.projectUser.list(projectId),
-    }),
-
-    queryClient.prefetchQuery({
-      queryKey: ["columns", boardId],
-      queryFn: () => Promise.resolve(columns),
-    }),
-
-    Promise.all(
-      columns.map((column) => {
-        return Promise.all([
-          queryClient.prefetchQuery({
-            queryKey: ["column", column.id],
-            queryFn: () => Promise.resolve(column),
-          }),
-          queryClient.prefetchQuery({
-            queryKey: ["cards", column.id],
-            queryFn: () => api.card.list(column.id),
-          }),
-        ]);
-      }),
-    ),
+    trpc.board.get.prefetch(boardId),
+    trpc.column.list.prefetch(boardId),
+    trpc.project.get.prefetch(projectId),
+    trpc.projectUser.list.prefetch(projectId),
   ]);
 
+  // Directly get the data since we need it for server rendering
+  const board = await trpc.board.get(boardId);
+  const columns = await trpc.column.list(boardId);
+  const project = await trpc.project.get(projectId);
+
+  // Prefetch cards for each column
+  await Promise.all(
+    columns.map((column: Column) => trpc.card.list.prefetch(column.id)),
+  );
+
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <BoardStateProvider>
         <div className="flex h-[100dvh] w-full flex-col">
           <BoardHeader
@@ -78,6 +54,6 @@ export default async function BoardPage({ params }: { params: Params }) {
         </div>
         <CardDetails />
       </BoardStateProvider>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

@@ -1,18 +1,20 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useCreateManyCards() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.card.createMany,
-    onSuccess: async (cards) => {
-      cards.forEach((card) => {
-        void queryClient.invalidateQueries({
-          queryKey: ["cards", card.columnId],
+    ...trpc.card.createMany.mutationOptions({
+      onSuccess: async (cards) => {
+        cards.forEach((card) => {
+          void queryClient.invalidateQueries({
+            queryKey: ["cards", card.columnId],
+          });
         });
-      });
-    },
+      },
+    }),
   });
 }

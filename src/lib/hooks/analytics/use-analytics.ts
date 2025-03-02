@@ -1,39 +1,52 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useAnalytics(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   const progressQuery = useQuery({
-    queryKey: ["analytics", "progress", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getProjectProgress(projectId, startDate, endDate),
+    ...trpc.analytics.getProjectProgress.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 
   const trendQuery = useQuery({
-    queryKey: ["analytics", "trend", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getTaskCompletionTrend(projectId, startDate, endDate),
+    ...trpc.analytics.getTaskCompletionTrend.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 
   const activityQuery = useQuery({
-    queryKey: ["analytics", "activity", projectId, { startDate, endDate }],
-    queryFn: () => api.analytics.getUserActivity(projectId, startDate, endDate),
+    ...trpc.analytics.getUserActivity.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 
   const prioritiesQuery = useQuery({
-    queryKey: ["analytics", "priorities", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getPriorityDistribution(projectId, startDate, endDate),
+    ...trpc.analytics.getPriorityDistribution.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 
   const dueDatesQuery = useQuery({
-    queryKey: ["analytics", "dueDates", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getTasksPerDueDate(projectId, startDate, endDate),
+    ...trpc.analytics.getTasksPerDueDate.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 
   const isPending =

@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useProjectProgress(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["analytics", "progress", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getProjectProgress(projectId, startDate, endDate),
+    ...trpc.analytics.getProjectProgress.queryOptions(projectId),
   });
 }

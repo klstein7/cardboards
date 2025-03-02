@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useTaskCompletionTrend(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["analytics", "trend", projectId, { startDate, endDate }],
-    queryFn: () =>
-      api.analytics.getTaskCompletionTrend(projectId, startDate, endDate),
+    ...trpc.analytics.getTaskCompletionTrend.queryOptions(projectId),
   });
 }

@@ -1,14 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useUpdateBoard() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.board.update,
-    onSuccess: async ({ projectId }) => {
-      await queryClient.invalidateQueries({ queryKey: ["boards", projectId] });
-    },
+    ...trpc.board.update.mutationOptions({
+      onSuccess: async ({ projectId }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["boards", projectId],
+        });
+      },
+    }),
   });
 }

@@ -1,0 +1,84 @@
+---
+description: Guidelines for maintaining a consistent domain-driven architecture in your Kanban application, ensuring proper separation of concerns and data flow.
+globs: **/*.{ts,tsx}
+alwaysApply: false
+---
+# Kanban Application Architecture
+
+This rule provides guidelines for maintaining a consistent domain-driven architecture in your Kanban application.
+
+## Domain Entity Hierarchy
+
+- Maintain a clear hierarchy of domain entities:
+  - Project: Top-level container for boards and users
+  - Board: Container for columns and cards within a project
+  - Column: Vertical list of cards representing a workflow stage
+  - Card: Individual task or item within a column
+  - CardComment: Comments or discussions attached to a card
+- Each entity should have clear boundaries and responsibilities
+- Maintain consistent relationships between entities
+
+## Service Layer Patterns
+
+- Implement services for each domain entity:
+  - `projectService`: Project management
+  - `boardService`: Board operations
+  - `columnService`: Column operations
+  - `cardService`: Card operations
+  - `cardCommentService`: Comment functionality
+  - `invitationService`: Invitation handling
+  - `analyticsService`: Analytics and reporting
+- Services should contain all business logic
+- Keep services focused on a single domain entity
+- Use dependency injection to manage service dependencies
+
+## Data Flow
+
+- Follow a consistent data flow pattern:
+  - Client component → tRPC router → Service → Database
+  - Database → Service → tRPC router → Client component
+- Prevent business logic from leaking into routers or UI components
+- Maintain clear separation between client and server code
+- Use React Query hooks to manage server state on the client
+
+## State Management
+
+- Use React Query for server state management
+- Use local state for UI-specific concerns
+- Implement proper optimistic updates for better UX
+- Use context providers sparingly and only for truly global state
+- Maintain consistent patterns for loading, error, and success states
+
+## Feature Implementation
+
+- Implement features following domain boundaries
+- Group related functionality by domain entity
+- Create reusable hooks for common operations
+- Maintain consistent patterns for:
+  - Drag and drop operations
+  - Form handling
+  - Data fetching
+  - Error handling
+  - Loading states
+
+## Permissions and Access Control
+
+- Implement a consistent permission model:
+  - Project Admin: Full access to project
+  - Project Member: Access to view and modify content
+  - Public Access: Limited or no access
+- Check permissions at both service and router levels
+- Document permission requirements for each operation
+- Create clear error messages for permission failures
+
+## Code Organization
+
+- Follow a consistent file structure:
+  - `/server/api/routers`: tRPC routers
+  - `/server/services`: Business logic
+  - `/server/db`: Database schema and queries
+  - `/components`: UI components
+  - `/lib`: Utility functions and helpers
+  - `/hooks`: Custom React hooks
+- Maintain clear boundaries between server and client code
+- Use barrel exports (index.ts) to simplify imports

@@ -1,15 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useCreateCardComment() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
+
   return useMutation({
-    mutationFn: api.cardComment.create,
-    onSuccess: ({ cardId }) => {
-      void queryClient.invalidateQueries({
-        queryKey: ["card-comments", cardId],
-      });
-    },
+    ...trpc.cardComment.create.mutationOptions({
+      onSuccess: ({ cardId }) => {
+        void queryClient.invalidateQueries({
+          queryKey: ["card-comments", cardId],
+        });
+      },
+    }),
   });
 }

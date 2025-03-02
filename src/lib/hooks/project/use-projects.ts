@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useProjects() {
-  return useQuery({
-    queryKey: ["projects"],
-    queryFn: () => api.project.list(),
-    placeholderData: [],
-  });
+  const trpc = useTRPC();
+  return useQuery(trpc.project.list.queryOptions());
 }

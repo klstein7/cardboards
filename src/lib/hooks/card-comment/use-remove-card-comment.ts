@@ -1,16 +1,18 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useRemoveCardComment() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.cardComment.remove,
-    onSuccess: async ({ cardId }) => {
-      await queryClient.invalidateQueries({
-        queryKey: ["card-comments", cardId],
-      });
-    },
+    ...trpc.cardComment.remove.mutationOptions({
+      onSuccess: async ({ cardId }) => {
+        await queryClient.invalidateQueries({
+          queryKey: ["card-comments", cardId],
+        });
+      },
+    }),
   });
 }

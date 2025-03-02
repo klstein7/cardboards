@@ -1,14 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useUserActivity(
   projectId: string,
   startDate?: Date,
   endDate?: Date,
 ) {
+  const trpc = useTRPC();
+
   return useQuery({
-    queryKey: ["analytics", "activity", projectId, { startDate, endDate }],
-    queryFn: () => api.analytics.getUserActivity(projectId, startDate, endDate),
+    ...trpc.analytics.getUserActivity.queryOptions(projectId),
   });
 }

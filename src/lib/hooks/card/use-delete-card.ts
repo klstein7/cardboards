@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 export function useDeleteCard() {
+  const trpc = useTRPC();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: api.card.del,
-    onSuccess: ({ columnId }) => {
-      void queryClient.invalidateQueries({ queryKey: ["cards", columnId] });
-    },
+    ...trpc.card.delete.mutationOptions({
+      onSuccess: ({ columnId }) => {
+        void queryClient.invalidateQueries({ queryKey: ["cards", columnId] });
+      },
+    }),
   });
 }

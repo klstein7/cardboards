@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { api } from "~/server/api";
+import { useTRPC } from "~/trpc/client";
 
 import { useCurrentProjectId } from "../utils";
 
 export function useCurrentProjectUser() {
+  const trpc = useTRPC();
   const projectId = useCurrentProjectId();
 
   return useQuery({
-    queryKey: ["current-project-user", projectId],
-    queryFn: () => api.projectUser.getCurrentProjectUser(projectId),
+    ...trpc.projectUser.getCurrentProjectUser.queryOptions(projectId),
   });
 }
