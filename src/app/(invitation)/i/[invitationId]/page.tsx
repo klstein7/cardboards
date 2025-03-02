@@ -1,10 +1,4 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  QueryClient,
-} from "@tanstack/react-query";
-
-import { api } from "~/server/api";
+import { HydrateClient, trpc } from "~/trpc/server";
 
 import InvitationCard from "../../_components/invitation-card";
 
@@ -15,18 +9,14 @@ export default async function InvitationPage({
 }) {
   const { invitationId } = await params;
 
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery({
-    queryKey: ["invitation", invitationId],
-    queryFn: () => api.invitation.get(invitationId),
-  });
+  // Prefetch the invitation data
+  await trpc.invitation.get.prefetch(invitationId);
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
+    <HydrateClient>
       <div className="flex min-h-screen items-center justify-center bg-background p-4">
         <InvitationCard invitationId={invitationId} />
       </div>
-    </HydrationBoundary>
+    </HydrateClient>
   );
 }

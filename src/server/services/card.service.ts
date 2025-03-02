@@ -2,12 +2,11 @@ import "server-only";
 
 import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
-import { generateObject, streamObject } from "ai";
-import { createStreamableValue } from "ai/rsc";
+import { generateObject } from "ai";
 import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { boards, cards, columns, projectUsers } from "../db/schema";
+import { boards, cards, columns } from "../db/schema";
 import {
   type CardCreate,
   type CardCreateManyPayload,
@@ -283,6 +282,13 @@ class CardService extends BaseService {
       return txOrDb.query.cards.findMany({
         where: eq(cards.columnId, columnId),
         orderBy: asc(cards.order),
+        with: {
+          assignedTo: {
+            with: {
+              user: true,
+            },
+          },
+        },
       });
     }, tx);
   }
@@ -415,16 +421,7 @@ class CardService extends BaseService {
       const card = await this.get(cardId, txOrDb);
 
       // Get column to find board and project
-      const [column] = await txOrDb
-        .select({
-          boardId: columns.boardId,
-        })
-        .from(columns)
-        .where(eq(columns.id, card.columnId));
-
-      if (!column) {
-        throw new Error("Column not found");
-      }
+      const column = await columnService.get(card.columnId, txOrDb);
 
       // Get board to find project
       const [board] = await txOrDb
@@ -443,6 +440,8 @@ class CardService extends BaseService {
         board.projectId,
         txOrDb,
       );
+
+      console.log("projectUser", projectUser);
 
       // Update the card with the project user ID
       const [updatedCard] = await txOrDb

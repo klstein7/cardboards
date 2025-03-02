@@ -121,7 +121,7 @@ export function CardDetails() {
         >
           <DialogHeader>
             <DialogTitle>
-              {card.data?.column.board.name?.slice(0, 2).toUpperCase()}-
+              CARD-
               {card.data?.id}
             </DialogTitle>
             <DialogDescription>

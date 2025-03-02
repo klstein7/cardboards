@@ -20,23 +20,27 @@ export function useCards(columnId: string) {
       let filteredData = data;
 
       if (debouncedSearch) {
-        filteredData = matchSorter(data, debouncedSearch.toLowerCase(), {
-          keys: ["title", "description"],
-          threshold: matchSorter.rankings.CONTAINS,
-        });
+        filteredData = matchSorter(
+          filteredData,
+          debouncedSearch.toLowerCase(),
+          {
+            keys: ["title", "description"],
+            threshold: matchSorter.rankings.CONTAINS,
+          },
+        );
       }
 
-      if (debouncedLabels.length > 0) {
+      if (debouncedLabels && debouncedLabels.length > 0) {
         filteredData = filteredData.filter((card) =>
-          debouncedLabels.some((label) => card.labels?.includes(label)),
+          card.labels?.some((label) => debouncedLabels.includes(label)),
         );
       }
 
       if (debouncedAssignedTo && debouncedAssignedTo.length > 0) {
-        filteredData = filteredData.filter((card) =>
-          debouncedAssignedTo.some((assignedTo) =>
-            card.assignedToId?.includes(assignedTo),
-          ),
+        filteredData = filteredData.filter(
+          (card) =>
+            card.assignedToId &&
+            debouncedAssignedTo.includes(card.assignedToId),
         );
       }
 
