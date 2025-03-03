@@ -1,99 +1,122 @@
 import { z } from "zod";
 
-import { cardService } from "~/server/services";
+import { authService, cardService } from "~/server/services";
 import {
   CardCreateManySchema,
   CardCreateSchema,
+  CardMoveSchema,
   CardUpdateSchema,
 } from "~/server/zod";
-import {
-  boardByIdProcedure,
-  boardProcedure,
-  cardByIdProcedure,
-  cardProcedure,
-  columnByIdProcedure,
-  columnProcedure,
-  createTRPCRouter,
-  projectByIdProcedure,
-} from "~/trpc/init";
+import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const cardRouter = createTRPCRouter({
-  // Create a new card
-  create: columnProcedure.input(CardCreateSchema).mutation(({ input }) => {
-    return cardService.create(input);
-  }),
-
-  // Create multiple cards
-  createMany: boardProcedure
-    .input(z.object({ data: CardCreateManySchema.shape.data }))
-    .mutation(({ ctx, input }) => {
-      return cardService.createMany(ctx.boardId, input.data);
+  // Create a new card (requires column access)
+  create: authedProcedure
+    .input(CardCreateSchema)
+    .mutation(async ({ input }) => {
+      // Verify user can access this column
+      await authService.canAccessColumn(input.columnId);
+      return cardService.create(input);
     }),
 
-  // Get a specific card
-  get: cardByIdProcedure.query(({ ctx }) => {
-    return cardService.get(ctx.cardId);
-  }),
-
-  // Update a card
-  update: cardProcedure
-    .input(z.object({ data: CardUpdateSchema.shape.data }))
-    .mutation(({ ctx, input }) => {
-      return cardService.update(ctx.cardId, input.data);
+  // Create multiple cards (requires board access)
+  createMany: authedProcedure
+    .input(CardCreateManySchema)
+    .mutation(async ({ input }) => {
+      // Verify user can access this board
+      await authService.canAccessBoard(input.boardId);
+      return cardService.createMany(input.boardId, input.data);
     }),
 
-  // Move a card
-  move: cardProcedure
+  // Get a specific card (requires card access)
+  get: authedProcedure.input(z.number()).query(async ({ input }) => {
+    // Verify user can access this card
+    await authService.canAccessCard(input);
+    return cardService.get(input);
+  }),
+
+  // Update a card (requires card access)
+  update: authedProcedure
+    .input(CardUpdateSchema)
+    .mutation(async ({ input }) => {
+      // Verify user can access this card
+      await authService.canAccessCard(input.cardId);
+      return cardService.update(input.cardId, input.data);
+    }),
+
+  // Move a card between columns (requires card access)
+  move: authedProcedure.input(CardMoveSchema).mutation(async ({ input }) => {
+    // Verify user can access this card
+    await authService.canAccessCard(input.cardId);
+    return cardService.move({
+      cardId: input.cardId,
+      destinationColumnId: input.destinationColumnId,
+      sourceColumnId: input.sourceColumnId,
+      newOrder: input.newOrder,
+    });
+  }),
+
+  // Delete a card (requires card access)
+  delete: authedProcedure
+    .input(z.object({ cardId: z.number() }))
+    .mutation(async ({ input }) => {
+      // Verify user can access this card
+      await authService.canAccessCard(input.cardId);
+      return cardService.del(input.cardId);
+    }),
+
+  // Duplicate a card (requires card access)
+  duplicate: authedProcedure
+    .input(z.object({ cardId: z.number() }))
+    .mutation(async ({ input }) => {
+      // Verify user can access this card
+      await authService.canAccessCard(input.cardId);
+      return cardService.duplicate(input.cardId);
+    }),
+
+  // List cards in a column (requires column access)
+  list: authedProcedure.input(z.string()).query(async ({ input }) => {
+    // Verify user can access this column
+    await authService.canAccessColumn(input);
+    return cardService.list(input);
+  }),
+
+  // Generate cards with AI (requires board access)
+  generate: authedProcedure
     .input(
       z.object({
-        destinationColumnId: z.string(),
-        sourceColumnId: z.string(),
-        newOrder: z.number(),
+        boardId: z.string(),
+        prompt: z.string(),
       }),
     )
-    .mutation(({ ctx, input }) => {
-      return cardService.move({
-        cardId: ctx.cardId,
-        destinationColumnId: input.destinationColumnId,
-        sourceColumnId: input.sourceColumnId,
-        newOrder: input.newOrder,
-      });
+    .mutation(async ({ input }) => {
+      // Verify user can access this board
+      await authService.canAccessBoard(input.boardId);
+      return cardService.generate(input.boardId, input.prompt);
     }),
 
-  // Delete a card
-  delete: cardProcedure.mutation(({ ctx }) => {
-    return cardService.del(ctx.cardId);
+  // Count cards by board ID (requires board access)
+  countByBoardId: authedProcedure.input(z.string()).query(async ({ input }) => {
+    // Verify user can access this board
+    await authService.canAccessBoard(input);
+    return cardService.countByBoardId(input);
   }),
 
-  // Duplicate a card
-  duplicate: cardProcedure.mutation(({ ctx }) => {
-    return cardService.duplicate(ctx.cardId);
-  }),
-
-  // List cards in a column
-  list: columnByIdProcedure.query(({ ctx }) => {
-    return cardService.list(ctx.columnId);
-  }),
-
-  // Generate cards with AI
-  generate: boardProcedure
-    .input(z.object({ prompt: z.string() }))
-    .mutation(({ ctx, input }) => {
-      return cardService.generate(ctx.boardId, input.prompt);
+  // Count cards by project ID (requires project access)
+  countByProjectId: authedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      // Verify user can access this project
+      await authService.canAccessProject(input);
+      return cardService.countByProjectId(input);
     }),
 
-  // Count cards by board ID
-  countByBoardId: boardByIdProcedure.query(({ ctx }) => {
-    return cardService.countByBoardId(ctx.boardId);
-  }),
-
-  // Count cards by project ID
-  countByProjectId: projectByIdProcedure.query(({ ctx }) => {
-    return cardService.countByProjectId(ctx.projectId);
-  }),
-
-  // Assign a card to the current user
-  assignToCurrentUser: cardByIdProcedure.mutation(({ ctx }) => {
-    return cardService.assignToCurrentUser(ctx.cardId);
-  }),
+  // Assign a card to the current user (requires card access)
+  assignToCurrentUser: authedProcedure
+    .input(z.object({ cardId: z.number() }))
+    .mutation(async ({ input }) => {
+      // Verify user can access this card
+      await authService.canAccessCard(input.cardId);
+      return cardService.assignToCurrentUser(input.cardId);
+    }),
 });

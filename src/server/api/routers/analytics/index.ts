@@ -3,7 +3,7 @@ import { z } from "zod";
 import { analyticsService, projectUserService } from "~/server/services";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
-// Define reusable input schema that includes projectId and date range
+// Define reusable input schema for analytics queries
 const analyticsInputSchema = z.object({
   projectId: z.string(),
   startDate: z.date().optional(),
@@ -11,10 +11,11 @@ const analyticsInputSchema = z.object({
 });
 
 export const analyticsRouter = createTRPCRouter({
-  // Get project progress
+  // Get project progress metrics (requires project membership)
   getProjectProgress: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
+      // Verify user is a member of this project
       await projectUserService.getCurrentProjectUser(input.projectId);
       return analyticsService.getProjectProgress(
         input.projectId,
@@ -23,10 +24,11 @@ export const analyticsRouter = createTRPCRouter({
       );
     }),
 
-  // Get task completion trend
+  // Get task completion trend over time (requires project membership)
   getTaskCompletionTrend: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
+      // Verify user is a member of this project
       await projectUserService.getCurrentProjectUser(input.projectId);
       return analyticsService.getTaskCompletionTrend(
         input.projectId,
@@ -35,10 +37,11 @@ export const analyticsRouter = createTRPCRouter({
       );
     }),
 
-  // Get user activity
+  // Get user activity statistics (requires project membership)
   getUserActivity: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
+      // Verify user is a member of this project
       await projectUserService.getCurrentProjectUser(input.projectId);
       return analyticsService.getUserActivity(
         input.projectId,
@@ -47,10 +50,11 @@ export const analyticsRouter = createTRPCRouter({
       );
     }),
 
-  // Get priority distribution
+  // Get task priority distribution (requires project membership)
   getPriorityDistribution: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
+      // Verify user is a member of this project
       await projectUserService.getCurrentProjectUser(input.projectId);
       return analyticsService.getPriorityDistribution(
         input.projectId,
@@ -59,10 +63,11 @@ export const analyticsRouter = createTRPCRouter({
       );
     }),
 
-  // Get tasks per due date
+  // Get tasks grouped by due date (requires project membership)
   getTasksPerDueDate: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
+      // Verify user is a member of this project
       await projectUserService.getCurrentProjectUser(input.projectId);
       return analyticsService.getTasksPerDueDate(
         input.projectId,

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { baseProcedure, createTRPCRouter } from "~/trpc/init";
 
+// Import domain-specific routers
 import { analyticsRouter } from "./analytics";
 import { boardRouter } from "./board";
 import { cardRouter } from "./card";
@@ -12,6 +13,7 @@ import { projectRouter } from "./project";
 import { projectUserRouter } from "./project-user";
 
 export const appRouter = createTRPCRouter({
+  // Test endpoint (does not require authentication)
   hello: baseProcedure
     .input(
       z.object({
@@ -24,7 +26,7 @@ export const appRouter = createTRPCRouter({
       };
     }),
 
-  // Domain routers
+  // Domain-specific routers with authorization checks
   analytics: analyticsRouter,
   board: boardRouter,
   card: cardRouter,

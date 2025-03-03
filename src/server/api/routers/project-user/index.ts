@@ -1,39 +1,51 @@
 import { z } from "zod";
 
-import { projectUserService } from "~/server/services";
+import { authService, projectUserService } from "~/server/services";
 import { ProjectUserUpdateSchema } from "~/server/zod";
-import {
-  createTRPCRouter,
-  projectAdminProcedure,
-  projectByIdProcedure,
-  projectMemberByIdProcedure,
-} from "~/trpc/init";
+import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const projectUserRouter = createTRPCRouter({
-  // List project users
-  list: projectMemberByIdProcedure.query(({ ctx }) => {
-    return projectUserService.list(ctx.projectId);
+  // List all users in a project (requires project membership)
+  list: authedProcedure.input(z.string()).query(async ({ input }) => {
+    // Verify user is a member of this project before listing users
+    await projectUserService.getCurrentProjectUser(input);
+    return projectUserService.list(input);
   }),
 
-  // Update a project user
-  update: projectAdminProcedure
+  // Update a project user (requires admin permission)
+  update: authedProcedure
     .input(
       z.object({
+        projectId: z.string(),
         userId: z.string(),
         data: ProjectUserUpdateSchema.shape.data,
       }),
     )
-    .mutation(({ ctx, input }) => {
-      return projectUserService.update(ctx.projectId, input.userId, input.data);
+    .mutation(async ({ input }) => {
+      // Verify current user is a project admin
+      await authService.requireProjectAdmin(input.projectId);
+
+      return projectUserService.update(
+        input.projectId,
+        input.userId,
+        input.data,
+      );
     }),
 
-  // Count users by project ID
-  countByProjectId: projectByIdProcedure.query(({ ctx }) => {
-    return projectUserService.countByProjectId(ctx.projectId);
-  }),
+  // Count users in a project (requires any access to project)
+  countByProjectId: authedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      // Verify user can access this project
+      await authService.canAccessProject(input);
+      return projectUserService.countByProjectId(input);
+    }),
 
-  // Get current project user
-  getCurrentProjectUser: projectMemberByIdProcedure.query(({ ctx }) => {
-    return projectUserService.getCurrentProjectUser(ctx.projectId);
-  }),
+  // Get current user's membership in a project
+  getCurrentProjectUser: authedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      // This function already checks if the user is a member
+      return projectUserService.getCurrentProjectUser(input);
+    }),
 });

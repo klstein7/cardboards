@@ -1,11 +1,12 @@
-import { projectService } from "~/server/services";
-import { ProjectCreateSchema } from "~/server/zod";
+import { z } from "zod";
+
 import {
-  authedProcedure,
-  createTRPCRouter,
-  projectAdminByIdProcedure,
-  projectMemberByIdProcedure,
-} from "~/trpc/init";
+  authService,
+  projectService,
+  projectUserService,
+} from "~/server/services";
+import { ProjectCreateSchema, ProjectUpdatePayloadSchema } from "~/server/zod";
+import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const projectRouter = createTRPCRouter({
   // Create a new project
@@ -20,13 +21,31 @@ export const projectRouter = createTRPCRouter({
     return projectService.list();
   }),
 
-  // Get a specific project
-  get: projectMemberByIdProcedure.query(({ ctx }) => {
-    return projectService.get(ctx.projectId);
+  // Get a specific project (requires membership)
+  get: authedProcedure.input(z.string()).query(async ({ input }) => {
+    // Verify user is a member of this project
+    await projectUserService.getCurrentProjectUser(input);
+    return projectService.get(input);
   }),
 
-  // Delete a project - requires admin permission
-  delete: projectAdminByIdProcedure.mutation(({ ctx }) => {
-    return projectService.del(ctx.projectId);
+  // Update a project (requires admin permission)
+  update: authedProcedure
+    .input(
+      z.object({
+        data: ProjectUpdatePayloadSchema,
+        projectId: z.string(),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      // Verify current user is a project admin
+      await authService.requireProjectAdmin(input.projectId);
+      return projectService.update(input.projectId, input.data);
+    }),
+
+  // Delete a project (requires admin permission)
+  delete: authedProcedure.input(z.string()).mutation(async ({ input }) => {
+    // Verify current user is a project admin
+    await authService.requireProjectAdmin(input);
+    return projectService.del(input);
   }),
 });

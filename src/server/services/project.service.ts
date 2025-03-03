@@ -5,7 +5,7 @@ import { eq } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";
-import { type ProjectCreate } from "../zod";
+import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
 import { projectUserService } from "./project-user.service";
 
@@ -36,6 +36,32 @@ class ProjectService extends BaseService {
       );
 
       return project;
+    }, tx);
+  }
+
+  /**
+   * Update a project
+   */
+  async update(
+    projectId: string,
+    data: ProjectUpdatePayload,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [updated] = await txOrDb
+        .update(projects)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
+        .where(eq(projects.id, projectId))
+        .returning();
+
+      if (!updated) {
+        throw new Error("Failed to update project");
+      }
+
+      return updated;
     }, tx);
   }
 

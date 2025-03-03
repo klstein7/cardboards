@@ -2,7 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import { type ProjectDetail } from "~/app/(project)/_types";
 import {
@@ -28,7 +30,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
-import { useDeleteProject } from "~/lib/hooks";
+import { useDeleteProject, useUpdateProject } from "~/lib/hooks";
 import { type ProjectUpdate, ProjectUpdateSchema } from "~/server/zod";
 
 interface SettingsGeneralFormProps {
@@ -36,22 +38,45 @@ interface SettingsGeneralFormProps {
 }
 
 export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<ProjectUpdate>({
     resolver: zodResolver(ProjectUpdateSchema),
-    defaultValues: project,
+    defaultValues: {
+      projectId: project.id,
+      data: {
+        name: project.name,
+      },
+    },
   });
 
   const deleteProjectMutation = useDeleteProject();
+  const updateProjectMutation = useUpdateProject();
 
   const router = useRouter();
+
+  const handleSubmit = async (values: ProjectUpdate) => {
+    setIsSubmitting(true);
+    try {
+      await updateProjectMutation.mutateAsync(values);
+      toast.success("Project updated successfully");
+    } catch (error) {
+      toast.error("Failed to update project");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="max-w-xl space-y-10">
       <Form {...form}>
-        <form className="flex flex-col gap-6">
+        <form
+          className="flex flex-col gap-6"
+          onSubmit={form.handleSubmit(handleSubmit)}
+        >
           <FormField
             control={form.control}
-            name="name"
+            name="data.name"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Name</FormLabel>
@@ -65,6 +90,15 @@ export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
               </FormItem>
             )}
           />
+
+          <div className="flex justify-end">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !form.formState.isDirty}
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
         </form>
       </Form>
 
