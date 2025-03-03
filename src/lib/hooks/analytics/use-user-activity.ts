@@ -10,6 +10,10 @@ export function useUserActivity(
   const trpc = useTRPC();
 
   return useQuery({
-    ...trpc.analytics.getUserActivity.queryOptions(projectId),
+    ...trpc.analytics.getUserActivity.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 }

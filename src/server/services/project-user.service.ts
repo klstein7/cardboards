@@ -3,7 +3,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { and, count, eq } from "drizzle-orm";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
 import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";

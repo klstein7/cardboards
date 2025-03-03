@@ -6,8 +6,6 @@ import {
 } from "~/components/ui/breadcrumb";
 import { Skeleton } from "~/components/ui/skeleton";
 
-import BoardPageSkeleton from "./b/[boardId]/loading";
-
 export default function BoardLayoutSkeleton() {
   return (
     <div className="flex h-[100dvh] w-full flex-col">

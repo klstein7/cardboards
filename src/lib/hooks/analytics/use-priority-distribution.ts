@@ -4,12 +4,16 @@ import { useTRPC } from "~/trpc/client";
 
 export function usePriorityDistribution(
   projectId: string,
-  startDate?: Date,
-  endDate?: Date,
+  startDate: Date,
+  endDate: Date,
 ) {
   const trpc = useTRPC();
 
   return useQuery({
-    ...trpc.analytics.getPriorityDistribution.queryOptions(projectId),
+    ...trpc.analytics.getPriorityDistribution.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 }

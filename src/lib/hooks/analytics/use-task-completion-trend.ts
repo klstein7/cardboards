@@ -10,6 +10,10 @@ export function useTaskCompletionTrend(
   const trpc = useTRPC();
 
   return useQuery({
-    ...trpc.analytics.getTaskCompletionTrend.queryOptions(projectId),
+    ...trpc.analytics.getTaskCompletionTrend.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 }

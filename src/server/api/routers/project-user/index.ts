@@ -4,7 +4,6 @@ import { projectUserService } from "~/server/services";
 import { ProjectUserUpdateSchema } from "~/server/zod";
 import {
   createTRPCRouter,
-  projectAdminByIdProcedure,
   projectAdminProcedure,
   projectByIdProcedure,
   projectMemberByIdProcedure,

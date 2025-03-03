@@ -3,7 +3,7 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq } from "drizzle-orm";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 import {
   boards,
   cardComments,

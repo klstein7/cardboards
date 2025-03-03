@@ -1,5 +1,3 @@
-import { z } from "zod";
-
 import { columnService } from "~/server/services/column.service";
 import {
   ColumnCreateSchema,
@@ -9,7 +7,6 @@ import {
 import {
   boardByIdProcedure,
   boardProcedure,
-  columnByIdProcedure,
   columnProcedure,
   createTRPCRouter,
 } from "~/trpc/init";
@@ -22,27 +19,19 @@ export const columnRouter = createTRPCRouter({
 
   // Update a column
   update: columnProcedure
-    .input(z.object({ data: ColumnUpdateSchema.shape.data }))
+    .input(ColumnUpdateSchema)
     .mutation(({ ctx, input }) => {
       return columnService.update(ctx.columnId, input.data);
     }),
 
   // Shift a column
-  shift: columnProcedure
-    .input(z.object({ data: ColumnShiftSchema.shape.data }))
-    .mutation(({ ctx, input }) => {
-      return columnService.shift(ctx.columnId, input.data);
-    }),
+  shift: columnProcedure.input(ColumnShiftSchema).mutation(({ ctx, input }) => {
+    return columnService.shift(ctx.columnId, input.data);
+  }),
 
   // Create a column
   create: boardProcedure
-    .input(
-      z.object({
-        name: z.string(),
-        description: z.string().optional(),
-        isCompleted: z.boolean().optional(),
-      }),
-    )
+    .input(ColumnCreateSchema)
     .mutation(({ ctx, input }) => {
       return columnService.create({
         boardId: ctx.boardId,

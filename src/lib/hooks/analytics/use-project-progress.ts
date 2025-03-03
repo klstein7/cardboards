@@ -10,6 +10,10 @@ export function useProjectProgress(
   const trpc = useTRPC();
 
   return useQuery({
-    ...trpc.analytics.getProjectProgress.queryOptions(projectId),
+    ...trpc.analytics.getProjectProgress.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 }

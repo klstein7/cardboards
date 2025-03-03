@@ -10,6 +10,10 @@ export function useTasksPerDueDate(
   const trpc = useTRPC();
 
   return useQuery({
-    ...trpc.analytics.getTasksPerDueDate.queryOptions(projectId),
+    ...trpc.analytics.getTasksPerDueDate.queryOptions({
+      projectId,
+      startDate,
+      endDate,
+    }),
   });
 }

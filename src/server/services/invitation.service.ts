@@ -2,7 +2,7 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 import { invitations } from "../db/schema";
 import { projectUserService, userService } from "./";
 import { BaseService } from "./base.service";
