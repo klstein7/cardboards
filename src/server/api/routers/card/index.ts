@@ -4,12 +4,9 @@ import { cardService } from "~/server/services";
 import {
   CardCreateManySchema,
   CardCreateSchema,
-  CardGenerateSchema,
-  CardMoveSchema,
   CardUpdateSchema,
 } from "~/server/zod";
 import {
-  authedProcedure,
   boardByIdProcedure,
   boardProcedure,
   cardByIdProcedure,
