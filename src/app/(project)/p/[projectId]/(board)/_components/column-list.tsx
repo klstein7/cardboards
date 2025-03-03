@@ -22,7 +22,10 @@ export function ColumnList({ boardId }: ColumnListProps) {
     return autoScrollForElements({ element: ref.current });
   }, []);
 
-  if (columns.isError) throw columns.error;
+  if (columns.isError) {
+    return <div>Error: {columns.error.message}</div>;
+  }
+
   if (columns.isPending) {
     return (
       <div className="flex h-full w-full items-center justify-center">

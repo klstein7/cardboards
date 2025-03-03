@@ -132,7 +132,9 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
     });
   }, [cards.data, columnId, moveCardMutation, queryClient]);
 
-  if (cards.error) throw cards.error;
+  if (cards.error) {
+    return <div>Error: {cards.error.message}</div>;
+  }
 
   if (cards.isPending)
     return (

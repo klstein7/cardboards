@@ -9,7 +9,9 @@ import { CardDetailsCommentSkeleton } from "./card-details-comment-skeleton";
 export function CardDetailsCommentList({ cardId }: { cardId: number }) {
   const cardComments = useCardComments(cardId);
 
-  if (cardComments.isError) throw cardComments.error;
+  if (cardComments.isError) {
+    return <div>Error: {cardComments.error.message}</div>;
+  }
 
   if (cardComments.isPending)
     return (

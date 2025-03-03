@@ -43,7 +43,9 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
 
   const currentBoardId = params.boardId as string | undefined;
 
-  if (boards.isError) throw boards.error;
+  if (boards.isError) {
+    return <div>Error: {boards.error.message}</div>;
+  }
 
   if (boards.isPending) return <ProjectSidebarSkeleton />;
 

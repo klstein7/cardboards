@@ -44,7 +44,7 @@ export default function InvitationCard({ invitationId }: InvitationCardProps) {
   }
 
   if (invitation.isError) {
-    throw invitation.error;
+    return <div>Error: {invitation.error.message}</div>;
   }
 
   return (
