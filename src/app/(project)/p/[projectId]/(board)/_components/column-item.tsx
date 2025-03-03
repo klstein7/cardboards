@@ -74,7 +74,9 @@ export function ColumnItem({ column }: ColumnItemProps) {
     );
   }, [cards.data?.length, column, moveCardMutation]);
 
-  if (cards.isError) throw cards.error;
+  if (cards.isError) {
+    return <div>Error: {cards.error.message}</div>;
+  }
 
   const cardCount = cards.data?.length ?? 0;
 
