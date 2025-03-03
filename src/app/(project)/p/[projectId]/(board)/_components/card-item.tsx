@@ -9,14 +9,7 @@ import {
   type Edge,
   extractClosestEdge,
 } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
-import {
-  Archive,
-  Copy,
-  Edit,
-  ExternalLink,
-  Trash,
-  UserCircle,
-} from "lucide-react";
+import { Copy, Edit, Trash, UserCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
@@ -50,6 +43,7 @@ import {
   useAssignToCurrentUser,
   useCurrentBoard,
   useDeleteCard,
+  useDuplicateCard,
 } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
@@ -80,6 +74,7 @@ export function CardItem({
 
   const deleteCardMutation = useDeleteCard();
   const assignToCurrentUserMutation = useAssignToCurrentUser();
+  const duplicateCardMutation = useDuplicateCard();
 
   useEffect(() => {
     const cardElement = cardElementRef.current;
@@ -225,24 +220,17 @@ export function CardItem({
               <span>Assign to me</span>
             </ContextMenuItem>
 
-            <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted">
+            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+            <ContextMenuItem
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
+            >
               <Copy className="size-4 text-muted-foreground" />
               <span>Duplicate</span>
             </ContextMenuItem>
 
             <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted">
-              <ExternalLink className="size-4 text-muted-foreground" />
-              <span>Open in new tab</span>
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted">
-              <Archive className="size-4 text-muted-foreground" />
-              <span>Archive</span>
-            </ContextMenuItem>
 
             <AlertDialogTrigger asChild>
               <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
@@ -269,7 +257,7 @@ export function CardItem({
               disabled={deleteCardMutation.isPending}
               className="bg-destructive font-medium text-destructive-foreground hover:bg-destructive/90"
               onClick={async () => {
-                await deleteCardMutation.mutateAsync(card.id);
+                await deleteCardMutation.mutateAsync({ cardId: card.id });
               }}
             >
               {deleteCardMutation.isPending ? "Deleting..." : "Delete"}

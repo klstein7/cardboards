@@ -1,7 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ChevronsUpDown } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  LayoutGrid,
+  Loader2,
+  Trash,
+} from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -18,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Collapsible,
@@ -35,8 +44,13 @@ import {
 } from "~/components/ui/form";
 import { Form } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
-import { useDeleteBoard, useUpdateBoard } from "~/lib/hooks";
+import {
+  useCardCountByBoardId,
+  useColumns,
+  useDeleteBoard,
+  useUpdateBoard,
+} from "~/lib/hooks";
+import { cn } from "~/lib/utils";
 import {
   type BoardUpdatePayload,
   BoardUpdatePayloadSchema,
@@ -50,6 +64,11 @@ interface SettingsBoardItemProps {
 
 export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
   const [open, setOpen] = useState(false);
+  const columns = useColumns(board.id);
+  const cardCount = useCardCountByBoardId(board.id);
+
+  const columnsCount = columns.data?.length ?? 0;
+  const cardsCount = cardCount.data ?? 0;
 
   const form = useForm<BoardUpdatePayload>({
     resolver: zodResolver(BoardUpdatePayloadSchema),
@@ -60,135 +79,208 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
   const deleteBoardMutation = useDeleteBoard();
 
   const onSubmit = async (data: BoardUpdatePayload) => {
-    await updateBoardMutation.mutateAsync({
-      boardId: board.id,
-      data,
-    });
-    toast.success("Board updated!");
-    setOpen(false);
+    try {
+      await updateBoardMutation.mutateAsync({
+        boardId: board.id,
+        data,
+      });
+      toast.success("Board updated successfully");
+    } catch (error) {
+      toast.error("Failed to update board");
+      console.error(error);
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      await deleteBoardMutation.mutateAsync(board.id);
+      toast.success("Board deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete board");
+      console.error(error);
+    }
   };
 
   return (
-    <div className="overflow-hidden">
-      <Collapsible open={open} onOpenChange={setOpen}>
-        <CollapsibleTrigger asChild>
-          <div className="flex cursor-pointer items-center justify-between rounded-lg border px-3 py-2 transition-colors hover:bg-muted/50">
-            <div className="flex items-center gap-3">
-              <div
-                className="h-4 w-4 rounded-sm"
-                style={{ backgroundColor: board.color }}
-              />
-              <h4 className="font-medium">{board.name}</h4>
-            </div>
-            <ChevronsUpDown className="h-4 w-4 transition-transform duration-200 ease-in-out group-data-[state=open]:rotate-180" />
-          </div>
-        </CollapsibleTrigger>
-        <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-          <div className="mt-3 space-y-10 rounded-lg border p-3">
-            <Form {...form}>
-              <form
-                className="flex flex-col gap-6"
-                onSubmit={form.handleSubmit(onSubmit)}
+    <Collapsible
+      open={open}
+      onOpenChange={setOpen}
+      className={cn(
+        "overflow-hidden transition-all duration-300",
+        open ? "bg-muted/50" : "hover:bg-muted/30",
+      )}
+    >
+      <CollapsibleTrigger asChild>
+        <div className="flex cursor-pointer items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3">
+          <div className="flex flex-1 items-center gap-2 overflow-hidden sm:gap-3">
+            <div
+              className="h-3 w-3 shrink-0 rounded-full sm:h-4 sm:w-4"
+              style={{ backgroundColor: board.color }}
+            />
+            <span className="truncate font-medium">{board.name}</span>
+
+            <div className="ml-1 flex flex-wrap items-center gap-1 sm:ml-2 sm:gap-2">
+              <Badge variant="secondary" className="gap-1 px-1.5 py-0 text-xs">
+                <LayoutGrid className="h-3 w-3" />
+                <span>{columnsCount}</span>
+              </Badge>
+
+              <Badge variant="secondary" className="gap-1 px-1.5 py-0 text-xs">
+                <FileText className="h-3 w-3" />
+                <span>{cardsCount}</span>
+              </Badge>
+
+              <Badge
+                variant="secondary"
+                className="hidden gap-1 px-1.5 py-0 text-xs sm:flex"
               >
-                <FormField
-                  control={form.control}
-                  name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormDescription>The name of the board.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="color"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Color</FormLabel>
-                      <FormControl>
-                        <ColorPicker {...field} color={field.value ?? ""} />
-                      </FormControl>
-                      <FormDescription>The color of the board.</FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" isLoading={updateBoardMutation.isPending}>
-                  Save
-                </Button>
-              </form>
-            </Form>
+                <Calendar className="h-3 w-3" />
+                <span>{new Date(board.createdAt).toLocaleDateString()}</span>
+              </Badge>
+            </div>
+          </div>
 
-            <div className="space-y-6">
-              <div className="space-y-4 rounded-lg border bg-secondary/25 p-4">
-                <div>
-                  <h3 className="text-lg font-medium">Columns</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Manage the columns of the board.
-                  </p>
-                </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {updateBoardMutation.isPending && (
+              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+            )}
+            {open ? (
+              <ChevronUp className="h-4 w-4" />
+            ) : (
+              <ChevronDown className="h-4 w-4" />
+            )}
+          </div>
+        </div>
+      </CollapsibleTrigger>
 
-                <Separator />
+      <CollapsibleContent>
+        <div className="border-t px-3 py-3 sm:px-4 sm:py-4">
+          <div className="space-y-6">
+            <div>
+              <h3 className="mb-3 text-base font-medium sm:text-lg">
+                Board Settings
+              </h3>
+              <div className="rounded-lg border bg-card p-3 sm:p-4">
+                <Form {...form}>
+                  <form
+                    className="space-y-3 sm:space-y-4"
+                    onSubmit={form.handleSubmit(onSubmit)}
+                  >
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">
+                            Board name
+                          </FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter board name" {...field} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm">
+                            This is how the board will appear in your project
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
 
+                    <FormField
+                      control={form.control}
+                      name="color"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-sm sm:text-base">
+                            Board color
+                          </FormLabel>
+                          <FormControl>
+                            <ColorPicker {...field} color={field.value ?? ""} />
+                          </FormControl>
+                          <FormDescription className="text-xs sm:text-sm">
+                            This color will be used for board visualization
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-between">
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            type="button"
+                            size="sm"
+                            className="w-full sm:w-auto"
+                          >
+                            <Trash className="mr-1.5 h-4 w-4 sm:mr-2" />
+                            Delete
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>
+                              Delete board &quot;{board.name}&quot;?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will
+                              permanently delete this board and remove all
+                              associated columns and cards.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                            <AlertDialogCancel className="w-full sm:w-auto">
+                              Cancel
+                            </AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={handleDelete}
+                              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:w-auto"
+                            >
+                              {deleteBoardMutation.isPending ? (
+                                <>
+                                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete board"
+                              )}
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+
+                      <Button
+                        type="submit"
+                        disabled={
+                          !form.formState.isDirty ||
+                          updateBoardMutation.isPending
+                        }
+                        className="w-full sm:w-auto"
+                      >
+                        {updateBoardMutation.isPending ? (
+                          <>
+                            <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
+                            Saving...
+                          </>
+                        ) : (
+                          "Save changes"
+                        )}
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="mb-3 text-base font-medium sm:text-lg">Columns</h3>
+              <div className="rounded-lg border bg-card">
                 <SettingsColumnList boardId={board.id} />
               </div>
-
-              <div>
-                <h3 className="text-lg font-medium">Danger Zone</h3>
-                <p className="text-sm text-muted-foreground">
-                  Irreversible and destructive actions
-                </p>
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="rounded-lg border border-destructive/50 p-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-medium">Delete Board</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Permanently delete this board and all of its data
-                    </p>
-                  </div>
-                  <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive">Delete Board</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>
-                          Are you absolutely sure?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This action cannot be undone. This will permanently
-                          delete the board &quot;{board.name}&quot; and all of
-                          its data.
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={async () => {
-                            await deleteBoardMutation.mutateAsync(board.id);
-                            setOpen(false);
-                          }}
-                        >
-                          Delete Board
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                </div>
-              </div>
             </div>
           </div>
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

@@ -18,9 +18,22 @@ export default async function ProjectSettingsPage({
   const project = await trpc.project.get(projectId);
 
   return (
-    <div className="flex flex-col gap-6">
-      <h4 className="text-lg font-medium">General</h4>
-      <SettingsGeneralForm project={project} />
+    <div className="space-y-6">
+      <div className="rounded-lg border bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b p-4 sm:p-6">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">
+              General Settings
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Basic information about your project
+            </p>
+          </div>
+        </div>
+        <div className="p-4 sm:p-6">
+          <SettingsGeneralForm project={project} />
+        </div>
+      </div>
     </div>
   );
 }

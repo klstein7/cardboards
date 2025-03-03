@@ -19,6 +19,8 @@ export function useShiftColumn() {
           columns?.some((c: Column) => c.id === columnId),
         );
 
+        console.log(matchingQuery);
+
         if (!matchingQuery) return;
 
         const [queryKey] = matchingQuery;
@@ -75,6 +77,7 @@ export function useShiftColumn() {
             return newColumns.map((c, index) => ({
               ...c,
               order: index,
+              isCompleted: newColumns.length === index + 1,
             }));
           },
         );
@@ -91,6 +94,14 @@ export function useShiftColumn() {
 
           void queryClient.invalidateQueries({
             queryKey: trpc.column.list.queryKey(contextBoardId),
+          });
+        }
+      },
+      onSettled: (_data, _error, _variables, context) => {
+        const boardId = context?.boardId;
+        if (boardId) {
+          void queryClient.invalidateQueries({
+            queryKey: trpc.column.list.queryKey(boardId),
           });
         }
       },

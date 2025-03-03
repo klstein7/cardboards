@@ -23,25 +23,32 @@ interface BaseHeaderProps {
 
 export function BaseHeader({ items, actions }: BaseHeaderProps) {
   return (
-    <div className="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-6">
-      <div className="flex min-w-0 items-center gap-4">
-        <BreadcrumbList>
+    <div className="flex flex-wrap items-center justify-between gap-3 px-3 py-3 sm:px-4 sm:py-4 lg:px-6">
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
+        <BreadcrumbList className="flex-wrap">
           {items.map((item, index) => (
             <React.Fragment key={`breadcrumb-${index}`}>
               {index > 0 && <BreadcrumbSeparator />}
-              <BreadcrumbItem>
+              <BreadcrumbItem className="max-w-[50vw] sm:max-w-none">
                 {item.href ? (
-                  <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                  <BreadcrumbLink
+                    href={item.href}
+                    className="truncate text-sm sm:text-base"
+                  >
+                    {item.label}
+                  </BreadcrumbLink>
                 ) : (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     {item.color && (
                       <div
-                        className="h-3 w-3 rounded-full"
+                        className="h-2.5 w-2.5 rounded-full sm:h-3 sm:w-3"
                         style={{ backgroundColor: item.color }}
                       />
                     )}
                     {item.icon}
-                    <span className="font-semibold">{item.label}</span>
+                    <span className="truncate text-sm font-semibold sm:text-base">
+                      {item.label}
+                    </span>
                   </div>
                 )}
               </BreadcrumbItem>
@@ -49,7 +56,9 @@ export function BaseHeader({ items, actions }: BaseHeaderProps) {
           ))}
         </BreadcrumbList>
       </div>
-      {actions && <div className="flex items-center gap-2">{actions}</div>}
+      {actions && (
+        <div className="flex flex-shrink-0 items-center gap-2">{actions}</div>
+      )}
     </div>
   );
 }

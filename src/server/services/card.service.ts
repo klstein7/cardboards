@@ -460,6 +460,43 @@ class CardService extends BaseService {
       return updatedCard;
     }, tx);
   }
+
+  /**
+   * Duplicate an existing card
+   */
+  async duplicate(cardId: number, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      // Get the existing card
+      const existingCard = await this.get(cardId, txOrDb);
+
+      // Get the last card order in the column
+      const lastCardOrder = await this.getLastCardOrder(
+        existingCard.columnId,
+        txOrDb,
+      );
+
+      // Create a new card with the same properties but a new order
+      const [duplicatedCard] = await txOrDb
+        .insert(cards)
+        .values({
+          title: `${existingCard.title} (Copy)`,
+          description: existingCard.description,
+          columnId: existingCard.columnId,
+          priority: existingCard.priority,
+          labels: existingCard.labels,
+          order: lastCardOrder + 1,
+          // Don't copy assignedToId - leave it unassigned
+          // Don't copy dueDate - leave it undefined
+        })
+        .returning();
+
+      if (!duplicatedCard) {
+        throw new Error("Failed to duplicate card");
+      }
+
+      return duplicatedCard;
+    }, tx);
+  }
 }
 
 export const cardService = new CardService();

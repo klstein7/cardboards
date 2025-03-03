@@ -1,3 +1,5 @@
+import { Search } from "lucide-react";
+
 import { Input } from "~/components/ui/input";
 import { HydrateClient } from "~/trpc/server";
 import { trpc } from "~/trpc/server";
@@ -19,13 +21,30 @@ export default async function ProjectSettingsMembersPage({
 
   return (
     <HydrateClient>
-      <div className="flex max-w-xl flex-col gap-6">
-        <h4 className="text-lg font-medium">Members</h4>
-        <div className="flex justify-between gap-6">
-          <Input placeholder="Search" />
-          <CreateInvitationButton />
+      <div className="space-y-6">
+        <div className="rounded-lg border bg-card shadow-sm">
+          <div className="flex items-center justify-between border-b p-4 sm:p-6">
+            <div>
+              <h2 className="text-xl font-semibold tracking-tight">
+                Team Members
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Manage your team and their access to the project
+              </p>
+            </div>
+            <CreateInvitationButton />
+          </div>
+
+          <div className="p-4 sm:p-6">
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search members..." className="pl-9" />
+              </div>
+            </div>
+            <ProjectUsersDataTable projectId={projectId} />
+          </div>
         </div>
-        <ProjectUsersDataTable projectId={projectId} />
       </div>
     </HydrateClient>
   );

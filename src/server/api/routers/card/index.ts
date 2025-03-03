@@ -61,8 +61,13 @@ export const cardRouter = createTRPCRouter({
     }),
 
   // Delete a card
-  delete: cardByIdProcedure.mutation(({ ctx }) => {
+  delete: cardProcedure.mutation(({ ctx }) => {
     return cardService.del(ctx.cardId);
+  }),
+
+  // Duplicate a card
+  duplicate: cardProcedure.mutation(({ ctx }) => {
+    return cardService.duplicate(ctx.cardId);
   }),
 
   // List cards in a column
