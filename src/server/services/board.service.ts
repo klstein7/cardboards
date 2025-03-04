@@ -13,6 +13,7 @@ import {
   BoardGenerateResponseSchema,
   type BoardUpdatePayload,
 } from "../zod";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { cardService } from "./card.service";
 import { columnService } from "./column.service";
@@ -142,7 +143,7 @@ class BoardService extends BaseService {
   }
 
   /**
-   * Update a board's properties
+   * Update a board
    */
   async update(
     boardId: string,
@@ -150,6 +151,9 @@ class BoardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireBoardAdmin(boardId, txOrDb);
+
       const [board] = await txOrDb
         .update(boards)
         .set(data)
@@ -157,7 +161,7 @@ class BoardService extends BaseService {
         .returning();
 
       if (!board) {
-        throw new Error("Board not found");
+        throw new Error("Failed to update board");
       }
 
       return board;
@@ -165,17 +169,20 @@ class BoardService extends BaseService {
   }
 
   /**
-   * Delete a board and all associated data
+   * Delete a board
    */
   async del(boardId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireBoardAdmin(boardId, txOrDb);
+
       const [board] = await txOrDb
         .delete(boards)
         .where(eq(boards.id, boardId))
         .returning();
 
       if (!board) {
-        throw new Error("Error deleting board");
+        throw new Error("Failed to delete board");
       }
 
       return board;
@@ -183,7 +190,7 @@ class BoardService extends BaseService {
   }
 
   /**
-   * Generate a board using AI based on a prompt
+   * Generate board content with AI
    */
   async generate(
     projectId: string,
@@ -191,6 +198,9 @@ class BoardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access for the project
+      await authService.requireProjectAdmin(projectId, txOrDb);
+
       const project = await projectService.get(projectId, txOrDb);
 
       const response = await generateObject({

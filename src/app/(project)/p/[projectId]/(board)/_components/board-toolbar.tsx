@@ -15,7 +15,6 @@ import {
 
 import { BoardFilters } from "./board-filters";
 import { FilterIndicator } from "./filter-indicator";
-import { GenerateDropdownMenu } from "./generate-dropdown-menu";
 
 interface BoardToolbarProps {
   boardId: string;
@@ -47,8 +46,6 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
           <BoardFilters />
         </DrawerContent>
       </Drawer>
-
-      <GenerateDropdownMenu boardId={boardId} />
     </div>
   );
 
@@ -56,13 +53,6 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   const desktopFilters = (
     <div className="hidden grow sm:block">
       <BoardFilters />
-    </div>
-  );
-
-  // Generate button for desktop
-  const desktopGenerate = (
-    <div className="ml-auto hidden sm:block">
-      <GenerateDropdownMenu boardId={boardId} />
     </div>
   );
 
@@ -74,7 +64,6 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
           {desktopFilters}
         </>
       }
-      right={desktopGenerate}
       className="flex-wrap"
     />
   );

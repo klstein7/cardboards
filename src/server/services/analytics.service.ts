@@ -3,7 +3,9 @@ import "server-only";
 import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
+import { type Database, type Transaction } from "../db";
 import { columns, projects, projectUsers } from "../db/schema";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 
 /**
@@ -44,6 +46,9 @@ class AnalyticsService extends BaseService {
   ): Promise<DataPoint[]> {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
+
+      // Verify user can access the project
+      await authService.canAccessProject(projectId, txOrDb);
 
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
@@ -113,6 +118,9 @@ class AnalyticsService extends BaseService {
   ): Promise<DataPoint[]> {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
+
+      // Verify user can access the project
+      await authService.canAccessProject(projectId, txOrDb);
 
       const end = endDate ?? new Date();
       const start = startDate ?? subDays(end, 30);
@@ -192,6 +200,9 @@ class AnalyticsService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
 
+      // Verify user can access the project
+      await authService.canAccessProject(projectId, txOrDb);
+
       const projectUsersWithCards = await txOrDb.query.projectUsers.findMany({
         where: eq(projectUsers.projectId, projectId),
         with: {
@@ -239,6 +250,9 @@ class AnalyticsService extends BaseService {
   ): Promise<DataPoint[]> {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
+
+      // Verify user can access the project
+      await authService.canAccessProject(projectId, txOrDb);
 
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
@@ -314,6 +328,9 @@ class AnalyticsService extends BaseService {
   ): Promise<DataPoint[]> {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
+
+      // Verify user can access the project
+      await authService.canAccessProject(projectId, txOrDb);
 
       const today = new Date();
 

@@ -68,7 +68,7 @@ export function CreateCardForm({
       <form
         id="create-card-form"
         onSubmit={form.handleSubmit(onSubmit)}
-        className="flex flex-col gap-6"
+        className="flex flex-col gap-4"
       >
         <div className="flex flex-col gap-4">
           <FormField
@@ -85,7 +85,9 @@ export function CreateCardForm({
                     {...field}
                   />
                 </FormControl>
-                <FormDescription>A concise title for the card.</FormDescription>
+                <FormDescription>
+                  What do you want to call this card?
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -100,7 +102,7 @@ export function CreateCardForm({
                   <Tiptap value={field.value ?? ""} onChange={field.onChange} />
                 </FormControl>
                 <FormDescription>
-                  A detailed description of the card.
+                  Add more details about this card.
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -117,7 +119,7 @@ export function CreateCardForm({
               <FormControl>
                 <DatePicker {...field} value={field.value ?? undefined} />
               </FormControl>
-              <FormDescription>The due date for the card.</FormDescription>
+              <FormDescription>When should this be completed?</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -137,7 +139,7 @@ export function CreateCardForm({
                   />
                 </FormControl>
                 <FormDescription>
-                  The user responsible for this card.
+                  Who is responsible for this task?
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -155,7 +157,7 @@ export function CreateCardForm({
                     onChange={field.onChange}
                   />
                 </FormControl>
-                <FormDescription>The priority of the card.</FormDescription>
+                <FormDescription>How important is this task?</FormDescription>
                 <FormMessage />
               </FormItem>
             )}
@@ -186,7 +188,9 @@ export function CreateCardForm({
                   }}
                 />
               </FormControl>
-              <FormDescription>Labels for the card.</FormDescription>
+              <FormDescription>
+                Add tags to categorize this card.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

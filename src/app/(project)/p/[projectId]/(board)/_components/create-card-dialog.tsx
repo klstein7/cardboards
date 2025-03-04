@@ -33,9 +33,10 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create a card</DialogTitle>
+          <DialogTitle>Create cards</DialogTitle>
           <DialogDescription>
-            A card is a task that you need to complete.
+            Add one or multiple cards to organize and track your tasks within
+            this column.
           </DialogDescription>
         </DialogHeader>
 
@@ -56,12 +57,12 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
           </TabsList>
 
           {/* AI Tab Content */}
-          <TabsContent className="pt-4" value="auto">
+          <TabsContent className="pt-2" value="auto">
             <GenerateCardForm columnId={columnId} setOpen={setOpen} />
           </TabsContent>
 
           {/* Manual Tab Content */}
-          <TabsContent className="pt-4" value="manual">
+          <TabsContent className="pt-2" value="manual">
             <CreateCardForm columnId={columnId} open={open} setOpen={setOpen} />
           </TabsContent>
         </Tabs>

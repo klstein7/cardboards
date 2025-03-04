@@ -214,7 +214,9 @@ export function CardItem({
 
             <ContextMenuItem
               className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-              onClick={() => assignToCurrentUserMutation.mutate(card.id)}
+              onClick={() =>
+                assignToCurrentUserMutation.mutate({ cardId: card.id })
+              }
             >
               <UserCircle className="size-4 text-muted-foreground" />
               <span>Assign to me</span>

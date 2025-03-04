@@ -1,28 +1,20 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Sparkles } from "lucide-react";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { Check, Sparkles } from "lucide-react";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "~/components/ui/form";
+import { Label } from "~/components/ui/label";
+import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
+import { useCreateManyCards, useGenerateCards } from "~/lib/hooks";
+import { cn, type Priority } from "~/lib/utils";
+import { type CardGenerateResponse, GeneratedCardSchema } from "~/server/zod";
 
-// Schema for AI prompt
-const generateCardSchema = z.object({
-  prompt: z.string().min(1, "Please provide a description for your card"),
-});
-
-type GenerateCardInput = z.infer<typeof generateCardSchema>;
+import { CardBase } from "./card-base";
+import { CardSkeleton } from "./card-skeleton";
 
 interface GenerateCardFormProps {
   columnId: string;
@@ -30,73 +22,210 @@ interface GenerateCardFormProps {
 }
 
 export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
+  const params = useParams();
+  const [prompt, setPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [selectedCards, setSelectedCards] = useState<number[]>([]);
+  const [generatedCards, setGeneratedCards] = useState<
+    CardGenerateResponse["cards"]
+  >([]);
 
-  const form = useForm<GenerateCardInput>({
-    resolver: zodResolver(generateCardSchema),
-    defaultValues: {
-      prompt: "",
-    },
-  });
+  // Get board ID from route params
+  const boardId = typeof params.boardId === "string" ? params.boardId : "";
 
-  const handleGenerateCard = async (data: GenerateCardInput) => {
+  const createManyCardsMutation = useCreateManyCards();
+  const generateCardsMutation = useGenerateCards();
+
+  const handleGenerate = async () => {
+    if (!prompt.trim() || !boardId) return;
+
     setIsGenerating(true);
+    setGeneratedCards([]);
+
     try {
-      // This will be implemented later with actual AI generation
-      console.log("Generate card with prompt:", data.prompt);
-      console.log("For column:", columnId);
+      const cards = await generateCardsMutation.mutateAsync({
+        prompt,
+        boardId,
+      });
 
-      // Simulate a delay to show loading state
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Process the cards and update state
+      if (cards && cards.length > 0) {
+        const validCards = cards
+          .map((card) => {
+            const result = GeneratedCardSchema.safeParse(card);
+            return result.success ? result.data : null;
+          })
+          .filter(
+            (card): card is CardGenerateResponse["cards"][0] => card !== null,
+          );
 
-      // Mock success
-      setOpen(false);
+        setGeneratedCards(validCards);
+      }
     } catch (error) {
-      console.error("Error generating card:", error);
+      console.error("Error generating cards:", error);
     } finally {
       setIsGenerating(false);
     }
   };
 
+  const handleAddCards = async () => {
+    await createManyCardsMutation.mutateAsync({
+      boardId,
+      data: generatedCards
+        .filter((_, index) => selectedCards.includes(index))
+        .map((card) => ({
+          title: card.title,
+          description: card.description,
+          priority: card.priority as Priority["value"],
+          columnId, // Use the provided columnId instead of the first column
+          labels: card.labels.map((label) => ({
+            id: label,
+            text: label,
+          })),
+        })),
+    });
+    setOpen(false);
+  };
+
+  useEffect(() => {
+    return () => {
+      setPrompt("");
+      setGeneratedCards([]);
+      setSelectedCards([]);
+    };
+  }, []);
+
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(handleGenerateCard)}
-        className="flex flex-col gap-4"
-      >
-        <FormField
-          control={form.control}
-          name="prompt"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Describe the card you want to create</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="e.g. Create a task for implementing user authentication with OAuth"
-                  {...field}
-                  rows={4}
-                  className="mt-2"
-                />
-              </FormControl>
-              <FormDescription className="mt-1">
-                Provide details about what the card should include, its
-                priority, deadlines, etc.
-              </FormDescription>
-            </FormItem>
-          )}
-        />
-        <div className="flex justify-end">
-          <Button
-            type="submit"
-            disabled={!form.formState.isValid || isGenerating}
-            className="gap-2"
-            isLoading={isGenerating}
-          >
-            {!isGenerating && <Sparkles className="size-4" />}
-            Generate Card
-          </Button>
+    <div className="flex flex-col gap-4">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="prompt" className="text-sm font-medium">
+            Prompt
+          </Label>
+          <span className="text-xs text-muted-foreground">
+            {prompt.length}/500 characters
+          </span>
         </div>
-      </form>
-    </Form>
+        <Textarea
+          id="prompt"
+          value={prompt}
+          placeholder="Example: 'I need to add user authentication using NextAuth.js with Google and GitHub providers'"
+          className="resize-none"
+          rows={4}
+          onChange={(e) => setPrompt(e.target.value.slice(0, 500))}
+        />
+        <p className="text-sm text-muted-foreground">
+          Describe what tasks you want to generate for your board.
+        </p>
+      </div>
+
+      <Button
+        onClick={handleGenerate}
+        isLoading={isGenerating}
+        disabled={!prompt.trim() || isGenerating}
+      >
+        {!isGenerating && <Sparkles className="mr-2 h-4 w-4" />}
+        {isGenerating ? "Generating ideas..." : "Generate cards"}
+      </Button>
+
+      {generatedCards.length > 0 && (
+        <div className="space-y-4 pt-2">
+          <Separator className="bg-border/50" />
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold">
+                Suggested cards
+                <span className="ml-2 text-sm text-muted-foreground">
+                  ({generatedCards.length} generated)
+                </span>
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Click cards to select/deselect them
+              </p>
+            </div>
+            <Badge
+              variant={selectedCards.length > 0 ? "default" : "outline"}
+              className="px-3 py-1 text-sm"
+            >
+              {selectedCards.length} selected
+            </Badge>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            {generatedCards.map((card, index) => (
+              <CardBase
+                key={index}
+                card={{
+                  id: index,
+                  title: card.title,
+                  description: card.description,
+                  createdAt: new Date(),
+                  labels: card.labels,
+                  priority: card.priority as Priority["value"],
+                  columnId: columnId,
+                  assignedTo: null,
+                  order: 0,
+                  dueDate: null,
+                  assignedToId: null,
+                  updatedAt: null,
+                }}
+                className={cn(
+                  "relative cursor-pointer transition-all hover:shadow-md",
+                  "border border-border/75",
+                  selectedCards.includes(index) && [
+                    "ring-2 ring-primary",
+                    "border-primary",
+                    "bg-primary/5 dark:bg-primary/10",
+                    "scale-[1.01]",
+                    "shadow-md",
+                    "transform transition-all duration-200 ease-in-out",
+                  ],
+                  card.priority && "border-l-4",
+                )}
+                onClick={() =>
+                  setSelectedCards((prev) => {
+                    if (prev.includes(index)) {
+                      return prev.filter((id) => id !== index);
+                    }
+                    return [...prev, index];
+                  })
+                }
+              >
+                {selectedCards.includes(index) && (
+                  <div className="absolute right-2 top-2 rounded-full bg-primary p-1 shadow-sm transition-opacity duration-200">
+                    <Check className="h-4 w-4 text-primary-foreground" />
+                  </div>
+                )}
+                {selectedCards.includes(index) && (
+                  <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-tr from-primary/5 to-primary/10" />
+                )}
+              </CardBase>
+            ))}
+            {isGenerating && (
+              <>
+                <CardSkeleton />
+                <CardSkeleton />
+              </>
+            )}
+          </div>
+
+          {!isGenerating && generatedCards.length > 0 && (
+            <div className="flex justify-end">
+              <Button
+                onClick={handleAddCards}
+                isLoading={createManyCardsMutation.isPending}
+                disabled={
+                  selectedCards.length === 0 ||
+                  createManyCardsMutation.isPending
+                }
+              >
+                Add {selectedCards.length} selected cards
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

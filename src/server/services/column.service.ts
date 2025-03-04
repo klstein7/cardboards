@@ -9,6 +9,7 @@ import {
   type ColumnShiftPayload,
   type ColumnUpdatePayload,
 } from "../zod";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 
 /**
@@ -37,6 +38,9 @@ class ColumnService extends BaseService {
    */
   async create(data: ColumnCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access for the board
+      await authService.requireBoardAdmin(data.boardId, txOrDb);
+
       const existingColumns = await this.list(data.boardId, txOrDb);
       const lastOrder =
         existingColumns.length > 0
@@ -138,6 +142,9 @@ class ColumnService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireColumnAdmin(columnId, txOrDb);
+
       const [column] = await txOrDb
         .update(columns)
         .set(data)
@@ -145,7 +152,7 @@ class ColumnService extends BaseService {
         .returning();
 
       if (!column) {
-        throw new Error("Column not found");
+        throw new Error("Failed to update column");
       }
 
       return column;
@@ -157,17 +164,12 @@ class ColumnService extends BaseService {
    */
   async del(columnId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireColumnAdmin(columnId, txOrDb);
+
       const column = await this.get(columnId, txOrDb);
 
-      const [deleted] = await txOrDb
-        .delete(columns)
-        .where(eq(columns.id, columnId))
-        .returning();
-
-      if (!deleted) {
-        throw new Error("Failed to delete column");
-      }
-
+      // Update order of columns after this one
       await txOrDb
         .update(columns)
         .set({
@@ -180,12 +182,21 @@ class ColumnService extends BaseService {
           ),
         );
 
-      return deleted;
+      const [deletedColumn] = await txOrDb
+        .delete(columns)
+        .where(eq(columns.id, columnId))
+        .returning();
+
+      if (!deletedColumn) {
+        throw new Error("Failed to delete column");
+      }
+
+      return deletedColumn;
     }, tx);
   }
 
   /**
-   * Shift a column up or down in order
+   * Shift a column to a new position
    */
   async shift(
     columnId: string,
@@ -193,6 +204,9 @@ class ColumnService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireColumnAdmin(columnId, txOrDb);
+
       const column = await this.get(columnId, txOrDb);
       const { direction } = data;
 

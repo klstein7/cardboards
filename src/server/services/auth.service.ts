@@ -63,6 +63,23 @@ class AuthService extends BaseService {
   }
 
   /**
+   * Verify the current user has admin rights for the specified board
+   */
+  async requireBoardAdmin(
+    boardId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const board = await this.canAccessBoard(boardId, txOrDb);
+
+      // Check if user has admin rights for the board's project
+      await this.requireProjectAdmin(board.projectId, txOrDb);
+
+      return board;
+    }, tx);
+  }
+
+  /**
    * Verify the current user can access the specified card
    */
   async canAccessCard(cardId: number, tx: Transaction | Database = this.db) {
@@ -86,6 +103,44 @@ class AuthService extends BaseService {
       }
 
       await this.canAccessColumn(card.columnId, txOrDb);
+
+      return card;
+    }, tx);
+  }
+
+  /**
+   * Verify the current user has admin rights for the specified card
+   */
+  async requireCardAdmin(cardId: number, tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const card = await this.canAccessCard(cardId, txOrDb);
+
+      // Get the column to find the board
+      const [column] = await txOrDb
+        .select({
+          boardId: columns.boardId,
+        })
+        .from(columns)
+        .where(eq(columns.id, card.columnId));
+
+      if (!column) {
+        throw new Error("Column not found");
+      }
+
+      // Find the board to get the project
+      const [board] = await txOrDb
+        .select({
+          projectId: boards.projectId,
+        })
+        .from(boards)
+        .where(eq(boards.id, column.boardId));
+
+      if (!board) {
+        throw new Error("Board not found");
+      }
+
+      // Check if user has admin rights for the project
+      await this.requireProjectAdmin(board.projectId, txOrDb);
 
       return card;
     }, tx);
@@ -124,6 +179,35 @@ class AuthService extends BaseService {
   }
 
   /**
+   * Verify the current user has admin rights for the specified column
+   */
+  async requireColumnAdmin(
+    columnId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const column = await this.canAccessColumn(columnId, txOrDb);
+
+      // Find the board to get the project
+      const [board] = await txOrDb
+        .select({
+          projectId: boards.projectId,
+        })
+        .from(boards)
+        .where(eq(boards.id, column.boardId));
+
+      if (!board) {
+        throw new Error("Board not found");
+      }
+
+      // Check if user has admin rights for the project
+      await this.requireProjectAdmin(board.projectId, txOrDb);
+
+      return column;
+    }, tx);
+  }
+
+  /**
    * Verify the current user can access the specified project
    */
   async canAccessProject(
@@ -152,6 +236,29 @@ class AuthService extends BaseService {
       }
 
       return projectUser;
+    }, tx);
+  }
+
+  /**
+   * Check if the current user is an admin for the specified project
+   * This is a non-throwing version of requireProjectAdmin
+   */
+  async isProjectAdmin(
+    projectId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      try {
+        const projectUser = await projectUserService.getCurrentProjectUser(
+          projectId,
+          txOrDb,
+        );
+
+        return projectUser.role === "admin";
+      } catch (error) {
+        console.error("Error checking if user is project admin", error);
+        return false;
+      }
     }, tx);
   }
 }

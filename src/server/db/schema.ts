@@ -196,6 +196,52 @@ export const invitations = createTable(
   ],
 );
 
+export const history = createTable(
+  "history",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    entityType: varchar("entity_type", {
+      length: 50,
+      enum: [
+        "project",
+        "board",
+        "column",
+        "card",
+        "user",
+        "project_user",
+        "invitation",
+        "card_comment",
+      ],
+    }).notNull(),
+    entityId: varchar("entity_id", { length: 255 }).notNull(),
+    action: varchar("action", {
+      length: 20,
+      enum: ["create", "update", "delete", "move"],
+    }).notNull(),
+    projectId: varchar("project_id", { length: 255 }).references(
+      () => projects.id,
+      { onDelete: "cascade" },
+    ),
+    performedById: varchar("performed_by_id", { length: 255 }).references(
+      () => projectUsers.id,
+      { onDelete: "set null" },
+    ),
+    changes: text("changes"), // JSON string containing the changes (old/new values)
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("history_entity_type_entity_id_idx").on(
+      table.entityType,
+      table.entityId,
+    ),
+    index("history_project_id_idx").on(table.projectId),
+    index("history_performed_by_id_idx").on(table.performedById),
+    index("history_created_at_idx").on(table.createdAt),
+  ],
+);
+
 export const invitationRelations = relations(invitations, ({ one }) => ({
   project: one(projects, {
     fields: [invitations.projectId],
@@ -266,6 +312,17 @@ export const cardCommentRelations = relations(cardComments, ({ one }) => ({
   }),
   projectUser: one(projectUsers, {
     fields: [cardComments.projectUserId],
+    references: [projectUsers.id],
+  }),
+}));
+
+export const historyRelations = relations(history, ({ one }) => ({
+  project: one(projects, {
+    fields: [history.projectId],
+    references: [projects.id],
+  }),
+  performedBy: one(projectUsers, {
+    fields: [history.performedById],
     references: [projectUsers.id],
   }),
 }));

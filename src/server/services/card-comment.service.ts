@@ -13,7 +13,9 @@ import {
   projectUsers,
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
+import { projectService } from "./project.service";
 
 /**
  * Service for managing card comments
@@ -33,6 +35,9 @@ class CardCommentService extends BaseService {
         throw new Error("Card comment not found");
       }
 
+      // Check if the user can access the card this comment belongs to
+      await authService.canAccessCard(comment.cardId, txOrDb);
+
       return comment;
     }, tx);
   }
@@ -42,6 +47,9 @@ class CardCommentService extends BaseService {
    */
   async create(data: CardCommentCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Check if the user can access the card
+      await authService.canAccessCard(data.cardId, txOrDb);
+
       const { userId } = await auth();
 
       if (!userId) {
@@ -101,6 +109,9 @@ class CardCommentService extends BaseService {
    */
   async list(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Check if the user can access the card
+      await authService.canAccessCard(cardId, txOrDb);
+
       return txOrDb.query.cardComments.findMany({
         where: eq(cardComments.cardId, cardId),
         with: {
@@ -120,16 +131,55 @@ class CardCommentService extends BaseService {
    */
   async remove(id: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      const [comment] = await txOrDb
+      const comment = await this.get(id, txOrDb);
+
+      // Get the project ID from the card
+      const projectId = await projectService.getProjectIdByCardId(
+        comment.cardId,
+        txOrDb,
+      );
+
+      // Check current user
+      const { userId } = await auth();
+      if (!userId) {
+        throw new Error("User is not authenticated");
+      }
+
+      // Get the current user's project user record
+      const [projectUser] = await txOrDb
+        .select()
+        .from(projectUsers)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        );
+
+      if (!projectUser) {
+        throw new Error("User is not a member of the project");
+      }
+
+      // Only allow admin or the comment creator to delete
+      const isAdmin = projectUser.role === "admin";
+      const isCreator = comment.projectUserId === projectUser.id;
+
+      if (!isAdmin && !isCreator) {
+        throw new Error(
+          "Unauthorized: Only admins or the comment creator can delete comments",
+        );
+      }
+
+      const [deletedComment] = await txOrDb
         .delete(cardComments)
         .where(eq(cardComments.id, id))
         .returning();
 
-      if (!comment) {
+      if (!deletedComment) {
         throw new Error("Failed to delete card comment");
       }
 
-      return comment;
+      return deletedComment;
     }, tx);
   }
 
@@ -142,17 +192,56 @@ class CardCommentService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      const [comment] = await txOrDb
+      const comment = await this.get(id, txOrDb);
+
+      // Get the project ID from the card
+      const projectId = await projectService.getProjectIdByCardId(
+        comment.cardId,
+        txOrDb,
+      );
+
+      // Check current user
+      const { userId } = await auth();
+      if (!userId) {
+        throw new Error("User is not authenticated");
+      }
+
+      // Get the current user's project user record
+      const [projectUser] = await txOrDb
+        .select()
+        .from(projectUsers)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        );
+
+      if (!projectUser) {
+        throw new Error("User is not a member of the project");
+      }
+
+      // Only allow admin or the comment creator to update
+      const isAdmin = projectUser.role === "admin";
+      const isCreator = comment.projectUserId === projectUser.id;
+
+      if (!isAdmin && !isCreator) {
+        throw new Error(
+          "Unauthorized: Only admins or the comment creator can update comments",
+        );
+      }
+
+      const [updatedComment] = await txOrDb
         .update(cardComments)
         .set(data)
         .where(eq(cardComments.id, id))
         .returning();
 
-      if (!comment) {
+      if (!updatedComment) {
         throw new Error("Failed to update card comment");
       }
 
-      return comment;
+      return updatedComment;
     }, tx);
   }
 }

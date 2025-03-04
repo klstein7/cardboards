@@ -1,6 +1,6 @@
 import "server-only";
 
-import { google } from "@ai-sdk/google";
+import { openai } from "@ai-sdk/openai";
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
 import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
@@ -14,10 +14,17 @@ import {
   type CardMove,
   type CardUpdatePayload,
 } from "../zod";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
 import { projectUserService } from "./project-user.service";
+
+// Type for labels in card create/update
+interface Label {
+  id: string;
+  text: string;
+}
 
 /**
  * Service for managing card-related operations
@@ -45,6 +52,9 @@ class CardService extends BaseService {
    */
   async create(data: CardCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify access to the column
+      await authService.canAccessColumn(data.columnId, txOrDb);
+
       const lastCardOrder = await this.getLastCardOrder(data.columnId, txOrDb);
 
       const [card] = await txOrDb
@@ -120,7 +130,7 @@ class CardService extends BaseService {
   }
 
   /**
-   * Update a card's properties
+   * Update a card
    */
   async update(
     cardId: number,
@@ -128,20 +138,42 @@ class CardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      const [updatedCard] = await txOrDb
+      // Determine if admin privileges are needed
+      // Admin is needed for priority changes or assignee changes
+      const isAdminRequired =
+        data.priority !== undefined || data.assignedToId !== undefined;
+
+      if (isAdminRequired) {
+        await authService.requireCardAdmin(cardId, txOrDb);
+      } else {
+        // Regular access check for non-admin operations
+        await authService.canAccessCard(cardId, txOrDb);
+      }
+
+      // Prepare data for the update
+      const updateData = { ...data };
+
+      // Extract text from labels if they are Label objects
+      if (updateData.labels && Array.isArray(updateData.labels)) {
+        const firstItem = updateData.labels[0];
+        if (firstItem && typeof firstItem === "object" && "text" in firstItem) {
+          updateData.labels = (updateData.labels as unknown as Label[]).map(
+            (label) => label.text,
+          );
+        }
+      }
+
+      const [card] = await txOrDb
         .update(cards)
-        .set({
-          ...data,
-          updatedAt: new Date(),
-        })
+        .set(updateData)
         .where(eq(cards.id, cardId))
         .returning();
 
-      if (!updatedCard) {
-        throw new Error("Card not found");
+      if (!card) {
+        throw new Error("Failed to update card");
       }
 
-      return updatedCard;
+      return card;
     }, tx);
   }
 
@@ -150,7 +182,20 @@ class CardService extends BaseService {
    */
   async del(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireCardAdmin(cardId, txOrDb);
+
       const card = await this.get(cardId, txOrDb);
+
+      // Update order of cards after this one
+      await txOrDb
+        .update(cards)
+        .set({
+          order: sql`${cards.order} - 1`,
+        })
+        .where(
+          and(eq(cards.columnId, card.columnId), gt(cards.order, card.order)),
+        );
 
       const [deletedCard] = await txOrDb
         .delete(cards)
@@ -161,25 +206,18 @@ class CardService extends BaseService {
         throw new Error("Failed to delete card");
       }
 
-      // Update the order of all cards that were after this one
-      await txOrDb
-        .update(cards)
-        .set({
-          order: sql`${cards.order} - 1`,
-        })
-        .where(
-          and(eq(cards.columnId, card.columnId), gt(cards.order, card.order)),
-        );
-
       return deletedCard;
     }, tx);
   }
 
   /**
-   * Move a card to a different column and/or position
+   * Move a card to a different position or column
    */
   async move(data: CardMove, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Admin access required to move cards
+      await authService.requireCardAdmin(data.cardId, txOrDb);
+
       const { cardId, destinationColumnId, newOrder } = data;
       const card = await this.get(cardId, txOrDb);
 
@@ -328,13 +366,16 @@ class CardService extends BaseService {
   }
 
   /**
-   * Generate a cards using AI
+   * Generate cards with AI
    */
   async generate(boardId: string, prompt: string) {
+    // Verify admin access first
+    await authService.requireBoardAdmin(boardId);
+
     const board = await boardService.getWithDetails(boardId);
 
     const { object } = await generateObject({
-      model: google("gemini-2.0-flash-exp"),
+      model: openai("o3-mini"),
       prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:
@@ -411,16 +452,8 @@ class CardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      const { userId } = await auth();
-
-      if (!userId) {
-        throw new Error("User is not authenticated");
-      }
-
-      // Get the card to find the project
+      // Check if user has admin rights or if self-assignment is allowed
       const card = await this.get(cardId, txOrDb);
-
-      // Get column to find board and project
       const column = await columnService.get(card.columnId, txOrDb);
 
       // Get board to find project
@@ -433,6 +466,20 @@ class CardService extends BaseService {
 
       if (!board) {
         throw new Error("Board not found");
+      }
+
+      // Check if user is admin
+      const isAdmin = await authService.isProjectAdmin(board.projectId, txOrDb);
+
+      // Admin can assign or reassign, but regular users can only self-assign if not already assigned
+      if (!isAdmin && card.assignedToId !== null) {
+        throw new Error("Only admins can reassign cards");
+      }
+
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("User is not authenticated");
       }
 
       // Get the project user ID for the current user
@@ -462,10 +509,13 @@ class CardService extends BaseService {
   }
 
   /**
-   * Duplicate an existing card
+   * Duplicate a card
    */
   async duplicate(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify access
+      await authService.canAccessCard(cardId, txOrDb);
+
       // Get the existing card
       const existingCard = await this.get(cardId, txOrDb);
 

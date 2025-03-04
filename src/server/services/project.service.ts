@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
+import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { projectUserService } from "./project-user.service";
 
@@ -48,6 +49,9 @@ class ProjectService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireProjectAdmin(projectId, txOrDb);
+
       const [updated] = await txOrDb
         .update(projects)
         .set({
@@ -85,6 +89,9 @@ class ProjectService extends BaseService {
    */
   async get(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify user can access this project
+      await authService.canAccessProject(projectId, txOrDb);
+
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
       });
@@ -102,6 +109,9 @@ class ProjectService extends BaseService {
    */
   async del(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify admin access
+      await authService.requireProjectAdmin(projectId, txOrDb);
+
       await txOrDb.delete(projects).where(eq(projects.id, projectId));
     }, tx);
   }
@@ -114,6 +124,9 @@ class ProjectService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
+      // Verify user can access this card
+      await authService.canAccessCard(cardId, txOrDb);
+
       const [result] = await txOrDb
         .select({
           projectId: boards.projectId,
