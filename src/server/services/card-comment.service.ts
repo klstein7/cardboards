@@ -15,6 +15,7 @@ import {
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
 import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
+import { historyService } from "./history.service";
 import { projectService } from "./project.service";
 
 /**
@@ -100,6 +101,17 @@ class CardCommentService extends BaseService {
         throw new Error("Failed to create card comment");
       }
 
+      // Record history for card comment creation
+      await historyService.create(
+        {
+          entityType: "card_comment",
+          entityId: comment.id,
+          action: "create",
+          projectId,
+        },
+        txOrDb,
+      );
+
       return comment;
     }, tx);
   }
@@ -170,6 +182,12 @@ class CardCommentService extends BaseService {
         );
       }
 
+      // Record changes for history
+      const changes = JSON.stringify({
+        before: comment,
+        after: null,
+      });
+
       const [deletedComment] = await txOrDb
         .delete(cardComments)
         .where(eq(cardComments.id, id))
@@ -178,6 +196,18 @@ class CardCommentService extends BaseService {
       if (!deletedComment) {
         throw new Error("Failed to delete card comment");
       }
+
+      // Record history for card comment deletion
+      await historyService.create(
+        {
+          entityType: "card_comment",
+          entityId: id,
+          action: "delete",
+          projectId,
+          changes,
+        },
+        txOrDb,
+      );
 
       return deletedComment;
     }, tx);
@@ -231,6 +261,9 @@ class CardCommentService extends BaseService {
         );
       }
 
+      // Save original comment for history
+      const originalComment = { ...comment };
+
       const [updatedComment] = await txOrDb
         .update(cardComments)
         .set(data)
@@ -240,6 +273,24 @@ class CardCommentService extends BaseService {
       if (!updatedComment) {
         throw new Error("Failed to update card comment");
       }
+
+      // Record changes for history
+      const changes = JSON.stringify({
+        before: originalComment,
+        after: updatedComment,
+      });
+
+      // Record history for card comment update
+      await historyService.create(
+        {
+          entityType: "card_comment",
+          entityId: id,
+          action: "update",
+          projectId,
+          changes,
+        },
+        txOrDb,
+      );
 
       return updatedComment;
     }, tx);

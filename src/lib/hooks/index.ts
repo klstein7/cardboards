@@ -2,6 +2,7 @@ export * from "./board";
 export * from "./card";
 export * from "./card-comment";
 export * from "./column";
+export * from "./history";
 export * from "./invitation";
 export * from "./project";
 export * from "./project-user";

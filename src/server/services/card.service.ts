@@ -18,6 +18,8 @@ import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
+import { historyService } from "./history.service";
+import { projectService } from "./project.service";
 import { projectUserService } from "./project-user.service";
 
 // Type for labels in card create/update
@@ -70,6 +72,19 @@ class CardService extends BaseService {
         throw new Error("Failed to create card");
       }
 
+      // Get the column and board to get project ID
+      const column = await columnService.get(data.columnId, txOrDb);
+      const board = await boardService.get(column.boardId, txOrDb);
+
+      // Record history for card creation
+      await historyService.recordCardAction(
+        card.id,
+        board.projectId,
+        "create",
+        JSON.stringify({ title: card.title }),
+        txOrDb,
+      );
+
       return card;
     }, tx);
   }
@@ -98,7 +113,7 @@ class CardService extends BaseService {
       const lastCardOrder = await this.getLastCardOrder(columnId, txOrDb);
       const startOrder = lastCardOrder === -1 ? 0 : lastCardOrder + 1;
 
-      return txOrDb
+      const createdCards = await txOrDb
         .insert(cards)
         .values(
           cardData.map((card, index) => ({
@@ -109,6 +124,22 @@ class CardService extends BaseService {
           })),
         )
         .returning();
+
+      // Get the board to get project ID
+      const board = await boardService.get(boardId, txOrDb);
+
+      // Record history for each created card
+      for (const card of createdCards) {
+        await historyService.recordCardAction(
+          card.id,
+          board.projectId,
+          "create",
+          JSON.stringify({ title: card.title }),
+          txOrDb,
+        );
+      }
+
+      return createdCards;
     }, tx);
   }
 
@@ -150,6 +181,9 @@ class CardService extends BaseService {
         await authService.canAccessCard(cardId, txOrDb);
       }
 
+      // Get the card before update to track changes
+      const existingCard = await this.get(cardId, txOrDb);
+
       // Prepare data for the update
       const updateData = { ...data };
 
@@ -173,6 +207,27 @@ class CardService extends BaseService {
         throw new Error("Failed to update card");
       }
 
+      // Get project ID for history tracking
+      const projectId = await projectService.getProjectIdByCardId(
+        cardId,
+        txOrDb,
+      );
+
+      // Record changes
+      const changes = JSON.stringify({
+        before: existingCard,
+        after: card,
+      });
+
+      // Record history for card update
+      await historyService.recordCardAction(
+        card.id,
+        projectId,
+        "update",
+        changes,
+        txOrDb,
+      );
+
       return card;
     }, tx);
   }
@@ -186,6 +241,18 @@ class CardService extends BaseService {
       await authService.requireCardAdmin(cardId, txOrDb);
 
       const card = await this.get(cardId, txOrDb);
+
+      // Get project ID for history tracking
+      const projectId = await projectService.getProjectIdByCardId(
+        cardId,
+        txOrDb,
+      );
+
+      // Record the card data before deletion
+      const changes = JSON.stringify({
+        before: card,
+        after: null,
+      });
 
       // Update order of cards after this one
       await txOrDb
@@ -206,6 +273,15 @@ class CardService extends BaseService {
         throw new Error("Failed to delete card");
       }
 
+      // Record history for card deletion
+      await historyService.recordCardAction(
+        cardId,
+        projectId,
+        "delete",
+        changes,
+        txOrDb,
+      );
+
       return deletedCard;
     }, tx);
   }
@@ -220,6 +296,18 @@ class CardService extends BaseService {
 
       const { cardId, destinationColumnId, newOrder } = data;
       const card = await this.get(cardId, txOrDb);
+
+      // Get project ID for history tracking
+      const projectId = await projectService.getProjectIdByCardId(
+        cardId,
+        txOrDb,
+      );
+
+      // Store original values for history
+      const originalValues = {
+        columnId: card.columnId,
+        order: card.order,
+      };
 
       // If moving within the same column
       if (card.columnId === destinationColumnId) {
@@ -257,7 +345,8 @@ class CardService extends BaseService {
             );
         }
 
-        const [updatedCard] = await txOrDb
+        // Update the card's order
+        const [updatedCardResult] = await txOrDb
           .update(cards)
           .set({
             order: newOrder,
@@ -266,11 +355,51 @@ class CardService extends BaseService {
           .where(eq(cards.id, cardId))
           .returning();
 
-        return updatedCard;
+        if (!updatedCardResult) {
+          throw new Error("Failed to move card within column");
+        }
+
+        // Get column name for better history display
+        const column = await columnService.get(card.columnId, txOrDb);
+
+        // Record changes with column name and card title
+        const changes = JSON.stringify({
+          cardTitle: card.title,
+          from: {
+            ...originalValues,
+            columnName: column.name,
+          },
+          to: {
+            columnId: updatedCardResult.columnId,
+            order: updatedCardResult.order,
+            columnName: column.name,
+          },
+          sameName: true, // Indicates it's within the same column
+        });
+
+        // Record history for card move
+        await historyService.recordCardAction(
+          cardId,
+          projectId,
+          "move",
+          changes,
+          txOrDb,
+        );
+
+        return updatedCardResult;
       }
 
-      // Moving to a different column
-      // 1. Update orders in source column
+      // Moving to different column
+      // 1. Get the destination column
+      const destinationColumn = await columnService.get(
+        destinationColumnId,
+        txOrDb,
+      );
+
+      // Get source column name for history
+      const sourceColumn = await columnService.get(card.columnId, txOrDb);
+
+      // 2. Update the order of cards in the original column
       await txOrDb
         .update(cards)
         .set({
@@ -280,7 +409,7 @@ class CardService extends BaseService {
           and(eq(cards.columnId, card.columnId), gt(cards.order, card.order)),
         );
 
-      // 2. Update orders in destination column
+      // 3. Update the order of cards in the destination column
       await txOrDb
         .update(cards)
         .set({
@@ -293,8 +422,8 @@ class CardService extends BaseService {
           ),
         );
 
-      // 3. Move the card itself
-      const [updatedCard] = await txOrDb
+      // 4. Move the card itself
+      const [updatedCardResult] = await txOrDb
         .update(cards)
         .set({
           columnId: destinationColumnId,
@@ -304,11 +433,34 @@ class CardService extends BaseService {
         .where(eq(cards.id, cardId))
         .returning();
 
-      if (!updatedCard) {
-        throw new Error("Failed to move card");
+      if (!updatedCardResult) {
+        throw new Error("Failed to move card to another column");
       }
 
-      return updatedCard;
+      // Record changes with column names for better activity display
+      const changes = JSON.stringify({
+        cardTitle: card.title,
+        from: {
+          ...originalValues,
+          columnName: sourceColumn.name,
+        },
+        to: {
+          columnId: updatedCardResult.columnId,
+          order: updatedCardResult.order,
+          columnName: destinationColumn.name,
+        },
+      });
+
+      // Record history for card move
+      await historyService.recordCardAction(
+        cardId,
+        projectId,
+        "move",
+        changes,
+        txOrDb,
+      );
+
+      return updatedCardResult;
     }, tx);
   }
 
@@ -543,6 +695,19 @@ class CardService extends BaseService {
       if (!duplicatedCard) {
         throw new Error("Failed to duplicate card");
       }
+
+      // Get the column and board to get project ID
+      const column = await columnService.get(duplicatedCard.columnId, txOrDb);
+      const board = await boardService.get(column.boardId, txOrDb);
+
+      // Record history for card creation
+      await historyService.recordCardAction(
+        duplicatedCard.id,
+        board.projectId,
+        "create",
+        JSON.stringify({ title: duplicatedCard.title }),
+        txOrDb,
+      );
 
       return duplicatedCard;
     }, tx);

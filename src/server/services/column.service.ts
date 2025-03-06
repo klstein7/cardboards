@@ -11,6 +11,8 @@ import {
 } from "../zod";
 import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
+import { boardService } from "./board.service";
+import { historyService } from "./history.service";
 
 /**
  * Service for managing column operations
@@ -47,43 +49,50 @@ class ColumnService extends BaseService {
           ? Math.max(...existingColumns.map((c) => c.order))
           : -1;
 
+      let finalOrder = lastOrder + 1;
+      const isCompleted = data.isCompleted ?? false;
+
       if (data.order !== undefined) {
+        // If order is provided, need to shift existing columns
+        finalOrder = data.order;
         await txOrDb
           .update(columns)
           .set({
             order: sql`${columns.order} + 1`,
-            isCompleted: false,
           })
           .where(
             and(
               eq(columns.boardId, data.boardId),
-              gte(columns.order, data.order),
+              gte(columns.order, finalOrder),
             ),
           );
       }
 
-      const finalOrder = data.order ?? lastOrder + 1;
-      const isLastPosition = finalOrder === lastOrder + 1;
-
-      if (isLastPosition) {
-        await txOrDb
-          .update(columns)
-          .set({ isCompleted: false })
-          .where(eq(columns.boardId, data.boardId));
-      }
-
+      // Create column with calculated order and isCompleted values
       const [column] = await txOrDb
         .insert(columns)
         .values({
           ...data,
           order: finalOrder,
-          isCompleted: data.isCompleted ?? isLastPosition,
+          isCompleted,
         })
         .returning();
 
       if (!column) {
         throw new Error("Failed to create column");
       }
+
+      // Get project ID from board for history tracking
+      const board = await boardService.get(data.boardId, txOrDb);
+
+      // Record history for column creation
+      await historyService.recordColumnAction(
+        column.id,
+        board.projectId,
+        "create",
+        undefined,
+        txOrDb,
+      );
 
       return column;
     }, tx);
@@ -145,6 +154,9 @@ class ColumnService extends BaseService {
       // Verify admin access
       await authService.requireColumnAdmin(columnId, txOrDb);
 
+      // Get the column before update to track changes
+      const existingColumn = await this.get(columnId, txOrDb);
+
       const [column] = await txOrDb
         .update(columns)
         .set(data)
@@ -154,6 +166,24 @@ class ColumnService extends BaseService {
       if (!column) {
         throw new Error("Failed to update column");
       }
+
+      // Get board for project ID
+      const board = await boardService.get(column.boardId, txOrDb);
+
+      // Record changes
+      const changes = JSON.stringify({
+        before: existingColumn,
+        after: column,
+      });
+
+      // Record history for column update
+      await historyService.recordColumnAction(
+        column.id,
+        board.projectId,
+        "update",
+        changes,
+        txOrDb,
+      );
 
       return column;
     }, tx);
@@ -168,6 +198,15 @@ class ColumnService extends BaseService {
       await authService.requireColumnAdmin(columnId, txOrDb);
 
       const column = await this.get(columnId, txOrDb);
+
+      // Get board for project ID
+      const board = await boardService.get(column.boardId, txOrDb);
+
+      // Record the column data before deletion
+      const changes = JSON.stringify({
+        before: column,
+        after: null,
+      });
 
       // Update order of columns after this one
       await txOrDb
@@ -190,6 +229,15 @@ class ColumnService extends BaseService {
       if (!deletedColumn) {
         throw new Error("Failed to delete column");
       }
+
+      // Record history for column deletion
+      await historyService.recordColumnAction(
+        column.id,
+        board.projectId,
+        "delete",
+        changes,
+        txOrDb,
+      );
 
       return deletedColumn;
     }, tx);
@@ -248,6 +296,25 @@ class ColumnService extends BaseService {
       if (!updatedColumn) {
         throw new Error("Error shifting column");
       }
+
+      // After successful shift operation, add history tracking
+      // Get the column after shift
+      const updatedColumnAfter = await this.get(columnId, txOrDb);
+      const board = await boardService.get(updatedColumnAfter.boardId, txOrDb);
+
+      // Record the move action
+      const changes = JSON.stringify({
+        from: { order: column.order },
+        to: { order: updatedColumnAfter.order },
+      });
+
+      await historyService.recordColumnAction(
+        columnId,
+        board.projectId,
+        "move",
+        changes,
+        txOrDb,
+      );
 
       return updatedColumn;
     }, tx);

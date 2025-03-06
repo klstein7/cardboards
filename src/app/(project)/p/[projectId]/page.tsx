@@ -14,7 +14,7 @@ import { HydrateClient, trpc } from "~/trpc/server";
 
 import { BoardList } from "../../_components/board-list";
 import { ProjectStats } from "../../_components/project-stats";
-import { ProjectActivity } from "./_components/project-activity";
+import { ProjectActivity } from "./_components/activity/project-activity";
 import { ProjectHeader } from "./_components/project-header";
 import { ProjectToolbar } from "./_components/project-toolbar";
 
@@ -28,6 +28,7 @@ export default async function ProjectPage({ params }: { params: Params }) {
     trpc.project.get.prefetch(projectId),
     trpc.board.list.prefetch(projectId),
     trpc.projectUser.list.prefetch(projectId),
+    trpc.history.getByProject.prefetch({ projectId }),
     trpc.board.countByProjectId.prefetch(projectId),
     trpc.projectUser.countByProjectId.prefetch(projectId),
     trpc.card.countByProjectId.prefetch(projectId),

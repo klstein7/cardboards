@@ -8,6 +8,7 @@ import { boards, cards, columns, projects } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
 import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
+import { historyService } from "./history.service";
 import { projectUserService } from "./project-user.service";
 
 /**
@@ -36,6 +37,14 @@ class ProjectService extends BaseService {
         txOrDb,
       );
 
+      // Record history for project creation
+      await historyService.recordProjectAction(
+        project.id,
+        "create",
+        undefined,
+        txOrDb,
+      );
+
       return project;
     }, tx);
   }
@@ -52,6 +61,15 @@ class ProjectService extends BaseService {
       // Verify admin access
       await authService.requireProjectAdmin(projectId, txOrDb);
 
+      // Get the project before update to track changes
+      const existingProject = await txOrDb.query.projects.findFirst({
+        where: eq(projects.id, projectId),
+      });
+
+      if (!existingProject) {
+        throw new Error("Project not found");
+      }
+
       const [updated] = await txOrDb
         .update(projects)
         .set({
@@ -64,6 +82,20 @@ class ProjectService extends BaseService {
       if (!updated) {
         throw new Error("Failed to update project");
       }
+
+      // Record changes
+      const changes = JSON.stringify({
+        before: existingProject,
+        after: updated,
+      });
+
+      // Record history for project update
+      await historyService.recordProjectAction(
+        projectId,
+        "update",
+        changes,
+        txOrDb,
+      );
 
       return updated;
     }, tx);
@@ -112,7 +144,28 @@ class ProjectService extends BaseService {
       // Verify admin access
       await authService.requireProjectAdmin(projectId, txOrDb);
 
+      // Get the project before deletion to record in history
+      const project = await txOrDb.query.projects.findFirst({
+        where: eq(projects.id, projectId),
+      });
+
+      if (!project) {
+        throw new Error("Project not found");
+      }
+
+      // Record the project data before deletion
+      const changes = JSON.stringify({
+        before: project,
+        after: null,
+      });
+
+      // Delete the project
       await txOrDb.delete(projects).where(eq(projects.id, projectId));
+
+      // Record history for project deletion
+      // Note: This needs to happen outside the transaction since we've deleted the project
+      // We'll create this record in a separate transaction
+      await historyService.recordProjectAction(projectId, "delete", changes);
     }, tx);
   }
 

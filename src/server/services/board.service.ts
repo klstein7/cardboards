@@ -17,6 +17,7 @@ import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { cardService } from "./card.service";
 import { columnService } from "./column.service";
+import { historyService } from "./history.service";
 import { projectService } from "./project.service";
 
 /**
@@ -53,6 +54,15 @@ class BoardService extends BaseService {
       if (!board) {
         throw new Error("Failed to create board");
       }
+
+      // Record history for board creation
+      await historyService.recordBoardAction(
+        board.id,
+        board.projectId,
+        "create",
+        undefined,
+        txOrDb,
+      );
 
       if (customColumns) {
         await columnService.createMany(
@@ -154,6 +164,15 @@ class BoardService extends BaseService {
       // Verify admin access
       await authService.requireBoardAdmin(boardId, txOrDb);
 
+      // Get the board before update to track changes
+      const existingBoard = await txOrDb.query.boards.findFirst({
+        where: eq(boards.id, boardId),
+      });
+
+      if (!existingBoard) {
+        throw new Error("Board not found");
+      }
+
       const [board] = await txOrDb
         .update(boards)
         .set(data)
@@ -163,6 +182,21 @@ class BoardService extends BaseService {
       if (!board) {
         throw new Error("Failed to update board");
       }
+
+      // Record changes
+      const changes = JSON.stringify({
+        before: existingBoard,
+        after: board,
+      });
+
+      // Record history for board update
+      await historyService.recordBoardAction(
+        board.id,
+        board.projectId,
+        "update",
+        changes,
+        txOrDb,
+      );
 
       return board;
     }, tx);
@@ -176,14 +210,38 @@ class BoardService extends BaseService {
       // Verify admin access
       await authService.requireBoardAdmin(boardId, txOrDb);
 
-      const [board] = await txOrDb
+      // Get the board before deletion to record in history
+      const board = await txOrDb.query.boards.findFirst({
+        where: eq(boards.id, boardId),
+      });
+
+      if (!board) {
+        throw new Error("Board not found");
+      }
+
+      // Record the board data before deletion
+      const changes = JSON.stringify({
+        before: board,
+        after: null,
+      });
+
+      const deletedBoard = await txOrDb
         .delete(boards)
         .where(eq(boards.id, boardId))
         .returning();
 
-      if (!board) {
+      if (!deletedBoard || deletedBoard.length === 0) {
         throw new Error("Failed to delete board");
       }
+
+      // Record history for board deletion
+      await historyService.recordBoardAction(
+        board.id,
+        board.projectId,
+        "delete",
+        changes,
+        txOrDb,
+      );
 
       return board;
     }, tx);
