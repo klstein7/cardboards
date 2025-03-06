@@ -1,7 +1,8 @@
 "use client";
 
 import { ActivityIcon, Loader2 } from "lucide-react";
-import { useState } from "react";
+import { parseAsString, useQueryState } from "nuqs";
+import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -13,7 +14,9 @@ import {
 } from "~/components/ui/card";
 import { useProjectHistoryPaginated, useProjectUsers } from "~/lib/hooks";
 
+import { ActivityFilters } from "./activity-filters";
 import { ActivityItem } from "./activity-item";
+import { ActivitySearch } from "./activity-search";
 import { ActivitySkeleton } from "./activity-skeleton";
 
 interface ProjectActivityProps {
@@ -28,6 +31,11 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
   const [offset, setOffset] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
+  // Query params
+  const [search, setSearch] = useQueryState("search", parseAsString);
+  const [activityType] = useQueryState("type", parseAsString);
+  const [timeFrame] = useQueryState("timeFrame", parseAsString);
+
   const projectUsers = useProjectUsers(projectId);
   const history = useProjectHistoryPaginated(projectId, limit, offset);
 
@@ -41,6 +49,25 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
       setIsLoadingMore(false);
     }, 500);
   };
+
+  // Handle search change
+  const handleSearchChange = (value: string) => {
+    if (value === "") {
+      void setSearch(null);
+    } else {
+      void setSearch(value);
+    }
+  };
+
+  // Handle clear search
+  const handleClearSearch = () => {
+    void setSearch(null);
+  };
+
+  // Reset offset when filters change
+  useEffect(() => {
+    setOffset(0);
+  }, [search, activityType, timeFrame]);
 
   // Loading state
   if (history.isLoading || projectUsers.isLoading) {
@@ -79,46 +106,46 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
   const hasMore = pagination.total > items.length;
 
   return (
-    <Card className="overflow-hidden border shadow">
-      <CardHeader className="bg-muted/50 px-4 py-4 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <ActivityIcon className="h-5 w-5 text-muted-foreground" />
-            <CardTitle>Activity</CardTitle>
-          </div>
-          <CardDescription className="hidden sm:block">
-            Recent project changes
-          </CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="divide-y">
-          {items.map((item) => (
-            <ActivityItem key={item.id} item={item} />
-          ))}
-        </div>
+    <div className="space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <ActivitySearch
+          searchQuery={search ?? ""}
+          onChange={handleSearchChange}
+          onClear={handleClearSearch}
+        />
+        <ActivityFilters />
+      </div>
 
-        {hasMore && (
-          <div className="flex justify-center p-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadMore}
-              disabled={isLoadingMore}
-              className="w-full max-w-[200px]"
-            >
-              {isLoadingMore ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Loading...
-                </>
-              ) : (
-                "Load more"
-              )}
-            </Button>
+      <Card className="overflow-hidden border shadow">
+        <CardContent className="p-0">
+          <div className="divide-y">
+            {items.map((item) => (
+              <ActivityItem key={item.id} item={item} />
+            ))}
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {hasMore && (
+            <div className="flex justify-center p-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadMore}
+                disabled={isLoadingMore}
+                className="w-full max-w-[200px]"
+              >
+                {isLoadingMore ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  "Load more"
+                )}
+              </Button>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
