@@ -11,49 +11,36 @@ import {
   CardHeader,
   CardTitle,
 } from "~/components/ui/card";
-import { useProjectHistoryPaginated, useProjectUsers } from "~/lib/hooks";
+import { useProjectHistoryPaginated } from "~/lib/hooks";
 
 import { ActivityItem } from "./activity-item";
-import { ActivitySkeleton } from "./activity-skeleton";
 
 interface ProjectActivityProps {
   projectId: string;
 }
 
-/**
- * Displays the activity feed for a project
- */
 export function ProjectActivity({ projectId }: ProjectActivityProps) {
   const [limit] = useState(10);
   const [offset, setOffset] = useState(0);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const projectUsers = useProjectUsers(projectId);
   const history = useProjectHistoryPaginated(projectId, limit, offset);
 
-  // Handle loading more activity items
   const loadMore = () => {
     setIsLoadingMore(true);
     setOffset((prev) => prev + limit);
 
-    // Simulate network delay for smoother UX
     setTimeout(() => {
       setIsLoadingMore(false);
     }, 500);
   };
 
-  // Loading state
-  if (history.isLoading || projectUsers.isLoading) {
-    return <ActivitySkeleton />;
-  }
-
-  // Error state
   if (history.isError) {
     return (
-      <Card>
+      <Card className="overflow-hidden border border-destructive/10 shadow-sm transition-all">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
-            <ActivityIcon className="h-5 w-5" />
+          <div className="flex items-center justify-center gap-2 py-8 text-muted-foreground">
+            <ActivityIcon className="h-5 w-5 text-destructive/70" />
             <p>Error loading activity: {history.error.message}</p>
           </div>
         </CardContent>
@@ -61,14 +48,22 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
     );
   }
 
-  // Empty state
   if (!history.data?.items || history.data.items.length === 0) {
     return (
-      <Card>
+      <Card className="overflow-hidden border shadow-sm transition-all">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-center gap-2 py-6 text-muted-foreground">
-            <ActivityIcon className="h-5 w-5" />
-            <p>No activity recorded yet.</p>
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <div className="rounded-full bg-muted p-3">
+              <ActivityIcon className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div className="space-y-1">
+              <p className="font-medium text-muted-foreground">
+                No activity recorded yet
+              </p>
+              <p className="text-sm text-muted-foreground/70">
+                Activity will appear here as changes are made to the project
+              </p>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -79,11 +74,13 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
   const hasMore = pagination.total > items.length;
 
   return (
-    <Card className="overflow-hidden border shadow">
-      <CardHeader className="bg-muted/50 px-4 py-4 sm:px-6">
+    <Card className="overflow-hidden border shadow-sm transition-all hover:shadow">
+      <CardHeader className="bg-muted/40 px-4 py-4 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ActivityIcon className="h-5 w-5 text-muted-foreground" />
+            <div className="rounded-full bg-primary/10 p-1.5">
+              <ActivityIcon className="h-4 w-4 text-primary" />
+            </div>
             <CardTitle>Activity</CardTitle>
           </div>
           <CardDescription className="hidden sm:block">
@@ -92,20 +89,20 @@ export function ProjectActivity({ projectId }: ProjectActivityProps) {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="divide-y">
+        <div className="divide-y divide-border/60">
           {items.map((item) => (
             <ActivityItem key={item.id} item={item} />
           ))}
         </div>
 
         {hasMore && (
-          <div className="flex justify-center p-4">
+          <div className="flex justify-center p-4 pb-5">
             <Button
               variant="outline"
               size="sm"
               onClick={loadMore}
               disabled={isLoadingMore}
-              className="w-full max-w-[200px]"
+              className="w-full max-w-[200px] transition-all hover:bg-primary/5"
             >
               {isLoadingMore ? (
                 <>

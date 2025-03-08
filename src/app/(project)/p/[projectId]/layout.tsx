@@ -2,11 +2,11 @@ import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectSidebar } from "../../_components/project-sidebar";
 
+type Params = Promise<{ projectId: string }>;
+
 interface ProjectLayoutProps {
   children: React.ReactNode;
-  params: Promise<{
-    projectId: string;
-  }>;
+  params: Params;
 }
 
 export default async function ProjectLayout({

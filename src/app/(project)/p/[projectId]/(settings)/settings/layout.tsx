@@ -4,11 +4,11 @@ import { SettingsHeader } from "../_components/settings-header";
 import { SettingsSidebar } from "../_components/settings-sidebar";
 import { SettingsToolbar } from "../_components/settings-toolbar";
 
+type Params = Promise<{ projectId: string }>;
+
 interface ProjectSettingsLayoutProps {
   children: React.ReactNode;
-  params: Promise<{
-    projectId: string;
-  }>;
+  params: Params;
 }
 
 export default async function ProjectSettingsLayout({
