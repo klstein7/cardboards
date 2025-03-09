@@ -9,3 +9,12 @@ export function useBoard(boardId: string) {
     ...trpc.board.get.queryOptions(boardId),
   });
 }
+
+export function useBoardSafe(boardId: string | undefined) {
+  const trpc = useTRPC();
+
+  return useQuery({
+    ...trpc.board.get.queryOptions(boardId!),
+    enabled: !!boardId,
+  });
+}

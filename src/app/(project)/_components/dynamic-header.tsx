@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { BaseHeader } from "~/components/shared/base-header";
-import { useBoard } from "~/lib/hooks";
+import { useBoardSafe } from "~/lib/hooks";
 
 interface DynamicHeaderProps {
   projectId: string;
@@ -16,8 +16,7 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   const params = useParams();
   const boardId = params.boardId as string | undefined;
 
-  // Use a safe default value if boardId is undefined
-  const { data: boardData } = useBoard(boardId ?? "");
+  const { data: boardData } = useBoardSafe(boardId);
 
   const [headerItems, setHeaderItems] = useState<
     Array<{
@@ -28,13 +27,11 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   >([]);
 
   useEffect(() => {
-    // Base items always include the project
     const baseItems = [
       { href: "/projects", label: "Projects" },
       { href: `/p/${projectId}`, label: projectName },
     ];
 
-    // Determine which header to show based on the pathname
     if (pathname.includes("/analytics")) {
       setHeaderItems([...baseItems, { label: "Analytics" }]);
     } else if (pathname.includes("/settings")) {
@@ -45,7 +42,6 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
         { label: boardData.name, color: boardData.color },
       ]);
     } else {
-      // Default to just the project header
       setHeaderItems(baseItems);
     }
   }, [pathname, projectId, projectName, boardId, boardData]);
