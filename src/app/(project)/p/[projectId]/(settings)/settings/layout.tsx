@@ -1,45 +1,37 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { SettingsHeader } from "../_components/settings-header";
 import { SettingsSidebar } from "../_components/settings-sidebar";
 import { SettingsToolbar } from "../_components/settings-toolbar";
 
 type Params = Promise<{ projectId: string }>;
 
-interface ProjectSettingsLayoutProps {
+interface SettingsLayoutProps {
   children: React.ReactNode;
   params: Params;
 }
 
-export default async function ProjectSettingsLayout({
+export default async function SettingsLayout({
   children,
   params,
-}: ProjectSettingsLayoutProps) {
+}: SettingsLayoutProps) {
   const { projectId } = await params;
 
-  // Prefetch the project data
+  // Prefetch project data
   await trpc.project.get.prefetch(projectId);
-
-  // Get the project data
-  const project = await trpc.project.get(projectId);
 
   return (
     <HydrateClient>
-      <div className="flex h-[100dvh] w-full flex-col">
-        <SettingsHeader projectId={projectId} projectName={project.name} />
-
-        {/* Toolbar - responsive padding */}
-        <div className="flex w-full border-y px-3 py-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="flex h-full flex-col">
+        <div className="flex w-full border-b border-t px-4 py-3 sm:px-6 lg:px-8">
           <SettingsToolbar projectId={projectId} />
         </div>
 
-        {/* Main content - responsive layout that switches from column to row at medium breakpoint */}
-        <main className="flex flex-1 flex-col overflow-auto md:flex-row">
+        <div className="flex flex-1 flex-col overflow-auto md:flex-row">
           <SettingsSidebar projectId={projectId} />
-          <div className="flex-1 overflow-y-auto px-3 pb-6 pt-4 sm:px-4 md:px-6 lg:px-8">
+          <main className="flex-1 overflow-auto px-4 py-6 sm:px-6 lg:px-8">
             {children}
-          </div>
-        </main>
+          </main>
+        </div>
       </div>
     </HydrateClient>
   );

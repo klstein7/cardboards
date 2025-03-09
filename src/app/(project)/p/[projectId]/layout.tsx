@@ -1,5 +1,7 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
+import { DynamicHeader } from "../../_components/dynamic-header";
+import { MobileNav } from "../../_components/mobile-nav";
 import { ProjectSidebar } from "../../_components/project-sidebar";
 
 type Params = Promise<{ projectId: string }>;
@@ -19,10 +21,14 @@ export default async function ProjectLayout({
   await Promise.all([
     trpc.board.list.prefetch(projectId),
     trpc.projectUser.list.prefetch(projectId),
+    trpc.project.get.prefetch(projectId),
   ]);
 
-  // Get boards directly as we need them for further prefetching
-  const boards = await trpc.board.list(projectId);
+  // Get project and boards directly as we need them for further prefetching
+  const [boards, project] = await Promise.all([
+    trpc.board.list(projectId),
+    trpc.project.get(projectId),
+  ]);
 
   // Prefetch column data for each board
   await Promise.all(
@@ -35,7 +41,13 @@ export default async function ProjectLayout({
     <HydrateClient>
       <div className="flex h-[100dvh] w-full overflow-hidden">
         <ProjectSidebar projectId={projectId} />
-        <div className="min-w-0 flex-1 overflow-hidden">{children}</div>
+        <div className="relative min-w-0 flex-1 overflow-hidden">
+          <MobileNav projectId={projectId} />
+          <div className="flex h-full flex-col overflow-auto pr-[16px] pt-[14px] sm:pr-0 sm:pt-0">
+            <DynamicHeader projectId={projectId} projectName={project.name} />
+            <div className="flex-1">{children}</div>
+          </div>
+        </div>
       </div>
     </HydrateClient>
   );

@@ -1,7 +1,7 @@
-import { FilePlus, UserPlus } from "lucide-react";
+import { UserPlus } from "lucide-react";
 
 import { CreateInvitationButton } from "~/app/(project)/_components/create-invitation-button";
-import { Button } from "~/components/ui/button";
+import { TabsContent } from "~/components/ui/tabs";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import {
@@ -26,28 +26,28 @@ export default async function ProjectMembersPage({
   const project = await trpc.project.get(projectId);
 
   return (
-    <HydrateClient>
-      <div className="space-y-6">
-        <div className="rounded-lg border bg-card shadow-sm">
-          <div className="flex items-center justify-between border-b p-4 sm:p-6">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight">
-                {project.name} Team
-              </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                View and manage team members and their roles
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <CreateInvitationButton />
-            </div>
+    <TabsContent value="members" className="space-y-6">
+      <div className="rounded-lg border bg-card shadow-sm">
+        <div className="flex items-center justify-between border-b p-4 sm:p-6">
+          <div>
+            <h2 className="text-xl font-semibold tracking-tight">
+              {project.name} Team
+            </h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              View and manage team members and their roles
+            </p>
           </div>
-
-          <div className="p-4 sm:p-6">
-            <ProjectMembersDataTable projectId={projectId} columns={columns} />
+          <div className="flex items-center gap-2">
+            <CreateInvitationButton />
           </div>
         </div>
+
+        <div className="p-4 sm:p-6">
+          <HydrateClient>
+            <ProjectMembersDataTable projectId={projectId} columns={columns} />
+          </HydrateClient>
+        </div>
       </div>
-    </HydrateClient>
+    </TabsContent>
   );
 }

@@ -14,11 +14,7 @@ export default function AnalyticsActivityPage({ params }: { params: Params }) {
   const { projectId } = use(params);
   const { startDate, endDate } = useAnalyticsStore();
 
-  const { activity, isPending, isError } = useAnalytics(
-    projectId,
-    startDate,
-    endDate,
-  );
+  const { activity } = useAnalytics(projectId, startDate, endDate);
 
   const activityData = useMemo(() => activity.data ?? [], [activity.data]);
 

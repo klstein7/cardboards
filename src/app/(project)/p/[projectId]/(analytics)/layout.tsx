@@ -2,7 +2,6 @@ import { subDays } from "date-fns";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { AnalyticsHeader } from "./_components/analytics-header";
 import { AnalyticsTabs } from "./_components/analytics-tabs";
 import { AnalyticsToolbar } from "./_components/analytics-toolbar";
 import { SummaryStats } from "./_components/charts/summary-stats";
@@ -57,18 +56,13 @@ export default async function AnalyticsLayout({
     }),
   ]);
 
-  // Get project data for rendering the header
-  const project = await trpc.project.get(projectId);
-
   return (
     <AnalyticsStoreProvider
       initialStartDate={startDate}
       initialEndDate={endDate}
     >
       <HydrateClient>
-        <div className="flex h-[100dvh] w-full flex-col">
-          <AnalyticsHeader projectId={projectId} projectName={project.name} />
-
+        <div className="flex h-full w-full flex-col">
           <div className="flex w-full border-b border-t px-4 py-3 sm:px-6 lg:px-8">
             <AnalyticsToolbar projectId={projectId} />
           </div>

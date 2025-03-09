@@ -4,135 +4,167 @@
 
 @layer base {
   :root {
-    --background: 220 30% 96%;
-    --foreground: 220 45% 12%;
-    --muted: 220 15% 85%;
-    --muted-foreground: 220 25% 35%;
+    /* Light mode - more refined, brighter palette */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
     --popover: 0 0% 100%;
-    --popover-foreground: 220 45% 12%;
+    --popover-foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 220 45% 12%;
-    --border: 220 20% 88%;
-    --input: 220 20% 88%;
+    --card-foreground: 240 10% 3.9%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
 
-    --primary: 230 85% 60%;
+    /* Rich indigo primary */
+    --primary: 250 85% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 20% 96%;
-    --secondary-foreground: 220 35% 25%;
+    /* Soft peach secondary - complements indigo */
+    --secondary: 25 100% 94%;
+    --secondary-foreground: 25 50% 35%;
 
-    --accent: 262 83% 94%;
-    --accent-foreground: 262 60% 30%;
+    /* Muted teal accent - complements indigo with subtlety */
+    --accent: 175 45% 40%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 85% 55%;
+    /* Slightly adjusted destructive for better contrast */
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 230 85% 60%;
+    --ring: 250 85% 55%;
 
+    /* Enhanced chart colors */
     --chart-blue: 210 100% 56%;
-    --chart-green: 142 69% 49%;
-    --chart-purple: 262 83% 58%;
-    --chart-amber: 35 100% 53%;
+    --chart-green: 142 76% 47%;
+    --chart-purple: 262 83% 65%;
+    --chart-amber: 35 100% 56%;
     --chart-red: 358 83% 58%;
-    --chart-cyan: 182 85% 42%;
-    --chart-indigo: 243 75% 59%;
-    --chart-pink: 330 81% 60%;
-    --chart-lime: 85 80% 44%;
-    --chart-emerald: 160 84% 39%;
+    --chart-cyan: 182 85% 50%;
+    --chart-indigo: 243 75% 62%;
+    --chart-pink: 330 81% 64%;
+    --chart-lime: 85 85% 50%;
+    --chart-emerald: 160 84% 44%;
 
-    --priority-low: 142 76% 42%;
-    --priority-medium: 38 92% 50%;
-    --priority-high: 326 85% 48%;
-    --priority-urgent: 0 95% 50%;
-    --priority-none: 220 13% 45%;
+    /* Priority and due date colors - more vibrant */
+    --priority-low: 142 76% 45%;
+    --priority-medium: 38 92% 54%;
+    --priority-high: 326 90% 54%;
+    --priority-urgent: 0 95% 55%;
+    --priority-none: 220 13% 50%;
 
-    --due-overdue: 0 95% 50%;
-    --due-today: 38 92% 50%;
-    --due-week: 142 76% 40%;
-    --due-later: 221 83% 45%;
-    --due-none: 220 13% 45%;
+    --due-overdue: 0 95% 55%;
+    --due-today: 38 92% 54%;
+    --due-week: 142 76% 45%;
+    --due-later: 221 83% 50%;
+    --due-none: 220 13% 50%;
 
     --radius: 0.5rem;
 
-    --priority-low-color: hsl(142 76% 42%);
-    --priority-medium-color: hsl(38 92% 50%);
-    --priority-high-color: hsl(326 85% 48%);
-    --priority-urgent-color: hsl(0 95% 50%);
-    --priority-none-color: hsl(220 13% 45%);
+    /* Color variables (HSL format) */
+    --priority-low-color: hsl(142 76% 45%);
+    --priority-medium-color: hsl(38 92% 54%);
+    --priority-high-color: hsl(326 90% 54%);
+    --priority-urgent-color: hsl(0 95% 55%);
+    --priority-none-color: hsl(220 13% 50%);
 
     --chart-blue-color: hsl(210 100% 56%);
-    --chart-green-color: hsl(142 76% 42%);
-    --chart-purple-color: hsl(262 83% 58%);
-    --chart-amber-color: hsl(38 92% 50%);
+    --chart-green-color: hsl(142 76% 45%);
+    --chart-purple-color: hsl(262 83% 65%);
+    --chart-amber-color: hsl(38 92% 54%);
     --chart-red-color: hsl(358 83% 58%);
-    --chart-cyan-color: hsl(182 85% 42%);
-    --chart-indigo-color: hsl(243 75% 59%);
-    --chart-pink-color: hsl(330 81% 60%);
-    --primary-color: hsl(230 85% 60%);
+    --chart-cyan-color: hsl(182 85% 50%);
+    --chart-indigo-color: hsl(243 75% 62%);
+    --chart-pink-color: hsl(330 81% 64%);
+    --primary-color: hsl(250 85% 55%);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
-    --background: 220 35% 8%;
-    --foreground: 220 15% 95%;
-    --muted: 220 25% 16%;
-    --muted-foreground: 220 15% 65%;
-    --popover: 220 35% 11%;
-    --popover-foreground: 220 15% 95%;
-    --card: 220 35% 11%;
-    --card-foreground: 220 15% 95%;
-    --border: 220 25% 20%;
-    --input: 220 25% 20%;
+    /* Dark mode - deeper, richer colors with better contrast */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
 
-    --primary: 230 85% 65%;
+    /* Rich indigo primary for dark mode */
+    --primary: 250 75% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 30% 16%;
-    --secondary-foreground: 220 20% 90%;
+    /* Soft peach secondary for dark mode */
+    --secondary: 25 30% 25%;
+    --secondary-foreground: 25 90% 85%;
 
-    --accent: 262 70% 20%;
-    --accent-foreground: 262 60% 90%;
+    /* Muted teal accent for dark theme */
+    --accent: 175 40% 45%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 85% 60%;
+    /* Slightly adjusted destructive for better contrast */
+    --destructive: 0 84.2% 65.2%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 230 85% 65%;
+    --ring: 250 75% 65%;
 
-    --chart-blue: 210 100% 66%;
-    --chart-green: 142 69% 59%;
-    --chart-purple: 262 83% 68%;
-    --chart-amber: 35 100% 63%;
-    --chart-red: 358 83% 68%;
-    --chart-cyan: 182 85% 52%;
-    --chart-indigo: 243 75% 69%;
-    --chart-pink: 330 81% 70%;
-    --chart-lime: 85 80% 54%;
-    --chart-emerald: 160 84% 49%;
+    /* Enhanced chart colors for dark mode */
+    --chart-blue: 210 100% 70%;
+    --chart-green: 142 75% 62%;
+    --chart-purple: 262 85% 70%;
+    --chart-amber: 35 100% 68%;
+    --chart-red: 358 85% 70%;
+    --chart-cyan: 182 85% 55%;
+    --chart-indigo: 243 75% 72%;
+    --chart-pink: 330 81% 72%;
+    --chart-lime: 85 80% 60%;
+    --chart-emerald: 160 84% 52%;
 
-    --priority-low: 140 69% 59%;
+    /* Priority and due date colors - more vibrant for dark theme */
+    --priority-low: 142 75% 62%;
     --priority-medium: 38 96% 68%;
-    --priority-high: 326 81% 64%;
-    --priority-urgent: 0 91% 68%;
-    --priority-none: 220 10% 60%;
+    --priority-high: 326 85% 68%;
+    --priority-urgent: 0 95% 68%;
+    --priority-none: 220 13% 65%;
 
-    --due-overdue: 0 91% 68%;
+    --due-overdue: 0 95% 68%;
     --due-today: 38 96% 68%;
-    --due-week: 142 69% 56%;
-    --due-later: 221 83% 63%;
-    --due-none: 220 10% 60%;
+    --due-week: 142 75% 62%;
+    --due-later: 221 85% 68%;
+    --due-none: 220 13% 65%;
 
-    --priority-low-color: hsl(140 69% 59%);
+    /* Color variables (HSL format) */
+    --priority-low-color: hsl(142 75% 62%);
     --priority-medium-color: hsl(38 96% 68%);
-    --priority-high-color: hsl(326 81% 64%);
-    --priority-urgent-color: hsl(0 91% 68%);
-    --priority-none-color: hsl(220 10% 60%);
+    --priority-high-color: hsl(326 85% 68%);
+    --priority-urgent-color: hsl(0 95% 68%);
+    --priority-none-color: hsl(220 13% 65%);
 
-    --chart-blue-color: hsl(210 100% 66%);
-    --chart-green-color: hsl(142 69% 59%);
-    --chart-purple-color: hsl(262 83% 68%);
-    --chart-amber-color: hsl(35 100% 63%);
-    --chart-red-color: hsl(358 83% 68%);
-    --chart-cyan-color: hsl(182 85% 52%);
-    --chart-indigo-color: hsl(243 75% 69%);
-    --chart-pink-color: hsl(330 81% 70%);
-    --primary-color: hsl(230 85% 65%);
+    --chart-blue-color: hsl(210 100% 70%);
+    --chart-green-color: hsl(142 75% 62%);
+    --chart-purple-color: hsl(262 85% 70%);
+    --chart-amber-color: hsl(35 100% 68%);
+    --chart-red-color: hsl(358 85% 70%);
+    --chart-cyan-color: hsl(182 85% 55%);
+    --chart-indigo-color: hsl(243 75% 72%);
+    --chart-pink-color: hsl(330 81% 72%);
+    --primary-color: hsl(250 75% 65%);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -145,10 +177,11 @@
   }
 }
 
+/* Smoother animation for a more polished feel */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(15px);
   }
   to {
     opacity: 1;
@@ -157,5 +190,16 @@
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }

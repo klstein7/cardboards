@@ -19,14 +19,15 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      size="icon"
+      className="h-10 w-full justify-center px-0 lg:justify-start lg:px-3"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       {theme === "dark" ? (
-        <Sun className="size-6" />
+        <Sun className="h-5 w-5" />
       ) : (
-        <Moon className="size-6" />
+        <Moon className="h-5 w-5" />
       )}
+      <span className="ml-3 hidden lg:inline-block">Toggle theme</span>
     </Button>
   );
 }

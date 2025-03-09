@@ -1,6 +1,8 @@
-export default function ProjectBoardsSkeleton() {
+import { TabsContent } from "~/components/ui/tabs";
+
+export default function ProjectBoardsLoading() {
   return (
-    <div className="space-y-4">
+    <TabsContent value="boards" className="space-y-4">
       <div className="rounded-lg border bg-card shadow-sm">
         <div className="flex items-center justify-between border-b p-4 sm:p-6">
           <div>
@@ -44,7 +46,7 @@ export default function ProjectBoardsSkeleton() {
           </div>
         </div>
       </div>
-    </div>
+    </TabsContent>
   );
 }
 
