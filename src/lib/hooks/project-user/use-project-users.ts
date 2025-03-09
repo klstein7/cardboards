@@ -7,6 +7,5 @@ export function useProjectUsers(projectId: string) {
 
   return useQuery({
     ...trpc.projectUser.list.queryOptions(projectId),
-    placeholderData: [],
   });
 }

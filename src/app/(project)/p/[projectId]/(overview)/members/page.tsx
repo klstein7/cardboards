@@ -1,7 +1,7 @@
-import { FilePlus, Filter, Search, UserPlus } from "lucide-react";
+import { FilePlus, UserPlus } from "lucide-react";
 
+import { CreateInvitationButton } from "~/app/(project)/_components/create-invitation-button";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import {
@@ -39,29 +39,11 @@ export default async function ProjectMembersPage({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm">
-                <FilePlus className="mr-2 h-4 w-4" />
-                Import CSV
-              </Button>
-              <Button>
-                <UserPlus className="mr-2 h-4 w-4" />
-                Add Member
-              </Button>
+              <CreateInvitationButton />
             </div>
           </div>
 
           <div className="p-4 sm:p-6">
-            <div className="mb-6 flex flex-wrap items-center gap-3">
-              <div className="relative min-w-[200px] flex-1">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search members..." className="pl-9" />
-              </div>
-              <Button variant="outline" size="sm" className="gap-1">
-                <Filter className="h-4 w-4" />
-                Filters
-              </Button>
-            </div>
-
             <ProjectMembersDataTable projectId={projectId} columns={columns} />
           </div>
         </div>

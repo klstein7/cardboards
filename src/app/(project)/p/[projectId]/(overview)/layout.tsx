@@ -1,12 +1,9 @@
-import Link from "next/link";
-
-import { ProjectStats } from "~/app/(project)/_components/project-stats";
-import { ProjectTabs } from "~/app/(project)/_components/project-tabs";
-import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ProjectStats } from "~/app/(project)/p/[projectId]/(overview)/_components/project-stats";
+import { ProjectTabs } from "~/app/(project)/p/[projectId]/(overview)/_components/project-tabs";
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { ProjectHeader } from "../_components/project-header";
-import { ProjectToolbar } from "../_components/project-toolbar";
+import { ProjectHeader } from "./_components/project-header";
+import { ProjectToolbar } from "./_components/project-toolbar";
 
 type Params = Promise<{ projectId: string }>;
 

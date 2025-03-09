@@ -4,7 +4,7 @@ import { Input } from "~/components/ui/input";
 import { HydrateClient } from "~/trpc/server";
 import { trpc } from "~/trpc/server";
 
-import { CreateInvitationButton } from "../../_components/create-invitation-button";
+import { CreateInvitationButton } from "../../../../../_components/create-invitation-button";
 import { ProjectUsersDataTable } from "../../_components/project-users-data-table/project-users-data-table";
 
 type Params = Promise<{ projectId: string }>;

@@ -207,15 +207,19 @@ export function AnalyticsContent({ projectId }: AnalyticsContentProps) {
         defaultValue="overview"
         value={activeTab}
         onValueChange={setActiveTab}
-        className="space-y-4"
+        className="w-full space-y-4"
       >
-        <div className="flex items-center justify-between">
-          <TabsList className="bg-card/50 backdrop-blur-sm">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="progress">Progress</TabsTrigger>
-            <TabsTrigger value="activity">Activity</TabsTrigger>
-          </TabsList>
-        </div>
+        <TabsList className="mb-4 w-full max-w-md">
+          <TabsTrigger value="overview" className="flex-1">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="progress" className="flex-1">
+            Progress
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="flex-1">
+            Activity
+          </TabsTrigger>
+        </TabsList>
 
         <TabsContent value="overview" className="space-y-6">
           <div className="grid grid-cols-1 gap-6">

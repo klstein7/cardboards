@@ -10,6 +10,7 @@ import {
   Shield,
   User,
 } from "lucide-react";
+import { useState } from "react";
 
 import { type ProjectUser } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -30,7 +31,8 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 
-import { ProjectUserRoleSelect } from "../../../../(settings)/_components/project-users-data-table/project-user-role-select";
+import { ProjectMembersTableActions } from "./project-members-table-actions";
+import { ProjectUserRoleDialog } from "./project-user-role-dialog";
 
 export const columns: ColumnDef<ProjectUser>[] = [
   {
@@ -101,11 +103,6 @@ export const columns: ColumnDef<ProjectUser>[] = [
               <span>Member</span>
             </Badge>
           )}
-          <ProjectUserRoleSelect
-            role={role}
-            projectId={row.original.projectId}
-            userId={row.original.userId}
-          />
         </div>
       );
     },
@@ -194,35 +191,8 @@ export const columns: ColumnDef<ProjectUser>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const user = row.original;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="border-border bg-popover">
-            <DropdownMenuLabel className="text-popover-foreground">
-              Actions
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-muted" />
-            <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground">
-              View profile
-            </DropdownMenuItem>
-            <DropdownMenuItem className="focus:bg-accent focus:text-accent-foreground">
-              Change role
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-muted" />
-            <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
-              Remove from project
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => (
+      <ProjectMembersTableActions projectUser={row.original} />
+    ),
   },
 ];

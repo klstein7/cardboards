@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowUpIcon,
   CheckCircleIcon,
@@ -6,21 +8,59 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "~/components/ui/card";
+import { useAnalytics } from "~/lib/hooks/analytics";
 import { cn } from "~/lib/utils";
 
+import { useAnalyticsStore } from "../../_store/analytics-store";
+
 interface SummaryStatsProps {
-  totalTasks: number;
-  completionRate: number;
-  activeUsers: number;
-  totalBoards: number;
+  projectId: string;
 }
 
-export function SummaryStats({
-  totalTasks,
-  completionRate,
-  activeUsers,
-  totalBoards,
-}: SummaryStatsProps) {
+export function SummaryStats({ projectId }: SummaryStatsProps) {
+  const { startDate, endDate } = useAnalyticsStore();
+
+  const {
+    progress,
+    trend,
+    activity,
+    priorities,
+    dueDates,
+    isPending,
+    isError,
+  } = useAnalytics(projectId, startDate, endDate);
+
+  if (isPending) {
+    return (
+      <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <Card key={i} className="animate-pulse bg-card/50">
+            <CardContent className="h-24 p-6"></CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="mb-6 text-sm text-destructive">
+        Error loading summary stats
+      </div>
+    );
+  }
+
+  const totalTasks =
+    priorities.data?.reduce((acc, item) => acc + item.value, 0) ?? 0;
+  const activeUsers = activity.data?.length ?? 0;
+  const totalBoards = progress.data?.length ?? 0;
+  const completionRate = progress.data?.length
+    ? Math.round(
+        progress.data.reduce((acc, item) => acc + item.value, 0) /
+          progress.data.length,
+      )
+    : 0;
+
   return (
     <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
       <StatCard

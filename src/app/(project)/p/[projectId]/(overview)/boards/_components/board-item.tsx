@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { useCardCountByBoardId, useColumns } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
-import { type Board } from "../_types";
+import { type Board } from "../../../../../_types";
 
 export function BoardItem({
   projectId,
@@ -52,7 +52,10 @@ export function BoardItem({
           <CardContent className="p-6 pt-8">
             <div className="mb-6 flex items-start justify-between">
               <div>
-                <h3 className="text-xl font-semibold tracking-tight group-hover:text-primary">
+                <h3
+                  className="text-xl font-semibold tracking-tight transition-colors"
+                  style={{ color: isHovered ? board.color : "inherit" }}
+                >
                   {board.name}
                 </h3>
                 <div className="mt-1.5 text-sm text-muted-foreground">
