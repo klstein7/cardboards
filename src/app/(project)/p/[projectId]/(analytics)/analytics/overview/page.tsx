@@ -16,7 +16,7 @@ export default function AnalyticsOverviewPage({ params }: { params: Params }) {
   const { projectId } = use(params);
   const { startDate, endDate } = useAnalyticsStore();
 
-  const { trend, priorities, dueDates, isPending, isError } = useAnalytics(
+  const { trend, priorities, dueDates } = useAnalytics(
     projectId,
     startDate,
     endDate,

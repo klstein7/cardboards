@@ -2,7 +2,6 @@ import { auth } from "@clerk/nextjs/server";
 import { type inferRouterOutputs, initTRPC, TRPCError } from "@trpc/server";
 import { cache } from "react";
 import superjson from "superjson";
-import { z } from "zod";
 
 import { type AppRouter } from "~/server/api/routers";
 

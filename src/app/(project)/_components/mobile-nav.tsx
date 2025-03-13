@@ -56,7 +56,7 @@ export function MobileNav({ projectId }: MobileNavProps) {
         <Button
           variant="ghost"
           size="icon"
-          className="absolute right-3 top-2 z-10 h-8 w-8 sm:hidden"
+          className="absolute right-3 top-2 z-10 h-8 w-8 bg-secondary sm:hidden"
         >
           <Menu className="h-4 w-4" />
         </Button>

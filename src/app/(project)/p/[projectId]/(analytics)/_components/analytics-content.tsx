@@ -184,24 +184,9 @@ export function AnalyticsContent({ projectId }: AnalyticsContentProps) {
     );
   }
 
-  const totalTasks = prioritiesData.reduce((acc, item) => acc + item.value, 0);
-  const activeUsers = activityData.length;
-  const totalBoards = progressData.length;
-  const completionRate = progressData.length
-    ? Math.round(
-        progressData.reduce((acc, item) => acc + item.value, 0) /
-          progressData.length,
-      )
-    : 0;
-
   return (
     <div className="py-4">
-      <SummaryStats
-        totalTasks={totalTasks}
-        completionRate={completionRate}
-        activeUsers={activeUsers}
-        totalBoards={totalBoards}
-      />
+      <SummaryStats projectId={projectId} />
 
       <Tabs
         defaultValue="overview"

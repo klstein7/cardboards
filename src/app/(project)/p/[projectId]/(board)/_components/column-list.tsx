@@ -51,7 +51,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
         } as React.CSSProperties
       }
     >
-      <div className="flex w-fit items-start gap-5 p-5">
+      <div className="flex w-fit items-start gap-5">
         {columns.data.map((column) => (
           <div key={column.id} className="h-full w-[300px] flex-shrink-0">
             <ColumnItem column={column} />

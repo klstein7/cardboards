@@ -1,5 +1,3 @@
-import { UserPlus } from "lucide-react";
-
 import { CreateInvitationButton } from "~/app/(project)/_components/create-invitation-button";
 import { TabsContent } from "~/components/ui/tabs";
 import { HydrateClient, trpc } from "~/trpc/server";

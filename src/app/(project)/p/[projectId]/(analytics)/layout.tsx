@@ -5,6 +5,7 @@ import { HydrateClient, trpc } from "~/trpc/server";
 import { AnalyticsTabs } from "./_components/analytics-tabs";
 import { AnalyticsToolbar } from "./_components/analytics-toolbar";
 import { SummaryStats } from "./_components/charts/summary-stats";
+import { ScrollReset } from "./_components/scroll-reset";
 import { AnalyticsStoreProvider } from "./_store";
 
 type Params = Promise<{ projectId: string }>;
@@ -62,8 +63,9 @@ export default async function AnalyticsLayout({
       initialEndDate={endDate}
     >
       <HydrateClient>
-        <div className="flex h-full w-full flex-col">
-          <div className="flex w-full border-b border-t px-4 py-3 sm:px-6 lg:px-8">
+        <ScrollReset />
+        <div className="flex h-full w-full flex-col overflow-hidden">
+          <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
             <AnalyticsToolbar projectId={projectId} />
           </div>
 

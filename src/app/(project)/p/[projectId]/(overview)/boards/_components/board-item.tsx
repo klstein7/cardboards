@@ -2,11 +2,10 @@ import { ArrowRight, FileText, Kanban, LayoutGridIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
+import { type Board } from "~/app/(project)/_types";
 import { Card, CardContent, CardFooter } from "~/components/ui/card";
 import { useCardCountByBoardId, useColumns } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
-
-import { type Board } from "../../../../../_types";
 
 export function BoardItem({
   projectId,

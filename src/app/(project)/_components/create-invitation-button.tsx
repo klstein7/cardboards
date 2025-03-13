@@ -8,12 +8,12 @@ import { Button } from "~/components/ui/button";
 import {
   useCopyToClipboard,
   useCreateInvitation,
-  useCurrentProjectId,
+  useStrictCurrentProjectId,
 } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 export function CreateInvitationButton() {
-  const projectId = useCurrentProjectId();
+  const projectId = useStrictCurrentProjectId();
   const { copy } = useCopyToClipboard();
   const createInvitationMutation = useCreateInvitation();
   const [copied, setCopied] = useState(false);

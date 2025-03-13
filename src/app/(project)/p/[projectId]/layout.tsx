@@ -41,9 +41,9 @@ export default async function ProjectLayout({
     <HydrateClient>
       <div className="flex h-[100dvh] w-full overflow-hidden">
         <ProjectSidebar projectId={projectId} />
-        <div className="relative min-w-0 flex-1 overflow-hidden">
+        <div className="min-w-0 flex-1 overflow-hidden sm:ml-[60px]">
           <MobileNav projectId={projectId} />
-          <div className="flex h-full flex-col overflow-auto pr-[16px] pt-[14px] sm:pr-0 sm:pt-0">
+          <div className="flex h-full flex-col overflow-auto">
             <DynamicHeader projectId={projectId} projectName={project.name} />
             <div className="flex-1">{children}</div>
           </div>

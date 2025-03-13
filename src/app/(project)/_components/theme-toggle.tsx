@@ -5,8 +5,13 @@ import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
-export function ThemeToggle() {
+interface ThemeToggleProps {
+  isHovered?: boolean;
+}
+
+export function ThemeToggle({ isHovered = true }: ThemeToggleProps) {
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -19,15 +24,20 @@ export function ThemeToggle() {
   return (
     <Button
       variant="ghost"
-      className="h-10 w-full justify-center px-0 lg:justify-start lg:px-3"
+      className={cn(
+        "h-10 w-full",
+        isHovered ? "justify-start px-3" : "justify-center px-0",
+      )}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       {theme === "dark" ? (
-        <Sun className="h-5 w-5" />
+        <Sun className="h-5 w-5 flex-shrink-0" />
       ) : (
-        <Moon className="h-5 w-5" />
+        <Moon className="h-5 w-5 flex-shrink-0" />
       )}
-      <span className="ml-3 hidden lg:inline-block">Toggle theme</span>
+      <span className={cn("ml-3 whitespace-nowrap", !isHovered && "hidden")}>
+        {theme === "dark" ? "Light" : "Dark"}
+      </span>
     </Button>
   );
 }

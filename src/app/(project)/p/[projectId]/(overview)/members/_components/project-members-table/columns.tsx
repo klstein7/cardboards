@@ -2,28 +2,12 @@
 
 import { type ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import {
-  ArrowUpDown,
-  Calendar,
-  Clock,
-  MoreHorizontal,
-  Shield,
-  User,
-} from "lucide-react";
-import { useState } from "react";
+import { ArrowUpDown, Calendar, Clock, Shield, User } from "lucide-react";
 
 import { type ProjectUser } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "~/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -32,7 +16,6 @@ import {
 } from "~/components/ui/tooltip";
 
 import { ProjectMembersTableActions } from "./project-members-table-actions";
-import { ProjectUserRoleDialog } from "./project-user-role-dialog";
 
 export const columns: ColumnDef<ProjectUser>[] = [
   {

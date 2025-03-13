@@ -14,11 +14,7 @@ export default function AnalyticsProgressPage({ params }: { params: Params }) {
   const { projectId } = use(params);
   const { startDate, endDate } = useAnalyticsStore();
 
-  const { progress, isPending, isError } = useAnalytics(
-    projectId,
-    startDate,
-    endDate,
-  );
+  const { progress } = useAnalytics(projectId, startDate, endDate);
 
   const progressData = useMemo(() => progress.data ?? [], [progress.data]);
 

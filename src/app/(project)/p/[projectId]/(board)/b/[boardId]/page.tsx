@@ -22,8 +22,6 @@ export default async function BoardPage({ params }: { params: Params }) {
     trpc.projectUser.list.prefetch(projectId),
   ]);
 
-  // Directly get the data since we need it for server rendering
-  const board = await trpc.board.get(boardId);
   const columns = await trpc.column.list(boardId);
 
   // Prefetch cards for each column
@@ -35,11 +33,11 @@ export default async function BoardPage({ params }: { params: Params }) {
     <HydrateClient>
       <BoardStateProvider>
         <div className="flex h-full w-full flex-col">
-          <div className="flex w-full border-y px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex w-full border-y px-4 py-3 sm:px-6">
             <BoardToolbar boardId={boardId} />
           </div>
 
-          <main className="relative flex-1 overflow-auto px-4 pb-6 pt-3 sm:px-6 lg:px-8">
+          <main className="relative flex-1 overflow-auto px-4 pb-6 pt-3 sm:px-6">
             <ColumnList boardId={boardId} />
             <CardDetails />
           </main>

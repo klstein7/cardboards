@@ -48,7 +48,10 @@ export function CreateColumnDialog({ boardId }: CreateColumnDialogProps) {
   const createColumnMutation = useCreateColumn();
 
   async function onSubmit(data: ColumnCreate) {
-    await createColumnMutation.mutateAsync(data);
+    await createColumnMutation.mutateAsync({
+      ...data,
+      description: data.description ?? undefined,
+    });
     setOpen(false);
   }
 

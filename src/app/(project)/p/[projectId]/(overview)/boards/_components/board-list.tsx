@@ -3,6 +3,7 @@
 import { LayoutGridIcon, PlusIcon, Search } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
+import { CreateBoardDialog } from "~/app/(project)/_components/create-board-dialog";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -14,7 +15,6 @@ import {
 } from "~/components/ui/select";
 import { useBoards } from "~/lib/hooks";
 
-import { CreateBoardDialog } from "../../../../../_components/create-board-dialog";
 import { BoardItem } from "./board-item";
 
 interface BoardListProps {

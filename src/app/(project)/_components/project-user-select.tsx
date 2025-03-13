@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { useCurrentProjectId, useProjectUsers } from "~/lib/hooks";
+import { useProjectUsers, useStrictCurrentProjectId } from "~/lib/hooks";
 
 interface ProjectUserSelectProps {
   value: string;
@@ -16,7 +16,7 @@ interface ProjectUserSelectProps {
 }
 
 export function ProjectUserSelect({ value, onChange }: ProjectUserSelectProps) {
-  const projectId = useCurrentProjectId();
+  const projectId = useStrictCurrentProjectId();
   const projectUsers = useProjectUsers(projectId);
 
   return (

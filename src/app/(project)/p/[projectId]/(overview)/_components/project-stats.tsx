@@ -2,13 +2,12 @@
 
 import { FileText, LayoutGridIcon, UsersIcon } from "lucide-react";
 
-import { Card } from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   useBoardCountByProjectId,
   useCardCountByProjectId,
   useProjectUserCountByProjectId,
 } from "~/lib/hooks";
-import { cn } from "~/lib/utils";
 
 interface ProjectStatsProps {
   projectId: string;
@@ -20,19 +19,19 @@ export function ProjectStats({ projectId }: ProjectStatsProps) {
   const cardCount = useCardCountByProjectId(projectId);
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3">
       <StatCard
-        icon={LayoutGridIcon}
+        icon={<LayoutGridIcon className="h-5 w-5 text-primary" />}
         value={boardCount.data ?? 0}
         label="Active boards"
       />
       <StatCard
-        icon={UsersIcon}
+        icon={<UsersIcon className="h-5 w-5 text-blue-500" />}
         value={memberCount.data ?? 0}
         label="Team members"
       />
       <StatCard
-        icon={FileText}
+        icon={<FileText className="h-5 w-5 text-purple-500" />}
         value={cardCount.data ?? 0}
         label="Total cards"
       />
@@ -40,35 +39,28 @@ export function ProjectStats({ projectId }: ProjectStatsProps) {
   );
 }
 
-function StatCard({
-  icon: Icon,
-  value,
-  label,
-  className,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  value: number;
+interface StatCardProps {
+  icon: React.ReactNode;
   label: string;
-  className?: string;
-}) {
+  value: number;
+}
+
+function StatCard({ icon, label, value }: StatCardProps) {
   return (
-    <Card
-      className={cn(
-        "group border-border/80 bg-secondary/20 shadow-lg transition-all duration-200 hover:border-primary hover:bg-secondary/30 hover:shadow-xl",
-        className,
-      )}
-    >
-      <div className="relative flex items-center gap-4 p-6">
-        <div className="rounded-full bg-primary/10 p-3 shadow-sm transition-colors group-hover:bg-primary/20">
-          <Icon className="h-6 w-6 text-primary" />
+    <Card className="bg-card/50 backdrop-blur-sm transition-all duration-200 hover:shadow-md">
+      <CardContent className="flex p-6">
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
+          {icon}
         </div>
-        <div className="space-y-1">
-          <div className="text-3xl font-semibold tabular-nums tracking-tight text-foreground">
+        <div className="ml-4 flex flex-col justify-center">
+          <span className="text-sm font-medium text-muted-foreground">
+            {label}
+          </span>
+          <span className="mt-0.5 text-2xl font-bold">
             {value.toLocaleString()}
-          </div>
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
+          </span>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 }

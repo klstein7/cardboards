@@ -15,13 +15,13 @@ import {
 } from "~/components/ui/popover";
 import {
   useCachedCardsByCurrentBoard,
-  useCurrentProjectId,
   useProjectUsers,
+  useStrictCurrentProjectId,
 } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 export function BoardFilters() {
-  const projectId = useCurrentProjectId();
+  const projectId = useStrictCurrentProjectId();
 
   const [search, setSearch] = useQueryState("search", parseAsString);
   const [labels, setLabels] = useQueryState(

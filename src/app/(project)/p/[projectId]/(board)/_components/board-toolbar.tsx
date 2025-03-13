@@ -20,7 +20,7 @@ interface BoardToolbarProps {
   boardId: string;
 }
 
-export function BoardToolbar({ boardId }: BoardToolbarProps) {
+export function BoardToolbar({ boardId: _boardId }: BoardToolbarProps) {
   // Mobile filters
   const mobileFilters = (
     <div className="flex items-center gap-2 sm:hidden">

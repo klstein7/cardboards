@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
@@ -17,7 +17,7 @@ export function ProjectTabs({ projectId, children }: ProjectTabsListProps) {
   const value = pathname.split("/").pop();
 
   return (
-    <Tabs value={value} className="w-full">
+    <Tabs value={value} className="w-full space-y-4">
       <TabsList className="mb-4 w-full max-w-md">
         <TabsTrigger
           value="boards"

@@ -20,15 +20,11 @@ interface SummaryStatsProps {
 export function SummaryStats({ projectId }: SummaryStatsProps) {
   const { startDate, endDate } = useAnalyticsStore();
 
-  const {
-    progress,
-    trend,
-    activity,
-    priorities,
-    dueDates,
-    isPending,
-    isError,
-  } = useAnalytics(projectId, startDate, endDate);
+  const { progress, activity, priorities, isPending, isError } = useAnalytics(
+    projectId,
+    startDate,
+    endDate,
+  );
 
   if (isPending) {
     return (

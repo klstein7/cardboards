@@ -3,7 +3,6 @@ import "server-only";
 import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
-import { type Database, type Transaction } from "../db";
 import { columns, projects, projectUsers } from "../db/schema";
 import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
