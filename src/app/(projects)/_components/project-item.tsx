@@ -30,7 +30,7 @@ export function ProjectItem({ project }: { project: Project }) {
 
   return (
     <Link
-      href={`/p/${project.id}`}
+      href={`/p/${project.id}/overview/boards`}
       className="block h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
     >
       <Card

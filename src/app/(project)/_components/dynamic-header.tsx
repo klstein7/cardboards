@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { BaseHeader } from "~/components/shared/base-header";
 import { useBoardSafe } from "~/lib/hooks";
@@ -18,20 +18,23 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
 
   const { data: boardData } = useBoardSafe(boardId);
 
+  const baseItems = useMemo(
+    () => [
+      { href: "/projects", label: "Projects" },
+      { href: `/p/${projectId}`, label: projectName },
+    ],
+    [projectId, projectName],
+  );
+
   const [headerItems, setHeaderItems] = useState<
     Array<{
       href?: string;
       label: string;
       color?: string;
     }>
-  >([]);
+  >(baseItems);
 
   useEffect(() => {
-    const baseItems = [
-      { href: "/projects", label: "Projects" },
-      { href: `/p/${projectId}`, label: projectName },
-    ];
-
     if (pathname.includes("/analytics")) {
       setHeaderItems([...baseItems, { label: "Analytics" }]);
     } else if (pathname.includes("/settings")) {
@@ -44,11 +47,7 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
     } else {
       setHeaderItems(baseItems);
     }
-  }, [pathname, projectId, projectName, boardId, boardData]);
-
-  if (headerItems.length === 0) {
-    return null;
-  }
+  }, [pathname, projectId, projectName, boardId, boardData, baseItems]);
 
   return <BaseHeader items={headerItems} />;
 }

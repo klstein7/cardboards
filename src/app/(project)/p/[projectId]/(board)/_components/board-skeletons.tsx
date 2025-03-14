@@ -82,14 +82,6 @@ export function BoardSkeleton() {
           {[1, 2, 3].map((i) => (
             <BoardColumnSkeleton key={i} />
           ))}
-
-          {/* Add column placeholder */}
-          <div className="h-[120px] w-[300px] flex-shrink-0">
-            <div className="flex h-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-muted-foreground/20 bg-card/50 p-4">
-              <Plus className="h-6 w-6 text-muted-foreground/70" />
-              <Skeleton className="h-4 w-24" />
-            </div>
-          </div>
         </div>
       </main>
     </div>

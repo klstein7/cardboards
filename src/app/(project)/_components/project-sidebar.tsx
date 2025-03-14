@@ -62,7 +62,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <div>
-                    <Star className="h-6 w-6 flex-shrink-0 fill-yellow-400 text-yellow-400" />
+                    <Star className="h-6 w-6 flex-shrink-0 fill-yellow-300 stroke-foreground text-yellow-300 dark:stroke-none" />
                   </div>
                 </TooltipTrigger>
                 <TooltipContent side="right">Starboard</TooltipContent>
@@ -78,7 +78,8 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                       variant="ghost"
                       className={cn(
                         "h-10 w-full justify-center px-0",
-                        pathname === `/p/${projectId}/boards` && "bg-muted/75",
+                        pathname === `/p/${projectId}/overview/boards` &&
+                          "bg-muted/75",
                       )}
                     >
                       <Kanban className="h-5 w-5 flex-shrink-0" />

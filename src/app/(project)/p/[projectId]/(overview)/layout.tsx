@@ -22,7 +22,7 @@ export default async function OverviewLayout({
     trpc.board.list.prefetch(projectId),
     trpc.project.get.prefetch(projectId),
     trpc.projectUser.list.prefetch(projectId),
-    trpc.history.getByProject.prefetch({ projectId }),
+    trpc.history.getByProjectPaginated.prefetch({ projectId }),
     trpc.board.countByProjectId.prefetch(projectId),
     trpc.projectUser.countByProjectId.prefetch(projectId),
     trpc.card.countByProjectId.prefetch(projectId),

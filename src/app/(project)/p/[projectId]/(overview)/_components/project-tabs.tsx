@@ -23,7 +23,7 @@ export function ProjectTabs({ projectId, children }: ProjectTabsListProps) {
           value="boards"
           className="flex-1"
           onClick={() =>
-            router.push(`/p/${projectId}/boards`, { scroll: false })
+            router.push(`/p/${projectId}/overview/boards`, { scroll: false })
           }
         >
           Boards
@@ -32,7 +32,7 @@ export function ProjectTabs({ projectId, children }: ProjectTabsListProps) {
           value="activity"
           className="flex-1"
           onClick={() =>
-            router.push(`/p/${projectId}/activity`, { scroll: false })
+            router.push(`/p/${projectId}/overview/activity`, { scroll: false })
           }
         >
           Activity
@@ -41,7 +41,7 @@ export function ProjectTabs({ projectId, children }: ProjectTabsListProps) {
           value="members"
           className="flex-1"
           onClick={() =>
-            router.push(`/p/${projectId}/members`, { scroll: false })
+            router.push(`/p/${projectId}/overview/members`, { scroll: false })
           }
         >
           Members
