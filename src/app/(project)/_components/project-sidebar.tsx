@@ -73,7 +73,7 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
             <div className="space-y-1 px-3">
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href={`/p/${projectId}`}>
+                  <Link href={`/p/${projectId}/overview/boards`}>
                     <Button
                       variant="ghost"
                       className={cn(
@@ -91,13 +91,14 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
 
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href={`/p/${projectId}/analytics`}>
+                  <Link href={`/p/${projectId}/analytics/overview`}>
                     <Button
                       variant="ghost"
                       className={cn(
                         "h-10 w-full justify-center px-0",
-                        isActivePathOrSubPath(`/p/${projectId}/analytics`) &&
-                          "bg-muted/75",
+                        isActivePathOrSubPath(
+                          `/p/${projectId}/analytics/overview`,
+                        ) && "bg-muted/75",
                       )}
                     >
                       <ChartArea className="h-5 w-5 flex-shrink-0" />
