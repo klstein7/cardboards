@@ -14,7 +14,6 @@ import {
   type CardMove,
   type CardUpdatePayload,
 } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
@@ -54,9 +53,6 @@ class CardService extends BaseService {
    */
   async create(data: CardCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify access to the column
-      await authService.canAccessColumn(data.columnId, txOrDb);
-
       const lastCardOrder = await this.getLastCardOrder(data.columnId, txOrDb);
 
       const [card] = await txOrDb
@@ -169,18 +165,6 @@ class CardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Determine if admin privileges are needed
-      // Admin is needed for priority changes or assignee changes
-      const isAdminRequired =
-        data.priority !== undefined || data.assignedToId !== undefined;
-
-      if (isAdminRequired) {
-        await authService.requireCardAdmin(cardId, txOrDb);
-      } else {
-        // Regular access check for non-admin operations
-        await authService.canAccessCard(cardId, txOrDb);
-      }
-
       // Get the card before update to track changes
       const existingCard = await this.get(cardId, txOrDb);
 
@@ -237,9 +221,6 @@ class CardService extends BaseService {
    */
   async del(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireCardAdmin(cardId, txOrDb);
-
       const card = await this.get(cardId, txOrDb);
 
       // Get project ID for history tracking
@@ -291,9 +272,6 @@ class CardService extends BaseService {
    */
   async move(data: CardMove, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Admin access required to move cards
-      await authService.requireCardAdmin(data.cardId, txOrDb);
-
       const { cardId, destinationColumnId, newOrder } = data;
       const card = await this.get(cardId, txOrDb);
 
@@ -521,9 +499,6 @@ class CardService extends BaseService {
    * Generate cards with AI
    */
   async generate(boardId: string, prompt: string) {
-    // Verify admin access first
-    await authService.requireBoardAdmin(boardId);
-
     const board = await boardService.getWithDetails(boardId);
 
     const { object } = await generateObject({
@@ -604,7 +579,6 @@ class CardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Check if user has admin rights or if self-assignment is allowed
       const card = await this.get(cardId, txOrDb);
       const column = await columnService.get(card.columnId, txOrDb);
 
@@ -620,14 +594,6 @@ class CardService extends BaseService {
         throw new Error("Board not found");
       }
 
-      // Check if user is admin
-      const isAdmin = await authService.isProjectAdmin(board.projectId, txOrDb);
-
-      // Admin can assign or reassign, but regular users can only self-assign if not already assigned
-      if (!isAdmin && card.assignedToId !== null) {
-        throw new Error("Only admins can reassign cards");
-      }
-
       const { userId } = await auth();
 
       if (!userId) {
@@ -639,8 +605,6 @@ class CardService extends BaseService {
         board.projectId,
         txOrDb,
       );
-
-      console.log("projectUser", projectUser);
 
       // Update the card with the project user ID
       const [updatedCard] = await txOrDb
@@ -665,9 +629,6 @@ class CardService extends BaseService {
    */
   async duplicate(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify access
-      await authService.canAccessCard(cardId, txOrDb);
-
       // Get the existing card
       const existingCard = await this.get(cardId, txOrDb);
 

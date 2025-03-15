@@ -6,7 +6,6 @@ import { eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projects } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { historyService } from "./history.service";
 import { projectUserService } from "./project-user.service";
@@ -58,9 +57,6 @@ class ProjectService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireProjectAdmin(projectId, txOrDb);
-
       // Get the project before update to track changes
       const existingProject = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
@@ -121,9 +117,6 @@ class ProjectService extends BaseService {
    */
   async get(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify user can access this project
-      await authService.canAccessProject(projectId, txOrDb);
-
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
       });
@@ -141,9 +134,6 @@ class ProjectService extends BaseService {
    */
   async del(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireProjectAdmin(projectId, txOrDb);
-
       // Get the project before deletion to record in history
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
@@ -170,16 +160,13 @@ class ProjectService extends BaseService {
   }
 
   /**
-   * Get a project ID from a card ID
+   * Get project ID by card ID
    */
   async getProjectIdByCardId(
     cardId: number,
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify user can access this card
-      await authService.canAccessCard(cardId, txOrDb);
-
       const [result] = await txOrDb
         .select({
           projectId: boards.projectId,
@@ -190,7 +177,7 @@ class ProjectService extends BaseService {
         .where(eq(cards.id, cardId));
 
       if (!result) {
-        throw new Error("Project not found");
+        throw new Error("Project not found for card");
       }
 
       return result.projectId;

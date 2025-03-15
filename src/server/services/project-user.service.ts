@@ -6,7 +6,6 @@ import { and, count, eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { projectUsers } from "../db/schema";
 import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 
 /**
@@ -18,9 +17,6 @@ class ProjectUserService extends BaseService {
    */
   async list(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
       return txOrDb.query.projectUsers.findMany({
         where: eq(projectUsers.projectId, projectId),
         with: {
@@ -35,13 +31,6 @@ class ProjectUserService extends BaseService {
    */
   async create(data: ProjectUserCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // If this is not the owner creating the initial admin user
-      // (which would have no prior project users)
-      if (data.role !== "admin") {
-        // Verify admin access for adding new members
-        await authService.requireProjectAdmin(data.projectId, txOrDb);
-      }
-
       const [projectUser] = await txOrDb
         .insert(projectUsers)
         .values(data)
@@ -70,9 +59,6 @@ class ProjectUserService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
       const projectUser = await txOrDb.query.projectUsers.findFirst({
         where: and(
           eq(projectUsers.projectId, projectId),
@@ -98,9 +84,6 @@ class ProjectUserService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access for updating user roles
-      await authService.requireProjectAdmin(projectId, txOrDb);
-
       // Don't allow removing the last admin
       if (data.role === "member") {
         const [projectUser] = await txOrDb
@@ -113,10 +96,12 @@ class ProjectUserService extends BaseService {
             ),
           );
 
-        if (projectUser?.role === "admin") {
-          // Count how many admins are in the project
-          const adminUsers = await txOrDb
-            .select()
+        if (projectUser && projectUser.role === "admin") {
+          // Check if this is the last admin
+          const result = await txOrDb
+            .select({
+              adminCount: count(),
+            })
             .from(projectUsers)
             .where(
               and(
@@ -125,15 +110,22 @@ class ProjectUserService extends BaseService {
               ),
             );
 
-          if (adminUsers.length <= 1) {
-            throw new Error("Cannot remove the last admin from the project");
+          const adminCount = result[0]?.adminCount ?? 0;
+
+          if (adminCount <= 1) {
+            throw new Error(
+              "Cannot remove the last admin from the project. Promote another user to admin first.",
+            );
           }
         }
       }
 
-      const [projectUser] = await txOrDb
+      const [projectUserResult] = await txOrDb
         .update(projectUsers)
-        .set(data)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
         .where(
           and(
             eq(projectUsers.projectId, projectId),
@@ -142,25 +134,79 @@ class ProjectUserService extends BaseService {
         )
         .returning();
 
-      if (!projectUser) {
-        throw new Error("Failed to update project user");
+      if (!projectUserResult) {
+        throw new Error("Project user not found");
       }
 
-      return projectUser;
+      return projectUserResult;
     }, tx);
   }
 
   /**
-   * Count project users by project ID
+   * Remove a user from a project
+   */
+  async remove(
+    projectId: string,
+    userId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [projectUser] = await txOrDb
+        .select()
+        .from(projectUsers)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        );
+
+      if (!projectUser) {
+        throw new Error("Project user not found");
+      }
+
+      if (projectUser.role === "admin") {
+        // Check if this is the last admin
+        const result = await txOrDb
+          .select({
+            adminCount: count(),
+          })
+          .from(projectUsers)
+          .where(
+            and(
+              eq(projectUsers.projectId, projectId),
+              eq(projectUsers.role, "admin"),
+            ),
+          );
+
+        const adminCount = result[0]?.adminCount ?? 0;
+
+        if (adminCount <= 1) {
+          throw new Error(
+            "Cannot remove the last admin from the project. Promote another user to admin first.",
+          );
+        }
+      }
+
+      await txOrDb
+        .delete(projectUsers)
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        );
+    }, tx);
+  }
+
+  /**
+   * Count users by project ID
    */
   async countByProjectId(
     projectId: string,
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
       const [result] = await txOrDb
         .select({ count: count() })
         .from(projectUsers)

@@ -13,7 +13,6 @@ import {
   BoardGenerateResponseSchema,
   type BoardUpdatePayload,
 } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { cardService } from "./card.service";
 import { columnService } from "./column.service";
@@ -161,9 +160,6 @@ class BoardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireBoardAdmin(boardId, txOrDb);
-
       // Get the board before update to track changes
       const existingBoard = await txOrDb.query.boards.findFirst({
         where: eq(boards.id, boardId),
@@ -207,9 +203,6 @@ class BoardService extends BaseService {
    */
   async del(boardId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireBoardAdmin(boardId, txOrDb);
-
       // Get the board before deletion to record in history
       const board = await txOrDb.query.boards.findFirst({
         where: eq(boards.id, boardId),
@@ -256,9 +249,6 @@ class BoardService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access for the project
-      await authService.requireProjectAdmin(projectId, txOrDb);
-
       const project = await projectService.get(projectId, txOrDb);
 
       const response = await generateObject({

@@ -5,7 +5,6 @@ import { eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { invitations } from "../db/schema";
 import { projectUserService, userService } from "./";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 
 /**
@@ -17,9 +16,6 @@ class InvitationService extends BaseService {
    */
   async create(projectId: string) {
     return this.executeWithTx(async (txOrDb) => {
-      // Only admins can create invitations
-      await authService.requireProjectAdmin(projectId, txOrDb);
-
       const projectUser =
         await projectUserService.getCurrentProjectUser(projectId);
 

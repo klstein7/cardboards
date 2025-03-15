@@ -1,3 +1,4 @@
+import { BarChartIcon } from "lucide-react";
 import {
   Bar,
   BarChart,
@@ -9,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { SectionHeader } from "~/components/shared/section-header";
 import {
   Card,
   CardContent,
@@ -26,13 +28,8 @@ interface ActivityChartProps {
 export function ActivityChart({ data, chartConfig }: ActivityChartProps) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>User Activity</CardTitle>
-        <CardDescription>
-          Detailed breakdown of user contributions
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="h-[600px]">
+      <SectionHeader title="User Activity" icon={BarChartIcon} />
+      <CardContent className="h-[600px] p-6">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart
             data={data}

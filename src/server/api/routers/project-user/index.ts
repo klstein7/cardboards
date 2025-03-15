@@ -7,8 +7,8 @@ import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 export const projectUserRouter = createTRPCRouter({
   // List all users in a project (requires project membership)
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    // Verify user is a member of this project before listing users
-    await projectUserService.getCurrentProjectUser(input);
+    // Verify user can access this project
+    await authService.canAccessProject(input);
     return projectUserService.list(input);
   }),
 
@@ -45,7 +45,8 @@ export const projectUserRouter = createTRPCRouter({
   getCurrentProjectUser: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      // This function already checks if the user is a member
+      // Verify user can access this project
+      await authService.canAccessProject(input);
       return projectUserService.getCurrentProjectUser(input);
     }),
 });

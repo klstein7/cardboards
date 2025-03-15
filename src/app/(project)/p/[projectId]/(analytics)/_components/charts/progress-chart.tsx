@@ -1,6 +1,7 @@
+import { LineChartIcon } from "lucide-react";
 import {
-  Bar,
-  BarChart,
+  Area,
+  AreaChart,
   CartesianGrid,
   Legend,
   ResponsiveContainer,
@@ -9,13 +10,8 @@ import {
   YAxis,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { SectionHeader } from "~/components/shared/section-header";
+import { Card, CardContent } from "~/components/ui/card";
 import { type ChartConfig } from "~/components/ui/chart";
 
 interface ProgressChartProps {
@@ -26,40 +22,45 @@ interface ProgressChartProps {
 export function ProgressChart({ data, chartConfig }: ProgressChartProps) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>Completion Progress by Board</CardTitle>
-        <CardDescription>Percent of tasks completed per board</CardDescription>
-      </CardHeader>
-      <CardContent className="h-[600px]">
+      <SectionHeader title="Project Progress" icon={LineChartIcon} />
+      <CardContent className="h-[400px] p-6">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart
+          <AreaChart
             data={data}
-            layout="vertical"
-            margin={{ left: 120, right: 30, top: 20, bottom: 20 }}
+            margin={{ top: 20, right: 30, left: 0, bottom: 0 }}
           >
-            <CartesianGrid
-              strokeDasharray="3 3"
-              horizontal={true}
-              vertical={false}
-              stroke="hsl(var(--border))"
-            />
+            <defs>
+              <linearGradient id="colorProgress" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor={chartConfig.progress?.theme?.light ?? ""}
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor={chartConfig.progress?.theme?.light ?? ""}
+                  stopOpacity={0}
+                />
+              </linearGradient>
+            </defs>
             <XAxis
-              type="number"
-              domain={[0, 100]}
-              tickFormatter={(value) => `${value}%`}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              type="category"
               dataKey="name"
-              width={110}
               axisLine={false}
               tickLine={false}
               tick={{ fontSize: 12 }}
             />
+            <YAxis
+              axisLine={false}
+              tickLine={false}
+              tick={{ fontSize: 12 }}
+              domain={[0, 100]}
+            />
+            <CartesianGrid
+              strokeDasharray="3 3"
+              vertical={false}
+              stroke="hsl(var(--border))"
+            />
             <Tooltip
-              formatter={(value: number) => [`${value}%`, "Completion"]}
               contentStyle={{
                 backgroundColor: "hsl(var(--popover))",
                 borderRadius: "8px",
@@ -69,20 +70,15 @@ export function ProgressChart({ data, chartConfig }: ProgressChartProps) {
               }}
             />
             <Legend />
-            <Bar
+            <Area
+              type="monotone"
               dataKey="value"
-              fill={chartConfig.progress?.theme?.light ?? ""}
-              radius={[0, 4, 4, 0]}
-              barSize={24}
-              name="Completion Rate"
-              background={{ fill: "rgba(0,0,0,0.05)" }}
-              label={{
-                position: "right",
-                formatter: (value: number) => `${value}%`,
-                fill: "hsl(var(--foreground))",
-              }}
+              stroke={chartConfig.progress?.theme?.light ?? ""}
+              fillOpacity={1}
+              fill="url(#colorProgress)"
+              name="Completion %"
             />
-          </BarChart>
+          </AreaChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

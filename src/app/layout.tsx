@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Jost } from "next/font/google";
+import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 import { Toaster } from "~/components/ui/sonner";
@@ -29,6 +30,7 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <Providers>{children}</Providers>
         </NuqsAdapter>

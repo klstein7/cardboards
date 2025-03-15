@@ -13,7 +13,6 @@ import {
   projectUsers,
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { historyService } from "./history.service";
 import { projectService } from "./project.service";
@@ -36,9 +35,6 @@ class CardCommentService extends BaseService {
         throw new Error("Card comment not found");
       }
 
-      // Check if the user can access the card this comment belongs to
-      await authService.canAccessCard(comment.cardId, txOrDb);
-
       return comment;
     }, tx);
   }
@@ -48,9 +44,6 @@ class CardCommentService extends BaseService {
    */
   async create(data: CardCommentCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Check if the user can access the card
-      await authService.canAccessCard(data.cardId, txOrDb);
-
       const { userId } = await auth();
 
       if (!userId) {
@@ -98,7 +91,7 @@ class CardCommentService extends BaseService {
         .returning();
 
       if (!comment) {
-        throw new Error("Failed to create card comment");
+        throw new Error("Failed to create comment");
       }
 
       // Record history for card comment creation
@@ -117,15 +110,13 @@ class CardCommentService extends BaseService {
   }
 
   /**
-   * List comments for a card
+   * List all comments for a card
    */
   async list(cardId: number, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Check if the user can access the card
-      await authService.canAccessCard(cardId, txOrDb);
-
       return txOrDb.query.cardComments.findMany({
         where: eq(cardComments.cardId, cardId),
+        orderBy: desc(cardComments.createdAt),
         with: {
           projectUser: {
             with: {
@@ -133,7 +124,6 @@ class CardCommentService extends BaseService {
             },
           },
         },
-        orderBy: desc(cardComments.createdAt),
       });
     }, tx);
   }
@@ -261,24 +251,24 @@ class CardCommentService extends BaseService {
         );
       }
 
-      // Save original comment for history
-      const originalComment = { ...comment };
+      // Record changes for history
+      const changes = JSON.stringify({
+        before: comment,
+        after: { ...comment, ...data },
+      });
 
       const [updatedComment] = await txOrDb
         .update(cardComments)
-        .set(data)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
         .where(eq(cardComments.id, id))
         .returning();
 
       if (!updatedComment) {
         throw new Error("Failed to update card comment");
       }
-
-      // Record changes for history
-      const changes = JSON.stringify({
-        before: originalComment,
-        after: updatedComment,
-      });
 
       // Record history for card comment update
       await historyService.create(

@@ -1,6 +1,7 @@
 import { ActivityIcon } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { SectionHeader } from "~/components/shared/section-header";
+import { Card, CardContent } from "~/components/ui/card";
 import {
   Pagination,
   PaginationContent,
@@ -10,7 +11,6 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
-import { Separator } from "~/components/ui/separator";
 import { trpc } from "~/trpc/server";
 
 import { ActivityItem } from "./activity-item";
@@ -69,67 +69,75 @@ export async function ProjectActivity({
 
   return (
     <Card className="overflow-hidden border shadow-sm transition-all hover:shadow">
-      <CardHeader className="bg-muted/40 px-4 py-4 sm:px-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="rounded-full bg-primary/10 p-1.5 shadow-sm">
-              <ActivityIcon className="h-4 w-4 text-primary" />
-            </div>
-            <CardTitle>Activity</CardTitle>
-          </div>
-        </div>
-      </CardHeader>
-      <Separator className="opacity-60" />
+      <SectionHeader title="Project Activity" icon={ActivityIcon} />
       <CardContent className="p-0">
-        <div className="divide-y divide-border/50">
-          {items.map((item) => (
-            <ActivityItem key={item.id} item={item} />
-          ))}
-        </div>
-
-        {showPagination && (
-          <div className="border-t border-border/50 p-4">
-            <Pagination>
-              <PaginationContent>
-                {currentPage > 1 && (
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href={`/p/${projectId}/overview/activity?page=${currentPage - 1}`}
-                    />
-                  </PaginationItem>
-                )}
-
-                {getPageNumbers().map((page, i) => {
-                  if (page === "ellipsis-start" || page === "ellipsis-end") {
-                    return (
-                      <PaginationItem key={`ellipsis-${i}`}>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    );
-                  }
-
-                  return (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href={`/p/${projectId}/overview/activity?page=${page}`}
-                        isActive={page === currentPage}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                })}
-
-                {currentPage < totalPages && (
-                  <PaginationItem>
-                    <PaginationNext
-                      href={`/p/${projectId}/overview/activity?page=${currentPage + 1}`}
-                    />
-                  </PaginationItem>
-                )}
-              </PaginationContent>
-            </Pagination>
+        {items.length === 0 ? (
+          <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
+            <div className="mb-4 rounded-full bg-muted p-3">
+              <ActivityIcon className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <h3 className="mb-1 text-lg font-semibold">No activity yet</h3>
+            <p className="max-w-md text-sm text-muted-foreground">
+              When you or team members make changes to this project,
+              they&apos;ll appear here.
+            </p>
           </div>
+        ) : (
+          <>
+            <div className="divide-y divide-border/50">
+              {items.map((item) => (
+                <ActivityItem key={item.id} item={item} />
+              ))}
+            </div>
+
+            {showPagination && (
+              <div className="border-t border-border/50 p-4">
+                <Pagination>
+                  <PaginationContent>
+                    {currentPage > 1 && (
+                      <PaginationItem>
+                        <PaginationPrevious
+                          href={`/p/${projectId}/overview/activity?page=${currentPage - 1}`}
+                        />
+                      </PaginationItem>
+                    )}
+
+                    {getPageNumbers().map((page, i) => {
+                      if (
+                        page === "ellipsis-start" ||
+                        page === "ellipsis-end"
+                      ) {
+                        return (
+                          <PaginationItem key={`ellipsis-${i}`}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            href={`/p/${projectId}/overview/activity?page=${page}`}
+                            isActive={page === currentPage}
+                          >
+                            {page}
+                          </PaginationLink>
+                        </PaginationItem>
+                      );
+                    })}
+
+                    {currentPage < totalPages && (
+                      <PaginationItem>
+                        <PaginationNext
+                          href={`/p/${projectId}/overview/activity?page=${currentPage + 1}`}
+                        />
+                      </PaginationItem>
+                    )}
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>

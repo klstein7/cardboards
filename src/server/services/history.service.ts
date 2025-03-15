@@ -6,7 +6,6 @@ import { and, count, desc, eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { history } from "../db/schema";
 import { type HistoryCreate } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { projectUserService } from "./project-user.service";
 
@@ -113,7 +112,7 @@ class HistoryService extends BaseService {
   async listByProject(projectId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
       // Verify user can access this project
-      await authService.canAccessProject(projectId, txOrDb);
+      // Authentication check removed
 
       return txOrDb.query.history.findMany({
         where: eq(history.projectId, projectId),
@@ -140,7 +139,7 @@ class HistoryService extends BaseService {
   ) {
     return this.executeWithTx(async (txOrDb) => {
       // Verify user can access this project
-      await authService.canAccessProject(projectId, txOrDb);
+      // Authentication check removed
 
       // Get total count for pagination
       const countResult = await txOrDb

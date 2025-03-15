@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { analyticsService, projectUserService } from "~/server/services";
+import { analyticsService, authService } from "~/server/services";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 // Define reusable input schema for analytics queries
@@ -15,8 +15,8 @@ export const analyticsRouter = createTRPCRouter({
   getProjectProgress: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user is a member of this project
-      await projectUserService.getCurrentProjectUser(input.projectId);
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return analyticsService.getProjectProgress(
         input.projectId,
         input.startDate,
@@ -28,8 +28,8 @@ export const analyticsRouter = createTRPCRouter({
   getTaskCompletionTrend: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user is a member of this project
-      await projectUserService.getCurrentProjectUser(input.projectId);
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return analyticsService.getTaskCompletionTrend(
         input.projectId,
         input.startDate,
@@ -41,8 +41,8 @@ export const analyticsRouter = createTRPCRouter({
   getUserActivity: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user is a member of this project
-      await projectUserService.getCurrentProjectUser(input.projectId);
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return analyticsService.getUserActivity(
         input.projectId,
         input.startDate,
@@ -54,8 +54,8 @@ export const analyticsRouter = createTRPCRouter({
   getPriorityDistribution: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user is a member of this project
-      await projectUserService.getCurrentProjectUser(input.projectId);
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return analyticsService.getPriorityDistribution(
         input.projectId,
         input.startDate,
@@ -67,8 +67,8 @@ export const analyticsRouter = createTRPCRouter({
   getTasksPerDueDate: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user is a member of this project
-      await projectUserService.getCurrentProjectUser(input.projectId);
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return analyticsService.getTasksPerDueDate(
         input.projectId,
         input.startDate,

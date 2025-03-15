@@ -9,7 +9,6 @@ import {
   type ColumnShiftPayload,
   type ColumnUpdatePayload,
 } from "../zod";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { historyService } from "./history.service";
@@ -40,9 +39,6 @@ class ColumnService extends BaseService {
    */
   async create(data: ColumnCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access for the board
-      await authService.requireBoardAdmin(data.boardId, txOrDb);
-
       const existingColumns = await this.list(data.boardId, txOrDb);
       const lastOrder =
         existingColumns.length > 0
@@ -151,9 +147,6 @@ class ColumnService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireColumnAdmin(columnId, txOrDb);
-
       // Get the column before update to track changes
       const existingColumn = await this.get(columnId, txOrDb);
 
@@ -194,9 +187,6 @@ class ColumnService extends BaseService {
    */
   async del(columnId: string, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireColumnAdmin(columnId, txOrDb);
-
       const column = await this.get(columnId, txOrDb);
 
       // Get board for project ID
@@ -252,9 +242,6 @@ class ColumnService extends BaseService {
     tx: Transaction | Database = this.db,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Verify admin access
-      await authService.requireColumnAdmin(columnId, txOrDb);
-
       const column = await this.get(columnId, txOrDb);
       const { direction } = data;
 

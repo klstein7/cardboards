@@ -17,13 +17,15 @@ export const boardRouter = createTRPCRouter({
   create: authedProcedure
     .input(BoardCreateSchema)
     .mutation(async ({ input }) => {
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
       return boardService.create(input);
     }),
 
   // List boards for a project (requires membership)
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    // Verify user is a member of this project
-    await projectUserService.getCurrentProjectUser(input);
+    // Verify user can access this project
+    await authService.canAccessProject(input);
     return boardService.list(input);
   }),
 

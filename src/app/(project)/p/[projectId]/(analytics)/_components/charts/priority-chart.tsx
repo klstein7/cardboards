@@ -1,3 +1,4 @@
+import { FlagIcon } from "lucide-react";
 import {
   Cell,
   Legend,
@@ -7,6 +8,7 @@ import {
   Tooltip,
 } from "recharts";
 
+import { SectionHeader } from "~/components/shared/section-header";
 import {
   Card,
   CardContent,
@@ -24,54 +26,31 @@ interface PriorityChartProps {
 export function PriorityChart({ data, chartConfig }: PriorityChartProps) {
   return (
     <Card>
-      <CardHeader className="pb-2">
-        <CardTitle>Priority Distribution</CardTitle>
-        <CardDescription>Tasks by priority level</CardDescription>
-      </CardHeader>
-      <CardContent className="h-[400px]">
+      <SectionHeader title="Priority Distribution" icon={FlagIcon} />
+      <CardContent className="h-[400px] p-6">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
               data={data}
               cx="50%"
               cy="50%"
-              innerRadius={80}
-              outerRadius={140}
-              paddingAngle={2}
+              labelLine={false}
+              outerRadius={120}
+              fill="#8884d8"
               dataKey="value"
               nameKey="name"
-              startAngle={0}
-              endAngle={360}
-              label={({
-                value,
-                percent,
-              }: {
-                value: number;
-                percent: number;
-              }) =>
-                percent > 0.05
-                  ? `${value} (${(percent * 100).toFixed(0)}%)`
-                  : ""
+              label={({ name, percent }) =>
+                percent > 0 ? `${name}: ${(percent * 100).toFixed(0)}%` : ""
               }
             >
-              {data.map((entry) => (
+              {data.map((entry, index) => (
                 <Cell
-                  key={entry.name}
-                  fill={chartConfig[entry.name]?.theme?.light ?? "#ccc"}
+                  key={`cell-${index}`}
+                  fill={chartConfig[entry.name]?.theme?.light ?? "#8884d8"}
                 />
               ))}
             </Pie>
-            <Legend
-              layout="horizontal"
-              verticalAlign="bottom"
-              align="center"
-              formatter={(value: string) => value.replace("Priority: ", "")}
-            />
             <Tooltip
-              formatter={(value: string, name: string) => [
-                value,
-                name.replace("Priority: ", ""),
-              ]}
               contentStyle={{
                 backgroundColor: "hsl(var(--popover))",
                 borderRadius: "8px",
@@ -79,12 +58,13 @@ export function PriorityChart({ data, chartConfig }: PriorityChartProps) {
                 border: "1px solid hsl(var(--border))",
                 color: "hsl(var(--popover-foreground))",
               }}
-              itemStyle={{
-                color: "hsl(var(--popover-foreground))",
-              }}
-              labelStyle={{
-                color: "hsl(var(--popover-foreground))",
-              }}
+              formatter={(value: number, name: string) => [
+                value,
+                chartConfig[name]?.label ?? name,
+              ]}
+            />
+            <Legend
+              formatter={(value: string) => chartConfig[value]?.label ?? value}
             />
           </PieChart>
         </ResponsiveContainer>

@@ -4,7 +4,6 @@ import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
 import { columns, projects, projectUsers } from "../db/schema";
-import { authService } from "./auth.service";
 import { BaseService } from "./base.service";
 
 /**
@@ -46,9 +45,6 @@ class AnalyticsService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
 
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
         with: {
@@ -56,13 +52,7 @@ class AnalyticsService extends BaseService {
             with: {
               columns: {
                 with: {
-                  cards: {
-                    columns: {
-                      id: true,
-                      columnId: true,
-                      updatedAt: true,
-                    },
-                  },
+                  cards: true,
                 },
               },
             },
@@ -70,37 +60,52 @@ class AnalyticsService extends BaseService {
         },
       });
 
-      if (!project) throw new Error("Project not found");
+      if (!project) {
+        throw new Error("Project not found");
+      }
 
       if (!project.boards || project.boards.length === 0) {
         return [];
       }
 
       return project.boards.map((board) => {
-        if (!board?.columns) {
-          return { name: "Unknown Board", value: 0 };
+        if (!board.columns || board.columns.length === 0) {
+          return {
+            name: board.name || "Unnamed Board",
+            value: 0,
+          };
         }
 
-        const allCards = board.columns.flatMap((col) => col.cards || []);
-        const filteredCards = this.filterByDateRange(
-          allCards,
+        const completedColumns = board.columns.filter(
+          (column) => column.isCompleted,
+        );
+
+        if (completedColumns.length === 0) {
+          return {
+            name: board.name || "Unnamed Board",
+            value: 0,
+          };
+        }
+
+        const completedCards = completedColumns.flatMap(
+          (column) => column.cards ?? [],
+        );
+
+        const filteredCompletedCards = this.filterByDateRange(
+          completedCards,
           startDate,
           endDate,
         );
 
-        const completedCards = board.columns
-          .filter((col) => col.isCompleted)
-          .flatMap((col) =>
-            this.filterByDateRange(col.cards || [], startDate, endDate),
-          );
-
-        const totalCards = filteredCards.length;
+        const totalCards = board.columns
+          .flatMap((column) => column.cards ?? [])
+          .filter((card) => card).length;
 
         return {
           name: board.name || "Unnamed Board",
           value:
             totalCards > 0
-              ? Math.round((completedCards.length / totalCards) * 100)
+              ? Math.round((filteredCompletedCards.length / totalCards) * 100)
               : 0,
         };
       });
@@ -117,9 +122,6 @@ class AnalyticsService extends BaseService {
   ): Promise<DataPoint[]> {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
-
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
 
       const end = endDate ?? new Date();
       const start = startDate ?? subDays(end, 30);
@@ -151,40 +153,36 @@ class AnalyticsService extends BaseService {
         return [];
       }
 
-      const completedCards = project.boards
-        .flatMap((board) => board.columns || [])
-        .flatMap((col) => col.cards || [])
-        .filter(
-          (card) =>
-            card.updatedAt && card.updatedAt >= start && card.updatedAt <= end,
-        );
+      const allCompletedCards = project.boards
+        .flatMap((board) => board.columns ?? [])
+        .flatMap((column) => column.cards ?? []);
 
-      const weeklyData = new Map<string, number>();
-      completedCards.forEach((card) => {
-        if (!card.updatedAt) return;
+      const cardsByWeek: Record<string, number> = {};
 
-        const updatedAt = card.updatedAt;
-        const weekStart = startOfWeek(updatedAt);
+      let currentDay = start;
+      while (currentDay <= end) {
+        const weekStart = startOfWeek(currentDay, { weekStartsOn: 1 });
         const weekKey = format(weekStart, "yyyy-MM-dd");
-        weeklyData.set(weekKey, (weeklyData.get(weekKey) ?? 0) + 1);
-      });
-
-      const weeks: Date[] = [];
-      const currentWeek = startOfWeek(start);
-      const endWeek = startOfWeek(end);
-
-      while (currentWeek <= endWeek) {
-        weeks.push(new Date(currentWeek));
-        currentWeek.setDate(currentWeek.getDate() + 7);
+        cardsByWeek[weekKey] = 0;
+        currentDay = subDays(currentDay, -7);
       }
 
-      return weeks.map((weekDate, i) => {
-        const weekKey = format(weekDate, "yyyy-MM-dd");
-        return {
-          name: `Week ${i + 1}`,
-          value: weeklyData.get(weekKey) ?? 0,
-        };
+      allCompletedCards.forEach((card) => {
+        if (!card.updatedAt) return;
+
+        const cardDate = new Date(card.updatedAt);
+        if (cardDate >= start && cardDate <= end) {
+          const weekStart = startOfWeek(cardDate, { weekStartsOn: 1 });
+          const weekKey = format(weekStart, "yyyy-MM-dd");
+          const currentCount = cardsByWeek[weekKey] ?? 0;
+          cardsByWeek[weekKey] = currentCount + 1;
+        }
       });
+
+      return Object.entries(cardsByWeek).map(([week, count]) => ({
+        name: format(new Date(week), "MMM d"),
+        value: count,
+      }));
     });
   }
 
@@ -199,43 +197,87 @@ class AnalyticsService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
 
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
-      const projectUsersWithCards = await txOrDb.query.projectUsers.findMany({
-        where: eq(projectUsers.projectId, projectId),
+      const project = await txOrDb.query.projects.findFirst({
+        where: eq(projects.id, projectId),
         with: {
-          user: {
-            columns: { name: true },
+          projectUsers: {
+            with: {
+              user: true,
+            },
           },
-          assignedCards: {
-            columns: { id: true, updatedAt: true },
+          boards: {
+            with: {
+              columns: {
+                with: {
+                  cards: {
+                    with: {
+                      assignedTo: {
+                        with: {
+                          user: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       });
 
-      if (!projectUsersWithCards || projectUsersWithCards.length === 0) {
+      if (!project) throw new Error("Project not found");
+      if (!project.boards || project.boards.length === 0) {
         return [];
       }
 
-      return projectUsersWithCards
-        .map((user) => {
-          if (!user?.assignedCards) {
-            return { name: "Unknown User", value: 0 };
-          }
+      const userCardCounts: Record<string, { count: number; name: string }> =
+        {};
 
-          const filteredCards = this.filterByDateRange(
-            user.assignedCards,
-            startDate,
-            endDate,
-          );
-
-          return {
-            name: user.user?.name || "Unknown",
-            value: filteredCards.length,
+      project.projectUsers.forEach((projectUser) => {
+        if (projectUser.user) {
+          userCardCounts[projectUser.id] = {
+            count: 0,
+            name: projectUser.user.name || projectUser.user.email,
           };
-        })
-        .sort((a, b) => b.value - a.value);
+        }
+      });
+
+      project.boards.forEach((board) => {
+        if (!board.columns) return;
+
+        board.columns.forEach((column) => {
+          if (!column.cards) return;
+
+          column.cards.forEach((card) => {
+            if (
+              card.assignedToId &&
+              userCardCounts[card.assignedToId] &&
+              (!startDate ||
+                !endDate ||
+                !card.updatedAt ||
+                isWithinInterval(new Date(card.updatedAt), {
+                  start: startDate,
+                  end: endDate,
+                }))
+            ) {
+              const userCount = userCardCounts[card.assignedToId];
+              if (userCount) {
+                userCount.count += 1;
+              }
+            }
+          });
+        });
+      });
+
+      const result: DataPoint[] = Object.values(userCardCounts)
+        .map((userData) => ({
+          name: userData.name,
+          value: userData.count,
+        }))
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10);
+
+      return result;
     });
   }
 
@@ -250,9 +292,6 @@ class AnalyticsService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
 
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
         with: {
@@ -260,9 +299,7 @@ class AnalyticsService extends BaseService {
             with: {
               columns: {
                 with: {
-                  cards: {
-                    columns: { id: true, priority: true, updatedAt: true },
-                  },
+                  cards: true,
                 },
               },
             },
@@ -272,53 +309,66 @@ class AnalyticsService extends BaseService {
 
       if (!project) throw new Error("Project not found");
       if (!project.boards || project.boards.length === 0) {
-        return [
-          { name: "Low", value: 0 },
-          { name: "Medium", value: 0 },
-          { name: "High", value: 0 },
-          { name: "Urgent", value: 0 },
-          { name: "Unassigned", value: 0 },
-        ];
+        return [];
       }
-
-      const allCards = project.boards
-        .flatMap((board) => board.columns || [])
-        .flatMap((column) => column.cards || []);
-
-      const filteredCards = this.filterByDateRange(
-        allCards,
-        startDate,
-        endDate,
-      );
 
       const priorityCounts = {
         low: 0,
         medium: 0,
         high: 0,
         urgent: 0,
-        unassigned: 0,
+        none: 0,
       };
 
-      filteredCards.forEach((card) => {
-        if (!card.priority) {
-          priorityCounts.unassigned++;
-        } else {
-          priorityCounts[card.priority as keyof typeof priorityCounts]++;
-        }
+      project.boards.forEach((board) => {
+        if (!board.columns) return;
+
+        board.columns.forEach((column) => {
+          if (!column.cards) return;
+
+          column.cards.forEach((card) => {
+            if (
+              startDate &&
+              endDate &&
+              card.updatedAt &&
+              !isWithinInterval(new Date(card.updatedAt), {
+                start: startDate,
+                end: endDate,
+              })
+            ) {
+              return;
+            }
+
+            const priority = card.priority?.toLowerCase() ?? "none";
+            if (priority === "low") {
+              priorityCounts.low += 1;
+            } else if (priority === "medium") {
+              priorityCounts.medium += 1;
+            } else if (priority === "high") {
+              priorityCounts.high += 1;
+            } else if (priority === "urgent") {
+              priorityCounts.urgent += 1;
+            } else {
+              priorityCounts.none += 1;
+            }
+          });
+        });
       });
 
-      return [
+      const result: DataPoint[] = [
         { name: "Low", value: priorityCounts.low },
         { name: "Medium", value: priorityCounts.medium },
         { name: "High", value: priorityCounts.high },
         { name: "Urgent", value: priorityCounts.urgent },
-        { name: "Unassigned", value: priorityCounts.unassigned },
-      ];
+        { name: "None", value: priorityCounts.none },
+      ].filter((p) => p.value > 0);
+
+      return result;
     });
   }
 
   /**
-   * Get tasks by due date data
+   * Get tasks per due date data
    */
   async getTasksPerDueDate(
     projectId: string,
@@ -328,11 +378,6 @@ class AnalyticsService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       if (!projectId) throw new Error("Project ID is required");
 
-      // Verify user can access the project
-      await authService.canAccessProject(projectId, txOrDb);
-
-      const today = new Date();
-
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
         with: {
@@ -340,9 +385,7 @@ class AnalyticsService extends BaseService {
             with: {
               columns: {
                 with: {
-                  cards: {
-                    columns: { id: true, dueDate: true, updatedAt: true },
-                  },
+                  cards: true,
                 },
               },
             },
@@ -352,58 +395,112 @@ class AnalyticsService extends BaseService {
 
       if (!project) throw new Error("Project not found");
       if (!project.boards || project.boards.length === 0) {
-        return [
-          { name: "Overdue", value: 0 },
-          { name: "Due Today", value: 0 },
-          { name: "Due This Week", value: 0 },
-          { name: "Due Later", value: 0 },
-          { name: "No Due Date", value: 0 },
-        ];
+        return [];
       }
 
-      const allCards = project.boards
-        .flatMap((board) => board.columns || [])
-        .flatMap((column) => column.cards || []);
+      const dueDateCounts = {
+        "Past due": 0,
+        "Due today": 0,
+        "Due this week": 0,
+        "Due next week": 0,
+        "Due later": 0,
+        "No due date": 0,
+      };
 
-      const filteredCards = this.filterByDateRange(
-        allCards,
-        startDate,
-        endDate,
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayEnd = new Date(today);
+      todayEnd.setHours(23, 59, 59, 999);
+
+      const thisWeekStart = startOfWeek(today, { weekStartsOn: 1 });
+      const thisWeekEnd = new Date(thisWeekStart);
+      thisWeekEnd.setDate(thisWeekStart.getDate() + 6);
+      thisWeekEnd.setHours(23, 59, 59, 999);
+
+      const nextWeekStart = new Date(thisWeekStart);
+      nextWeekStart.setDate(thisWeekStart.getDate() + 7);
+      const nextWeekEnd = new Date(nextWeekStart);
+      nextWeekEnd.setDate(nextWeekStart.getDate() + 6);
+      nextWeekEnd.setHours(23, 59, 59, 999);
+
+      project.boards.forEach((board) => {
+        if (!board.columns) return;
+
+        board.columns.forEach((column) => {
+          if (!column.cards) return;
+
+          column.cards.forEach((card) => {
+            if (
+              startDate &&
+              endDate &&
+              card.updatedAt &&
+              !isWithinInterval(new Date(card.updatedAt), {
+                start: startDate,
+                end: endDate,
+              })
+            ) {
+              return;
+            }
+
+            if (!card.dueDate) {
+              dueDateCounts["No due date"] += 1;
+            } else {
+              const dueDate = new Date(card.dueDate);
+              if (dueDate < today) {
+                dueDateCounts["Past due"] += 1;
+              } else if (dueDate <= todayEnd) {
+                dueDateCounts["Due today"] += 1;
+              } else if (dueDate <= thisWeekEnd) {
+                dueDateCounts["Due this week"] += 1;
+              } else if (dueDate <= nextWeekEnd) {
+                dueDateCounts["Due next week"] += 1;
+              } else {
+                dueDateCounts["Due later"] += 1;
+              }
+            }
+          });
+        });
+      });
+
+      const result: DataPoint[] = Object.entries(dueDateCounts).map(
+        ([name, value]) => ({
+          name,
+          value,
+        }),
       );
 
-      const overdue = filteredCards.filter(
-        (card) => card.dueDate && card.dueDate < today,
-      ).length;
+      return result;
+    });
+  }
 
-      const dueToday = filteredCards.filter((card) => {
-        if (!card.dueDate) return false;
-        const cardDate = new Date(card.dueDate);
-        return cardDate.toDateString() === today.toDateString();
-      }).length;
-
-      const dueThisWeek = filteredCards.filter((card) => {
-        if (!card.dueDate || card.dueDate < today) return false;
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        return card.dueDate <= nextWeek;
-      }).length;
-
-      const dueLater = filteredCards.filter((card) => {
-        if (!card.dueDate) return false;
-        const nextWeek = new Date(today);
-        nextWeek.setDate(today.getDate() + 7);
-        return card.dueDate > nextWeek;
-      }).length;
-
-      const noDueDate = filteredCards.filter((card) => !card.dueDate).length;
-
-      return [
-        { name: "Overdue", value: overdue },
-        { name: "Due Today", value: dueToday },
-        { name: "Due This Week", value: dueThisWeek },
-        { name: "Due Later", value: dueLater },
-        { name: "No Due Date", value: noDueDate },
-      ];
+  /**
+   * Get all project analytics
+   */
+  async getProjectAnalytics(
+    projectId: string,
+    startDate?: Date | null,
+    endDate?: Date | null,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      return {
+        progress: await this.getProjectProgress(projectId, startDate, endDate),
+        taskCompletionTrend: await this.getTaskCompletionTrend(
+          projectId,
+          startDate,
+          endDate,
+        ),
+        userActivity: await this.getUserActivity(projectId, startDate, endDate),
+        priorityDistribution: await this.getPriorityDistribution(
+          projectId,
+          startDate,
+          endDate,
+        ),
+        tasksPerDueDate: await this.getTasksPerDueDate(
+          projectId,
+          startDate,
+          endDate,
+        ),
+      };
     });
   }
 }
