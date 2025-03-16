@@ -42,14 +42,7 @@ export function ProjectList() {
   };
 
   return (
-    <div className="w-full max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-      <header className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight">Your Projects</h1>
-        <p className="mt-2 text-lg text-muted-foreground">
-          Manage and organize your work with projects
-        </p>
-      </header>
-
+    <div className="w-full max-w-7xl">
       <motion.div
         className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
         variants={container}

@@ -53,7 +53,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
     >
       <div className="flex w-fit items-start gap-5">
         {columns.data.map((column) => (
-          <div key={column.id} className="h-full w-[300px] flex-shrink-0">
+          <div key={column.id} className="h-full w-[325px] flex-shrink-0">
             <ColumnItem column={column} />
           </div>
         ))}

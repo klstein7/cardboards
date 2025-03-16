@@ -4,11 +4,12 @@ import { auth } from "@clerk/nextjs/server";
 import { eq } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { boards, cards, columns, projects } from "../db/schema";
+import { boards, cards, columns, projects, projectUsers } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
 import { historyService } from "./history.service";
 import { projectUserService } from "./project-user.service";
+import { userService } from "./user.service";
 
 /**
  * Service for managing project-related operations
@@ -20,6 +21,8 @@ class ProjectService extends BaseService {
   async create(data: ProjectCreate, tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
+
+      await userService.syncCurrentUser(txOrDb);
 
       const [project] = await txOrDb.insert(projects).values(data).returning();
 
@@ -36,7 +39,6 @@ class ProjectService extends BaseService {
         txOrDb,
       );
 
-      // Record history for project creation
       await historyService.recordProjectAction(
         project.id,
         "create",
@@ -102,7 +104,25 @@ class ProjectService extends BaseService {
    */
   async list(tx: Transaction | Database = this.db) {
     return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: User not authenticated");
+      }
+
       return txOrDb.query.projects.findMany({
+        where: (projects, { exists, eq, and }) =>
+          exists(
+            txOrDb
+              .select()
+              .from(projectUsers)
+              .where(
+                and(
+                  eq(projectUsers.projectId, projects.id),
+                  eq(projectUsers.userId, userId),
+                ),
+              ),
+          ),
         orderBy: (projects, { desc }) => [desc(projects.createdAt)],
         with: {
           boards: true,
