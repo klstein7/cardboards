@@ -4,6 +4,8 @@
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
+import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import {
   attachClosestEdge,
   type Edge,
@@ -12,6 +14,7 @@ import {
 import { Copy, Edit, Trash, UserCircle } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { type Card } from "~/app/(project)/_types";
 import {
@@ -49,6 +52,7 @@ import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
 import { CardBase } from "./card-base";
+import { CardDragPreview } from "./card-drag-preview";
 
 interface CardItemProps {
   card: Card;
@@ -56,6 +60,11 @@ interface CardItemProps {
   isCompleted: boolean;
   columnId: string;
 }
+
+type DragState =
+  | { type: "idle" }
+  | { type: "preview"; container: HTMLElement }
+  | { type: "dragging" };
 
 export function CardItem({
   card,
@@ -69,6 +78,7 @@ export function CardItem({
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const [dragState, setDragState] = useState<DragState>({ type: "idle" });
 
   const [, setSelectedCardId] = useQueryState("cardId");
 
@@ -91,11 +101,25 @@ export function CardItem({
           index,
           columnId,
         }),
+        onGenerateDragPreview({ nativeSetDragImage }) {
+          setCustomNativeDragPreview({
+            getOffset: pointerOutsideOfPreview({
+              x: "10px",
+              y: "10px",
+            }),
+            nativeSetDragImage,
+            render({ container }) {
+              setDragState({ type: "preview", container });
+              return () => setDragState({ type: "dragging" });
+            },
+          });
+        },
         onDragStart: () => {
           setActiveCard(card);
         },
         onDrop: () => {
           setActiveCard(null);
+          setDragState({ type: "idle" });
         },
       }),
       dropTargetForElements({
@@ -243,6 +267,13 @@ export function CardItem({
           </ContextMenuContent>
         </ContextMenu>
 
+        {/* Custom Drag Preview Portal */}
+        {dragState.type === "preview" &&
+          createPortal(
+            <CardDragPreview card={card} isCompleted={isCompleted} />,
+            dragState.container,
+          )}
+
         <AlertDialogContent className="max-w-md rounded-lg shadow-lg backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete card</AlertDialogTitle>
@@ -252,17 +283,12 @@ export function CardItem({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="font-medium">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              disabled={deleteCardMutation.isPending}
-              className="bg-destructive font-medium text-destructive-foreground hover:bg-destructive/90"
-              onClick={async () => {
-                await deleteCardMutation.mutateAsync({ cardId: card.id });
-              }}
+              onClick={() => deleteCardMutation.mutate({ cardId: card.id })}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleteCardMutation.isPending ? "Deleting..." : "Delete"}
+              Delete
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

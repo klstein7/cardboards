@@ -37,7 +37,7 @@ export default async function BoardPage({ params }: { params: Params }) {
             <BoardToolbar boardId={boardId} />
           </div>
 
-          <main className="relative flex-1 overflow-auto px-4 pb-6 pt-3 sm:px-6">
+          <main className="relative flex-1 overflow-hidden px-4 pb-6 pt-3 sm:px-6">
             <ColumnList boardId={boardId} />
             <CardDetails />
           </main>

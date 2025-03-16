@@ -1,7 +1,8 @@
 "use client";
 
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
-import { useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { useColumns, useCurrentBoard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
@@ -16,11 +17,72 @@ export function ColumnList({ boardId }: ColumnListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const columns = useColumns(boardId);
   const board = useCurrentBoard();
+  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [showLeftButton, setShowLeftButton] = useState(false);
+  const [showRightButton, setShowRightButton] = useState(false);
+
+  const handleScroll = () => {
+    if (!ref.current) return;
+
+    const { scrollLeft, scrollWidth, clientWidth } = ref.current;
+    setShowLeftButton(scrollLeft > 0);
+    setShowRightButton(scrollLeft < scrollWidth - clientWidth - 10);
+  };
+
+  const scrollLeft = () => {
+    if (!ref.current) return;
+    ref.current.scrollBy({ left: -350, behavior: "smooth" });
+  };
+
+  const scrollRight = () => {
+    if (!ref.current) return;
+    ref.current.scrollBy({ left: 350, behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (!ref.current) return;
-    return autoScrollForElements({ element: ref.current });
-  }, []);
+
+    const element = ref.current;
+    const checkForOverflow = () => {
+      if (element) {
+        const { scrollWidth, clientWidth } = element;
+        const hasOverflow = scrollWidth > clientWidth;
+        setShowScrollIndicator(hasOverflow);
+        setShowRightButton(hasOverflow);
+      }
+    };
+
+    checkForOverflow();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        scrollLeft();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        scrollRight();
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      checkForOverflow();
+      handleScroll();
+    });
+
+    resizeObserver.observe(element);
+
+    const cleanup = autoScrollForElements({ element });
+
+    element.addEventListener("scroll", handleScroll);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      resizeObserver.disconnect();
+      cleanup();
+      element.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [columns.data]);
 
   if (columns.isError) {
     return <div>Error: {columns.error.message}</div>;
@@ -38,26 +100,61 @@ export function ColumnList({ boardId }: ColumnListProps) {
   }
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        "scrollbar-thumb-rounded-full h-full w-full overflow-y-auto scrollbar-thin scrollbar-track-transparent",
+    <div className="relative h-full w-full">
+      {showLeftButton && (
+        <button
+          onClick={scrollLeft}
+          className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </button>
       )}
-      style={
-        {
-          "--scrollbar-thumb": board.data
-            ? `${board.data.color}`
-            : "var(--secondary)",
-        } as React.CSSProperties
-      }
-    >
-      <div className="flex w-fit items-start gap-5">
-        {columns.data.map((column) => (
-          <div key={column.id} className="h-full w-[325px] flex-shrink-0">
-            <ColumnItem column={column} />
-          </div>
-        ))}
+
+      <div
+        ref={ref}
+        className={cn(
+          "scrollbar-thumb-rounded-full h-full w-full overflow-x-auto overflow-y-auto scrollbar scrollbar-track-transparent",
+          "snap-x snap-mandatory scroll-smooth",
+        )}
+        style={
+          {
+            "--scrollbar-thumb": board.data
+              ? `${board.data.color}`
+              : "var(--secondary)",
+          } as React.CSSProperties
+        }
+        tabIndex={0}
+      >
+        <div className="flex w-fit items-start gap-5 pb-2">
+          {columns.data.map((column) => (
+            <div
+              key={column.id}
+              className="h-full w-[325px] flex-shrink-0 snap-start"
+            >
+              <ColumnItem column={column} />
+            </div>
+          ))}
+        </div>
       </div>
+
+      {showRightButton && (
+        <button
+          onClick={scrollRight}
+          className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          aria-label="Scroll right"
+        >
+          <ChevronRight className="h-6 w-6" />
+        </button>
+      )}
+
+      {showLeftButton && (
+        <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-16 bg-gradient-to-r from-background to-transparent opacity-80" />
+      )}
+
+      {showScrollIndicator && (
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-16 bg-gradient-to-l from-background to-transparent opacity-80" />
+      )}
     </div>
   );
 }
