@@ -3,6 +3,7 @@ import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/co
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { BoardStateProvider } from "../../_components/board-state-provider";
+import { BoardRealtimeProvider } from "../../_components/board-realtime-provider";
 import { BoardToolbar } from "../../_components/board-toolbar";
 import { CardDetails } from "../../_components/card-details";
 
@@ -31,18 +32,20 @@ export default async function BoardPage({ params }: { params: Params }) {
 
   return (
     <HydrateClient>
-      <BoardStateProvider>
-        <div className="flex h-full w-full flex-col">
-          <div className="flex w-full border-y px-4 py-3 sm:px-6">
-            <BoardToolbar boardId={boardId} />
-          </div>
+      <BoardRealtimeProvider>
+        <BoardStateProvider>
+          <div className="flex h-full w-full flex-col">
+            <div className="flex w-full border-y px-4 py-3 sm:px-6">
+              <BoardToolbar boardId={boardId} />
+            </div>
 
-          <main className="relative flex-1 overflow-hidden px-4 pb-6 pt-3 sm:px-6">
-            <ColumnList boardId={boardId} />
-            <CardDetails />
-          </main>
-        </div>
-      </BoardStateProvider>
+            <main className="relative flex-1 overflow-hidden px-4 pb-6 pt-3 sm:px-6">
+              <ColumnList boardId={boardId} />
+              <CardDetails />
+            </main>
+          </div>
+        </BoardStateProvider>
+      </BoardRealtimeProvider>
     </HydrateClient>
   );
 }

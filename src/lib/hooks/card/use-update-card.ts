@@ -9,37 +9,33 @@ export function useUpdateCard() {
 
   return useMutation({
     ...trpc.card.update.mutationOptions({
-      onSuccess: (updatedCard, { cardId, data }) => {
-        // If the card moved to a new column
+      onSuccess: async (updatedCard, { cardId, data }) => {
         if (data.columnId) {
           const newColumnId = data.columnId;
 
-          void queryClient.invalidateQueries({
+          await queryClient.invalidateQueries({
             queryKey: trpc.card.list.queryKey(newColumnId),
           });
 
-          void queryClient.invalidateQueries({
+          await queryClient.invalidateQueries({
             queryKey: trpc.card.get.queryKey(cardId),
           });
 
-          // If we have the old column ID, invalidate that too
           const oldCard = queryClient.getQueryData<Card>(
             trpc.card.get.queryKey(cardId),
           );
 
           if (oldCard?.columnId && oldCard.columnId !== newColumnId) {
-            void queryClient.invalidateQueries({
+            await queryClient.invalidateQueries({
               queryKey: trpc.card.list.queryKey(oldCard.columnId),
             });
           }
         } else {
-          // Just invalidate the card itself
-          void queryClient.invalidateQueries({
+          await queryClient.invalidateQueries({
             queryKey: trpc.card.get.queryKey(cardId),
           });
 
-          // And its column
-          void queryClient.invalidateQueries({
+          await queryClient.invalidateQueries({
             queryKey: trpc.card.list.queryKey(updatedCard.columnId),
           });
         }

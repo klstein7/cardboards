@@ -10,17 +10,14 @@ export function useCachedCardsByCurrentBoard() {
   const queryClient = useQueryClient();
   const trpc = useTRPC();
 
-  // Get columns from cache using the tRPC query key
   const columnsQueryKey = trpc.column.list.queryKey(boardId);
   const columns = queryClient.getQueryData<Column[]>(columnsQueryKey);
 
-  // Find all card queries in the cache using the tRPC query key pattern
   const cardQueries = queryClient.getQueriesData<Card[]>({
-    queryKey: ["cards"], // Use the base part of the query key for matching
-    exact: false, // We want to match all card list queries
+    queryKey: trpc.card.list.queryKey(),
+    exact: false,
   });
 
-  // Extract and filter the cards to only include those from the current board's columns
   return cardQueries
     .flatMap(([_, data]) => data ?? [])
     .filter(

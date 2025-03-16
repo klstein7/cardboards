@@ -9,11 +9,13 @@ export function useCreateManyCards() {
   return useMutation({
     ...trpc.card.createMany.mutationOptions({
       onSuccess: async (cards) => {
-        cards.forEach((card) => {
-          void queryClient.invalidateQueries({
-            queryKey: trpc.card.list.queryKey(card.columnId),
-          });
-        });
+        await Promise.all(
+          cards.map((card) => {
+            void queryClient.invalidateQueries({
+              queryKey: trpc.card.list.queryKey(card.columnId),
+            });
+          }),
+        );
       },
     }),
   });

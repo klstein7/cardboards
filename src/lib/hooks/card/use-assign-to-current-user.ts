@@ -8,12 +8,12 @@ export function useAssignToCurrentUser() {
 
   return useMutation({
     ...trpc.card.assignToCurrentUser.mutationOptions({
-      onSuccess: (updatedCard) => {
-        void queryClient.invalidateQueries({
+      onSuccess: async (updatedCard) => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.card.list.queryKey(updatedCard.columnId),
         });
 
-        void queryClient.invalidateQueries({
+        await queryClient.invalidateQueries({
           queryKey: trpc.card.get.queryKey(updatedCard.id),
         });
       },

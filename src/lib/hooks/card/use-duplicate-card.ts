@@ -8,8 +8,8 @@ export function useDuplicateCard() {
 
   return useMutation({
     ...trpc.card.duplicate.mutationOptions({
-      onSuccess: ({ columnId }) => {
-        void queryClient.invalidateQueries({
+      onSuccess: async ({ columnId }) => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.card.list.queryKey(columnId),
         });
       },

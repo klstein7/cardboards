@@ -8,8 +8,8 @@ export function useDeleteCard() {
 
   return useMutation({
     ...trpc.card.delete.mutationOptions({
-      onSuccess: ({ columnId }) => {
-        void queryClient.invalidateQueries({
+      onSuccess: async ({ columnId }) => {
+        await queryClient.invalidateQueries({
           queryKey: trpc.card.list.queryKey(columnId),
         });
       },
