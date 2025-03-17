@@ -15,7 +15,6 @@ export default async function ProjectSettingsBoardsPage({
 }) {
   const { projectId } = await params;
 
-  // Prefetch the boards data
   await trpc.board.list.prefetch(projectId);
 
   return (

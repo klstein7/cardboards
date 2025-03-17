@@ -244,6 +244,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
           )}
         </div>
         <DropdownMenu
+          modal={false}
           open={isDropdownOpen}
           onOpenChange={(open) => {
             if (!open && isMovingColumn) return;

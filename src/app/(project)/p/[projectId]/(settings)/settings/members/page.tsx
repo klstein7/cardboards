@@ -1,11 +1,11 @@
-import { Search } from "lucide-react";
-
-import { Input } from "~/components/ui/input";
+import {
+  columns,
+  ProjectMembersDataTable,
+} from "~/app/(project)/_components/project-members-table";
 import { HydrateClient } from "~/trpc/server";
 import { trpc } from "~/trpc/server";
 
 import { CreateInvitationButton } from "../../../../../_components/create-invitation-button";
-import { ProjectUsersDataTable } from "../../_components/project-users-data-table/project-users-data-table";
 
 type Params = Promise<{ projectId: string }>;
 
@@ -16,7 +16,6 @@ export default async function ProjectSettingsMembersPage({
 }) {
   const { projectId } = await params;
 
-  // Prefetch the project users data
   await trpc.projectUser.list.prefetch(projectId);
 
   return (
@@ -36,13 +35,7 @@ export default async function ProjectSettingsMembersPage({
           </div>
 
           <div className="p-4 sm:p-6">
-            <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search members..." className="pl-9" />
-              </div>
-            </div>
-            <ProjectUsersDataTable projectId={projectId} />
+            <ProjectMembersDataTable projectId={projectId} columns={columns} />
           </div>
         </div>
       </div>

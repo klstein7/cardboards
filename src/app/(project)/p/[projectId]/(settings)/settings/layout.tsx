@@ -16,7 +16,6 @@ export default async function SettingsLayout({
 }: SettingsLayoutProps) {
   const { projectId } = await params;
 
-  // Prefetch project data
   await trpc.project.get.prefetch(projectId);
 
   return (

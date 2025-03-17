@@ -21,7 +21,6 @@ export function SettingsBreadcrumb({
 }: SettingsBreadcrumbProps) {
   const pathname = usePathname();
 
-  // Determine the current settings section
   let currentSection = "General";
   if (pathname.includes("/members")) {
     currentSection = "Members";

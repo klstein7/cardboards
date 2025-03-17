@@ -15,7 +15,6 @@ export function SettingsToolbar({
 }: SettingsToolbarProps) {
   const pathname = usePathname();
 
-  // Determine the current settings section
   let sectionTitle = "General Settings";
   let sectionIcon = <FileText className="mr-1.5 h-4 w-4" />;
 

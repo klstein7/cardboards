@@ -56,8 +56,6 @@ import {
   BoardUpdatePayloadSchema,
 } from "~/server/zod";
 
-import { SettingsColumnList } from "./settings-column-list";
-
 interface SettingsBoardItemProps {
   board: Board;
 }
@@ -269,13 +267,6 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
                     </div>
                   </form>
                 </Form>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="mb-3 text-base font-medium sm:text-lg">Columns</h3>
-              <div className="rounded-lg border bg-card">
-                <SettingsColumnList boardId={board.id} />
               </div>
             </div>
           </div>

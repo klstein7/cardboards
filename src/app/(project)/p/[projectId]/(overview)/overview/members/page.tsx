@@ -1,15 +1,14 @@
 import { UsersIcon } from "lucide-react";
 
 import { CreateInvitationButton } from "~/app/(project)/_components/create-invitation-button";
+import {
+  columns,
+  ProjectMembersDataTable,
+} from "~/app/(project)/_components/project-members-table";
 import { SectionHeader } from "~/components/shared/section-header";
 import { Card, CardContent } from "~/components/ui/card";
 import { TabsContent } from "~/components/ui/tabs";
 import { HydrateClient, trpc } from "~/trpc/server";
-
-import {
-  columns,
-  ProjectMembersDataTable,
-} from "./_components/project-members-table";
 
 type Params = Promise<{ projectId: string }>;
 

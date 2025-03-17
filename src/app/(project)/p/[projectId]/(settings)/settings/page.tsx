@@ -11,10 +11,8 @@ export default async function ProjectSettingsPage({
 }) {
   const { projectId } = await params;
 
-  // Prefetch the project data
   await trpc.project.get.prefetch(projectId);
 
-  // Get the project data
   const project = await trpc.project.get(projectId);
 
   return (
