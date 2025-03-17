@@ -2,8 +2,8 @@ import { type Column } from "~/app/(project)/_types";
 import { ColumnList } from "~/app/(project)/p/[projectId]/(board)/_components/column-list";
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { BoardStateProvider } from "../../_components/board-state-provider";
 import { BoardRealtimeProvider } from "../../_components/board-realtime-provider";
+import { BoardStateProvider } from "../../_components/board-state-provider";
 import { BoardToolbar } from "../../_components/board-toolbar";
 import { CardDetails } from "../../_components/card-details";
 

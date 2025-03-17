@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useColumns, useCurrentBoard } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
+import { AddColumnButton } from "./add-column-button";
 import { ColumnItem } from "./column-item";
 
 interface ColumnListProps {
@@ -135,6 +136,8 @@ export function ColumnList({ boardId }: ColumnListProps) {
               <ColumnItem column={column} />
             </div>
           ))}
+
+          <AddColumnButton boardId={boardId} />
         </div>
       </div>
 

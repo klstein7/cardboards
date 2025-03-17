@@ -258,16 +258,11 @@ class ColumnService extends BaseService {
       const adjacentIndex =
         direction === "up" ? currentIndex - 1 : currentIndex + 1;
       const adjacentColumn = allColumns[adjacentIndex]!;
-      const isMovingToLast =
-        direction === "down" && adjacentIndex === allColumns.length - 1;
-      const isMovingFromLast =
-        direction === "up" && currentIndex === allColumns.length - 1;
 
       const [updatedColumn] = await txOrDb
         .update(columns)
         .set({
           order: adjacentColumn.order,
-          isCompleted: isMovingToLast,
         })
         .where(eq(columns.id, columnId))
         .returning();
@@ -276,7 +271,6 @@ class ColumnService extends BaseService {
         .update(columns)
         .set({
           order: column.order,
-          isCompleted: isMovingFromLast,
         })
         .where(eq(columns.id, adjacentColumn.id));
 

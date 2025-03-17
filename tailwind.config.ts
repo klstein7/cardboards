@@ -86,10 +86,15 @@ export default {
             height: "0",
           },
         },
+        "column-pulse": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(var(--column-color-rgb), 0)" },
+          "50%": { boxShadow: "0 0 0 4px rgba(var(--column-color-rgb), 0.3)" },
+        },
       },
       animation: {
         "collapsible-down": "collapsible-down 0.2s ease-out",
         "collapsible-up": "collapsible-up 0.2s ease-out",
+        "column-moved": "column-pulse 1.5s ease-in-out",
       },
     },
   },
