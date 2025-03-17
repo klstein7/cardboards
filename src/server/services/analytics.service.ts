@@ -481,7 +481,7 @@ class AnalyticsService extends BaseService {
     startDate?: Date | null,
     endDate?: Date | null,
   ) {
-    return this.executeWithTx(async (txOrDb) => {
+    return this.executeWithTx(async () => {
       return {
         progress: await this.getProjectProgress(projectId, startDate, endDate),
         taskCompletionTrend: await this.getTaskCompletionTrend(
