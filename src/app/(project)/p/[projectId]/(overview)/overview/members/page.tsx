@@ -19,12 +19,8 @@ export default async function ProjectMembersPage({
 }) {
   const { projectId } = await params;
 
-  // Prefetch the project users data
   await trpc.projectUser.list.prefetch(projectId);
   await trpc.project.get.prefetch(projectId);
-
-  // Get project data for rendering
-  const project = await trpc.project.get(projectId);
 
   return (
     <TabsContent value="members" className="space-y-6">

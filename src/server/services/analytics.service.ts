@@ -3,7 +3,7 @@ import "server-only";
 import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
-import { columns, projects, projectUsers } from "../db/schema";
+import { columns, projects } from "../db/schema";
 import { BaseService } from "./base.service";
 
 /**

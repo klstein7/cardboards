@@ -9,13 +9,7 @@ import {
 } from "recharts";
 
 import { SectionHeader } from "~/components/shared/section-header";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "~/components/ui/card";
+import { Card, CardContent } from "~/components/ui/card";
 import { type ChartConfig } from "~/components/ui/chart";
 
 interface DueDateChartProps {
