@@ -45,12 +45,12 @@
     --chart-lime: 85 90% 40%;
     --chart-emerald: 160 90% 35%;
 
-    /* Priority colors - more distinct */
-    --priority-low: 150 80% 40%;
-    --priority-medium: 30 100% 50%;
-    --priority-high: 330 90% 50%;
+    /* Priority colors - matching card-details dialog */
+    --priority-low: 214 93% 60%; /* Blue */
+    --priority-medium: 38 96% 50%; /* Amber */
+    --priority-high: 0 84% 60%; /* Red */
     --priority-urgent: 0 95% 55%;
-    --priority-none: 220 20% 45%;
+    --priority-none: 220 10% 46%; /* Gray */
 
     /* Due date colors - more distinct */
     --due-overdue: 0 95% 55%;
@@ -62,11 +62,11 @@
     --radius: 0.5rem;
 
     /* Color variables (HSL format) - updated to match */
-    --priority-low-color: hsl(150 80% 40%);
-    --priority-medium-color: hsl(30 100% 50%);
-    --priority-high-color: hsl(330 90% 50%);
+    --priority-low-color: hsl(214 93% 60%);
+    --priority-medium-color: hsl(38 96% 50%);
+    --priority-high-color: hsl(0 84% 60%);
     --priority-urgent-color: hsl(0 95% 55%);
-    --priority-none-color: hsl(220 20% 45%);
+    --priority-none-color: hsl(220 10% 46%);
 
     --chart-blue-color: hsl(215 90% 55%);
     --chart-green-color: hsl(150 80% 40%);
@@ -129,12 +129,12 @@
     --chart-lime: 85 90% 65%;
     --chart-emerald: 160 90% 60%;
 
-    /* Priority colors - brighter and more distinct */
-    --priority-low: 150 80% 60%;
-    --priority-medium: 30 100% 70%;
-    --priority-high: 330 90% 70%;
+    /* Priority colors - matching card-details dialog with increased brightness for dark mode */
+    --priority-low: 214 93% 68%; /* Blue */
+    --priority-medium: 38 96% 65%; /* Amber */
+    --priority-high: 0 84% 70%; /* Red */
     --priority-urgent: 0 95% 75%;
-    --priority-none: 220 20% 70%;
+    --priority-none: 220 10% 65%; /* Gray */
 
     /* Due date colors - brighter and more distinct */
     --due-overdue: 0 95% 75%;
@@ -144,11 +144,11 @@
     --due-none: 220 20% 70%;
 
     /* Color variables (HSL format) - updated to match */
-    --priority-low-color: hsl(150 80% 60%);
-    --priority-medium-color: hsl(30 100% 70%);
-    --priority-high-color: hsl(330 90% 70%);
+    --priority-low-color: hsl(214 93% 68%);
+    --priority-medium-color: hsl(38 96% 65%);
+    --priority-high-color: hsl(0 84% 70%);
     --priority-urgent-color: hsl(0 95% 75%);
-    --priority-none-color: hsl(220 20% 70%);
+    --priority-none-color: hsl(220 10% 65%);
 
     --chart-blue-color: hsl(215 90% 75%);
     --chart-green-color: hsl(150 80% 65%);

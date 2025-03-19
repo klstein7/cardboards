@@ -1,12 +1,8 @@
 "use client";
 
-import { format } from "date-fns";
-import { type Tag, TagInput } from "emblor";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
-import { ProjectUserSelect } from "~/app/(project)/_components/project-user-select";
-import { DatePicker } from "~/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -15,27 +11,25 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Separator } from "~/components/ui/separator";
-import { Skeleton } from "~/components/ui/skeleton";
-import { Textarea } from "~/components/ui/textarea";
-import { Tiptap } from "~/components/ui/tiptap";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
 import { type Priority } from "~/lib/utils";
 
 import { CardDetailsCommentList } from "./card-details-comment-list";
 import { CardDetailsCreateCommentForm } from "./card-details-create-comment-form";
-import { CardPrioritySelect } from "./card-priority-select";
+import { CardDetailsDescription } from "./card-details-description";
+import { CardDetailsHeader } from "./card-details-header";
+import { CardDetailsLabels } from "./card-details-labels";
+import { CardDetailsMetadata } from "./card-details-metadata";
+import { CardDetailsSkeleton } from "./card-details-skeleton";
+import { CardDetailsTitle } from "./card-details-title";
 
 export function CardDetails() {
   const [selectedCardId, setSelectedCardId] = useQueryState("cardId");
-  const [tags, setTags] = useState<Tag[]>([]);
-  const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
-
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
 
   const card = useCard(selectedCardId ? Number(selectedCardId) : null);
-
   const updateCardMutation = useUpdateCard();
 
   const [editing, setEditing] = useState<
@@ -50,12 +44,6 @@ export function CardDetails() {
     }
   }, [editing]);
 
-  useEffect(() => {
-    if (card.data?.labels) {
-      setTags(card.data.labels.map((label) => ({ id: label, text: label })));
-    }
-  }, [card.data?.labels]);
-
   return (
     <Dialog
       open={!!selectedCardId}
@@ -65,250 +53,168 @@ export function CardDetails() {
         }
       }}
     >
-      {card.isPending ? (
-        <DialogContent
-          className="md:max-w-2xl"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-        >
+      <DialogContent
+        className="md:max-w-2xl"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
+        {card.isPending ? (
           <DialogHeader>
-            <DialogTitle asChild>
-              <Skeleton className="h-10 w-36" />
-            </DialogTitle>
-            <DialogDescription asChild>
-              <Skeleton className="h-5 w-48" />
-            </DialogDescription>
+            <DialogTitle className="sr-only">Card Details</DialogTitle>
+            <CardDetailsSkeleton />
           </DialogHeader>
+        ) : (
+          <>
+            <DialogHeader className="pb-4">
+              <DialogTitle className="sr-only">
+                Card Details - CARD-{card.data?.id}
+              </DialogTitle>
+              <CardDetailsHeader
+                id={card.data?.id}
+                priority={card.data?.priority}
+              />
+              <DialogDescription className="mt-1.5">
+                View or edit card details below
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-4 w-12" />
-              <Skeleton className="h-8 w-full" />
-            </div>
+            <div className="flex flex-col gap-6">
+              <CardDetailsTitle
+                title={card.data?.title}
+                isEditing={editing === "title"}
+                isPending={updateCardMutation.isPending}
+                onEdit={() => setEditing("title")}
+                onBlur={async (value) => {
+                  if (value !== card.data?.title) {
+                    await updateCardMutation.mutateAsync({
+                      cardId: Number(selectedCardId),
+                      data: { title: value },
+                    });
+                  }
+                  setEditing(null);
+                }}
+              />
 
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-24 w-full" />
-            </div>
+              <CardDetailsDescription
+                description={card.data?.description ?? undefined}
+                isEditing={editing === "description"}
+                isPending={updateCardMutation.isPending}
+                onEdit={() => setEditing("description")}
+                onBlur={async (content) => {
+                  if (content !== card.data?.description) {
+                    await updateCardMutation.mutateAsync({
+                      cardId: Number(selectedCardId),
+                      data: { description: content },
+                    });
+                  }
+                  setEditing(null);
+                }}
+              />
 
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-4 w-20" />
-              <Skeleton className="h-10 w-[240px]" />
-            </div>
+              <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+                <CardDetailsMetadata
+                  dueDate={card.data?.dueDate}
+                  assignedToId={card.data?.assignedToId}
+                  priority={card.data?.priority}
+                  isEditingDueDate={editing === "dueDate"}
+                  isPendingDueDate={
+                    updateCardMutation.isPending &&
+                    updateCardMutation.variables?.data.dueDate !== undefined
+                  }
+                  isPendingAssignee={
+                    updateCardMutation.isPending &&
+                    updateCardMutation.variables?.data.assignedToId !==
+                      undefined
+                  }
+                  isPendingPriority={
+                    updateCardMutation.isPending &&
+                    updateCardMutation.variables?.data.priority !== undefined
+                  }
+                  onEditDueDate={() => setEditing("dueDate")}
+                  onDueDateChange={async (date) => {
+                    const currentDate = card.data?.dueDate;
+                    const newDate = date;
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-              <div className="flex flex-col gap-1">
-                <Skeleton className="h-4 w-20" />
-                <Skeleton className="h-10 w-full" />
-              </div>
-            </div>
+                    const hasCurrentDate =
+                      currentDate !== null && currentDate !== undefined;
+                    const hasNewDate =
+                      newDate !== null && newDate !== undefined;
 
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-4 w-16" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          </div>
-        </DialogContent>
-      ) : (
-        <DialogContent
-          className="md:max-w-2xl"
-          onPointerDownOutside={(e) => e.preventDefault()}
-          onInteractOutside={(e) => e.preventDefault()}
-        >
-          <DialogHeader>
-            <DialogTitle>
-              CARD-
-              {card.data?.id}
-            </DialogTitle>
-            <DialogDescription>
-              View or edit card details below
-            </DialogDescription>
-          </DialogHeader>
+                    const dateChanged =
+                      (!hasCurrentDate && hasNewDate) ||
+                      (hasCurrentDate && !hasNewDate) ||
+                      (hasCurrentDate &&
+                        hasNewDate &&
+                        currentDate.getTime() !== newDate.getTime());
 
-          <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Title</span>
-              {editing === "title" ? (
-                updateCardMutation.isPending ? (
-                  <Skeleton className="h-[56px] w-full" />
-                ) : (
-                  <Textarea
-                    className="resize-none"
-                    ref={titleRef}
-                    defaultValue={card.data?.title}
-                    onBlur={async (e) => {
-                      if (e.target.value !== card.data?.title) {
-                        await updateCardMutation.mutateAsync({
-                          cardId: Number(selectedCardId),
-                          data: {
-                            title: e.target.value,
-                          },
-                        });
-                      }
-                      setEditing(null);
-                    }}
-                  />
-                )
-              ) : (
-                <div
-                  role="button"
-                  className="rounded-md text-lg font-medium"
-                  onClick={() => {
-                    setEditing("title");
-                    titleRef.current?.focus();
-                  }}
-                >
-                  {!card.data?.title || card.data.title === ""
-                    ? "Click to add title"
-                    : card.data.title}
-                </div>
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Description</span>
-              {editing === "description" ? (
-                updateCardMutation.isPending ? (
-                  <Skeleton className="h-[150px] w-full" />
-                ) : (
-                  <Tiptap
-                    value={card.data?.description ?? ""}
-                    onBlur={async (content) => {
-                      if (content !== card.data?.description) {
-                        await updateCardMutation.mutateAsync({
-                          cardId: Number(selectedCardId),
-                          data: {
-                            description: content,
-                          },
-                        });
-                      }
-                      setEditing(null);
-                    }}
-                    autoFocus
-                  />
-                )
-              ) : (
-                <div
-                  role="button"
-                  className="prose max-w-none dark:prose-invert"
-                  onClick={() => {
-                    setEditing("description");
-                  }}
-                  dangerouslySetInnerHTML={{
-                    __html:
-                      card.data?.description === "<p></p>" ||
-                      !card.data?.description
-                        ? "<p>Click to edit</p>"
-                        : card.data.description,
-                  }}
-                />
-              )}
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Due date</span>
-              {editing === "dueDate" ? (
-                updateCardMutation.isPending ? (
-                  <Skeleton className="h-10 w-[240px]" />
-                ) : (
-                  <DatePicker
-                    value={card.data?.dueDate ?? undefined}
-                    onChange={async (date) => {
+                    if (dateChanged) {
                       await updateCardMutation.mutateAsync({
                         cardId: Number(selectedCardId),
                         data: { dueDate: date },
                       });
-                      setEditing(null);
-                    }}
-                  />
-                )
-              ) : (
-                <div
-                  role="button"
-                  onClick={() => setEditing("dueDate")}
-                  className="rounded-md"
-                >
-                  {card.data?.dueDate
-                    ? format(card.data.dueDate, "MMM d, yyyy")
-                    : "Click to set due date"}
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">Assignee</span>
-                {updateCardMutation.isPending &&
-                updateCardMutation.variables?.data.assignedToId !==
-                  undefined ? (
-                  <Skeleton className="h-9 w-full" />
-                ) : (
-                  <ProjectUserSelect
-                    value={card.data?.assignedToId ?? ""}
-                    onChange={async (value) => {
+                    }
+                    setEditing(null);
+                  }}
+                  onAssigneeChange={async (value) => {
+                    if (value !== (card.data?.assignedToId ?? "")) {
                       await updateCardMutation.mutateAsync({
                         cardId: Number(selectedCardId),
                         data: { assignedToId: value },
                       });
-                    }}
-                  />
-                )}
-              </div>
-              <div className="flex flex-col gap-1">
-                <span className="text-sm text-muted-foreground">Priority</span>
-                {updateCardMutation.isPending &&
-                updateCardMutation.variables?.data.priority !== undefined ? (
-                  <Skeleton className="h-9 w-full" />
-                ) : (
-                  <CardPrioritySelect
-                    value={card.data?.priority ?? ""}
-                    onChange={async (value) => {
+                    }
+                  }}
+                  onPriorityChange={async (value) => {
+                    if (value !== (card.data?.priority ?? "")) {
                       await updateCardMutation.mutateAsync({
                         cardId: Number(selectedCardId),
                         data: { priority: value as Priority["value"] },
                       });
-                    }}
-                  />
-                )}
+                    }
+                  }}
+                />
+
+                <CardDetailsLabels
+                  labels={card.data?.labels}
+                  isPending={
+                    updateCardMutation.isPending &&
+                    updateCardMutation.variables?.data.labels !== undefined
+                  }
+                  onTagAdd={async (tag) => {
+                    const currentTags = card.data?.labels ?? [];
+                    if (!currentTags.includes(tag)) {
+                      await updateCardMutation.mutateAsync({
+                        cardId: Number(selectedCardId),
+                        data: { labels: [...currentTags, tag] },
+                      });
+                    }
+                  }}
+                  onTagRemove={async (tag) => {
+                    const currentTags = card.data?.labels ?? [];
+                    if (currentTags.includes(tag)) {
+                      await updateCardMutation.mutateAsync({
+                        cardId: Number(selectedCardId),
+                        data: {
+                          labels: currentTags.filter((t) => t !== tag),
+                        },
+                      });
+                    }
+                  }}
+                />
+              </div>
+
+              <Separator className="my-1" />
+
+              <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+                <h3 className="mb-4 text-sm font-medium">Comments</h3>
+                <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
+                <div className="mt-4">
+                  <CardDetailsCommentList cardId={Number(selectedCardId)} />
+                </div>
               </div>
             </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-sm text-muted-foreground">Labels</span>
-              <TagInput
-                tags={tags}
-                activeTagIndex={activeTagIndex}
-                setActiveTagIndex={setActiveTagIndex}
-                setTags={setTags}
-                className="sm:min-w-[450px]"
-                styleClasses={{
-                  input: "h-9",
-                  inlineTagsContainer: "pl-1 py-0.5",
-                }}
-                placeholder="Enter a topic"
-                maxTags={5}
-                onTagAdd={async (tag) => {
-                  await updateCardMutation.mutateAsync({
-                    cardId: Number(selectedCardId),
-                    data: { labels: [...tags.map((t) => t.text), tag] },
-                  });
-                }}
-                onTagRemove={async (tag) => {
-                  await updateCardMutation.mutateAsync({
-                    cardId: Number(selectedCardId),
-                    data: {
-                      labels: tags.map((t) => t.text).filter((t) => t !== tag),
-                    },
-                  });
-                }}
-              />
-            </div>
-            <Separator />
-            <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
-            <CardDetailsCommentList cardId={Number(selectedCardId)} />
-          </div>
-        </DialogContent>
-      )}
+          </>
+        )}
+      </DialogContent>
     </Dialog>
   );
 }
