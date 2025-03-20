@@ -4,34 +4,34 @@
 
 @layer base {
   :root {
-    /* Light mode - increased contrast */
-    --background: 220 20% 98%; /* Lighter background */
-    --foreground: 220 50% 8%; /* Darker text */
-    --muted: 220 20% 92%;
-    --muted-foreground: 220 30% 30%; /* Darker muted text */
+    /* Light mode - further increased contrast */
+    --background: 220 20% 98%;
+    --foreground: 220 50% 5%; /* Darker text for better readability */
+    --muted: 220 20% 90%;
+    --muted-foreground: 220 30% 25%; /* Darker muted text */
     --popover: 220 20% 98%;
-    --popover-foreground: 220 50% 8%;
+    --popover-foreground: 220 50% 5%;
     --card: 0 0% 100%;
-    --card-foreground: 220 50% 8%;
-    --border: 220 25% 80%; /* More visible borders */
-    --input: 220 25% 80%;
+    --card-foreground: 220 50% 5%;
+    --border: 220 25% 75%; /* More visible borders */
+    --input: 220 25% 75%;
 
     /* Blue-based color scheme with increased contrast */
-    --primary: 215 90% 45%; /* Deeper, richer blue */
+    --primary: 215 90% 40%; /* Deeper blue for better contrast against white */
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - more contrast */
-    --secondary: 210 35% 88%;
-    --secondary-foreground: 210 50% 25%;
+    --secondary: 210 35% 85%;
+    --secondary-foreground: 210 50% 20%;
 
     /* Accent - deeper indigo-blue */
-    --accent: 230 85% 65%;
+    --accent: 230 85% 60%;
     --accent-foreground: 0 0% 100%;
 
     /* Refined destructive */
-    --destructive: 0 90% 55%;
+    --destructive: 0 95% 50%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 215 90% 45%;
+    --ring: 215 90% 40%;
 
     /* Enhanced chart colors - more contrast */
     --chart-blue: 215 90% 55%;
@@ -88,25 +88,25 @@
   }
 
   .dark {
-    /* Dark mode - deeper contrast */
-    --background: 220 30% 3%; /* Even darker background */
-    --foreground: 220 15% 98%; /* Brighter text */
+    /* Dark mode - further increased contrast */
+    --background: 220 30% 2%; /* Even darker background */
+    --foreground: 220 15% 100%; /* Brighter text */
     --muted: 220 30% 8%;
-    --muted-foreground: 220 15% 75%;
-    --popover: 220 30% 5%;
-    --popover-foreground: 220 15% 98%;
-    --card: 220 30% 5%;
-    --card-foreground: 220 15% 98%;
-    --border: 220 30% 18%; /* More visible borders */
-    --input: 220 30% 18%;
+    --muted-foreground: 220 15% 80%;
+    --popover: 220 30% 4%;
+    --popover-foreground: 220 15% 100%;
+    --card: 220 30% 4%;
+    --card-foreground: 220 15% 100%;
+    --border: 220 30% 22%; /* More visible borders */
+    --input: 220 30% 22%;
 
     /* Blue-based color scheme for dark mode - more vibrant */
-    --primary: 215 90% 65%; /* Brighter, more saturated blue */
+    --primary: 215 90% 70%; /* Brighter blue against dark background */
     --primary-foreground: 0 0% 100%;
 
     /* Secondary - more contrast */
     --secondary: 210 35% 18%;
-    --secondary-foreground: 210 25% 95%;
+    --secondary-foreground: 210 25% 100%;
 
     /* Accent - brighter for dark mode */
     --accent: 230 85% 65%;

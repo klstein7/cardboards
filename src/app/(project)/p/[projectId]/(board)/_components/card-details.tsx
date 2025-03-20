@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 
+import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +15,8 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
+import { useCurrentBoardId } from "~/lib/hooks/utils/use-current-board-id";
+import { useCurrentProjectId } from "~/lib/hooks/utils/use-current-project-id";
 import { type Priority } from "~/lib/utils";
 
 import { CardDetailsCommentList } from "./card-details-comment-list";
@@ -28,6 +32,8 @@ export function CardDetails() {
   const [selectedCardId, setSelectedCardId] = useQueryState("cardId");
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
+  const projectId = useCurrentProjectId();
+  const boardId = useCurrentBoardId();
 
   const card = useCard(selectedCardId ? Number(selectedCardId) : null);
   const updateCardMutation = useUpdateCard();
@@ -66,13 +72,49 @@ export function CardDetails() {
         ) : (
           <>
             <DialogHeader className="pb-4">
-              <DialogTitle className="sr-only">
-                Card Details - CARD-{card.data?.id}
-              </DialogTitle>
-              <CardDetailsHeader
-                id={card.data?.id}
-                priority={card.data?.priority}
-              />
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle className="sr-only">
+                    Card Details - CARD-{card.data?.id}
+                  </DialogTitle>
+                  <CardDetailsHeader
+                    id={card.data?.id}
+                    priority={card.data?.priority}
+                  />
+                </div>
+                {selectedCardId && projectId && boardId && (
+                  <Link
+                    href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-auto mr-8"
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5 text-xs"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="lucide-external-link"
+                      >
+                        <path d="M15 3h6v6" />
+                        <path d="M10 14 21 3" />
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      </svg>
+                      Open full page
+                    </Button>
+                  </Link>
+                )}
+              </div>
               <DialogDescription className="mt-1.5">
                 View or edit card details below
               </DialogDescription>
