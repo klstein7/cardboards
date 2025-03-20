@@ -184,7 +184,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
         "flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card/30 shadow-sm transition-all duration-200",
         isDropping && "ring-2 ring-offset-2 ring-offset-background",
         column.isCompleted &&
-          "border-green-200 bg-green-50/40 dark:border-green-900/30 dark:bg-green-950/10",
+          "border-green-300 bg-green-50/40 dark:border-green-700/50 dark:bg-green-950/10",
         justMoved && "animate-column-moved",
       )}
       style={{
@@ -202,6 +202,12 @@ export function ColumnItem({ column }: ColumnItemProps) {
                 : "0, 0, 0",
             } as React.CSSProperties)
           : {}),
+        ...(column.isCompleted && !isDropping && !justMoved
+          ? {
+              borderColor: "rgba(34, 197, 94, 0.4)",
+              boxShadow: "0 1px 3px rgba(34, 197, 94, 0.1)",
+            }
+          : {}),
       }}
       aria-describedby={`${column.name}-column`}
     >
@@ -209,13 +215,15 @@ export function ColumnItem({ column }: ColumnItemProps) {
         className={cn(
           "flex items-center justify-between border-b p-3",
           column.isCompleted
-            ? "border-b-green-200 bg-green-100/40 dark:border-b-green-900/30 dark:bg-green-900/20"
+            ? "border-b-green-300 bg-green-50/50 dark:border-b-green-700/40 dark:bg-green-900/15"
             : "bg-card/50",
         )}
       >
         <div className="flex items-center gap-2">
           {column.isCompleted && (
-            <div className="h-2 w-2 rounded-full bg-green-500 dark:bg-green-400"></div>
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/40">
+              <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+            </div>
           )}
           <span
             className={cn(
@@ -225,23 +233,16 @@ export function ColumnItem({ column }: ColumnItemProps) {
           >
             {column.name}
           </span>
-          <Badge variant="secondary" className="ml-1 text-xs">
+          <Badge
+            variant="secondary"
+            className={cn(
+              "ml-1 text-xs",
+              column.isCompleted &&
+                "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+            )}
+          >
             {cardCount}
           </Badge>
-          {column.isCompleted && (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <span className="ml-1">
-                    <CheckCircle2 className="h-4 w-4 text-green-500" />
-                  </span>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-xs">Tasks completed - no new cards</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          )}
         </div>
         <DropdownMenu
           modal={false}
@@ -315,7 +316,12 @@ export function ColumnItem({ column }: ColumnItemProps) {
         />
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2">
+      <div
+        className={cn(
+          "flex-1 overflow-y-auto p-2",
+          column.isCompleted && "bg-green-50/20 dark:bg-green-950/10",
+        )}
+      >
         <CardList columnId={column.id} isCompleted={column.isCompleted} />
       </div>
 
@@ -333,6 +339,14 @@ export function ColumnItem({ column }: ColumnItemProps) {
             }
             columnId={column.id}
           />
+        </div>
+      )}
+      {column.isCompleted && (
+        <div className="border-t border-green-200 p-2 dark:border-green-800/30">
+          <div className="flex items-center justify-center py-1 text-xs font-medium text-green-700 dark:text-green-400">
+            <CheckCircle2 className="mr-1 h-3 w-3" />
+            <span>Completed</span>
+          </div>
         </div>
       )}
     </div>
