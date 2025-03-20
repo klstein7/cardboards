@@ -43,9 +43,11 @@ export default async function ProjectLayout({
         <ProjectSidebar projectId={projectId} />
         <div className="min-w-0 flex-1 overflow-hidden sm:ml-[60px]">
           <MobileNav projectId={projectId} />
-          <div className="flex h-full flex-col overflow-auto">
-            <DynamicHeader projectId={projectId} projectName={project.name} />
-            <div className="flex-1">{children}</div>
+          <div className="flex h-full flex-col">
+            <div className="sticky top-0 z-10 shadow-sm">
+              <DynamicHeader projectId={projectId} projectName={project.name} />
+            </div>
+            <div className="flex-1 overflow-auto">{children}</div>
           </div>
         </div>
       </div>

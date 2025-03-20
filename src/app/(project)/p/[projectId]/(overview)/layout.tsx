@@ -17,7 +17,6 @@ export default async function OverviewLayout({
 }: OverviewLayoutProps) {
   const { projectId } = await params;
 
-  // Prefetch needed data
   await Promise.all([
     trpc.board.list.prefetch(projectId),
     trpc.project.get.prefetch(projectId),
