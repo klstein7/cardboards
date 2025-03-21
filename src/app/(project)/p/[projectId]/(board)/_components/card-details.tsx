@@ -1,5 +1,6 @@
 "use client";
 
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -85,8 +86,6 @@ export function CardDetails() {
                 {selectedCardId && projectId && boardId && (
                   <Link
                     href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="ml-auto mr-8"
                   >
                     <Button
@@ -94,23 +93,8 @@ export function CardDetails() {
                       size="sm"
                       className="gap-1.5 text-xs"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="lucide-external-link"
-                      >
-                        <path d="M15 3h6v6" />
-                        <path d="M10 14 21 3" />
-                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                      </svg>
-                      Open full page
+                      <FileText className="h-4 w-4" />
+                      View full page
                     </Button>
                   </Link>
                 )}

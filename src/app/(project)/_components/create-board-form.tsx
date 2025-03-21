@@ -18,6 +18,7 @@ import {
 import { Form, FormField } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { useCreateBoard } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
 const formSchema = z.object({
   name: z.string().min(1, "Board name is required"),
@@ -37,6 +38,7 @@ export function CreateBoardForm({
   open,
   setOpen,
 }: CreateBoardFormProps) {
+  const isAdmin = useIsAdmin();
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,6 +50,8 @@ export function CreateBoardForm({
   const createBoardMutation = useCreateBoard();
 
   async function onSubmit(values: FormValues) {
+    if (!isAdmin) return;
+
     await createBoardMutation.mutateAsync({
       projectId,
       name: values.name,
@@ -80,6 +84,7 @@ export function CreateBoardForm({
                     placeholder="E.g. Event Planning"
                     autoComplete="off"
                     {...field}
+                    disabled={!isAdmin}
                   />
                 </FormControl>
                 <FormDescription>
@@ -96,7 +101,11 @@ export function CreateBoardForm({
               <FormItem>
                 <FormLabel>Color</FormLabel>
                 <FormControl>
-                  <ColorPicker color={field.value} onChange={field.onChange} />
+                  <ColorPicker
+                    color={field.value}
+                    onChange={field.onChange}
+                    disabled={!isAdmin}
+                  />
                 </FormControl>
                 <FormDescription>
                   The color is used to easily identify the board.
@@ -113,7 +122,11 @@ export function CreateBoardForm({
             >
               Cancel
             </Button>
-            <Button type="submit" isLoading={createBoardMutation.isPending}>
+            <Button
+              type="submit"
+              isLoading={createBoardMutation.isPending}
+              disabled={!isAdmin}
+            >
               Create
             </Button>
           </DialogFooter>

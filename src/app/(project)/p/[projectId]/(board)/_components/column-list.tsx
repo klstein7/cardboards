@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { useColumns, useCurrentBoard } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
 import { AddColumnButton } from "./add-column-button";
@@ -18,6 +19,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const columns = useColumns(boardId);
   const board = useCurrentBoard();
+  const isAdmin = useIsAdmin();
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(false);
@@ -137,7 +139,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
             </div>
           ))}
 
-          <AddColumnButton boardId={boardId} />
+          {isAdmin && <AddColumnButton boardId={boardId} />}
         </div>
       </div>
 

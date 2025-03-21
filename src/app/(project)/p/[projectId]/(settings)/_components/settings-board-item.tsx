@@ -50,6 +50,7 @@ import {
   useDeleteBoard,
   useUpdateBoard,
 } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 import {
   type BoardUpdatePayload,
@@ -64,6 +65,7 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
   const [open, setOpen] = useState(false);
   const columns = useColumns(board.id);
   const cardCount = useCardCountByBoardId(board.id);
+  const isAdmin = useIsAdmin();
 
   const columnsCount = columns.data?.length ?? 0;
   const cardsCount = cardCount.data ?? 0;
@@ -173,7 +175,11 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
                             Board name
                           </FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter board name" {...field} />
+                            <Input
+                              placeholder="Enter board name"
+                              {...field}
+                              disabled={!isAdmin}
+                            />
                           </FormControl>
                           <FormDescription className="text-xs sm:text-sm">
                             This is how the board will appear in your project
@@ -192,7 +198,11 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
                             Board color
                           </FormLabel>
                           <FormControl>
-                            <ColorPicker {...field} color={field.value ?? ""} />
+                            <ColorPicker
+                              {...field}
+                              color={field.value ?? ""}
+                              disabled={!isAdmin}
+                            />
                           </FormControl>
                           <FormDescription className="text-xs sm:text-sm">
                             This color will be used for board visualization
@@ -203,67 +213,72 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
                     />
 
                     <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-between">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            type="button"
-                            size="sm"
-                            className="w-full sm:w-auto"
-                          >
-                            <Trash className="mr-1.5 h-4 w-4 sm:mr-2" />
-                            Delete
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>
-                              Delete board &quot;{board.name}&quot;?
-                            </AlertDialogTitle>
-                            <AlertDialogDescription>
-                              This action cannot be undone. This will
-                              permanently delete this board and remove all
-                              associated columns and cards.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-                            <AlertDialogCancel className="w-full sm:w-auto">
-                              Cancel
-                            </AlertDialogCancel>
-                            <AlertDialogAction
-                              onClick={handleDelete}
-                              className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:w-auto"
+                      {isAdmin && (
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="destructive"
+                              type="button"
+                              size="sm"
+                              className="w-full sm:w-auto"
                             >
-                              {deleteBoardMutation.isPending ? (
-                                <>
-                                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
-                                  Deleting...
-                                </>
-                              ) : (
-                                "Delete board"
-                              )}
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                              <Trash className="mr-1.5 h-4 w-4 sm:mr-2" />
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="max-w-[90vw] sm:max-w-lg">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete board &quot;{board.name}&quot;?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                This action cannot be undone. This will
+                                permanently delete this board and remove all
+                                associated columns and cards.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
+                              <AlertDialogCancel className="w-full sm:w-auto">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={handleDelete}
+                                className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 sm:w-auto"
+                              >
+                                {deleteBoardMutation.isPending ? (
+                                  <>
+                                    <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
+                                    Deleting...
+                                  </>
+                                ) : (
+                                  "Delete board"
+                                )}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      )}
 
-                      <Button
-                        type="submit"
-                        disabled={
-                          !form.formState.isDirty ||
-                          updateBoardMutation.isPending
-                        }
-                        className="w-full sm:w-auto"
-                      >
-                        {updateBoardMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
-                            Saving...
-                          </>
-                        ) : (
-                          "Save changes"
-                        )}
-                      </Button>
+                      {isAdmin && (
+                        <Button
+                          type="submit"
+                          size="sm"
+                          className="w-full sm:w-auto"
+                          disabled={
+                            !form.formState.isDirty ||
+                            updateBoardMutation.isPending
+                          }
+                        >
+                          {updateBoardMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-1.5 h-4 w-4 animate-spin sm:mr-2" />
+                              Saving...
+                            </>
+                          ) : (
+                            "Save changes"
+                          )}
+                        </Button>
+                      )}
                     </div>
                   </form>
                 </Form>

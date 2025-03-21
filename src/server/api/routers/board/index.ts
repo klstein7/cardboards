@@ -12,7 +12,7 @@ export const boardRouter = createTRPCRouter({
   create: authedProcedure
     .input(BoardCreateSchema)
     .mutation(async ({ input }) => {
-      await authService.canAccessProject(input.projectId);
+      await authService.requireProjectAdmin(input.projectId);
       return boardService.create(input);
     }),
 
@@ -29,19 +29,19 @@ export const boardRouter = createTRPCRouter({
   update: authedProcedure
     .input(BoardUpdateSchema)
     .mutation(async ({ input }) => {
-      await authService.canAccessBoard(input.boardId);
+      await authService.requireBoardAdmin(input.boardId);
       return boardService.update(input.boardId, input.data);
     }),
 
   delete: authedProcedure.input(z.string()).mutation(async ({ input }) => {
-    await authService.canAccessBoard(input);
+    await authService.requireBoardAdmin(input);
     return boardService.del(input);
   }),
 
   generate: authedProcedure
     .input(BoardGenerateSchema)
     .mutation(async ({ input }) => {
-      await authService.canAccessProject(input.projectId);
+      await authService.requireProjectAdmin(input.projectId);
       return boardService.generate(input.projectId, input.prompt);
     }),
 

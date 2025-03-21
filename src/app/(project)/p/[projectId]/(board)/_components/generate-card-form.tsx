@@ -77,7 +77,7 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
           title: card.title,
           description: card.description,
           priority: card.priority as Priority["value"],
-          columnId, // Use the provided columnId instead of the first column
+          columnId,
           labels: card.labels.map((label) => ({
             id: label,
             text: label,

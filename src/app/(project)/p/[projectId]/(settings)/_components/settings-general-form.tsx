@@ -31,6 +31,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { Separator } from "~/components/ui/separator";
 import { useDeleteProject, useUpdateProject } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { type ProjectUpdate, ProjectUpdateSchema } from "~/server/zod";
 
 interface SettingsGeneralFormProps {
@@ -39,6 +40,7 @@ interface SettingsGeneralFormProps {
 
 export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isAdmin = useIsAdmin();
   const form = useForm<ProjectUpdate>({
     resolver: zodResolver(ProjectUpdateSchema),
     defaultValues: {
@@ -81,7 +83,7 @@ export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} disabled={!isAdmin} />
                 </FormControl>
                 <FormDescription>
                   The name of the project. This is used to identify the project.
@@ -91,63 +93,70 @@ export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
             )}
           />
 
-          <div className="flex justify-end">
-            <Button
-              type="submit"
-              disabled={isSubmitting || !form.formState.isDirty}
-            >
-              {isSubmitting ? "Saving..." : "Save Changes"}
-            </Button>
-          </div>
+          {isAdmin && (
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !form.formState.isDirty}
+              >
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          )}
         </form>
       </Form>
 
-      <div className="space-y-6">
-        <div>
-          <h3 className="text-lg font-medium">Danger Zone</h3>
-          <p className="text-sm text-muted-foreground">
-            Irreversible and destructive actions
-          </p>
-        </div>
+      {isAdmin && (
+        <div className="space-y-6">
+          <div>
+            <h3 className="text-lg font-medium">Danger Zone</h3>
+            <p className="text-sm text-muted-foreground">
+              Irreversible and destructive actions
+            </p>
+          </div>
 
-        <Separator className="my-4" />
+          <Separator className="my-4" />
 
-        <div className="rounded-lg border border-destructive/50 p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h4 className="text-sm font-medium">Delete Project</h4>
-              <p className="text-sm text-muted-foreground">
-                Permanently delete this project and all of its data
-              </p>
+          <div className="rounded-lg border border-destructive/50 p-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-1">
+                <h4 className="text-sm font-medium">Delete Project</h4>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete this project and all of its data
+                </p>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive">Delete Project</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      the project &quot;{project.name}&quot; and all of its
+                      data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={async () => {
+                        await deleteProjectMutation.mutateAsync(project.id);
+                        router.push("/projects");
+                      }}
+                    >
+                      Delete Project
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive">Delete Project</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This action cannot be undone. This will permanently delete
-                    the project &quot;{project.name}&quot; and all of its data.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={async () => {
-                      await deleteProjectMutation.mutateAsync(project.id);
-                      router.push("/projects");
-                    }}
-                  >
-                    Delete Project
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

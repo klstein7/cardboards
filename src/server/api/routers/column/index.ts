@@ -13,25 +13,25 @@ export const columnRouter = createTRPCRouter({
     return columnService.list(input);
   }),
 
-  // Update a column (requires column access)
+  // Update a column (requires admin access)
   update: authedProcedure
     .input(ColumnUpdateSchema)
     .mutation(async ({ input }) => {
-      // Verify user can access this column
-      await authService.canAccessColumn(input.columnId);
+      // Verify user has admin access to this column
+      await authService.requireColumnAdmin(input.columnId);
       return columnService.update(input.columnId, input.data);
     }),
 
-  // Shift a column's position (requires column access)
+  // Shift a column's position (requires admin access)
   shift: authedProcedure
     .input(ColumnShiftSchema)
     .mutation(async ({ input }) => {
-      // Verify user can access this column
-      await authService.canAccessColumn(input.columnId);
+      // Verify user has admin access to this column
+      await authService.requireColumnAdmin(input.columnId);
       return columnService.shift(input.columnId, input.data);
     }),
 
-  // Create a new column (requires board access)
+  // Create a new column (requires admin access)
   create: authedProcedure
     .input(
       z.object({
@@ -42,15 +42,15 @@ export const columnRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      // Verify user can access this board
-      await authService.canAccessBoard(input.boardId);
+      // Verify user has admin access to this board
+      await authService.requireBoardAdmin(input.boardId);
       return columnService.create(input);
     }),
 
-  // Delete a column (requires column access)
+  // Delete a column (requires admin access)
   delete: authedProcedure.input(z.string()).mutation(async ({ input }) => {
-    // Verify user can access this column
-    await authService.canAccessColumn(input);
+    // Verify user has admin access to this column
+    await authService.requireColumnAdmin(input);
     return columnService.del(input);
   }),
 });

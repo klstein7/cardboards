@@ -9,13 +9,20 @@ interface ColorPickerProps {
   color: string;
   onChange: (color: string) => void;
   className?: string;
+  disabled?: boolean;
 }
 
-export function ColorPicker({ color, onChange, className }: ColorPickerProps) {
+export function ColorPicker({
+  color,
+  onChange,
+  className,
+  disabled = false,
+}: ColorPickerProps) {
   return (
     <div
       className={cn(
         "flex flex-wrap gap-1.5 rounded-md bg-secondary/40 p-3",
+        disabled && "cursor-not-allowed opacity-50",
         className,
       )}
     >
@@ -26,9 +33,11 @@ export function ColorPicker({ color, onChange, className }: ColorPickerProps) {
           className={cn(
             "relative h-7 w-7 rounded-full transition-transform hover:scale-105 active:scale-95",
             color === hex && "ring-2 ring-offset-2",
+            disabled && "cursor-not-allowed hover:scale-100 active:scale-100",
           )}
           style={{ backgroundColor: hex }}
-          onClick={() => onChange(hex)}
+          onClick={() => !disabled && onChange(hex)}
+          disabled={disabled}
         >
           {color === hex && (
             <Check

@@ -28,6 +28,7 @@ import { Input } from "~/components/ui/input";
 import { Switch } from "~/components/ui/switch";
 import { Textarea } from "~/components/ui/textarea";
 import { useCreateColumn } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { type ColumnCreate, ColumnCreateSchema } from "~/server/zod";
 
 interface CreateColumnDialogProps {
@@ -40,6 +41,7 @@ export function CreateColumnDialog({
   trigger,
 }: CreateColumnDialogProps) {
   const [open, setOpen] = useState(false);
+  const isAdmin = useIsAdmin();
 
   const form = useForm<ColumnCreate>({
     resolver: zodResolver(ColumnCreateSchema),
@@ -54,6 +56,8 @@ export function CreateColumnDialog({
   const createColumnMutation = useCreateColumn();
 
   async function onSubmit(data: ColumnCreate) {
+    if (!isAdmin) return;
+
     await createColumnMutation.mutateAsync({
       ...data,
       description: data.description ?? undefined,
@@ -68,6 +72,7 @@ export function CreateColumnDialog({
           <Button
             variant="outline"
             className="flex items-center justify-center gap-2 bg-muted/25 py-6 hover:bg-muted/50"
+            disabled={!isAdmin}
           >
             <Plus className="size-4" />
             Add column
@@ -98,6 +103,7 @@ export function CreateColumnDialog({
                       placeholder="E.g. To Do"
                       autoComplete="off"
                       {...field}
+                      disabled={!isAdmin}
                     />
                   </FormControl>
                   <FormDescription>The name of the column.</FormDescription>
@@ -118,6 +124,7 @@ export function CreateColumnDialog({
                       rows={3}
                       {...field}
                       value={field.value ?? ""}
+                      disabled={!isAdmin}
                     />
                   </FormControl>
                   <FormDescription>
@@ -143,6 +150,7 @@ export function CreateColumnDialog({
                     <Switch
                       checked={field.value}
                       onCheckedChange={field.onChange}
+                      disabled={!isAdmin}
                     />
                   </FormControl>
                 </FormItem>
@@ -158,6 +166,7 @@ export function CreateColumnDialog({
             type="submit"
             form="create-column-form"
             isLoading={createColumnMutation.isPending}
+            disabled={!isAdmin}
           >
             Create
           </Button>

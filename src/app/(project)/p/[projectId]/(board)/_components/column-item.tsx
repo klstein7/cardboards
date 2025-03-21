@@ -39,6 +39,7 @@ import {
   useMoveCard,
   useShiftColumn,
 } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
 import { CardList } from "./card-list";
@@ -55,6 +56,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [justMoved, setJustMoved] = useState(false);
+  const isAdmin = useIsAdmin();
 
   const cards = useCards(column.id);
   const moveCardMutation = useMoveCard();
@@ -244,70 +246,73 @@ export function ColumnItem({ column }: ColumnItemProps) {
             {cardCount}
           </Badge>
         </div>
-        <DropdownMenu
-          modal={false}
-          open={isDropdownOpen}
-          onOpenChange={(open) => {
-            if (!open && isMovingColumn) return;
-            setIsDropdownOpen(open);
-          }}
-        >
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <Ellipsis className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent side="bottom" align="end" className="w-48">
-            <DropdownMenuItem
-              onClick={() => setIsEditOpen(true)}
-              disabled={isMovingColumn}
-            >
-              <Pencil className="mr-2 h-4 w-4" />
-              <span>Edit column</span>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={async (e) => {
-                e.preventDefault();
-                if (!isFirst && !isMovingColumn) {
-                  await handleShiftColumn("up");
-                }
-              }}
-              disabled={isFirst || isMovingColumn}
-            >
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              <span>Move left</span>
-              {isMovingColumn &&
-                shiftColumnMutation.variables?.data.direction === "up" && (
-                  <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                )}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={async (e) => {
-                e.preventDefault();
-                if (!isLast && !isMovingColumn) {
-                  await handleShiftColumn("down");
-                }
-              }}
-              disabled={isLast || isMovingColumn}
-            >
-              <ChevronRight className="mr-2 h-4 w-4" />
-              <span>Move right</span>
-              {isMovingColumn &&
-                shiftColumnMutation.variables?.data.direction === "down" && (
-                  <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              disabled={isMovingColumn}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete column</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+        {isAdmin && (
+          <DropdownMenu
+            modal={false}
+            open={isDropdownOpen}
+            onOpenChange={(open) => {
+              if (!open && isMovingColumn) return;
+              setIsDropdownOpen(open);
+            }}
+          >
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Ellipsis className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="bottom" align="end" className="w-48">
+              <DropdownMenuItem
+                onClick={() => setIsEditOpen(true)}
+                disabled={isMovingColumn}
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>Edit column</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (!isFirst && !isMovingColumn) {
+                    await handleShiftColumn("up");
+                  }
+                }}
+                disabled={isFirst || isMovingColumn}
+              >
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                <span>Move left</span>
+                {isMovingColumn &&
+                  shiftColumnMutation.variables?.data.direction === "up" && (
+                    <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.preventDefault();
+                  if (!isLast && !isMovingColumn) {
+                    await handleShiftColumn("down");
+                  }
+                }}
+                disabled={isLast || isMovingColumn}
+              >
+                <ChevronRight className="mr-2 h-4 w-4" />
+                <span>Move right</span>
+                {isMovingColumn &&
+                  shiftColumnMutation.variables?.data.direction === "down" && (
+                    <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                  )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive focus:text-destructive"
+                disabled={isMovingColumn}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>Delete column</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
 
         <EditColumnDialog
           column={column}

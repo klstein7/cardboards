@@ -13,6 +13,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useBoards } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
 import { CreateBoardDialog } from "./create-board-dialog";
@@ -40,6 +41,7 @@ const UserButton = dynamic(
 export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
   const pathname = usePathname();
   const boards = useBoards(projectId);
+  const isAdmin = useIsAdmin();
 
   const isActivePathOrSubPath = (path: string) => pathname.startsWith(path);
 
@@ -134,24 +136,26 @@ export function ProjectSidebar({ projectId }: ProjectSidebarProps) {
                   </Tooltip>
                 ))}
 
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <div>
-                      <CreateBoardDialog
-                        trigger={
-                          <Button
-                            variant="ghost"
-                            className="flex h-9 w-full items-center justify-center px-0 text-muted-foreground"
-                          >
-                            <Plus className="h-4 w-4 flex-shrink-0" />
-                          </Button>
-                        }
-                        projectId={projectId}
-                      />
-                    </div>
-                  </TooltipTrigger>
-                  <TooltipContent side="right">Add Board</TooltipContent>
-                </Tooltip>
+                {isAdmin && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <div>
+                        <CreateBoardDialog
+                          trigger={
+                            <Button
+                              variant="ghost"
+                              className="flex h-9 w-full items-center justify-center px-0 text-muted-foreground"
+                            >
+                              <Plus className="h-4 w-4 flex-shrink-0" />
+                            </Button>
+                          }
+                          projectId={projectId}
+                        />
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Add Board</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </div>
 

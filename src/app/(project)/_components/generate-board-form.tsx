@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
 import { useGenerateBoard } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
 interface GenerateBoardFormProps {
   projectId: string;
@@ -17,12 +18,14 @@ export function GenerateBoardForm({
   setOpen,
 }: GenerateBoardFormProps) {
   const router = useRouter();
-
+  const isAdmin = useIsAdmin();
   const [prompt, setPrompt] = useState("");
 
   const generateBoardMutation = useGenerateBoard();
 
   const handleGenerate = async () => {
+    if (!isAdmin) return;
+
     const board = await generateBoardMutation.mutateAsync({
       projectId,
       prompt,
@@ -48,10 +51,14 @@ export function GenerateBoardForm({
           className="resize-none"
           rows={4}
           onChange={(e) => setPrompt(e.target.value)}
+          disabled={!isAdmin}
         />
         <Button
           onClick={handleGenerate}
           isLoading={generateBoardMutation.isPending}
+          disabled={
+            !isAdmin || prompt.trim() === "" || generateBoardMutation.isPending
+          }
         >
           Create
         </Button>
