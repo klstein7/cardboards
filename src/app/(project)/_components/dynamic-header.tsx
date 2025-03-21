@@ -4,7 +4,7 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { BaseHeader } from "~/components/shared/base-header";
-import { useBoardSafe } from "~/lib/hooks";
+import { useBoardSafe, useCard } from "~/lib/hooks";
 
 interface DynamicHeaderProps {
   projectId: string;
@@ -15,8 +15,10 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   const pathname = usePathname();
   const params = useParams();
   const boardId = params.boardId as string | undefined;
+  const cardId = params.cardId as string | undefined;
 
   const { data: boardData } = useBoardSafe(boardId);
+  const { data: cardData } = useCard(cardId ? Number(cardId) : undefined);
 
   const baseItems = useMemo(
     () => [
@@ -39,15 +41,38 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
       setHeaderItems([...baseItems, { label: "Analytics" }]);
     } else if (pathname.includes("/settings")) {
       setHeaderItems([...baseItems, { label: "Settings" }]);
-    } else if (boardId && pathname.includes(`/b/${boardId}`) && boardData) {
-      setHeaderItems([
+    } else if (boardId && pathname.includes(`/b/${boardId}`)) {
+      const boardItems = [
         ...baseItems,
-        { label: boardData.name, color: boardData.color },
-      ]);
+        {
+          href: `/p/${projectId}/b/${boardId}`,
+          label: boardData?.name ?? "Board",
+          color: boardData?.color,
+        },
+      ];
+
+      // If we're in a card route, add the card to the breadcrumb
+      if (cardId && pathname.includes(`/c/${cardId}`) && cardData) {
+        setHeaderItems([
+          ...boardItems,
+          { label: cardData.title ?? `Card ${cardId}` },
+        ]);
+      } else {
+        setHeaderItems(boardItems);
+      }
     } else {
       setHeaderItems(baseItems);
     }
-  }, [pathname, projectId, projectName, boardId, boardData, baseItems]);
+  }, [
+    pathname,
+    projectId,
+    projectName,
+    boardId,
+    boardData,
+    cardId,
+    cardData,
+    baseItems,
+  ]);
 
   return <BaseHeader items={headerItems} />;
 }

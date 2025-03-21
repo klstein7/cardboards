@@ -54,9 +54,6 @@ export function CardEditor({ cardId }: CardEditorProps) {
             </Badge>
           )}
         </div>
-        <p className="font-mono text-sm text-muted-foreground">
-          CARD-{card.id}
-        </p>
       </div>
 
       <div className="grid gap-6">
@@ -211,7 +208,6 @@ function CardSkeleton() {
           <Skeleton className="h-9 w-48" />
           <Skeleton className="h-6 w-24" />
         </div>
-        <Skeleton className="h-5 w-32" />
       </div>
 
       <div className="grid gap-6">
