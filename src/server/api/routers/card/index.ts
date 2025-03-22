@@ -14,9 +14,21 @@ import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 export const cardRouter = createTRPCRouter({
   create: authedProcedure
     .input(CardCreateSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await authService.canAccessColumn(input.columnId);
-      return cardService.create(input);
+      const card = await cardService.create(input);
+
+      await pusher.trigger(
+        pusherChannels.card.name,
+        pusherChannels.card.events.created.name,
+        {
+          input: card,
+          returning: card,
+          userId: ctx.userId,
+        },
+      );
+
+      return card;
     }),
 
   createMany: authedProcedure
@@ -33,9 +45,21 @@ export const cardRouter = createTRPCRouter({
 
   update: authedProcedure
     .input(CardUpdateSchema)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await authService.canAccessCard(input.cardId);
-      return cardService.update(input.cardId, input.data);
+      const card = await cardService.update(input.cardId, input.data);
+
+      await pusher.trigger(
+        pusherChannels.card.name,
+        pusherChannels.card.events.updated.name,
+        {
+          input: card,
+          returning: card,
+          userId: ctx.userId,
+        },
+      );
+
+      return card;
     }),
 
   move: authedProcedure
@@ -64,9 +88,21 @@ export const cardRouter = createTRPCRouter({
 
   delete: authedProcedure
     .input(z.object({ cardId: z.number() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await authService.canAccessCard(input.cardId);
-      return cardService.del(input.cardId);
+      const card = await cardService.del(input.cardId);
+
+      await pusher.trigger(
+        pusherChannels.card.name,
+        pusherChannels.card.events.deleted.name,
+        {
+          input: card,
+          returning: card,
+          userId: ctx.userId,
+        },
+      );
+
+      return card;
     }),
 
   duplicate: authedProcedure

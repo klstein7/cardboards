@@ -1,3 +1,4 @@
+export * from "./ai-insight.schema";
 export * from "./board.schema";
 export * from "./card.schema";
 export * from "./card-comment.schema";

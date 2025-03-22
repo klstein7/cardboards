@@ -228,7 +228,7 @@ export const history = createTable(
       () => projectUsers.id,
       { onDelete: "set null" },
     ),
-    changes: text("changes"), // JSON string containing the changes (old/new values)
+    changes: text("changes"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => [
@@ -242,6 +242,57 @@ export const history = createTable(
   ],
 );
 
+export const aiInsights = createTable(
+  "ai_insight",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    entityType: varchar("entity_type", {
+      length: 20,
+      enum: ["project", "board"],
+    }).notNull(),
+    entityId: varchar("entity_id", { length: 255 }).notNull(),
+    projectId: varchar("project_id", { length: 255 }).references(
+      () => projects.id,
+      { onDelete: "cascade" },
+    ),
+    boardId: varchar("board_id", { length: 255 }).references(() => boards.id, {
+      onDelete: "cascade",
+    }),
+    insightType: varchar("insight_type", {
+      length: 50,
+      enum: [
+        "sprint_prediction",
+        "bottleneck",
+        "productivity",
+        "risk_assessment",
+        "recommendation",
+      ],
+    }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    content: varchar("content", { length: 2000 }).notNull(),
+    metadata: text("metadata"),
+    severity: varchar("severity", {
+      length: 20,
+      enum: ["info", "warning", "critical"],
+    }).default("info"),
+    isActive: boolean("is_active").default(true),
+    expiresAt: timestamp("expires_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index("ai_insight_entity_idx").on(table.entityType, table.entityId),
+    index("ai_insight_type_idx").on(table.insightType),
+    index("ai_insight_created_at_idx").on(table.createdAt),
+    index("ai_insight_project_id_idx").on(table.projectId),
+    index("ai_insight_board_id_idx").on(table.boardId),
+  ],
+);
+
 export const invitationRelations = relations(invitations, ({ one }) => ({
   project: one(projects, {
     fields: [invitations.projectId],
@@ -250,6 +301,17 @@ export const invitationRelations = relations(invitations, ({ one }) => ({
   invitedBy: one(projectUsers, {
     fields: [invitations.invitedById],
     references: [projectUsers.id],
+  }),
+}));
+
+export const aiInsightRelations = relations(aiInsights, ({ one }) => ({
+  project: one(projects, {
+    fields: [aiInsights.projectId],
+    references: [projects.id],
+  }),
+  board: one(boards, {
+    fields: [aiInsights.boardId],
+    references: [boards.id],
   }),
 }));
 
@@ -275,6 +337,7 @@ export const projectUserRelations = relations(
 export const projectRelations = relations(projects, ({ many }) => ({
   boards: many(boards),
   projectUsers: many(projectUsers),
+  insights: many(aiInsights),
 }));
 
 export const boardRelations = relations(boards, ({ many, one }) => ({
@@ -283,6 +346,7 @@ export const boardRelations = relations(boards, ({ many, one }) => ({
     references: [projects.id],
   }),
   columns: many(columns),
+  insights: many(aiInsights),
 }));
 
 export const columnRelations = relations(columns, ({ one, many }) => ({

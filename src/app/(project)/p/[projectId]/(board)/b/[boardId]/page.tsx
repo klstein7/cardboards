@@ -4,7 +4,6 @@ import { HydrateClient, trpc } from "~/trpc/server";
 
 import { BoardRealtimeProvider } from "../../_components/board-realtime-provider";
 import { BoardStateProvider } from "../../_components/board-state-provider";
-import { BoardToolbar } from "../../_components/board-toolbar";
 import { CardDetails } from "../../_components/card-details";
 
 type Params = Promise<{
@@ -30,16 +29,16 @@ export default async function BoardPage({ params }: { params: Params }) {
     columns.map((column: Column) => trpc.card.list.prefetch(column.id)),
   );
 
+  const insights = await trpc.aiInsight.generateProjectInsights(projectId);
+
+  console.log(insights);
+
   return (
     <HydrateClient>
       <BoardRealtimeProvider>
         <BoardStateProvider>
           <div className="flex h-full w-full flex-col">
-            <div className="flex w-full border-y px-4 py-3 sm:px-6">
-              <BoardToolbar boardId={boardId} />
-            </div>
-
-            <main className="relative flex-1 overflow-hidden px-4 pb-6 pt-3 sm:px-6">
+            <main className="relative flex-1 overflow-hidden">
               <ColumnList boardId={boardId} />
               <CardDetails />
             </main>

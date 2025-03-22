@@ -1,3 +1,9 @@
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "~/components/ui/resizable";
+import { DetailsMock } from "~/components/ui/sidebar";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { DynamicHeader } from "../../_components/dynamic-header";
@@ -17,20 +23,17 @@ export default async function ProjectLayout({
 }: ProjectLayoutProps) {
   const { projectId } = await params;
 
-  // Prefetch all needed data
   await Promise.all([
     trpc.board.list.prefetch(projectId),
     trpc.projectUser.list.prefetch(projectId),
     trpc.project.get.prefetch(projectId),
   ]);
 
-  // Get project and boards directly as we need them for further prefetching
   const [boards, project] = await Promise.all([
     trpc.board.list(projectId),
     trpc.project.get(projectId),
   ]);
 
-  // Prefetch column data for each board
   await Promise.all(
     boards.map((board) => {
       return trpc.column.list.prefetch(board.id);
@@ -41,14 +44,27 @@ export default async function ProjectLayout({
     <HydrateClient>
       <div className="flex h-[100dvh] w-full overflow-hidden">
         <ProjectSidebar projectId={projectId} />
-        <div className="min-w-0 flex-1 overflow-hidden sm:ml-[60px]">
-          <MobileNav projectId={projectId} />
-          <div className="flex h-full flex-col">
-            <div className="sticky top-0 z-10 shadow-sm">
-              <DynamicHeader projectId={projectId} projectName={project.name} />
-            </div>
-            <div className="flex-1 overflow-auto">{children}</div>
+
+        <div className="h-full flex-1 overflow-hidden sm:ml-[60px]">
+          <div className="sticky top-0 z-10 w-full bg-background shadow-sm">
+            <DynamicHeader projectId={projectId} projectName={project.name} />
           </div>
+          <MobileNav projectId={projectId} />
+
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="h-[calc(100%-56px)]"
+          >
+            <ResizablePanel minSize={60} defaultSize={75}>
+              <div className="h-full overflow-auto">{children}</div>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel minSize={15} maxSize={40} defaultSize={25}>
+              <div className="h-full border-t p-4">
+                <DetailsMock />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </div>
     </HydrateClient>

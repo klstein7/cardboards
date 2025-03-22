@@ -72,5 +72,10 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
     baseItems,
   ]);
 
-  return <BaseHeader items={headerItems} />;
+  // Apply a more compact style to the header
+  return (
+    <div className="px-2 py-1">
+      <BaseHeader items={headerItems} />
+    </div>
+  );
 }

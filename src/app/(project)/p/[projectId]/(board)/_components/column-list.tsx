@@ -74,7 +74,9 @@ export function ColumnList({ boardId }: ColumnListProps) {
 
     resizeObserver.observe(element);
 
-    const cleanup = autoScrollForElements({ element });
+    const cleanup = autoScrollForElements({
+      element,
+    });
 
     element.addEventListener("scroll", handleScroll);
     document.addEventListener("keydown", handleKeyDown);
@@ -107,7 +109,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showLeftButton && (
         <button
           onClick={scrollLeft}
-          className="absolute left-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -118,7 +120,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
         ref={ref}
         className={cn(
           "scrollbar-thumb-rounded-full h-full w-full overflow-x-auto overflow-y-auto scrollbar scrollbar-track-transparent",
-          "snap-x snap-mandatory scroll-smooth",
+          "scroll-smooth",
         )}
         style={
           {
@@ -129,7 +131,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
         }
         tabIndex={0}
       >
-        <div className="flex w-fit items-start gap-5 pb-2">
+        <div className="flex w-fit items-start gap-5 p-6">
           {columns.data.map((column) => (
             <div
               key={column.id}
@@ -146,7 +148,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showRightButton && (
         <button
           onClick={scrollRight}
-          className="absolute right-0 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-6 w-6" />
