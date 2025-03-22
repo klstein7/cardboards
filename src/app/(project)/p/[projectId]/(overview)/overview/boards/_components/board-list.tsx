@@ -32,7 +32,6 @@ export function BoardList({ projectId }: BoardListProps) {
 
   const filteredBoards = useMemo(() => {
     if (!boards.data) return [];
-
     if (!searchQuery.trim()) return boards.data;
 
     const query = searchQuery.toLowerCase().trim();
@@ -92,70 +91,72 @@ export function BoardList({ projectId }: BoardListProps) {
   }, []);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-        <div className="relative min-w-[200px] flex-1">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search boards..."
-            className="w-full pl-9"
+            className="pl-9"
             value={searchQuery}
             onChange={handleSearchChange}
           />
         </div>
 
-        <Select
-          value={sortOption}
-          onValueChange={(value) => handleSortChange(value as SortOption)}
-        >
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="newest">Newest first</SelectItem>
-            <SelectItem value="oldest">Oldest first</SelectItem>
-            <SelectItem value="a-z">Name (A-Z)</SelectItem>
-            <SelectItem value="z-a">Name (Z-A)</SelectItem>
-            <SelectItem value="recent">Recently updated</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-2">
+          <Select
+            value={sortOption}
+            onValueChange={(value) => handleSortChange(value as SortOption)}
+          >
+            <SelectTrigger className="w-[150px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="newest">Newest</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+              <SelectItem value="a-z">A-Z</SelectItem>
+              <SelectItem value="z-a">Z-A</SelectItem>
+              <SelectItem value="recent">Recent</SelectItem>
+            </SelectContent>
+          </Select>
 
-        <div className="flex">
-          <Button
-            variant={viewMode === "grid" ? "default" : "outline"}
-            size="icon"
-            className="rounded-r-none border-r-0"
-            onClick={() => setViewMode("grid")}
-          >
-            <LayoutGridIcon className="h-4 w-4" />
-          </Button>
-          <Button
-            variant={viewMode === "list" ? "default" : "outline"}
-            size="icon"
-            className="rounded-l-none"
-            onClick={() => setViewMode("list")}
-          >
-            <LayoutGridIcon className="h-4 w-4 rotate-90" />
-          </Button>
+          <div className="flex">
+            <Button
+              variant={viewMode === "grid" ? "default" : "outline"}
+              size="icon"
+              className="h-9 w-9 rounded-r-none border-r-0"
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGridIcon className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "outline"}
+              size="icon"
+              className="h-9 w-9 rounded-l-none"
+              onClick={() => setViewMode("list")}
+            >
+              <LayoutGridIcon className="h-4 w-4 rotate-90" />
+            </Button>
+          </div>
         </div>
       </div>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <h2 className="text-xl font-semibold">Boards</h2>
+          <h2 className="text-lg font-medium">Boards</h2>
           {totalBoards > 0 && (
-            <span className="inline-flex h-6 items-center rounded-full bg-secondary px-2 text-xs font-medium">
-              {hasFilters ? `${filteredCount} / ${totalBoards}` : totalBoards}
+            <span className="inline-flex h-5 items-center rounded-full bg-secondary px-2 text-xs">
+              {hasFilters ? `${filteredCount}/${totalBoards}` : totalBoards}
             </span>
           )}
         </div>
 
         {hasFilters && (
           <Button
-            variant="link"
+            variant="ghost"
             size="sm"
             onClick={handleClearSearch}
-            className="h-auto p-0 text-xs"
+            className="h-8 px-2 text-xs"
           >
             Clear filters
           </Button>
@@ -163,25 +164,25 @@ export function BoardList({ projectId }: BoardListProps) {
       </div>
 
       {boards.isPending ? (
-        <div className="grid place-items-center rounded-lg border border-dashed py-12">
+        <div className="grid place-items-center rounded-lg border border-dashed py-10">
           <div className="flex flex-col items-center gap-2">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
             <p className="text-sm text-muted-foreground">Loading boards...</p>
           </div>
         </div>
       ) : boards.error ? (
-        <div className="grid place-items-center rounded-lg border border-dashed py-12 text-destructive">
-          <p>Error loading boards. Please try again.</p>
+        <div className="grid place-items-center rounded-lg border border-dashed py-10 text-destructive">
+          <p className="text-sm">Error loading boards. Please try again.</p>
         </div>
       ) : sortedBoards.length === 0 ? (
         hasFilters ? (
-          <div className="grid place-items-center rounded-lg border border-dashed py-12">
+          <div className="grid place-items-center rounded-lg border border-dashed py-10">
             <div className="flex flex-col items-center">
-              <h3 className="text-xl font-semibold">No matching boards</h3>
-              <p className="mb-4 mt-2 text-center text-muted-foreground">
+              <h3 className="text-base font-medium">No matching boards</h3>
+              <p className="mb-3 mt-1 text-center text-sm text-muted-foreground">
                 No boards match your search criteria.
               </p>
-              <Button variant="outline" onClick={handleClearSearch}>
+              <Button variant="outline" size="sm" onClick={handleClearSearch}>
                 Clear search
               </Button>
             </div>
@@ -193,8 +194,8 @@ export function BoardList({ projectId }: BoardListProps) {
         <div
           className={
             viewMode === "grid"
-              ? "grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-              : "space-y-4"
+              ? "grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+              : "space-y-3"
           }
         >
           {sortedBoards.map((board) => (
@@ -208,20 +209,17 @@ export function BoardList({ projectId }: BoardListProps) {
 
 function EmptyState({ projectId }: { projectId: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-6 py-12 text-center">
-      <div className="mb-4 rounded-full bg-primary/10 p-3">
-        <LayoutGridIcon className="h-10 w-10 text-primary/70" />
-      </div>
-      <h3 className="text-xl font-semibold">No boards yet</h3>
-      <p className="mb-6 mt-2 max-w-sm text-muted-foreground">
-        Create your first board to start organizing your project tasks and track
-        your progress.
+    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 px-6 py-10 text-center">
+      <LayoutGridIcon className="mb-3 h-8 w-8 text-muted-foreground/60" />
+      <h3 className="text-base font-medium">No boards yet</h3>
+      <p className="mb-4 mt-1 max-w-sm text-sm text-muted-foreground">
+        Create your first board to start organizing your project tasks.
       </p>
       <CreateBoardDialog
         trigger={
-          <Button className="gap-1.5">
-            <PlusIcon className="h-4 w-4" />
-            <span>Create First Board</span>
+          <Button size="sm" className="gap-1">
+            <PlusIcon className="h-3.5 w-3.5" />
+            <span>Create Board</span>
           </Button>
         }
         projectId={projectId}

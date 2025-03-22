@@ -122,10 +122,10 @@ export default function BoardPageSkeleton() {
           </button>
 
           {/* Left gradient */}
-          <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-16 bg-gradient-to-r from-background to-transparent opacity-80" />
+          <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-12 bg-gradient-to-r from-background to-transparent opacity-50" />
 
           {/* Right gradient */}
-          <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-16 bg-gradient-to-l from-background to-transparent opacity-80" />
+          <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-12 bg-gradient-to-l from-background to-transparent opacity-50" />
         </div>
       </main>
     </div>

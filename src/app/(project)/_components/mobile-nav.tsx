@@ -54,11 +54,11 @@ export function MobileNav({ projectId }: MobileNavProps) {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button
-          variant="ghost"
+          variant="secondary"
           size="icon"
-          className="absolute right-3 top-2 z-10 h-8 w-8 bg-secondary sm:hidden"
+          className="fixed right-4 top-4 z-50 h-10 w-10 rounded-full shadow-md sm:hidden"
         >
-          <Menu className="h-4 w-4" />
+          <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[280px] p-0 sm:hidden">

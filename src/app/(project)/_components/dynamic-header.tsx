@@ -46,12 +46,10 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
         ...baseItems,
         {
           href: `/p/${projectId}/b/${boardId}`,
-          label: boardData?.name ?? "Board",
+          label: boardData?.name ?? "",
           color: boardData?.color,
         },
       ];
-
-      // If we're in a card route, add the card to the breadcrumb
       if (cardId && pathname.includes(`/c/${cardId}`) && cardData) {
         setHeaderItems([
           ...boardItems,
