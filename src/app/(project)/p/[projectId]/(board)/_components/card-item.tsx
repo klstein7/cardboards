@@ -1,4 +1,3 @@
-// src/app/(project)/p/[projectId]/(board)/_components/card-item.tsx
 "use client";
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
@@ -66,6 +65,11 @@ type DragState =
   | { type: "preview"; container: HTMLElement }
   | { type: "dragging" };
 
+// Helper function to detect if user is on a touch device
+const isTouchDevice = () => {
+  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
+};
+
 export function CardItem({
   card,
   index,
@@ -79,6 +83,7 @@ export function CardItem({
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [dragState, setDragState] = useState<DragState>({ type: "idle" });
+  const [isMobileDevice] = useState(() => isTouchDevice());
 
   const [, setSelectedCardId] = useQueryState("cardId");
 
@@ -167,11 +172,18 @@ export function CardItem({
     );
   }, [card, index, columnId, setActiveCard, registerCard, unregisterCard]);
 
+  // Function to prevent context menu on mobile devices
+  const handleContextMenu = (e: React.MouseEvent) => {
+    if (isMobileDevice) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <TooltipProvider>
       <AlertDialog>
         <ContextMenu modal={false}>
-          <ContextMenuTrigger asChild>
+          <ContextMenuTrigger asChild onContextMenu={handleContextMenu}>
             <div
               ref={cardElementRef}
               className={cn(
