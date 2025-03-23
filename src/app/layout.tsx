@@ -29,7 +29,7 @@ export default function RootLayout({
       className={`${font.className} dark`}
       suppressHydrationWarning
     >
-      <body>
+      <body className="h-full overflow-hidden">
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
           <Providers>{children}</Providers>

@@ -1,9 +1,3 @@
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "~/components/ui/resizable";
-import { DetailsMock } from "~/components/ui/sidebar";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { DynamicHeader } from "../../_components/dynamic-header";
@@ -42,7 +36,10 @@ export default async function ProjectLayout({
 
   return (
     <HydrateClient>
-      <div className="flex h-[100dvh] w-full overflow-hidden">
+      <div
+        className="flex h-[100dvh] w-full overflow-hidden"
+        style={{ "--header-height": "40px" } as React.CSSProperties}
+      >
         <ProjectSidebar projectId={projectId} />
 
         <div className="h-full flex-1 overflow-hidden sm:ml-[60px]">
@@ -50,7 +47,9 @@ export default async function ProjectLayout({
             <DynamicHeader projectId={projectId} projectName={project.name} />
           </div>
           <MobileNav projectId={projectId} />
-          <div className="h-full overflow-auto">{children}</div>
+          <div className="h-[calc(100%-var(--header-height))] overflow-y-auto">
+            {children}
+          </div>
         </div>
       </div>
     </HydrateClient>

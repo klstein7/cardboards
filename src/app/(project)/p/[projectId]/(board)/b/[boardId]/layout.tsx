@@ -10,14 +10,12 @@ export default async function BoardLayout({
   const { boardId } = await params;
 
   return (
-    <div className="relative flex h-full flex-col">
-      <div className="flex w-full border-y px-4 py-3 sm:px-6">
+    <div className="relative flex h-full flex-col overflow-hidden">
+      <div className="flex w-full shrink-0 border-y px-4 py-3 sm:px-6">
         <BoardToolbar boardId={boardId} />
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
-        <div className="h-full overflow-auto">{children}</div>
-      </div>
+      <div className="flex-1 overflow-auto">{children}</div>
     </div>
   );
 }

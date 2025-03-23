@@ -29,22 +29,20 @@ export default async function OverviewLayout({
 
   return (
     <HydrateClient>
-      <div className="flex h-full w-full flex-col">
-        <div className="flex w-full border-b border-t px-4 py-3 sm:px-6 lg:px-8">
+      <div className="flex h-full w-full flex-col overflow-hidden">
+        <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
           <ProjectToolbar projectId={projectId} />
         </div>
 
-        <div className="flex-1 overflow-hidden">
-          <main className="h-full overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
-            <div className="py-4">
-              <ProjectStats projectId={projectId} />
-            </div>
+        <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
+          <div className="py-4">
+            <ProjectStats projectId={projectId} />
+          </div>
 
-            <div className="mt-6">
-              <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
-            </div>
-          </main>
-        </div>
+          <div className="mt-6">
+            <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
+          </div>
+        </main>
       </div>
     </HydrateClient>
   );

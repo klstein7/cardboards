@@ -33,7 +33,13 @@ function SettingsSidebarItem({
   );
 }
 
-export function SettingsSidebar({ projectId }: { projectId: string }) {
+export function SettingsSidebar({
+  projectId,
+  className,
+}: {
+  projectId: string;
+  className?: string;
+}) {
   const pathname = usePathname();
   const normalizedPath = pathname.replace(/\/$/, "");
 
@@ -42,7 +48,12 @@ export function SettingsSidebar({ projectId }: { projectId: string }) {
   const isBoards = normalizedPath.endsWith("/settings/boards");
 
   return (
-    <div className="border-b border-border md:w-56 md:shrink-0 md:border-b-0 md:border-r md:p-4">
+    <div
+      className={cn(
+        "border-b border-border md:w-56 md:shrink-0 md:border-b-0 md:border-r md:p-4",
+        className,
+      )}
+    >
       {/* On mobile: horizontal scrollable menu */}
       <div className="flex md:block">
         <div className="hidden px-3 pb-2 pt-4 text-xs font-semibold uppercase text-muted-foreground md:block">

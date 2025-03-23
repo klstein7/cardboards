@@ -23,7 +23,7 @@ interface BaseHeaderProps {
 
 export function BaseHeader({ items, actions }: BaseHeaderProps) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-1 px-2 py-1.5">
+    <div className="flex h-full flex-wrap items-center justify-between gap-1 px-2 py-1.5">
       <div className="flex min-w-0 flex-1 items-center gap-1">
         <BreadcrumbList className="flex-wrap">
           {items.map((item, index) => (
