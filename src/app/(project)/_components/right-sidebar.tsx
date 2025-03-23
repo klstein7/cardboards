@@ -7,7 +7,7 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "~/components/ui/resizable";
-import { DetailsMock, Sidebar } from "~/components/ui/sidebar";
+import { Sidebar } from "~/components/ui/sidebar";
 
 interface RightSidebarProps {
   sidebarContent: ReactNode;

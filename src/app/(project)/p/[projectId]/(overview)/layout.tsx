@@ -34,15 +34,17 @@ export default async function OverviewLayout({
           <ProjectToolbar projectId={projectId} />
         </div>
 
-        <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <ProjectStats projectId={projectId} />
-          </div>
+        <div className="flex-1 overflow-hidden">
+          <main className="h-full overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
+            <div className="py-4">
+              <ProjectStats projectId={projectId} />
+            </div>
 
-          <div className="mt-6">
-            <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
-          </div>
-        </main>
+            <div className="mt-6">
+              <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
+            </div>
+          </main>
+        </div>
       </div>
     </HydrateClient>
   );

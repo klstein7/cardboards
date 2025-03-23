@@ -15,8 +15,8 @@ export default async function BoardLayout({
         <BoardToolbar boardId={boardId} />
       </div>
 
-      <div className="relative flex flex-1 overflow-hidden">
-        <div className="flex-1 overflow-auto">{children}</div>
+      <div className="relative flex-1 overflow-hidden">
+        <div className="h-full overflow-auto">{children}</div>
       </div>
     </div>
   );

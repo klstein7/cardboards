@@ -1,6 +1,6 @@
 import "server-only";
 
-import { openai } from "@ai-sdk/openai";
+import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
 import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
@@ -502,7 +502,7 @@ class CardService extends BaseService {
     const board = await boardService.getWithDetails(boardId);
 
     const { object } = await generateObject({
-      model: openai("o3-mini"),
+      model: google("gemini-2.0-flash-exp"),
       prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:

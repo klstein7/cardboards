@@ -151,6 +151,7 @@ export const projectUsers = createTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     role: varchar("role", { length: 255, enum: ["admin", "member"] }).notNull(),
+    isFavorite: boolean("is_favorite").notNull().default(false),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at")
       .defaultNow()
@@ -163,6 +164,7 @@ export const projectUsers = createTable(
     ),
     index("project_user_project_id_idx").on(table.projectId),
     index("project_user_user_id_idx").on(table.userId),
+    index("project_user_is_favorite_idx").on(table.isFavorite),
   ],
 );
 

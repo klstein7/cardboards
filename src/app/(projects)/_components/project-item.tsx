@@ -3,6 +3,7 @@ import {
   CalendarIcon,
   FolderKanbanIcon,
   LayoutGridIcon,
+  Star,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export function ProjectItem({ project }: { project: Project }) {
   const [isHovered, setIsHovered] = useState(false);
   const boardCount = project.boards?.length ?? 0;
   const userCount = project.projectUsers?.length ?? 0;
+  const isFavorite = project.isFavorite ?? false;
 
   const progressPercentage = Math.min(
     100,
@@ -34,11 +36,19 @@ export function ProjectItem({ project }: { project: Project }) {
       className="block h-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/20"
     >
       <Card
-        className="group relative flex h-full flex-col overflow-hidden border-border/60 bg-background shadow-sm transition-all duration-150 hover:border-primary/40 hover:shadow-md"
+        className={cn(
+          "group relative flex h-full flex-col overflow-hidden border-border/60 bg-background shadow-sm transition-all duration-150 hover:border-primary/40 hover:shadow-md",
+          isFavorite && "border-yellow-400/50 bg-yellow-50/10 shadow",
+        )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        <div className="absolute inset-x-0 top-0 h-0.5 bg-primary/60 opacity-40 transition-opacity group-hover:opacity-100" />
+        <div
+          className={cn(
+            "absolute inset-x-0 top-0 h-0.5 bg-primary/60 opacity-40 transition-opacity group-hover:opacity-100",
+            isFavorite && "bg-yellow-400 opacity-80",
+          )}
+        />
 
         <CardHeader className="pb-2 pt-5">
           <div className="flex items-start justify-between gap-3">
@@ -47,6 +57,9 @@ export function ProjectItem({ project }: { project: Project }) {
                 <h3 className="text-base font-medium tracking-tight text-foreground transition-colors group-hover:text-primary">
                   {project.name}
                 </h3>
+                {isFavorite && (
+                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                )}
                 <Badge
                   variant="outline"
                   className="bg-primary/5 text-[10px] font-normal"
@@ -64,8 +77,18 @@ export function ProjectItem({ project }: { project: Project }) {
                 </span>
               </div>
             </div>
-            <div className="rounded-full bg-primary/5 p-1.5 transition-colors group-hover:bg-primary/10">
-              <FolderKanbanIcon className="h-4 w-4 text-primary" />
+            <div
+              className={cn(
+                "rounded-full bg-primary/5 p-1.5 transition-colors group-hover:bg-primary/10",
+                isFavorite && "bg-yellow-400/10 group-hover:bg-yellow-400/20",
+              )}
+            >
+              <FolderKanbanIcon
+                className={cn(
+                  "h-4 w-4 text-primary",
+                  isFavorite && "text-yellow-500",
+                )}
+              />
             </div>
           </div>
         </CardHeader>
@@ -74,13 +97,21 @@ export function ProjectItem({ project }: { project: Project }) {
           <div className="mb-3 space-y-1">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground/80">Status</span>
-              <span className="font-medium text-primary/90">
+              <span
+                className={cn(
+                  "font-medium text-primary/90",
+                  isFavorite && "text-yellow-500",
+                )}
+              >
                 {progressPercentage}%
               </span>
             </div>
             <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary/50">
               <div
-                className="h-full rounded-full bg-primary/70 transition-all duration-500"
+                className={cn(
+                  "h-full rounded-full bg-primary/70 transition-all duration-500",
+                  isFavorite && "bg-yellow-400/70",
+                )}
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -89,8 +120,18 @@ export function ProjectItem({ project }: { project: Project }) {
           <div className="mt-auto grid grid-cols-2 gap-3">
             <div className="rounded-md bg-secondary/40 p-2.5">
               <div className="flex items-center gap-1.5">
-                <div className="rounded-md bg-primary/10 p-1">
-                  <LayoutGridIcon className="h-3.5 w-3.5 text-primary" />
+                <div
+                  className={cn(
+                    "rounded-md bg-primary/10 p-1",
+                    isFavorite && "bg-yellow-400/10",
+                  )}
+                >
+                  <LayoutGridIcon
+                    className={cn(
+                      "h-3.5 w-3.5 text-primary",
+                      isFavorite && "text-yellow-500",
+                    )}
+                  />
                 </div>
                 <div className="text-base font-medium">{boardCount}</div>
               </div>
@@ -101,8 +142,18 @@ export function ProjectItem({ project }: { project: Project }) {
 
             <div className="rounded-md bg-secondary/40 p-2.5">
               <div className="flex items-center gap-1.5">
-                <div className="rounded-md bg-primary/10 p-1">
-                  <UsersIcon className="h-3.5 w-3.5 text-primary" />
+                <div
+                  className={cn(
+                    "rounded-md bg-primary/10 p-1",
+                    isFavorite && "bg-yellow-400/10",
+                  )}
+                >
+                  <UsersIcon
+                    className={cn(
+                      "h-3.5 w-3.5 text-primary",
+                      isFavorite && "text-yellow-500",
+                    )}
+                  />
                 </div>
                 <div className="text-base font-medium">{userCount}</div>
               </div>
@@ -117,6 +168,8 @@ export function ProjectItem({ project }: { project: Project }) {
           className={cn(
             "bg-secondary/30 p-2 transition-colors",
             isHovered && "bg-secondary/50",
+            isFavorite && !isHovered && "bg-yellow-50/20",
+            isFavorite && isHovered && "bg-yellow-50/30",
           )}
         >
           <div className="flex w-full items-center justify-end">
@@ -124,6 +177,7 @@ export function ProjectItem({ project }: { project: Project }) {
               className={cn(
                 "flex items-center gap-1 text-xs font-medium",
                 isHovered ? "text-primary" : "text-muted-foreground/90",
+                isFavorite && isHovered && "text-yellow-500",
               )}
             >
               View details

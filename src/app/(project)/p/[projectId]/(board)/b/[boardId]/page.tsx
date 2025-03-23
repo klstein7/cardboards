@@ -29,10 +29,6 @@ export default async function BoardPage({ params }: { params: Params }) {
     columns.map((column: Column) => trpc.card.list.prefetch(column.id)),
   );
 
-  const insights = await trpc.aiInsight.generateProjectInsights(projectId);
-
-  console.log(insights);
-
   return (
     <HydrateClient>
       <BoardRealtimeProvider>

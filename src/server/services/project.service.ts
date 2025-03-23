@@ -110,7 +110,7 @@ class ProjectService extends BaseService {
         throw new Error("Unauthorized: User not authenticated");
       }
 
-      return txOrDb.query.projects.findMany({
+      const projects = await txOrDb.query.projects.findMany({
         where: (projects, { exists, eq, and }) =>
           exists(
             txOrDb
@@ -128,6 +128,24 @@ class ProjectService extends BaseService {
           boards: true,
           projectUsers: true,
         },
+      });
+
+      // Get all project user records for the current user
+      const currentUserProjectRecords = await txOrDb
+        .select()
+        .from(projectUsers)
+        .where(eq(projectUsers.userId, userId));
+
+      // Map the projects to include isFavorite status
+      return projects.map((project) => {
+        const projectUser = currentUserProjectRecords.find(
+          (pu) => pu.projectId === project.id,
+        );
+
+        return {
+          ...project,
+          isFavorite: projectUser?.isFavorite ?? false,
+        };
       });
     }, tx);
   }

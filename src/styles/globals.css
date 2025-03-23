@@ -85,6 +85,9 @@
     --sidebar-accent-foreground: 220 50% 15%;
     --sidebar-border: 220 25% 80%;
     --sidebar-ring: 215 90% 45%;
+
+    /* Animation keyframes for fadeIn effect */
+    --animate-duration: 0.3s;
   }
 
   .dark {
@@ -222,4 +225,21 @@
       transparent 1px
     ),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn var(--animate-duration) ease forwards;
+  }
 }

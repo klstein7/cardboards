@@ -32,6 +32,25 @@ export const projectUserRouter = createTRPCRouter({
       );
     }),
 
+  // Update current user's project preferences (requires project membership)
+  updateCurrentUserPreferences: authedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        data: z.object({
+          isFavorite: z.boolean().optional(),
+        }),
+      }),
+    )
+    .mutation(async ({ input }) => {
+      // Verify user can access this project
+      await authService.canAccessProject(input.projectId);
+      return projectUserService.updateCurrentUserPreferences(
+        input.projectId,
+        input.data,
+      );
+    }),
+
   // Count users in a project (requires any access to project)
   countByProjectId: authedProcedure
     .input(z.string())

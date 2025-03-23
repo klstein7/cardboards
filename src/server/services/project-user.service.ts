@@ -9,6 +9,13 @@ import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
 
 /**
+ * Update current user preferences data shape
+ */
+export interface ProjectUserPreferencesUpdate {
+  isFavorite?: boolean;
+}
+
+/**
  * Service for managing project user operations
  */
 class ProjectUserService extends BaseService {
@@ -242,6 +249,55 @@ class ProjectUserService extends BaseService {
       }
 
       return projectUser;
+    }, tx);
+  }
+
+  /**
+   * Update the current user's preferences for a project
+   */
+  async updateCurrentUserPreferences(
+    projectId: string,
+    data: ProjectUserPreferencesUpdate,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: User not authenticated");
+      }
+
+      const projectUser = await txOrDb.query.projectUsers.findFirst({
+        where: and(
+          eq(projectUsers.projectId, projectId),
+          eq(projectUsers.userId, userId),
+        ),
+      });
+
+      if (!projectUser) {
+        throw new Error("Unauthorized: User is not a member of this project");
+      }
+
+      // Update the project user preferences
+      const [updatedProjectUser] = await txOrDb
+        .update(projectUsers)
+        .set({
+          ...data,
+          updatedAt: new Date(),
+        })
+        .where(
+          and(
+            eq(projectUsers.projectId, projectId),
+            eq(projectUsers.userId, userId),
+          ),
+        )
+        .returning();
+
+      if (!updatedProjectUser) {
+        throw new Error("Failed to update project user preferences");
+      }
+
+      return updatedProjectUser;
     }, tx);
   }
 }

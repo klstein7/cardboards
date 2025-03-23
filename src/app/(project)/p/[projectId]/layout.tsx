@@ -50,21 +50,7 @@ export default async function ProjectLayout({
             <DynamicHeader projectId={projectId} projectName={project.name} />
           </div>
           <MobileNav projectId={projectId} />
-
-          <ResizablePanelGroup
-            direction="horizontal"
-            className="h-[calc(100%-56px)]"
-          >
-            <ResizablePanel minSize={60} defaultSize={75}>
-              <div className="h-full overflow-auto">{children}</div>
-            </ResizablePanel>
-            <ResizableHandle withHandle />
-            <ResizablePanel minSize={15} maxSize={40} defaultSize={25}>
-              <div className="h-full border-t p-4">
-                <DetailsMock />
-              </div>
-            </ResizablePanel>
-          </ResizablePanelGroup>
+          <div className="h-full overflow-auto">{children}</div>
         </div>
       </div>
     </HydrateClient>

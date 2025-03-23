@@ -1,7 +1,9 @@
 "use client";
 
 import { motion, type Variants } from "framer-motion";
+import { Star } from "lucide-react";
 
+import { type Project } from "~/app/(project)/_types";
 import { useProjects } from "~/lib/hooks";
 
 import { ProjectItem } from "../project-item";
@@ -25,6 +27,18 @@ export function ProjectList() {
     return <EmptyState />;
   }
 
+  // Split projects into favorite and regular
+  const favoriteProjects = projects.data.filter((p) => p.isFavorite);
+  const regularProjects = projects.data.filter((p) => !p.isFavorite);
+
+  // Sort both lists by creation date (newest first)
+  const sortByDate = (a: Project, b: Project) =>
+    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  const sortedFavorites = [...favoriteProjects].sort(sortByDate);
+  const sortedRegulars = [...regularProjects].sort(sortByDate);
+
+  const hasFavorites = sortedFavorites.length > 0;
+
   const container: Variants = {
     hidden: { opacity: 0 },
     show: {
@@ -42,23 +56,54 @@ export function ProjectList() {
   };
 
   return (
-    <div className="w-full max-w-7xl">
-      <motion.div
-        className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-        variants={container}
-        initial="hidden"
-        animate="show"
-      >
-        <motion.div variants={item} className="h-full">
-          <CreateProjectCard />
-        </motion.div>
-
-        {projects.data.map((project) => (
-          <motion.div key={project.id} variants={item} className="h-full">
-            <ProjectItem project={project} />
+    <div className="w-full max-w-7xl space-y-10">
+      {/* Favorites Section */}
+      {hasFavorites && (
+        <section>
+          <div className="mb-4 flex items-center border-b pb-2">
+            <Star className="mr-2 h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <h3 className="text-base font-medium">Favorites</h3>
+          </div>
+          <motion.div
+            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
+            {sortedFavorites.map((project) => (
+              <motion.div key={project.id} variants={item} className="h-full">
+                <ProjectItem project={project} />
+              </motion.div>
+            ))}
           </motion.div>
-        ))}
-      </motion.div>
+        </section>
+      )}
+
+      {/* Projects Section */}
+      <section>
+        <div className="mb-4 flex items-center border-b pb-2">
+          <h3 className="text-base font-medium">
+            {hasFavorites ? "All Projects" : "Projects"}
+          </h3>
+        </div>
+        <motion.div
+          className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+          variants={container}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div variants={item} className="h-full">
+            <CreateProjectCard />
+          </motion.div>
+
+          {regularProjects.length > 0 &&
+            sortedRegulars.map((project) => (
+              <motion.div key={project.id} variants={item} className="h-full">
+                <ProjectItem project={project} />
+              </motion.div>
+            ))}
+        </motion.div>
+      </section>
     </div>
   );
 }
