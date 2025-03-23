@@ -1,8 +1,8 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
+import { ProjectToolbar } from "../../../_components/project-toolbar";
 import { ProjectStats } from "./_components/project-stats";
 import { ProjectTabs } from "./_components/project-tabs";
-import { ProjectToolbar } from "./_components/project-toolbar";
 
 type Params = Promise<{ projectId: string }>;
 

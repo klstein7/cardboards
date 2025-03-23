@@ -74,7 +74,7 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
 
   // Apply a more compact style to the header
   return (
-    <div className="h-10 px-2">
+    <div className="h-10 px-6">
       <BaseHeader items={headerItems} />
     </div>
   );

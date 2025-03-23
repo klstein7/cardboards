@@ -5,7 +5,6 @@ import { Logo } from "~/components/brand/logo";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectList } from "../_components/project-list";
-import { SearchBar } from "../_components/search-bar";
 import { StatsCounter } from "../_components/stats-counter";
 
 export default async function ProjectsPage() {
@@ -13,7 +12,7 @@ export default async function ProjectsPage() {
 
   return (
     <HydrateClient>
-      <div className="min-h-[100dvh] bg-background">
+      <div className="h-[100dvh] overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="py-12 text-center">
@@ -83,11 +82,6 @@ export default async function ProjectsPage() {
                   </div>
                 </div>
               </div>
-            </div>
-
-            {/* Search */}
-            <div>
-              <SearchBar />
             </div>
 
             {/* Projects List */}
