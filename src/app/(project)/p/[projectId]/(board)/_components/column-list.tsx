@@ -120,7 +120,6 @@ export function ColumnList({ boardId }: ColumnListProps) {
         ref={ref}
         className={cn(
           "scrollbar-thumb-rounded-full h-full w-full overflow-x-auto overflow-y-auto scrollbar scrollbar-track-transparent",
-          "scroll-smooth",
         )}
         style={
           {
