@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { BaseHeader } from "~/components/shared/base-header";
 import { useBoardSafe, useCard } from "~/lib/hooks";
+import { useIsMobile } from "~/lib/hooks/utils";
 
 interface DynamicHeaderProps {
   projectId: string;
@@ -16,6 +17,7 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   const params = useParams();
   const boardId = params.boardId as string | undefined;
   const cardId = params.cardId as string | undefined;
+  const isMobile = useIsMobile();
 
   const { data: boardData } = useBoardSafe(boardId);
   const { data: cardData } = useCard(cardId ? Number(cardId) : undefined);
@@ -23,9 +25,12 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   const baseItems = useMemo(
     () => [
       { href: "/projects", label: "Projects" },
-      { href: `/p/${projectId}`, label: projectName },
+      {
+        href: `/p/${projectId}`,
+        label: isMobile ? getTruncatedText(projectName, 12) : projectName,
+      },
     ],
-    [projectId, projectName],
+    [projectId, projectName, isMobile],
   );
 
   const [headerItems, setHeaderItems] = useState<
@@ -46,14 +51,20 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
         ...baseItems,
         {
           href: `/p/${projectId}/b/${boardId}`,
-          label: boardData?.name ?? "",
+          label: isMobile
+            ? getTruncatedText(boardData?.name ?? "", 15)
+            : (boardData?.name ?? ""),
           color: boardData?.color,
         },
       ];
       if (cardId && pathname.includes(`/c/${cardId}`) && cardData) {
         setHeaderItems([
           ...boardItems,
-          { label: cardData.title ?? `Card ${cardId}` },
+          {
+            label: isMobile
+              ? getTruncatedText(cardData.title ?? `Card ${cardId}`, 20)
+              : (cardData.title ?? `Card ${cardId}`),
+          },
         ]);
       } else {
         setHeaderItems(boardItems);
@@ -70,11 +81,17 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
     cardId,
     cardData,
     baseItems,
+    isMobile,
   ]);
 
-  // Apply a more compact style to the header
+  // Helper function to truncate text for mobile screens
+  function getTruncatedText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength - 1) + "…";
+  }
+
   return (
-    <div className="h-10 px-6">
+    <div className="min-h-[2.5rem] overflow-hidden px-3 py-1.5 sm:px-6">
       <BaseHeader items={headerItems} />
     </div>
   );

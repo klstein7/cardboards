@@ -1,3 +1,4 @@
+// src/app/(project)/p/[projectId]/(board)/_components/card-item.tsx
 "use client";
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
@@ -47,6 +48,7 @@ import {
   useDeleteCard,
   useDuplicateCard,
 } from "~/lib/hooks";
+import { useIsMobile } from "~/lib/hooks/utils";
 import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
@@ -65,11 +67,6 @@ type DragState =
   | { type: "preview"; container: HTMLElement }
   | { type: "dragging" };
 
-// Helper function to detect if user is on a touch device
-const isTouchDevice = () => {
-  return "ontouchstart" in window || navigator.maxTouchPoints > 0;
-};
-
 export function CardItem({
   card,
   index,
@@ -83,7 +80,7 @@ export function CardItem({
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [dragState, setDragState] = useState<DragState>({ type: "idle" });
-  const [isMobileDevice] = useState(() => isTouchDevice());
+  const isMobile = useIsMobile();
 
   const [, setSelectedCardId] = useQueryState("cardId");
 
@@ -91,9 +88,20 @@ export function CardItem({
   const assignToCurrentUserMutation = useAssignToCurrentUser();
   const duplicateCardMutation = useDuplicateCard();
 
+  // Reset dragging state on component unmount
+  useEffect(() => {
+    return () => {
+      setActiveCard(null);
+      setDragState({ type: "idle" });
+    };
+  }, [setActiveCard]);
+
   useEffect(() => {
     const cardElement = cardElementRef.current;
     if (!cardElement) return;
+
+    // Add a class to prevent text selection during drag
+    cardElement.classList.add("card-draggable");
 
     registerCard(card.id, cardElement);
 
@@ -120,11 +128,22 @@ export function CardItem({
           });
         },
         onDragStart: () => {
+          // Add a body class to prevent text selection during drag
+          document.body.classList.add("dragging-card");
           setActiveCard(card);
         },
         onDrop: () => {
+          // Remove body class after drop
+          document.body.classList.remove("dragging-card");
           setActiveCard(null);
           setDragState({ type: "idle" });
+
+          // Small delay to ensure we can drag again immediately
+          setTimeout(() => {
+            if (cardElementRef.current) {
+              cardElementRef.current.classList.remove("no-drag");
+            }
+          }, 10);
         },
       }),
       dropTargetForElements({
@@ -172,112 +191,109 @@ export function CardItem({
     );
   }, [card, index, columnId, setActiveCard, registerCard, unregisterCard]);
 
-  // Function to prevent context menu on mobile devices
-  const handleContextMenu = (e: React.MouseEvent) => {
-    if (isMobileDevice) {
-      e.preventDefault();
-    }
-  };
+  const cardContent = (
+    <div
+      ref={cardElementRef}
+      className={cn(
+        "relative flex cursor-grab select-none flex-col gap-3 p-0.5 transition-all duration-300",
+        activeCard?.id === card.id && "cursor-grabbing opacity-50",
+      )}
+      onClick={() => setSelectedCardId(card.id.toString())}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      data-card-id={card.id}
+      aria-label={`Card: ${card.title}`}
+    >
+      {isHovered && !activeCard && !isMobile && (
+        <div
+          className="absolute -right-1 -top-1 z-10 flex gap-1.5 opacity-0 transition-all duration-200 group-hover:opacity-100"
+          style={{
+            opacity: isHovered ? 1 : 0,
+            transform: isHovered ? "translateY(0)" : "translateY(-5px)",
+          }}
+        >
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-card/95 text-muted-foreground shadow-md transition-all duration-200 hover:bg-card hover:text-foreground hover:shadow-lg"
+                onClick={async (e) => {
+                  e.stopPropagation();
+                  await setSelectedCardId(card.id.toString());
+                }}
+              >
+                <Edit className="h-3.5 w-3.5" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" className="font-medium">
+              Edit Card
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+
+      <CardBase
+        card={card}
+        isDragging={activeCard?.id === card.id}
+        isCompleted={isCompleted}
+      />
+
+      {closestEdge && (
+        <DropIndicator edge={closestEdge} gap={4} color={board.data?.color} />
+      )}
+    </div>
+  );
 
   return (
     <TooltipProvider>
       <AlertDialog>
-        <ContextMenu modal={false}>
-          <ContextMenuTrigger asChild onContextMenu={handleContextMenu}>
-            <div
-              ref={cardElementRef}
-              className={cn(
-                "relative flex cursor-grab select-none flex-col gap-3 p-0.5 transition-all duration-300",
-                activeCard?.id === card.id && "cursor-grabbing opacity-50",
-              )}
-              onClick={() => setSelectedCardId(card.id.toString())}
-              onMouseEnter={() => setIsHovered(true)}
-              onMouseLeave={() => setIsHovered(false)}
-              data-card-id={card.id}
-              aria-label={`Card: ${card.title}`}
-            >
-              {isHovered && !activeCard && (
-                <div
-                  className="absolute -right-1 -top-1 z-10 flex gap-1.5 opacity-0 transition-all duration-200 group-hover:opacity-100"
-                  style={{
-                    opacity: isHovered ? 1 : 0,
-                    transform: isHovered ? "translateY(0)" : "translateY(-5px)",
-                  }}
-                >
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        className="flex h-8 w-8 items-center justify-center rounded-full bg-card/95 text-muted-foreground shadow-md transition-all duration-200 hover:bg-card hover:text-foreground hover:shadow-lg"
-                        onClick={async (e) => {
-                          e.stopPropagation();
-                          await setSelectedCardId(card.id.toString());
-                        }}
-                      >
-                        <Edit className="h-3.5 w-3.5" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent side="top" className="font-medium">
-                      Edit Card
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              )}
+        {isMobile ? (
+          cardContent
+        ) : (
+          <ContextMenu modal={false}>
+            <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
 
-              <CardBase
-                card={card}
-                isDragging={activeCard?.id === card.id}
-                isCompleted={isCompleted}
-              />
-
-              {closestEdge && (
-                <DropIndicator
-                  edge={closestEdge}
-                  gap={4}
-                  color={board.data?.color}
-                />
-              )}
-            </div>
-          </ContextMenuTrigger>
-
-          <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
-            <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-              onClick={() => setSelectedCardId(card.id.toString())}
-            >
-              <Edit className="size-4 text-muted-foreground" />
-              <span>Edit card</span>
-            </ContextMenuItem>
-
-            <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-              onClick={() =>
-                assignToCurrentUserMutation.mutate({ cardId: card.id })
-              }
-            >
-              <UserCircle className="size-4 text-muted-foreground" />
-              <span>Assign to me</span>
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-              onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
-            >
-              <Copy className="size-4 text-muted-foreground" />
-              <span>Duplicate</span>
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <AlertDialogTrigger asChild>
-              <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
-                <Trash className="size-4" />
-                <span>Delete</span>
+            <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
+              <ContextMenuItem
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+                onClick={() => setSelectedCardId(card.id.toString())}
+              >
+                <Edit className="size-4 text-muted-foreground" />
+                <span>Edit card</span>
               </ContextMenuItem>
-            </AlertDialogTrigger>
-          </ContextMenuContent>
-        </ContextMenu>
+
+              <ContextMenuItem
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+                onClick={() =>
+                  assignToCurrentUserMutation.mutate({ cardId: card.id })
+                }
+              >
+                <UserCircle className="size-4 text-muted-foreground" />
+                <span>Assign to me</span>
+              </ContextMenuItem>
+
+              <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+              <ContextMenuItem
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+                onClick={() =>
+                  duplicateCardMutation.mutate({ cardId: card.id })
+                }
+              >
+                <Copy className="size-4 text-muted-foreground" />
+                <span>Duplicate</span>
+              </ContextMenuItem>
+
+              <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+              <AlertDialogTrigger asChild>
+                <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
+                  <Trash className="size-4" />
+                  <span>Delete</span>
+                </ContextMenuItem>
+              </AlertDialogTrigger>
+            </ContextMenuContent>
+          </ContextMenu>
+        )}
 
         {/* Custom Drag Preview Portal */}
         {dragState.type === "preview" &&

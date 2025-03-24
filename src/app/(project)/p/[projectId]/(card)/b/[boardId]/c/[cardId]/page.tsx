@@ -2,8 +2,8 @@ import { notFound } from "next/navigation";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { CardEditor } from "../../_components/card-editor";
-import { CardToolbar } from "../../_components/card-toolbar";
+import { CardEditor } from "../../../../_components/card-editor";
+import { CardToolbar } from "../../../../_components/card-toolbar";
 
 type Params = Promise<{
   projectId: string;

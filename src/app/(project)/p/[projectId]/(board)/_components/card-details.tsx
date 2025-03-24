@@ -16,6 +16,7 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
+import { useIsMobile } from "~/lib/hooks/utils";
 import { useCurrentBoardId } from "~/lib/hooks/utils/use-current-board-id";
 import { useCurrentProjectId } from "~/lib/hooks/utils/use-current-project-id";
 import { type Priority } from "~/lib/utils";
@@ -35,6 +36,7 @@ export function CardDetails() {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const projectId = useCurrentProjectId();
   const boardId = useCurrentBoardId();
+  const isMobile = useIsMobile();
 
   const card = useCard(selectedCardId ? Number(selectedCardId) : null);
   const updateCardMutation = useUpdateCard();
@@ -61,7 +63,7 @@ export function CardDetails() {
       }}
     >
       <DialogContent
-        className="md:max-w-2xl"
+        className="p-4 sm:p-6 md:max-w-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -73,7 +75,7 @@ export function CardDetails() {
         ) : (
           <>
             <DialogHeader className="pb-4">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <DialogTitle className="sr-only">
                     Card Details - CARD-{card.data?.id}
@@ -86,12 +88,12 @@ export function CardDetails() {
                 {selectedCardId && projectId && boardId && (
                   <Link
                     href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
-                    className="ml-auto mr-8"
+                    className="sm:ml-auto"
                   >
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="gap-1.5 text-xs"
+                      size={isMobile ? "default" : "sm"}
+                      className="w-full gap-1.5 text-xs sm:w-auto"
                     >
                       <FileText className="h-4 w-4" />
                       View full page
@@ -104,7 +106,7 @@ export function CardDetails() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4 overflow-y-auto sm:gap-6">
               <CardDetailsTitle
                 title={card.data?.title}
                 isEditing={editing === "title"}
@@ -137,7 +139,7 @@ export function CardDetails() {
                 }}
               />
 
-              <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+              <div className="rounded-lg border bg-card/50 p-3 shadow-sm backdrop-blur-[2px] sm:p-4">
                 <CardDetailsMetadata
                   dueDate={card.data?.dueDate}
                   assignedToId={card.data?.assignedToId}
@@ -230,7 +232,7 @@ export function CardDetails() {
 
               <Separator className="my-1" />
 
-              <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+              <div className="rounded-lg border bg-card/50 p-3 shadow-sm backdrop-blur-[2px] sm:p-4">
                 <h3 className="mb-4 text-sm font-medium">Comments</h3>
                 <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
                 <div className="mt-4">

@@ -51,7 +51,7 @@ export function MobileNav({ projectId }: MobileNavProps) {
   }
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
+    <Sheet open={open} onOpenChange={setOpen} modal={false}>
       <SheetTrigger asChild>
         <Button
           variant="secondary"
@@ -66,7 +66,7 @@ export function MobileNav({ projectId }: MobileNavProps) {
           <SheetHeader className="text-left">
             <div className="mb-6 flex items-center">
               <Star className="h-6 w-6 flex-shrink-0 fill-yellow-400 text-yellow-400" />
-              <SheetTitle className="ml-3 text-lg">Kanban</SheetTitle>
+              <SheetTitle className="ml-3 text-lg">Starboard</SheetTitle>
             </div>
           </SheetHeader>
 

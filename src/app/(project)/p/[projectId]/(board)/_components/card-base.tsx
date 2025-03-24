@@ -54,6 +54,7 @@ export const CardBase = memo(
           isCompleted && "opacity-25",
           priority && "border-l-4",
           isDragging && "rotate-[0.2deg] shadow-md",
+          isDragging && "pointer-events-none select-none",
           "hover:translate-y-[-2px] hover:bg-card/80 hover:shadow-md",
           className,
         )}
