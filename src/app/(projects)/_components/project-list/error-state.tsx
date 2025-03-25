@@ -9,11 +9,13 @@ interface ErrorStateProps {
 
 export function ErrorState({ error, refetch }: ErrorStateProps) {
   const errorMessage =
-    error instanceof Error
-      ? error.message
-      : typeof error === "object" && error && "message" in error
+    process.env.NODE_ENV === "development"
+      ? error instanceof Error
         ? error.message
-        : "Please try again later";
+        : typeof error === "object" && error && "message" in error
+          ? error.message
+          : "Please try again later"
+      : "Unable to load projects at this time";
 
   return (
     <div className="flex h-60 flex-col items-center justify-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center dark:border-red-900/30 dark:bg-red-900/10">
@@ -23,7 +25,7 @@ export function ErrorState({ error, refetch }: ErrorStateProps) {
           Error loading projects
         </h3>
         <p className="mt-1 text-sm text-red-600 dark:text-red-300">
-          {errorMessage ?? "Please try again later"}
+          {errorMessage}
         </p>
       </div>
       <Button variant="secondary" className="mt-2" onClick={() => refetch()}>

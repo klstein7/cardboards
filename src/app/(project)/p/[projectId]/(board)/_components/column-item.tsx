@@ -334,10 +334,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
         <div className="border-t p-2">
           <CreateCardDialog
             trigger={
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-muted-foreground hover:text-foreground"
-              >
+              <Button variant="ghost" className="w-full justify-start">
                 <Plus className="mr-2 h-4 w-4" />
                 <span>Add card</span>
               </Button>

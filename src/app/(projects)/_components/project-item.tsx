@@ -57,27 +57,21 @@ export function ProjectItem({ project }: { project: Project }) {
     >
       <Card
         className={cn(
-          "relative flex h-full flex-col overflow-hidden border-border/60 bg-background shadow-sm transition-all duration-300 ease-in-out",
-          "hover:translate-y-[-2px] hover:border-primary/40 hover:shadow-md",
-          isFavorite &&
-            isMounted &&
-            (isDarkMode
-              ? "border-amber-300/40 bg-amber-50/5 shadow"
-              : "border-l-2 border-yellow-600/80 bg-yellow-50/30 shadow"),
+          "relative flex h-full flex-col overflow-hidden border border-border/80 bg-card shadow-md transition-all duration-300 ease-in-out",
+          "dark:border-border/60 dark:shadow-lg dark:shadow-background/10",
+          "hover:translate-y-[-2px] hover:border-primary/60 hover:shadow-lg",
+          "dark:hover:border-primary/40 dark:hover:shadow-xl dark:hover:shadow-background/20",
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         <div
           className={cn(
-            "absolute inset-x-0 top-0 h-1 transition-all duration-300 ease-in-out",
-            !isFavorite &&
-              "bg-gradient-to-r from-primary/60 to-primary/40 opacity-40 group-hover:opacity-100",
-            isFavorite &&
-              isMounted &&
-              (isDarkMode
-                ? "bg-gradient-to-r from-amber-300 to-amber-400/70 opacity-60"
-                : "bg-gradient-to-r from-yellow-500 to-yellow-600 opacity-90"),
+            "absolute inset-x-0 top-0 h-2 transition-all duration-500 ease-in-out",
+            !isDarkMode &&
+              "bg-gradient-to-r from-primary/70 via-primary/60 to-accent/60 opacity-70 group-hover:opacity-100",
+            isDarkMode &&
+              "bg-gradient-to-r from-primary/60 via-primary/50 to-primary/40 opacity-70 group-hover:opacity-100",
           )}
         />
 
@@ -87,9 +81,8 @@ export function ProjectItem({ project }: { project: Project }) {
               <div className="flex items-center gap-1.5">
                 <h3
                   className={cn(
-                    "text-base font-medium tracking-tight text-foreground transition-all duration-200 ease-in-out group-hover:text-primary",
-                    isFavorite && isMounted && !isDarkMode && "text-yellow-700",
-                    isFavorite && isMounted && isDarkMode && "text-amber-200",
+                    "text-base font-medium tracking-tight text-foreground transition-all duration-300 ease-out",
+                    "group-hover:text-primary",
                   )}
                 >
                   {project.name}
@@ -98,12 +91,7 @@ export function ProjectItem({ project }: { project: Project }) {
                   <Star
                     className={cn(
                       "h-4 w-4 transition-all duration-200 ease-in-out",
-                      isMounted &&
-                        isDarkMode &&
-                        "fill-amber-300/80 text-amber-300/80",
-                      isMounted &&
-                        !isDarkMode &&
-                        "fill-yellow-500 text-yellow-500",
+                      "fill-primary text-primary drop-shadow-md",
                     )}
                   />
                 )}
@@ -111,17 +99,10 @@ export function ProjectItem({ project }: { project: Project }) {
                   variant="outline"
                   className={cn(
                     "bg-primary/5 text-[10px] font-normal shadow-sm transition-all duration-200 ease-in-out",
-                    isFavorite &&
-                      isMounted &&
-                      !isDarkMode &&
-                      "border-yellow-300 bg-yellow-100 font-medium text-yellow-900",
-                    isFavorite &&
-                      isMounted &&
-                      isDarkMode &&
-                      "border-amber-800/30 bg-amber-900/20 text-amber-200",
+                    "dark:border-border/50 dark:bg-secondary/40",
                   )}
                 >
-                  {isFavorite ? "Favorite" : "Active"}
+                  Active
                 </Badge>
               </div>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground/80">
@@ -137,20 +118,14 @@ export function ProjectItem({ project }: { project: Project }) {
             </div>
             <div
               className={cn(
-                "rounded-full bg-primary/5 p-1.5 shadow-sm transition-all duration-200 ease-in-out group-hover:bg-primary/10 group-hover:shadow",
-                isFavorite &&
-                  isMounted &&
-                  (isDarkMode
-                    ? "bg-amber-900/30 group-hover:bg-amber-800/30"
-                    : "border border-yellow-200 bg-yellow-100 group-hover:bg-yellow-200"),
+                "rounded-full bg-primary/10 p-1.5 shadow-sm transition-all duration-300 ease-in-out",
+                "group-hover:bg-primary/15 group-hover:shadow dark:bg-primary/20 dark:group-hover:bg-primary/25",
               )}
             >
               <FolderKanbanIcon
                 className={cn(
-                  "h-4 w-4 text-primary transition-all duration-200 ease-in-out",
-                  isFavorite &&
-                    isMounted &&
-                    (isDarkMode ? "text-amber-300" : "text-yellow-600"),
+                  "h-4 w-4 text-primary transition-all duration-300 ease-in-out",
+                  "dark:text-primary/90 dark:group-hover:text-primary",
                 )}
               />
             </div>
@@ -163,23 +138,19 @@ export function ProjectItem({ project }: { project: Project }) {
               <span className="text-muted-foreground/80">Completion</span>
               <span
                 className={cn(
-                  "font-medium text-primary/90 transition-all duration-200 ease-in-out",
-                  isFavorite &&
-                    isMounted &&
-                    (isDarkMode ? "text-amber-300/90" : "text-yellow-700"),
+                  "font-medium text-primary/90 transition-all duration-300 ease-in-out",
+                  "dark:text-primary/80 dark:group-hover:text-primary",
                 )}
               >
                 {progressPercentage}%
               </span>
             </div>
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary/50 shadow-sm">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary/70 shadow-sm dark:bg-secondary/30">
               <div
                 className={cn(
-                  "h-full rounded-full transition-all duration-500 ease-in-out",
-                  !isFavorite && getStatusColor(),
-                  isFavorite &&
-                    isMounted &&
-                    (isDarkMode ? "bg-amber-400/40" : "bg-yellow-600/70"),
+                  "h-full rounded-full transition-all duration-700 ease-in-out",
+                  getStatusColor(),
+                  isHovered && "origin-left scale-x-[1.01]",
                 )}
                 style={{ width: `${progressPercentage}%` }}
               />
@@ -189,31 +160,22 @@ export function ProjectItem({ project }: { project: Project }) {
           <div className="mt-auto grid grid-cols-2 gap-3">
             <div
               className={cn(
-                "rounded-md bg-secondary/40 p-2.5 shadow-sm transition-all duration-200 ease-in-out group-hover:bg-secondary/50 group-hover:shadow",
-                isFavorite &&
-                  isMounted &&
-                  !isDarkMode &&
-                  "border border-yellow-200 bg-yellow-50",
-                isFavorite && isMounted && isDarkMode && "bg-amber-950/40",
+                "rounded-md bg-secondary/60 p-2.5 shadow-sm transition-all duration-300 ease-in-out",
+                "group-hover:bg-secondary/70 group-hover:shadow dark:bg-secondary/20 dark:group-hover:bg-secondary/30",
+                isHovered && "scale-[1.02]",
               )}
             >
               <div className="flex items-center gap-1.5">
                 <div
                   className={cn(
-                    "rounded-md bg-primary/10 p-1 shadow-sm",
-                    isFavorite &&
-                      isMounted &&
-                      (isDarkMode
-                        ? "bg-amber-800/30"
-                        : "border border-yellow-300 bg-yellow-200"),
+                    "rounded-md bg-primary/15 p-1 shadow-sm transition-all duration-300 ease-in-out",
+                    "dark:bg-primary/25",
                   )}
                 >
                   <LayoutGridIcon
                     className={cn(
                       "h-3.5 w-3.5 text-primary",
-                      isFavorite &&
-                        isMounted &&
-                        (isDarkMode ? "text-amber-300" : "text-yellow-700"),
+                      "dark:text-primary/90",
                     )}
                   />
                 </div>
@@ -226,31 +188,22 @@ export function ProjectItem({ project }: { project: Project }) {
 
             <div
               className={cn(
-                "rounded-md bg-secondary/40 p-2.5 shadow-sm transition-all duration-200 ease-in-out group-hover:bg-secondary/50 group-hover:shadow",
-                isFavorite &&
-                  isMounted &&
-                  !isDarkMode &&
-                  "border border-yellow-200 bg-yellow-50",
-                isFavorite && isMounted && isDarkMode && "bg-amber-950/40",
+                "rounded-md bg-secondary/60 p-2.5 shadow-sm transition-all duration-300 ease-in-out",
+                "group-hover:bg-secondary/70 group-hover:shadow dark:bg-secondary/20 dark:group-hover:bg-secondary/30",
+                isHovered && "scale-[1.02]",
               )}
             >
               <div className="flex items-center gap-1.5">
                 <div
                   className={cn(
-                    "rounded-md bg-primary/10 p-1 shadow-sm",
-                    isFavorite &&
-                      isMounted &&
-                      (isDarkMode
-                        ? "bg-amber-800/30"
-                        : "border border-yellow-300 bg-yellow-200"),
+                    "rounded-md bg-primary/15 p-1 shadow-sm transition-all duration-300 ease-in-out",
+                    "dark:bg-primary/25",
                   )}
                 >
                   <UsersIcon
                     className={cn(
                       "h-3.5 w-3.5 text-primary",
-                      isFavorite &&
-                        isMounted &&
-                        (isDarkMode ? "text-amber-300" : "text-yellow-700"),
+                      "dark:text-primary/90",
                     )}
                   />
                 </div>
@@ -265,33 +218,22 @@ export function ProjectItem({ project }: { project: Project }) {
 
         <CardFooter
           className={cn(
-            "bg-secondary/30 p-2 transition-all duration-200 ease-in-out",
-            isHovered && "bg-secondary/50",
-            isFavorite &&
-              isMounted &&
-              !isHovered &&
-              (isDarkMode ? "bg-amber-900/10" : "bg-yellow-50/40"),
-            isFavorite &&
-              isMounted &&
-              isHovered &&
-              (isDarkMode ? "bg-amber-900/20" : "bg-yellow-50/60"),
+            "bg-secondary/50 p-2 transition-all duration-300 ease-in-out",
+            "dark:bg-secondary/15",
+            isHovered && "bg-secondary/70 dark:bg-secondary/25",
           )}
         >
           <div className="flex w-full items-center justify-end">
             <span
               className={cn(
-                "flex items-center gap-1 text-xs font-medium transition-all duration-200 ease-in-out",
+                "flex items-center gap-1 text-xs font-medium transition-all duration-300 ease-in-out",
                 isHovered ? "text-primary" : "text-muted-foreground/90",
-                isFavorite &&
-                  isMounted &&
-                  isHovered &&
-                  (isDarkMode ? "text-amber-300/90" : "text-yellow-700"),
               )}
             >
               View details
               <ArrowRight
                 className={cn(
-                  "h-3 w-3 transition-transform duration-200 ease-in-out",
+                  "h-3 w-3 transition-transform duration-300 ease-in-out",
                   isHovered && "translate-x-0.5",
                 )}
               />

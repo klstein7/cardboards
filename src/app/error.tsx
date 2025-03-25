@@ -12,8 +12,10 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Optionally log the error to an error reporting service
-    console.error(error);
+    // Only log errors in development
+    if (process.env.NODE_ENV === "development") {
+      console.error(error);
+    }
   }, [error]);
 
   return (
@@ -23,11 +25,16 @@ export default function Error({ error, reset }: ErrorProps) {
       </div>
       <h2 className="mb-3 text-3xl font-bold">Something went wrong!</h2>
       <p className="mb-8 max-w-md text-base text-muted-foreground">
-        {error.message || "An unexpected error occurred"}
-        {error.digest && (
-          <span className="mt-2 block text-sm text-gray-500">
-            Error ID: {error.digest}
-          </span>
+        We encountered an unexpected error. Our team has been notified.
+        {process.env.NODE_ENV === "development" && (
+          <>
+            <span className="mt-2 block text-sm">{error.message}</span>
+            {error.digest && (
+              <span className="mt-2 block text-sm text-gray-500">
+                Error ID: {error.digest}
+              </span>
+            )}
+          </>
         )}
       </p>
       <div className="flex gap-4">

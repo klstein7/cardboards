@@ -23,9 +23,9 @@ export default async function ProjectsPage() {
           <div className="mx-auto max-w-5xl space-y-10 pt-4">
             {/* Statistics */}
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <div className="rounded-lg border border-border/60 bg-background p-4 shadow-sm transition-colors hover:bg-secondary/10">
+              <div className="rounded-lg border border-border/80 bg-card p-4 shadow-sm transition-colors hover:bg-secondary/20 dark:border-border/60 dark:hover:border-border dark:hover:bg-secondary/30">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-primary/5 p-2">
+                  <div className="rounded-full bg-primary/10 p-2 dark:bg-primary/15">
                     <LayoutGrid className="h-4 w-4 text-primary" />
                   </div>
                   <div>
@@ -43,9 +43,9 @@ export default async function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/60 bg-background p-4 shadow-sm transition-colors hover:bg-secondary/10">
+              <div className="rounded-lg border border-border/80 bg-card p-4 shadow-sm transition-colors hover:bg-secondary/20 dark:border-border/60 dark:hover:border-border dark:hover:bg-secondary/30">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-primary/5 p-2">
+                  <div className="rounded-full bg-primary/10 p-2 dark:bg-primary/15">
                     <Users className="h-4 w-4 text-primary" />
                   </div>
                   <div>
@@ -63,9 +63,9 @@ export default async function ProjectsPage() {
                 </div>
               </div>
 
-              <div className="rounded-lg border border-border/60 bg-background p-4 shadow-sm transition-colors hover:bg-secondary/10">
+              <div className="rounded-lg border border-border/80 bg-card p-4 shadow-sm transition-colors hover:bg-secondary/20 dark:border-border/60 dark:hover:border-border dark:hover:bg-secondary/30">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-full bg-primary/5 p-2">
+                  <div className="rounded-full bg-primary/10 p-2 dark:bg-primary/15">
                     <Clock className="h-4 w-4 text-primary" />
                   </div>
                   <div>

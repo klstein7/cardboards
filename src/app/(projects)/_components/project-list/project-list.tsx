@@ -60,9 +60,9 @@ export function ProjectList() {
       {/* Favorites Section */}
       {hasFavorites && (
         <section>
-          <div className="mb-4 flex items-center border-b pb-2">
-            <Star className="mr-2 h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <h3 className="text-base font-medium">Favorites</h3>
+          <div className="mb-4 flex items-center border-b border-border/50 pb-2 dark:border-border/40">
+            <Star className="mr-2 h-4 w-4 fill-primary text-primary drop-shadow-sm" />
+            <h3 className="text-base font-medium text-foreground">Favorites</h3>
           </div>
           <motion.div
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
@@ -81,8 +81,8 @@ export function ProjectList() {
 
       {/* Projects Section */}
       <section>
-        <div className="mb-4 flex items-center border-b pb-2">
-          <h3 className="text-base font-medium">
+        <div className="mb-4 flex items-center border-b border-border/50 pb-2 dark:border-border/40">
+          <h3 className="text-base font-medium text-foreground">
             {hasFavorites ? "All Projects" : "Projects"}
           </h3>
         </div>

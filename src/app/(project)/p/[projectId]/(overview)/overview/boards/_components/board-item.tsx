@@ -24,7 +24,11 @@ export function BoardItem({
   return (
     <Link href={`/p/${projectId}/b/${board.id}`}>
       <Card
-        className="group flex h-full flex-col justify-between border-l-2 p-4 transition-all duration-200 hover:bg-muted/30 hover:shadow-sm"
+        className={cn(
+          "group flex h-full flex-col justify-between border-l-2 p-4 transition-all duration-200",
+          "hover:bg-muted/30 hover:shadow-sm dark:hover:bg-blue-900/10",
+          "dark:border-opacity-60 dark:bg-background/80 dark:shadow-sm",
+        )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         style={{ borderLeftColor: board.color }}
@@ -32,7 +36,10 @@ export function BoardItem({
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h3
-              className="truncate font-medium transition-colors"
+              className={cn(
+                "truncate font-medium transition-colors",
+                isHovered && "dark:text-blue-200",
+              )}
               style={{ color: isHovered ? board.color : "inherit" }}
             >
               {board.name}
@@ -41,7 +48,9 @@ export function BoardItem({
             <div
               className={cn(
                 "flex h-7 w-7 items-center justify-center rounded-md transition-colors",
-                isHovered ? "bg-background" : "bg-muted/40",
+                isHovered
+                  ? "bg-background dark:bg-blue-900/30"
+                  : "bg-muted/40 dark:bg-blue-950/30",
               )}
               style={{ color: board.color }}
             >
@@ -55,12 +64,13 @@ export function BoardItem({
               : "No columns yet"}
           </div>
 
-          <div className="h-1 w-full overflow-hidden rounded-full bg-secondary/30">
+          <div className="h-1 w-full overflow-hidden rounded-full bg-secondary/30 dark:bg-blue-950/40">
             <div
               className="h-full rounded-full transition-all duration-300"
               style={{
                 width: `${Math.min(100, (columnsCount / 8) * 100)}%`,
                 backgroundColor: board.color,
+                opacity: isHovered ? 1 : 0.85,
               }}
             />
           </div>
@@ -68,8 +78,12 @@ export function BoardItem({
 
         <div className="mt-4 flex justify-end">
           <span
-            className="flex items-center gap-1 text-xs font-medium transition-colors"
-            style={{ color: isHovered ? board.color : "text-muted-foreground" }}
+            className={cn(
+              "flex items-center gap-1 text-xs font-medium transition-colors",
+              isHovered
+                ? "text-primary dark:text-blue-300"
+                : "text-muted-foreground",
+            )}
           >
             View
             <ArrowRight
