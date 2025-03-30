@@ -116,10 +116,6 @@ export function CardItem({
         }),
         onGenerateDragPreview({ nativeSetDragImage }) {
           setCustomNativeDragPreview({
-            getOffset: pointerOutsideOfPreview({
-              x: "10px",
-              y: "10px",
-            }),
             nativeSetDragImage,
             render({ container }) {
               setDragState({ type: "preview", container });
@@ -206,7 +202,7 @@ export function CardItem({
     >
       {isHovered && !activeCard && !isMobile && (
         <div
-          className="absolute -right-1 -top-1 z-10 flex gap-1.5 opacity-0 transition-all duration-200 group-hover:opacity-100"
+          className="absolute -right-2 -top-2 z-10 flex gap-1.5 opacity-0 transition-all duration-200 group-hover:opacity-100"
           style={{
             opacity: isHovered ? 1 : 0,
             transform: isHovered ? "translateY(0)" : "translateY(-5px)",
@@ -238,7 +234,7 @@ export function CardItem({
       />
 
       {closestEdge && (
-        <DropIndicator edge={closestEdge} gap={4} color={board.data?.color} />
+        <DropIndicator edge={closestEdge} gap={4} color="hsl(var(--primary))" />
       )}
     </div>
   );

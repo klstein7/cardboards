@@ -26,7 +26,7 @@ export function ThemeToggle({ isHovered = true }: ThemeToggleProps) {
       variant="ghost"
       className={cn(
         "h-10 w-full",
-        isHovered ? "justify-start px-3" : "justify-center px-0",
+        isHovered ? "justify-start px-3" : "justify-center",
       )}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >

@@ -1,8 +1,7 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { DynamicHeader } from "../../_components/dynamic-header";
-import { MobileNav } from "../../_components/mobile-nav";
-import { ProjectSidebar } from "../../_components/project-sidebar";
+import { FloatingInsightsButton } from "../../_components/ai-insights/floating-insights-button";
+import { ProjectClientLayout } from "./_components/project-client-layout";
 
 type Params = Promise<{ projectId: string }>;
 
@@ -36,22 +35,10 @@ export default async function ProjectLayout({
 
   return (
     <HydrateClient>
-      <div
-        className="flex h-[100dvh] w-full overflow-hidden"
-        style={{ "--header-height": "40px" } as React.CSSProperties}
-      >
-        <ProjectSidebar projectId={projectId} />
-
-        <div className="h-full flex-1 overflow-hidden sm:ml-[60px]">
-          <div className="sticky top-0 z-10 w-full bg-background shadow-sm">
-            <DynamicHeader projectId={projectId} projectName={project.name} />
-          </div>
-          <MobileNav projectId={projectId} />
-          <div className="h-[calc(100%-var(--header-height))] overflow-y-auto">
-            {children}
-          </div>
-        </div>
-      </div>
+      <ProjectClientLayout projectId={projectId} project={project}>
+        {children}
+      </ProjectClientLayout>
+      <FloatingInsightsButton entityType="project" entityId={projectId} />
     </HydrateClient>
   );
 }

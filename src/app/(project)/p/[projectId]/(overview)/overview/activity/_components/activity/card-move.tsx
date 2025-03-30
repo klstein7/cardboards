@@ -1,4 +1,4 @@
-import { ArrowRight, FileText } from "lucide-react";
+import { ArrowRight, ArrowRightLeft, FileText } from "lucide-react";
 
 import { Badge } from "~/components/ui/badge";
 import {
@@ -30,10 +30,11 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
             getActionColor(item.action),
           )}
         >
+          <ArrowRightLeft className="h-3 w-3" />
           {item.action}d
         </span>{" "}
         a {formatEntityType(item.entityType)}
@@ -74,10 +75,11 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
             getActionColor(item.action),
           )}
         >
+          <ArrowRightLeft className="h-3 w-3" />
           {item.action}d
         </span>{" "}
         a {formatEntityType(item.entityType)}
@@ -98,10 +100,11 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
             getActionColor(item.action),
           )}
         >
+          <ArrowRightLeft className="h-3 w-3" />
           {item.action}d
         </span>{" "}
         a {formatEntityType(item.entityType)}
@@ -128,10 +131,11 @@ export function CardMove({ item }: CardMoveProps) {
     <span>
       <span
         className={cn(
-          "rounded px-1.5 py-0.5 font-medium shadow-sm",
+          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
           getActionColor(item.action),
         )}
       >
+        <ArrowRightLeft className="h-3 w-3" />
         {item.action}d
       </span>{" "}
       a {formatEntityType(item.entityType)}

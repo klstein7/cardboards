@@ -18,13 +18,13 @@ export default async function ProjectBoardsPage({
 
   return (
     <TabsContent value="boards" className="space-y-4">
-      <Card className="rounded-lg border bg-card shadow-sm">
+      <Card className="rounded-lg border border-border/60 bg-background shadow-sm">
         <SectionHeader
           title="Project Boards"
           icon={KanbanIcon}
           actions={<AdminCreateBoardButton projectId={projectId} />}
         />
-        <CardContent className="p-4 pt-5 sm:p-6">
+        <CardContent className="bg-muted/30 p-4 pt-5 sm:p-6">
           <BoardList projectId={projectId} />
         </CardContent>
       </Card>

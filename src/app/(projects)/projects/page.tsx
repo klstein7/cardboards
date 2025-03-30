@@ -15,8 +15,8 @@ export default async function ProjectsPage() {
       <div className="h-[100dvh] overflow-y-auto bg-background">
         <div className="mx-auto w-full max-w-6xl px-4 pb-20 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="py-12 text-center">
-            <Logo variant="default" className="mx-auto" />
+          <div className="flex items-center justify-center py-12">
+            <Logo variant="default" className="mx-auto" showText={true} />
           </div>
 
           {/* Main Content */}

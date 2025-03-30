@@ -120,14 +120,8 @@ export function ColumnList({ boardId }: ColumnListProps) {
         ref={ref}
         className={cn(
           "scrollbar-thumb-rounded-full h-full w-full overflow-x-auto overflow-y-auto scrollbar scrollbar-track-transparent",
+          "scrollbar-thumb-primary/40 hover:scrollbar-thumb-primary/60 dark:scrollbar-thumb-primary/30 dark:hover:scrollbar-thumb-primary/50",
         )}
-        style={
-          {
-            "--scrollbar-thumb": board.data
-              ? `${board.data.color}`
-              : "var(--secondary)",
-          } as React.CSSProperties
-        }
         tabIndex={0}
       >
         <div className="flex w-fit items-start gap-5 p-6">

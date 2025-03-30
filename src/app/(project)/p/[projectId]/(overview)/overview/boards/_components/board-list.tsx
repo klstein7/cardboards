@@ -26,7 +26,6 @@ type SortOption = "newest" | "oldest" | "a-z" | "z-a" | "recent";
 export function BoardList({ projectId }: BoardListProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<SortOption>("newest");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   const boards = useBoards(projectId);
 
@@ -119,25 +118,6 @@ export function BoardList({ projectId }: BoardListProps) {
               <SelectItem value="recent">Recent</SelectItem>
             </SelectContent>
           </Select>
-
-          <div className="flex">
-            <Button
-              variant={viewMode === "grid" ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9 rounded-r-none border-r-0"
-              onClick={() => setViewMode("grid")}
-            >
-              <LayoutGridIcon className="h-4 w-4" />
-            </Button>
-            <Button
-              variant={viewMode === "list" ? "default" : "outline"}
-              size="icon"
-              className="h-9 w-9 rounded-l-none"
-              onClick={() => setViewMode("list")}
-            >
-              <LayoutGridIcon className="h-4 w-4 rotate-90" />
-            </Button>
-          </div>
         </div>
       </div>
 
@@ -191,13 +171,7 @@ export function BoardList({ projectId }: BoardListProps) {
           <EmptyState projectId={projectId} />
         )
       ) : (
-        <div
-          className={
-            viewMode === "grid"
-              ? "grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-              : "space-y-3"
-          }
-        >
+        <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {sortedBoards.map((board) => (
             <BoardItem key={board.id} projectId={projectId} board={board} />
           ))}

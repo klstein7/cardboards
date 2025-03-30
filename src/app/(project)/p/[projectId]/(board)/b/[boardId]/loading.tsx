@@ -5,23 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 export default function BoardPageSkeleton() {
   return (
     <div className="flex h-full w-full flex-col">
-      {/* Board toolbar area */}
-      <div className="flex w-full border-y px-4 py-3 sm:px-6">
-        <div className="flex w-full flex-wrap items-center justify-between">
-          {/* Mobile filters */}
-          <div className="flex items-center gap-2 sm:hidden">
-            <div className="h-9 w-24 animate-pulse rounded-md bg-muted/50" />
-          </div>
-
-          {/* Desktop filters */}
-          <div className="hidden grow sm:block">
-            <div className="flex flex-wrap gap-2">
-              <div className="h-9 w-44 animate-pulse rounded-md bg-muted/50" />
-              <div className="h-9 w-44 animate-pulse rounded-md bg-muted/50" />
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Board toolbar area removed */}
 
       {/* Main content with columns */}
       <main className="relative flex-1 overflow-hidden px-4 pb-6 pt-3 sm:px-6">

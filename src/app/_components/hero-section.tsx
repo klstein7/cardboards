@@ -15,7 +15,7 @@ export function HeroSection() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center gap-16">
           <FadeIn className="flex flex-col items-center gap-8 text-center">
-            <Logo />
+            <Logo showText={true} />
             <div className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary shadow-sm transition-all duration-300 hover:bg-primary/20">
               Kanban Project Management
             </div>

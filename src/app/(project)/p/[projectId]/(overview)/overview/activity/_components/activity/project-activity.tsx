@@ -84,7 +84,7 @@ export async function ProjectActivity({
           </div>
         ) : (
           <>
-            <div className="divide-y divide-border/50">
+            <div className="divide-border/50">
               {items.map((item) => (
                 <ActivityItem key={item.id} item={item} />
               ))}

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { CheckCircle, Save, XCircle } from "lucide-react";
+import { useRef, useState } from "react";
 
 import { CardDetailsCommentList } from "~/app/(project)/p/[projectId]/(board)/_components/card-details-comment-list";
 import { CardDetailsCreateCommentForm } from "~/app/(project)/p/[projectId]/(board)/_components/card-details-create-comment-form";
@@ -14,6 +15,7 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCard } from "~/lib/hooks/card/use-card";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
+import { cn } from "~/lib/utils";
 import { getColor, getPriorityByValue, type Priority } from "~/lib/utils";
 
 interface CardEditorProps {
@@ -26,6 +28,48 @@ export function CardEditor({ cardId }: CardEditorProps) {
   const [editing, setEditing] = useState<
     "title" | "description" | "dueDate" | null
   >(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  // Create a ref to track the latest card data to avoid dependency issues
+  const cardDataRef = useRef(card);
+  cardDataRef.current = card;
+
+  // Helper function to save changes
+  const saveChanges = async (data: Record<string, unknown>) => {
+    if (!card) return;
+
+    try {
+      setSaveStatus("saving");
+      await updateCardMutation.mutateAsync({
+        cardId: card.id,
+        data,
+      });
+      setSaveStatus("saved");
+      // Reset to idle after showing "saved" for 2 seconds
+      const timer = setTimeout(() => setSaveStatus("idle"), 2000);
+      return () => clearTimeout(timer);
+    } catch (error) {
+      setSaveStatus("error");
+      console.error("Failed to save changes:", error);
+      // Keep error state showing longer
+      const timer = setTimeout(() => setSaveStatus("idle"), 3000);
+      return () => clearTimeout(timer);
+    }
+  };
+
+  const handleTitleChange = async (value: string) => {
+    if (value !== cardDataRef.current?.title) {
+      await saveChanges({ title: value });
+    }
+  };
+
+  const handleDescriptionChange = async (content: string) => {
+    if (content !== cardDataRef.current?.description) {
+      await saveChanges({ description: content });
+    }
+  };
 
   if (isPending) {
     return <CardSkeleton />;
@@ -40,19 +84,53 @@ export function CardEditor({ cardId }: CardEditorProps) {
   return (
     <div className="container mx-auto max-w-4xl px-4 py-8 sm:px-6">
       <div className="mb-8">
-        <div className="mb-2 flex items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight">Card Details</h1>
-          {priorityInfo && (
-            <Badge
-              className="px-2.5 py-1 text-xs font-medium"
-              style={{
-                backgroundColor: getColor(card.priority),
-                color: "#FFFFFF",
-              }}
-            >
-              {priorityInfo.label}
-            </Badge>
-          )}
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight">Card Details</h1>
+            {priorityInfo && (
+              <Badge
+                className="px-2.5 py-1 text-xs font-medium"
+                style={{
+                  backgroundColor: getColor(card.priority),
+                  color: "#FFFFFF",
+                }}
+              >
+                {priorityInfo.label}
+              </Badge>
+            )}
+          </div>
+
+          <div
+            className={cn(
+              "flex h-8 items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-medium transition-all duration-300",
+              saveStatus === "idle" && "opacity-0",
+              saveStatus === "saving" &&
+                "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400",
+              saveStatus === "saved" &&
+                "border-green-200 bg-green-50 text-green-600 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400",
+              saveStatus === "error" &&
+                "border-red-200 bg-red-50 text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400",
+            )}
+          >
+            {saveStatus === "saving" && (
+              <>
+                <Save className="h-3.5 w-3.5 animate-[spin_2s_linear_infinite]" />
+                Saving changes...
+              </>
+            )}
+            {saveStatus === "saved" && (
+              <>
+                <CheckCircle className="h-3.5 w-3.5" />
+                Changes saved
+              </>
+            )}
+            {saveStatus === "error" && (
+              <>
+                <XCircle className="h-3.5 w-3.5" />
+                Failed to save
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -60,32 +138,22 @@ export function CardEditor({ cardId }: CardEditorProps) {
         <CardDetailsTitle
           title={card.title}
           isEditing={editing === "title"}
-          isPending={updateCardMutation.isPending}
+          isPending={false}
           onEdit={() => setEditing("title")}
           onBlur={async (value) => {
-            if (value !== card.title) {
-              await updateCardMutation.mutateAsync({
-                cardId: card.id,
-                data: { title: value },
-              });
-            }
             setEditing(null);
+            await handleTitleChange(value);
           }}
         />
 
         <CardDetailsDescription
           description={card.description ?? undefined}
           isEditing={editing === "description"}
-          isPending={updateCardMutation.isPending}
+          isPending={false}
           onEdit={() => setEditing("description")}
           onBlur={async (content) => {
-            if (content !== card.description) {
-              await updateCardMutation.mutateAsync({
-                cardId: card.id,
-                data: { description: content },
-              });
-            }
             setEditing(null);
+            await handleDescriptionChange(content);
           }}
         />
 
@@ -94,20 +162,12 @@ export function CardEditor({ cardId }: CardEditorProps) {
           assignedToId={card.assignedToId}
           priority={card.priority}
           isEditingDueDate={editing === "dueDate"}
-          isPendingDueDate={
-            updateCardMutation.isPending &&
-            updateCardMutation.variables?.data.dueDate !== undefined
-          }
-          isPendingAssignee={
-            updateCardMutation.isPending &&
-            updateCardMutation.variables?.data.assignedToId !== undefined
-          }
-          isPendingPriority={
-            updateCardMutation.isPending &&
-            updateCardMutation.variables?.data.priority !== undefined
-          }
+          isPendingDueDate={false}
+          isPendingAssignee={false}
+          isPendingPriority={false}
           onEditDueDate={() => setEditing("dueDate")}
           onDueDateChange={async (date) => {
+            setEditing(null);
             const currentDate = card.dueDate;
             const newDate = date;
 
@@ -123,27 +183,17 @@ export function CardEditor({ cardId }: CardEditorProps) {
                 currentDate.getTime() !== newDate.getTime());
 
             if (dateChanged) {
-              await updateCardMutation.mutateAsync({
-                cardId: card.id,
-                data: { dueDate: date },
-              });
+              await saveChanges({ dueDate: date });
             }
-            setEditing(null);
           }}
           onAssigneeChange={async (value) => {
             if (value !== (card.assignedToId ?? "")) {
-              await updateCardMutation.mutateAsync({
-                cardId: card.id,
-                data: { assignedToId: value },
-              });
+              await saveChanges({ assignedToId: value });
             }
           }}
           onPriorityChange={async (value) => {
             if (value !== (card.priority ?? "")) {
-              await updateCardMutation.mutateAsync({
-                cardId: card.id,
-                data: { priority: value as Priority["value"] },
-              });
+              await saveChanges({ priority: value as Priority["value"] });
             }
           }}
         />
@@ -155,27 +205,18 @@ export function CardEditor({ cardId }: CardEditorProps) {
           <CardContent>
             <CardDetailsLabels
               labels={card.labels ?? []}
-              isPending={
-                updateCardMutation.isPending &&
-                updateCardMutation.variables?.data.labels !== undefined
-              }
+              isPending={false}
               onTagAdd={async (tag) => {
                 const currentTags = card.labels ?? [];
                 if (!currentTags.includes(tag)) {
-                  await updateCardMutation.mutateAsync({
-                    cardId: card.id,
-                    data: { labels: [...currentTags, tag] },
-                  });
+                  await saveChanges({ labels: [...currentTags, tag] });
                 }
               }}
               onTagRemove={async (tag) => {
                 const currentTags = card.labels ?? [];
                 if (currentTags.includes(tag)) {
-                  await updateCardMutation.mutateAsync({
-                    cardId: card.id,
-                    data: {
-                      labels: currentTags.filter((t) => t !== tag),
-                    },
+                  await saveChanges({
+                    labels: currentTags.filter((t) => t !== tag),
                   });
                 }
               }}

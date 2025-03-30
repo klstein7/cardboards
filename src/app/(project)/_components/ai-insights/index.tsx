@@ -72,7 +72,7 @@ export function AiInsightsSidebar({
       open={true}
       persistent={true}
       className={cn(
-        "h-full w-full overflow-auto border-l bg-muted/30 dark:bg-muted/20",
+        "h-full w-full overflow-auto border-l bg-background shadow-md dark:bg-background/95",
         className,
       )}
     >
@@ -95,7 +95,7 @@ export function AiInsightsSidebar({
             variant="outline"
             onClick={handleGenerateInsights}
             disabled={isGenerating}
-            className="w-full gap-2.5 rounded-md border-border/70 bg-background/80 py-5 shadow-sm transition-all hover:bg-background/95 dark:border-border/80 dark:bg-background/30 dark:hover:bg-background/40"
+            className="w-full gap-2.5 rounded-md py-5 shadow-sm"
           >
             {isGenerating ? (
               <>
@@ -113,7 +113,7 @@ export function AiInsightsSidebar({
 
         <Separator className="my-6 opacity-50" />
 
-        <div className="flex-1 overflow-auto pb-4">
+        <div className="flex-1 pb-4">
           {isLoadingInsights ? (
             <InsightsLoading />
           ) : isGenerating ? (

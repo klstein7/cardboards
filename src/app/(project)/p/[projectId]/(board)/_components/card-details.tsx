@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText } from "lucide-react";
+import { FileText, Save } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -44,6 +44,15 @@ export function CardDetails() {
   const [editing, setEditing] = useState<
     "title" | "description" | "dueDate" | null
   >(null);
+  const [saveStatus, setSaveStatus] = useState<
+    "idle" | "saving" | "saved" | "error"
+  >("idle");
+
+  // Create a ref to track the latest card data to avoid dependency issues
+  const cardDataRef = useRef<typeof card.data | null>(null);
+  useEffect(() => {
+    cardDataRef.current = card.data;
+  }, [card.data]);
 
   useEffect(() => {
     if (editing === "title") {
@@ -52,6 +61,38 @@ export function CardDetails() {
       descriptionRef.current?.focus();
     }
   }, [editing]);
+
+  // Helper function to save changes
+  const saveChanges = async (data: Record<string, unknown>) => {
+    if (!selectedCardId) return;
+
+    try {
+      setSaveStatus("saving");
+      await updateCardMutation.mutateAsync({
+        cardId: Number(selectedCardId),
+        data,
+      });
+      setSaveStatus("saved");
+      // Reset to idle after showing "saved" for 2 seconds
+      const timer = setTimeout(() => setSaveStatus("idle"), 2000);
+      return () => clearTimeout(timer);
+    } catch (error) {
+      setSaveStatus("error");
+      console.error("Failed to save changes:", error);
+    }
+  };
+
+  const handleTitleChange = async (value: string) => {
+    if (value !== cardDataRef.current?.title) {
+      await saveChanges({ title: value });
+    }
+  };
+
+  const handleDescriptionChange = async (content: string) => {
+    if (content !== cardDataRef.current?.description) {
+      await saveChanges({ description: content });
+    }
+  };
 
   return (
     <Dialog
@@ -85,21 +126,40 @@ export function CardDetails() {
                     priority={card.data?.priority}
                   />
                 </div>
-                {selectedCardId && projectId && boardId && (
-                  <Link
-                    href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
-                    className="sm:ml-auto"
-                  >
-                    <Button
-                      variant="outline"
-                      size={isMobile ? "default" : "sm"}
-                      className="w-full gap-1.5 text-xs sm:w-auto"
+                <div className="flex items-center gap-2">
+                  {saveStatus === "saving" && (
+                    <div className="flex items-center text-xs text-muted-foreground">
+                      <Save className="mr-1 h-3 w-3 animate-pulse" />
+                      Saving...
+                    </div>
+                  )}
+                  {saveStatus === "saved" && (
+                    <div className="flex items-center text-xs text-green-600 dark:text-green-400">
+                      <Save className="mr-1 h-3 w-3" />
+                      Saved
+                    </div>
+                  )}
+                  {saveStatus === "error" && (
+                    <div className="flex items-center text-xs text-red-600 dark:text-red-400">
+                      Failed to save
+                    </div>
+                  )}
+                  {selectedCardId && projectId && boardId && (
+                    <Link
+                      href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
+                      className="sm:ml-auto"
                     >
-                      <FileText className="h-4 w-4" />
-                      View full page
-                    </Button>
-                  </Link>
-                )}
+                      <Button
+                        variant="outline"
+                        size={isMobile ? "default" : "sm"}
+                        className="mr-6 w-full gap-1.5 text-xs sm:w-auto"
+                      >
+                        <FileText className="h-4 w-4" />
+                        View full page
+                      </Button>
+                    </Link>
+                  )}
+                </div>
               </div>
               <DialogDescription className="mt-1.5">
                 View or edit card details below
@@ -110,32 +170,22 @@ export function CardDetails() {
               <CardDetailsTitle
                 title={card.data?.title}
                 isEditing={editing === "title"}
-                isPending={updateCardMutation.isPending}
+                isPending={false}
                 onEdit={() => setEditing("title")}
                 onBlur={async (value) => {
-                  if (value !== card.data?.title) {
-                    await updateCardMutation.mutateAsync({
-                      cardId: Number(selectedCardId),
-                      data: { title: value },
-                    });
-                  }
                   setEditing(null);
+                  await handleTitleChange(value);
                 }}
               />
 
               <CardDetailsDescription
                 description={card.data?.description ?? undefined}
                 isEditing={editing === "description"}
-                isPending={updateCardMutation.isPending}
+                isPending={false}
                 onEdit={() => setEditing("description")}
                 onBlur={async (content) => {
-                  if (content !== card.data?.description) {
-                    await updateCardMutation.mutateAsync({
-                      cardId: Number(selectedCardId),
-                      data: { description: content },
-                    });
-                  }
                   setEditing(null);
+                  await handleDescriptionChange(content);
                 }}
               />
 
@@ -145,21 +195,12 @@ export function CardDetails() {
                   assignedToId={card.data?.assignedToId}
                   priority={card.data?.priority}
                   isEditingDueDate={editing === "dueDate"}
-                  isPendingDueDate={
-                    updateCardMutation.isPending &&
-                    updateCardMutation.variables?.data.dueDate !== undefined
-                  }
-                  isPendingAssignee={
-                    updateCardMutation.isPending &&
-                    updateCardMutation.variables?.data.assignedToId !==
-                      undefined
-                  }
-                  isPendingPriority={
-                    updateCardMutation.isPending &&
-                    updateCardMutation.variables?.data.priority !== undefined
-                  }
+                  isPendingDueDate={false}
+                  isPendingAssignee={false}
+                  isPendingPriority={false}
                   onEditDueDate={() => setEditing("dueDate")}
                   onDueDateChange={async (date) => {
+                    setEditing(null);
                     const currentDate = card.data?.dueDate;
                     const newDate = date;
 
@@ -176,26 +217,18 @@ export function CardDetails() {
                         currentDate.getTime() !== newDate.getTime());
 
                     if (dateChanged) {
-                      await updateCardMutation.mutateAsync({
-                        cardId: Number(selectedCardId),
-                        data: { dueDate: date },
-                      });
+                      await saveChanges({ dueDate: date });
                     }
-                    setEditing(null);
                   }}
                   onAssigneeChange={async (value) => {
                     if (value !== (card.data?.assignedToId ?? "")) {
-                      await updateCardMutation.mutateAsync({
-                        cardId: Number(selectedCardId),
-                        data: { assignedToId: value },
-                      });
+                      await saveChanges({ assignedToId: value });
                     }
                   }}
                   onPriorityChange={async (value) => {
                     if (value !== (card.data?.priority ?? "")) {
-                      await updateCardMutation.mutateAsync({
-                        cardId: Number(selectedCardId),
-                        data: { priority: value as Priority["value"] },
+                      await saveChanges({
+                        priority: value as Priority["value"],
                       });
                     }
                   }}
@@ -203,27 +236,20 @@ export function CardDetails() {
 
                 <CardDetailsLabels
                   labels={card.data?.labels}
-                  isPending={
-                    updateCardMutation.isPending &&
-                    updateCardMutation.variables?.data.labels !== undefined
-                  }
+                  isPending={false}
                   onTagAdd={async (tag) => {
                     const currentTags = card.data?.labels ?? [];
                     if (!currentTags.includes(tag)) {
-                      await updateCardMutation.mutateAsync({
-                        cardId: Number(selectedCardId),
-                        data: { labels: [...currentTags, tag] },
+                      await saveChanges({
+                        labels: [...currentTags, tag],
                       });
                     }
                   }}
                   onTagRemove={async (tag) => {
                     const currentTags = card.data?.labels ?? [];
                     if (currentTags.includes(tag)) {
-                      await updateCardMutation.mutateAsync({
-                        cardId: Number(selectedCardId),
-                        data: {
-                          labels: currentTags.filter((t) => t !== tag),
-                        },
+                      await saveChanges({
+                        labels: currentTags.filter((t) => t !== tag),
                       });
                     }
                   }}

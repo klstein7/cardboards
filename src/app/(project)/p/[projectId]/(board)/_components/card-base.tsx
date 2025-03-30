@@ -4,10 +4,10 @@ import { format, formatDistanceToNow } from "date-fns";
 import { CalendarIcon, CheckIcon } from "lucide-react";
 import { memo } from "react";
 
+import { type Card } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { cn, getColor, getPriorityByValue } from "~/lib/utils";
 
-import { type Card } from "../../../../_types";
 import { useBoardState } from "./board-state-provider";
 
 interface CardBaseProps {
@@ -38,7 +38,7 @@ export const CardBase = memo(
     const getStatusIndicator = () => {
       if (isCompleted) {
         return (
-          <div className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm">
+          <div className="bg-success text-success-foreground absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full shadow-sm">
             <CheckIcon className="h-3.5 w-3.5" />
           </div>
         );
@@ -49,13 +49,13 @@ export const CardBase = memo(
     return (
       <div
         className={cn(
-          "group relative flex flex-col gap-3 rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px] transition-all duration-200",
+          "group relative flex flex-col gap-3 rounded-lg border bg-card/50 p-4 shadow backdrop-blur-[2px] transition-all duration-200",
           activeCard?.id === card.id && !isDragging && "opacity-30",
-          isCompleted && "opacity-25",
+          isCompleted && "opacity-40 grayscale filter",
           priority && "border-l-4",
           isDragging && "rotate-[0.2deg] shadow-md",
           isDragging && "pointer-events-none select-none",
-          "hover:translate-y-[-2px] hover:bg-card/80 hover:shadow-md",
+          "hover:translate-y-[-2px] hover:bg-card/80 hover:shadow-lg",
           className,
         )}
         style={{
@@ -68,7 +68,7 @@ export const CardBase = memo(
         {children}
 
         {/* Header area with metadata */}
-        <div className="flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <span className="font-medium">Created</span>
             <span>
@@ -89,7 +89,7 @@ export const CardBase = memo(
         <div className="flex flex-col space-y-2">
           <h3
             className={cn(
-              "line-clamp-2 text-sm font-semibold tracking-tight",
+              "line-clamp-2 text-lg font-semibold tracking-tight",
               isCompleted && "text-muted-foreground line-through",
             )}
           >
@@ -99,7 +99,7 @@ export const CardBase = memo(
             <div
               className={cn(
                 "prose prose-sm prose-invert line-clamp-2 text-xs text-muted-foreground",
-                isCompleted && "line-clamp-1 line-through opacity-75",
+                isCompleted && "line-clamp-1 line-through",
               )}
               dangerouslySetInnerHTML={{ __html: card.description ?? "" }}
             />
@@ -113,7 +113,7 @@ export const CardBase = memo(
               {card.labels.map((label, index) => (
                 <div
                   key={index}
-                  className="rounded-md bg-secondary/70 px-2.5 py-1 text-xs font-medium text-secondary-foreground shadow-sm"
+                  className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground shadow-sm"
                 >
                   {label}
                 </div>

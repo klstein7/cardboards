@@ -1,5 +1,12 @@
 import { formatDistanceToNow } from "date-fns";
-import { Clock, FileText } from "lucide-react";
+import {
+  ArrowRightLeft,
+  Clock,
+  FileText,
+  Pencil,
+  PlusCircle,
+  Trash2,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -17,6 +24,14 @@ import {
   getActionColor,
   getChangeDetailsForDisplay,
 } from "./utils";
+
+// Define a map for action icons
+const actionIcons: Record<ActivityItemType["action"], React.ElementType> = {
+  create: PlusCircle,
+  update: Pencil,
+  delete: Trash2,
+  move: ArrowRightLeft,
+};
 
 interface ActivityItemProps {
   item: ActivityItemType;
@@ -57,9 +72,10 @@ export function ActivityItem({ item }: ActivityItemProps) {
   );
 
   const timestamp = formatDistanceToNow(new Date(item.createdAt));
+  const ActionIcon = actionIcons[item.action];
 
   return (
-    <div className="group flex items-start gap-4 rounded-lg p-4 transition-all duration-200 ease-in-out hover:bg-muted/50 hover:shadow-sm">
+    <div className="group flex items-start gap-4 rounded-lg border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:bg-muted/50 hover:shadow-sm">
       <Avatar className="h-10 w-10 shrink-0 border border-border/50 shadow-sm transition-all duration-200 ease-in-out group-hover:border-border/80 group-hover:shadow-md">
         <AvatarImage
           src={user?.imageUrl ?? undefined}
@@ -83,10 +99,11 @@ export function ActivityItem({ item }: ActivityItemProps) {
               <span className="inline-flex flex-wrap items-center gap-1.5">
                 <span
                   className={cn(
-                    "rounded-md px-2 py-0.5 font-medium shadow-sm transition-all duration-200 ease-in-out group-hover:shadow",
+                    "inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium shadow-sm transition-all duration-200 ease-in-out group-hover:shadow",
                     actionColor,
                   )}
                 >
+                  <ActionIcon className="h-3 w-3" />
                   {item.action}d
                 </span>
                 <span className="text-muted-foreground">

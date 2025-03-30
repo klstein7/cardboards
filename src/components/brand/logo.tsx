@@ -1,12 +1,12 @@
-import { Star } from "lucide-react";
-import { Lexend_Deca } from "next/font/google";
+import { Nunito } from "next/font/google";
+import Image from "next/image";
 import { type HTMLAttributes } from "react";
 
 import { cn } from "~/lib/utils";
 
-const lexendDeca = Lexend_Deca({
+const nunito = Nunito({
   subsets: ["latin"],
-  weight: ["400", "700"],
+  weight: ["400", "700", "800", "900", "1000"],
 });
 
 interface LogoProps extends HTMLAttributes<HTMLDivElement> {
@@ -16,44 +16,44 @@ interface LogoProps extends HTMLAttributes<HTMLDivElement> {
 
 export function Logo({
   variant = "default",
-  showText = true,
+  showText = false,
   className,
   ...props
 }: LogoProps) {
   const sizeClasses = {
-    small: "h-8 w-8",
-    default: "h-11 w-11",
-    large: "h-14 w-14",
+    small: "48",
+    default: "64",
+    large: "96",
   };
 
   const textClasses = {
     small: "text-3xl",
-    default: "text-5xl",
-    large: "text-6xl",
+    default: "text-6xl",
+    large: "text-7xl",
   };
 
   return (
     <div
-      className={cn("flex flex-col items-center gap-3", className)}
+      className={cn("flex flex-row items-center gap-6", className)}
       {...props}
     >
       <div className="relative">
-        <Star
-          className={cn(
-            "fill-yellow-400 stroke-foreground text-yellow-400 transition-transform duration-700 hover:rotate-[360deg] dark:stroke-none",
-            sizeClasses[variant],
-          )}
+        <Image
+          src="/logo.png"
+          alt="Starboard Logo"
+          width={Number(sizeClasses[variant])}
+          height={Number(sizeClasses[variant])}
         />
       </div>
       {showText && (
         <span
           className={cn(
-            "bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text font-bold text-transparent",
+            "text-4xl font-extrabold",
             textClasses[variant],
-            lexendDeca.className,
+            nunito.className,
           )}
         >
-          Starboard
+          cardboards
         </span>
       )}
     </div>
