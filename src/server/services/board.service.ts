@@ -36,9 +36,7 @@ class BoardService extends BaseService {
       let randomColorKey =
         colorKeys[Math.floor(Math.random() * colorKeys.length)];
 
-      if (!randomColorKey) {
-        randomColorKey = "blue";
-      }
+      randomColorKey ??= "blue";
 
       const randomColorHex = COLORS[randomColorKey];
 

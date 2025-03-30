@@ -29,13 +29,6 @@ export function BoardItem({
 
   const progressPercentage = Math.min(100, (columnsCount / 8) * 100);
 
-  // Determine the status color based on progress
-  const getStatusColor = () => {
-    if (progressPercentage < 30) return "bg-rose-500/50";
-    if (progressPercentage < 70) return "bg-amber-500/50";
-    return "bg-emerald-500/50";
-  };
-
   return (
     <Link
       href={`/p/${projectId}/b/${board.id}`}

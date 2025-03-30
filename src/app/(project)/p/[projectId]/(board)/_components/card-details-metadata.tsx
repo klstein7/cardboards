@@ -5,7 +5,6 @@ import { format } from "date-fns";
 import { ProjectUserSelect } from "~/app/(project)/_components/project-user-select";
 import { DatePicker } from "~/components/ui/date-picker";
 import { Skeleton } from "~/components/ui/skeleton";
-import { type Priority } from "~/lib/utils";
 
 import { CardPrioritySelect } from "./card-priority-select";
 

@@ -1,14 +1,12 @@
 import {
   ArrowRightIcon,
   CalendarIcon,
-  FolderKanbanIcon,
   LayoutGridIcon,
   StarIcon,
   UsersIcon,
 } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { type Project } from "~/app/(project)/_types";
 import { Badge } from "~/components/ui/badge";
@@ -22,16 +20,6 @@ import { cn } from "~/lib/utils";
 
 export function ProjectItem({ project }: { project: Project }) {
   const [isHovered, setIsHovered] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Safely determine dark mode only on client side
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  // Always use a consistent initial render to prevent hydration mismatch
-  const isDarkMode = isMounted ? resolvedTheme === "dark" : false;
 
   const boardCount = project.boards?.length ?? 0;
   const userCount = project.projectUsers?.length ?? 0;
@@ -42,7 +30,6 @@ export function ProjectItem({ project }: { project: Project }) {
     (boardCount > 0 ? 50 : 0) + (userCount > 1 ? 50 : 25),
   );
 
-  // Determine the status color based on progress
   const getStatusColor = () => {
     if (progressPercentage < 30) return "bg-rose-500/50";
     if (progressPercentage < 70) return "bg-amber-500/50";

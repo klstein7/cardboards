@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState } from "react";
+import { type ReactNode } from "react";
 
 import {
   ResizableHandle,
@@ -22,16 +22,8 @@ export function RightSidebar({
   minSize = 15,
   maxSize = 40,
 }: RightSidebarProps) {
-  const [size, setSize] = useState(defaultSize);
-
   return (
-    <ResizablePanelGroup
-      direction="horizontal"
-      className="h-full"
-      onLayout={(sizes) => {
-        if (sizes[1]) setSize(sizes[1]);
-      }}
-    >
+    <ResizablePanelGroup direction="horizontal" className="h-full">
       <ResizablePanel
         minSize={60}
         defaultSize={100 - defaultSize}

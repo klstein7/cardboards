@@ -13,7 +13,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -27,13 +26,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import {
-  useCards,
-  useColumns,
-  useCurrentBoard,
-  useMoveCard,
-  useShiftColumn,
-} from "~/lib/hooks";
+import { useCards, useColumns, useMoveCard, useShiftColumn } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
@@ -52,8 +45,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [justMoved, setJustMoved] = useState(false);
   const isAdmin = useIsAdmin();
-  const { resolvedTheme } = useTheme();
-  const isDarkTheme = resolvedTheme === "dark";
 
   const cards = useCards(column.id);
   const moveCardMutation = useMoveCard();
@@ -61,8 +52,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const columns = useColumns(column.boardId);
 
   const isMovingColumn = shiftColumnMutation.isPending;
-
-  const board = useCurrentBoard();
 
   const centerColumnInView = () => {
     setTimeout(() => {

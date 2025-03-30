@@ -1,10 +1,8 @@
-// src/app/(project)/p/[projectId]/(board)/_components/card-item.tsx
 "use client";
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { pointerOutsideOfPreview } from "@atlaskit/pragmatic-drag-and-drop/element/pointer-outside-of-preview";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import {
   attachClosestEdge,
@@ -44,7 +42,6 @@ import {
 } from "~/components/ui/tooltip";
 import {
   useAssignToCurrentUser,
-  useCurrentBoard,
   useDeleteCard,
   useDuplicateCard,
 } from "~/lib/hooks";
@@ -73,7 +70,6 @@ export function CardItem({
   isCompleted,
   columnId,
 }: CardItemProps) {
-  const board = useCurrentBoard();
   const { activeCard, setActiveCard, registerCard, unregisterCard } =
     useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
@@ -88,7 +84,6 @@ export function CardItem({
   const assignToCurrentUserMutation = useAssignToCurrentUser();
   const duplicateCardMutation = useDuplicateCard();
 
-  // Reset dragging state on component unmount
   useEffect(() => {
     return () => {
       setActiveCard(null);
@@ -100,7 +95,6 @@ export function CardItem({
     const cardElement = cardElementRef.current;
     if (!cardElement) return;
 
-    // Add a class to prevent text selection during drag
     cardElement.classList.add("card-draggable");
 
     registerCard(card.id, cardElement);
@@ -124,17 +118,14 @@ export function CardItem({
           });
         },
         onDragStart: () => {
-          // Add a body class to prevent text selection during drag
           document.body.classList.add("dragging-card");
           setActiveCard(card);
         },
         onDrop: () => {
-          // Remove body class after drop
           document.body.classList.remove("dragging-card");
           setActiveCard(null);
           setDragState({ type: "idle" });
 
-          // Small delay to ensure we can drag again immediately
           setTimeout(() => {
             if (cardElementRef.current) {
               cardElementRef.current.classList.remove("no-drag");

@@ -4,7 +4,7 @@ import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-sc
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
-import { useColumns, useCurrentBoard } from "~/lib/hooks";
+import { useColumns } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
@@ -18,7 +18,6 @@ interface ColumnListProps {
 export function ColumnList({ boardId }: ColumnListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const columns = useColumns(boardId);
-  const board = useCurrentBoard();
   const isAdmin = useIsAdmin();
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [showLeftButton, setShowLeftButton] = useState(false);
