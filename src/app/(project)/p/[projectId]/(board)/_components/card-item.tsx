@@ -233,54 +233,48 @@ export function CardItem({
   return (
     <TooltipProvider>
       <AlertDialog>
-        {isMobile ? (
-          cardContent
-        ) : (
-          <ContextMenu modal={false}>
-            <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
+        <ContextMenu modal={false}>
+          <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
 
-            <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
-              <ContextMenuItem
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-                onClick={() => setSelectedCardId(card.id.toString())}
-              >
-                <Edit className="size-4 text-muted-foreground" />
-                <span>Edit card</span>
+          <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
+            <ContextMenuItem
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              onClick={() => setSelectedCardId(card.id.toString())}
+            >
+              <Edit className="size-4 text-muted-foreground" />
+              <span>Edit card</span>
+            </ContextMenuItem>
+
+            <ContextMenuItem
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              onClick={() =>
+                assignToCurrentUserMutation.mutate({ cardId: card.id })
+              }
+            >
+              <UserCircle className="size-4 text-muted-foreground" />
+              <span>Assign to me</span>
+            </ContextMenuItem>
+
+            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+            <ContextMenuItem
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
+            >
+              <Copy className="size-4 text-muted-foreground" />
+              <span>Duplicate</span>
+            </ContextMenuItem>
+
+            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+            <AlertDialogTrigger asChild>
+              <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
+                <Trash className="size-4" />
+                <span>Delete</span>
               </ContextMenuItem>
-
-              <ContextMenuItem
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-                onClick={() =>
-                  assignToCurrentUserMutation.mutate({ cardId: card.id })
-                }
-              >
-                <UserCircle className="size-4 text-muted-foreground" />
-                <span>Assign to me</span>
-              </ContextMenuItem>
-
-              <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-              <ContextMenuItem
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
-                onClick={() =>
-                  duplicateCardMutation.mutate({ cardId: card.id })
-                }
-              >
-                <Copy className="size-4 text-muted-foreground" />
-                <span>Duplicate</span>
-              </ContextMenuItem>
-
-              <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-              <AlertDialogTrigger asChild>
-                <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
-                  <Trash className="size-4" />
-                  <span>Delete</span>
-                </ContextMenuItem>
-              </AlertDialogTrigger>
-            </ContextMenuContent>
-          </ContextMenu>
-        )}
+            </AlertDialogTrigger>
+          </ContextMenuContent>
+        </ContextMenu>
 
         {/* Custom Drag Preview Portal */}
         {dragState.type === "preview" &&

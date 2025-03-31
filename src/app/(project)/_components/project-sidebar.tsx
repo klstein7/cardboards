@@ -84,7 +84,7 @@ export function ProjectSidebar({
             isExpanded ? "w-[240px]" : "w-[60px]",
           )}
         >
-          <div className="absolute right-0 top-[4.5rem] z-20 -translate-y-1/2 translate-x-1/2">
+          <div className="absolute right-0 top-[4.25rem] z-20 -translate-y-1/2 translate-x-1/2">
             <Tooltip delayDuration={0}>
               <TooltipTrigger asChild>
                 <Button
@@ -106,7 +106,7 @@ export function ProjectSidebar({
             </Tooltip>
           </div>
 
-          <div className="flex h-full flex-col py-6">
+          <div className="flex h-full flex-col bg-accent-foreground py-6">
             {/* Logo */}
             <div
               className={cn(
@@ -125,8 +125,9 @@ export function ProjectSidebar({
                       alt="Starboard Logo"
                       width={32}
                       height={32}
-                      className="flex-shrink-0 opacity-80"
+                      className="flex-shrink-0"
                     />
+
                     <span
                       className={cn(
                         "text-2xl font-extrabold transition-opacity duration-300 ease-in-out",
