@@ -76,6 +76,7 @@ export function CardItem({
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [dragState, setDragState] = useState<DragState>({ type: "idle" });
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const [, setSelectedCardId] = useQueryState("cardId");
@@ -120,6 +121,7 @@ export function CardItem({
         onDragStart: () => {
           document.body.classList.add("dragging-card");
           setActiveCard(card);
+          setIsContextMenuOpen(false);
         },
         onDrop: () => {
           document.body.classList.remove("dragging-card");
@@ -233,7 +235,11 @@ export function CardItem({
   return (
     <TooltipProvider>
       <AlertDialog>
-        <ContextMenu modal={false}>
+        <ContextMenu
+          modal={false}
+          open={isContextMenuOpen}
+          onOpenChange={setIsContextMenuOpen}
+        >
           <ContextMenuTrigger asChild>{cardContent}</ContextMenuTrigger>
 
           <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
@@ -268,7 +274,10 @@ export function CardItem({
             <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
 
             <AlertDialogTrigger asChild>
-              <ContextMenuItem className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10">
+              <ContextMenuItem
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
+                onSelect={(e) => e.preventDefault()}
+              >
                 <Trash className="size-4" />
                 <span>Delete</span>
               </ContextMenuItem>
