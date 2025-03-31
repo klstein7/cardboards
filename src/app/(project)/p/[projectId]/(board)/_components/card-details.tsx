@@ -4,6 +4,7 @@ import { FileText, Save } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "~/components/ui/button";
 import {
@@ -73,11 +74,15 @@ export function CardDetails() {
         data,
       });
       setSaveStatus("saved");
+      toast.success("Card updated successfully");
       // Reset to idle after showing "saved" for 2 seconds
       const timer = setTimeout(() => setSaveStatus("idle"), 2000);
       return () => clearTimeout(timer);
     } catch (error) {
       setSaveStatus("error");
+      toast.error("Failed to save changes", {
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
       console.error("Failed to save changes:", error);
     }
   };
@@ -147,11 +152,11 @@ export function CardDetails() {
                   {selectedCardId && projectId && boardId && (
                     <Link
                       href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
-                      className="sm:ml-auto"
+                      className="hidden sm:ml-auto sm:block"
                     >
                       <Button
                         variant="outline"
-                        size={isMobile ? "default" : "sm"}
+                        size={"sm"}
                         className="mr-6 w-full gap-1.5 text-xs sm:w-auto"
                       >
                         <FileText className="h-4 w-4" />
