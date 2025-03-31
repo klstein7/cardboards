@@ -108,7 +108,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showLeftButton && (
         <button
           onClick={scrollLeft}
-          className="absolute left-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -118,16 +118,17 @@ export function ColumnList({ boardId }: ColumnListProps) {
       <div
         ref={ref}
         className={cn(
-          "scrollbar-thumb-rounded-full h-full w-full overflow-x-auto overflow-y-auto scrollbar scrollbar-track-transparent",
-          "scrollbar-thumb-primary/40 hover:scrollbar-thumb-primary/60 dark:scrollbar-thumb-primary/30 dark:hover:scrollbar-thumb-primary/50",
+          "h-full w-full overflow-x-auto",
+          "sm:scrollbar-thumb-rounded-full scrollbar-none sm:scrollbar sm:scrollbar-track-transparent",
+          "sm:scrollbar-thumb-primary/40 sm:hover:scrollbar-thumb-primary/60 sm:dark:scrollbar-thumb-primary/30 sm:dark:hover:scrollbar-thumb-primary/50",
         )}
         tabIndex={0}
       >
-        <div className="flex w-fit items-start gap-5 p-6">
+        <div className="flex h-full w-fit items-start gap-3 p-3 sm:gap-5 sm:p-6">
           {columns.data.map((column) => (
             <div
               key={column.id}
-              className="h-full w-[325px] flex-shrink-0 snap-start"
+              className="h-full w-[calc(100vw-24px)] flex-shrink-0 sm:w-[325px]"
             >
               <ColumnItem column={column} />
             </div>
@@ -140,7 +141,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showRightButton && (
         <button
           onClick={scrollRight}
-          className="absolute right-2 top-1/2 z-10 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+          className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-6 w-6" />
@@ -148,11 +149,11 @@ export function ColumnList({ boardId }: ColumnListProps) {
       )}
 
       {showLeftButton && (
-        <div className="pointer-events-none absolute bottom-0 left-0 top-0 w-12 bg-gradient-to-r from-background to-transparent opacity-50" />
+        <div className="pointer-events-none absolute bottom-0 left-0 top-0 hidden w-12 bg-gradient-to-r from-background to-transparent opacity-50 sm:block" />
       )}
 
       {showScrollIndicator && (
-        <div className="pointer-events-none absolute bottom-0 right-0 top-0 w-12 bg-gradient-to-l from-background to-transparent opacity-50" />
+        <div className="pointer-events-none absolute bottom-0 right-0 top-0 hidden w-12 bg-gradient-to-l from-background to-transparent opacity-50 sm:block" />
       )}
     </div>
   );
