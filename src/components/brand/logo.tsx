@@ -34,13 +34,16 @@ export function Logo({
 
   return (
     <div
-      className={cn("flex flex-row items-center gap-6", className)}
+      className={cn(
+        "flex flex-row items-center gap-3 md:gap-4 lg:gap-6",
+        className,
+      )}
       {...props}
     >
       <div className="relative">
         <Image
           src="/logo.png"
-          alt="Starboard Logo"
+          alt="cardboards Logo"
           width={Number(sizeClasses[variant])}
           height={Number(sizeClasses[variant])}
         />
