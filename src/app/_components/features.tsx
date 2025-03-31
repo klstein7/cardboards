@@ -26,7 +26,7 @@ const features = [
 export function FeaturesSection() {
   return (
     <section
-      className="w-full bg-background py-24"
+      className="w-full bg-gradient-to-b from-background to-muted/10 py-24"
       aria-labelledby="features-heading"
     >
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -46,7 +46,7 @@ export function FeaturesSection() {
           {features.map((feature) => (
             <FadeIn
               key={feature.title}
-              className="group flex flex-col gap-3 rounded-xl border p-6 transition-all hover:border-primary/30 hover:bg-primary/5"
+              className="group flex flex-col gap-3 rounded-xl border p-6 transition-all hover:scale-[1.03] hover:border-primary/30 hover:bg-primary/5 hover:shadow-lg"
             >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">

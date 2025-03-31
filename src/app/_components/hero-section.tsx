@@ -9,14 +9,14 @@ import { Button } from "~/components/ui/button";
 export function HeroSection() {
   return (
     <section
-      className="relative w-full bg-gradient-to-b from-primary/5 to-background pb-24 pt-16"
+      className="relative w-full rounded-xl bg-gradient-to-b from-primary/5 to-background pb-24 pt-20"
       aria-labelledby="hero-heading"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center justify-center gap-16">
           <FadeIn className="flex flex-col items-center gap-8 text-center">
             <Logo showText={true} />
-            <div className="rounded-full bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary shadow-sm transition-all duration-300 hover:bg-primary/20">
+            <div className="rounded-full bg-primary/15 px-4 py-1.5 text-sm font-medium text-primary shadow-sm transition-all duration-300 hover:bg-primary/25">
               Kanban Project Management
             </div>
             <h1
