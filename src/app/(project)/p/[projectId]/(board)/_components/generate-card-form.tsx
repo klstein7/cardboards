@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,11 +10,11 @@ import { Label } from "~/components/ui/label";
 import { Separator } from "~/components/ui/separator";
 import { Textarea } from "~/components/ui/textarea";
 import { useCreateManyCards, useGenerateCards } from "~/lib/hooks";
-import { cn, type Priority } from "~/lib/utils";
+import { type Priority } from "~/lib/utils";
 import { type CardGenerateResponse, GeneratedCardSchema } from "~/server/zod";
 
-import { CardBase } from "./card-base";
 import { CardSkeleton } from "./card-skeleton";
+import { GeneratedCardPreview } from "./generated-card-preview";
 
 interface GenerateCardFormProps {
   columnId: string;
@@ -120,6 +120,7 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
       </div>
 
       <Button
+        className="mt-2"
         onClick={handleGenerate}
         isLoading={isGenerating}
         disabled={!prompt.trim() || isGenerating}
@@ -129,10 +130,10 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
       </Button>
 
       {generatedCards.length > 0 && (
-        <div className="space-y-4 pt-2">
+        <div className="mt-4 space-y-4 border-t pt-4">
           <Separator className="bg-border/50" />
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between px-1">
             <div>
               <h3 className="text-lg font-semibold">
                 Suggested cards
@@ -154,35 +155,10 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
 
           <div className="grid gap-3 sm:grid-cols-2">
             {generatedCards.map((card, index) => (
-              <CardBase
+              <GeneratedCardPreview
                 key={index}
-                card={{
-                  id: index,
-                  title: card.title,
-                  description: card.description,
-                  createdAt: new Date(),
-                  labels: card.labels,
-                  priority: card.priority as Priority["value"],
-                  columnId: columnId,
-                  assignedTo: null,
-                  order: 0,
-                  dueDate: null,
-                  assignedToId: null,
-                  updatedAt: null,
-                }}
-                className={cn(
-                  "relative cursor-pointer transition-all hover:shadow-md",
-                  "border border-border/75",
-                  selectedCards.includes(index) && [
-                    "ring-2 ring-primary",
-                    "border-primary",
-                    "bg-primary/5 dark:bg-primary/10",
-                    "scale-[1.01]",
-                    "shadow-md",
-                    "transform transition-all duration-200 ease-in-out",
-                  ],
-                  card.priority && "border-l-4",
-                )}
+                card={card}
+                isSelected={selectedCards.includes(index)}
                 onClick={() =>
                   setSelectedCards((prev) => {
                     if (prev.includes(index)) {
@@ -191,16 +167,7 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
                     return [...prev, index];
                   })
                 }
-              >
-                {selectedCards.includes(index) && (
-                  <div className="absolute right-2 top-2 rounded-full bg-primary p-1 shadow-sm transition-opacity duration-200">
-                    <Check className="h-4 w-4 text-primary-foreground" />
-                  </div>
-                )}
-                {selectedCards.includes(index) && (
-                  <div className="pointer-events-none absolute inset-0 rounded-lg bg-gradient-to-tr from-primary/5 to-primary/10" />
-                )}
-              </CardBase>
+              />
             ))}
             {isGenerating && (
               <>
@@ -211,7 +178,7 @@ export function GenerateCardForm({ columnId, setOpen }: GenerateCardFormProps) {
           </div>
 
           {!isGenerating && generatedCards.length > 0 && (
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-2">
               <Button
                 onClick={handleAddCards}
                 isLoading={createManyCardsMutation.isPending}

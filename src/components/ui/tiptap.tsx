@@ -1,6 +1,8 @@
 "use client";
 
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import Link from "@tiptap/extension-link";
+import Placeholder from "@tiptap/extension-placeholder";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { common, createLowlight } from "lowlight";
@@ -11,18 +13,27 @@ import {
   Heading2,
   Heading3,
   Italic,
+  Link as LinkIcon,
   List,
   ListOrdered,
   Quote,
   Strikethrough,
   Terminal,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { cn } from "~/lib/utils";
 
+import { Button } from "./button";
 import { CodeLanguages } from "./code-languages";
+import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 import { ToggleGroup, ToggleGroupItem } from "./toggle-group";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./tooltip";
 
 const lowlight = createLowlight(common);
 
@@ -34,9 +45,86 @@ interface TiptapProps {
   className?: string;
   autoFocus?: boolean;
   onBlur?: (content: string) => void;
+  placeholder?: string;
 }
 
 type Level = 1 | 2 | 3;
+
+// Button configurations for the toolbar
+const formatButtons = [
+  {
+    value: "bold",
+    label: "Bold",
+    icon: <Bold className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleBold().run(),
+    isActive: (editor: any) => editor?.isActive("bold"),
+  },
+  {
+    value: "italic",
+    label: "Italic",
+    icon: <Italic className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleItalic().run(),
+    isActive: (editor: any) => editor?.isActive("italic"),
+  },
+  {
+    value: "strike",
+    label: "Strikethrough",
+    icon: <Strikethrough className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleStrike().run(),
+    isActive: (editor: any) => editor?.isActive("strike"),
+  },
+  {
+    value: "code",
+    label: "Inline Code",
+    icon: <Code className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleCode().run(),
+    isActive: (editor: any) => editor?.isActive("code"),
+  },
+];
+
+const headingButtons = [1, 2, 3].map((level) => ({
+  value: `heading-${level}`,
+  label: `Heading ${level}`,
+  icon:
+    level === 1 ? (
+      <Heading1 className="size-4" />
+    ) : level === 2 ? (
+      <Heading2 className="size-4" />
+    ) : (
+      <Heading3 className="size-4" />
+    ),
+  command: (editor: any) =>
+    editor
+      .chain()
+      .focus()
+      .toggleHeading({ level: level as Level })
+      .run(),
+  isActive: (editor: any) => editor?.isActive("heading", { level }),
+}));
+
+const listButtons = [
+  {
+    value: "bullet-list",
+    label: "Bullet List",
+    icon: <List className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleBulletList().run(),
+    isActive: (editor: any) => editor?.isActive("bulletList"),
+  },
+  {
+    value: "ordered-list",
+    label: "Numbered List",
+    icon: <ListOrdered className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleOrderedList().run(),
+    isActive: (editor: any) => editor?.isActive("orderedList"),
+  },
+  {
+    value: "blockquote",
+    label: "Quote",
+    icon: <Quote className="size-4" />,
+    command: (editor: any) => editor.chain().focus().toggleBlockquote().run(),
+    isActive: (editor: any) => editor?.isActive("blockquote"),
+  },
+];
 
 export function Tiptap({
   value,
@@ -44,11 +132,15 @@ export function Tiptap({
   className,
   autoFocus,
   onBlur,
+  placeholder = "Write something...",
 }: TiptapProps) {
   const [selectedLanguage, setSelectedLanguage] = useState("plaintext");
+  const [linkUrl, setLinkUrl] = useState("");
+  const [showLinkPopover, setShowLinkPopover] = useState(false);
 
-  const editor = useEditor({
-    extensions: [
+  // Use memoized extensions to prevent unnecessary re-creation
+  const extensions = useMemo(
+    () => [
       StarterKit.configure({
         codeBlock: false,
       }),
@@ -69,7 +161,23 @@ export function Tiptap({
           ),
         },
       }),
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: "text-primary underline",
+        },
+      }),
+      Placeholder.configure({
+        placeholder,
+        emptyEditorClass:
+          "before:content-[attr(data-placeholder)] before:text-muted-foreground before:float-left before:pointer-events-none",
+      }),
     ],
+    [placeholder],
+  );
+
+  const editor = useEditor({
+    extensions,
     content: value,
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
@@ -85,13 +193,13 @@ export function Tiptap({
           "[&_ul]:my-2.5 [&_ul]:list-disc [&_ul]:pl-4",
           "[&_ol]:my-2.5 [&_ol]:list-decimal [&_ol]:pl-4",
           "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:tracking-tight",
-          "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:tracking-tight",
           "[&_h2]:text-xl [&_h2]:font-semibold",
           "[&_h3]:text-lg [&_h3]:font-semibold",
           "[&_blockquote]:border-l-2 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:my-2.5",
           "[&_:not(pre)_code]:rounded [&_:not(pre)_code]:bg-muted [&_:not(pre)_code]:px-1.5 [&_:not(pre)_code]:py-0.5 [&_:not(pre)_code]:text-sm [&_:not(pre)_code]:font-mono",
           "[&_pre]:my-2.5 [&_pre]:overflow-auto [&_pre]:rounded-lg",
           "[&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
+          "[&_a]:text-primary [&_a]:underline [&_a]:transition-colors hover:[&_a]:text-primary/80",
           className,
         ),
       },
@@ -123,139 +231,163 @@ export function Tiptap({
     },
   });
 
+  // Handle link insertion
+  const setLink = useCallback(() => {
+    if (!editor) return;
+
+    // If no URL is provided, unset the link
+    if (!linkUrl) {
+      // Use the correct method from the Link extension
+      editor.chain().focus().extendMarkRange("link").unsetMark("link").run();
+      return;
+    }
+
+    // Validate URL
+    let url = linkUrl;
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+
+    // Use the correct method from the Link extension
+    editor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setMark("link", { href: url })
+      .run();
+
+    setLinkUrl("");
+    setShowLinkPopover(false);
+  }, [editor, linkUrl]);
+
+  // Render toolbar buttons with tooltips
+  const renderToolbarButton = useCallback(
+    ({ value, label, icon, command, isActive }: any) => (
+      <Tooltip key={value} delayDuration={300}>
+        <TooltipTrigger asChild>
+          <ToggleGroupItem
+            value={value}
+            aria-label={label}
+            onClick={() => editor && command(editor)}
+            data-state={editor && isActive(editor) ? "on" : "off"}
+            onMouseDown={(e) => e.preventDefault()}
+          >
+            {icon}
+          </ToggleGroupItem>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">{label}</TooltipContent>
+      </Tooltip>
+    ),
+    [editor],
+  );
+
   return (
     <div className="tiptap-editor min-h-[150px] w-full overflow-hidden rounded-md border border-input bg-transparent">
-      <div className="border-b border-input bg-muted/10 px-2 py-2">
-        <ToggleGroup type="multiple" className="flex-wrap justify-start">
-          {[
-            {
-              value: "bold",
-              label: "Toggle bold",
-              icon: <Bold className="size-4" />,
-              isActive: editor?.isActive("bold"),
-              onClick: () => editor?.chain().focus().toggleBold().run(),
-            },
-            {
-              value: "italic",
-              label: "Toggle italic",
-              icon: <Italic className="size-4" />,
-              isActive: editor?.isActive("italic"),
-              onClick: () => editor?.chain().focus().toggleItalic().run(),
-            },
-            {
-              value: "strike",
-              label: "Toggle strikethrough",
-              icon: <Strikethrough className="size-4" />,
-              isActive: editor?.isActive("strike"),
-              onClick: () => editor?.chain().focus().toggleStrike().run(),
-            },
-            {
-              value: "code",
-              label: "Toggle code",
-              icon: <Code className="size-4" />,
-              isActive: editor?.isActive("code"),
-              onClick: () => editor?.chain().focus().toggleCode().run(),
-            },
-          ].map((item) => (
-            <ToggleGroupItem
-              key={item.value}
-              value={item.value}
-              aria-label={item.label}
-              onClick={item.onClick}
-              data-state={item.isActive ? "on" : "off"}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {item.icon}
-            </ToggleGroupItem>
-          ))}
+      <TooltipProvider>
+        <div className="border-b border-input bg-muted/10 px-2 py-2">
+          <ToggleGroup type="multiple" className="flex-wrap justify-start">
+            {/* Text formatting buttons */}
+            {formatButtons.map(renderToolbarButton)}
 
-          <div className="flex items-center gap-1">
-            <ToggleGroupItem
-              value="codeBlock"
-              aria-label="Toggle code block"
-              onClick={() => {
-                editor
-                  ?.chain()
-                  .focus()
-                  .toggleCodeBlock({ language: selectedLanguage })
-                  .run();
-              }}
-              data-state={editor?.isActive("codeBlock") ? "on" : "off"}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              <Terminal className="size-4" />
-            </ToggleGroupItem>
+            {/* Code block button with language selector */}
+            <div className="flex items-center gap-1">
+              <Tooltip delayDuration={300}>
+                <TooltipTrigger asChild>
+                  <ToggleGroupItem
+                    value="codeBlock"
+                    aria-label="Code Block"
+                    onClick={() => {
+                      editor
+                        ?.chain()
+                        .focus()
+                        .toggleCodeBlock({ language: selectedLanguage })
+                        .run();
+                    }}
+                    data-state={editor?.isActive("codeBlock") ? "on" : "off"}
+                    onMouseDown={(e) => e.preventDefault()}
+                  >
+                    <Terminal className="size-4" />
+                  </ToggleGroupItem>
+                </TooltipTrigger>
+                <TooltipContent side="bottom">Code Block</TooltipContent>
+              </Tooltip>
 
-            {editor?.isActive("codeBlock") && (
-              <CodeLanguages
-                value={
-                  (editor.getAttributes("codeBlock") as { language?: string })
-                    .language ?? selectedLanguage
-                }
-                onValueChange={(language) => {
-                  setSelectedLanguage(language);
-                  if (editor?.isActive("codeBlock")) {
-                    editor
-                      .chain()
-                      .focus()
-                      .updateAttributes("codeBlock", { language })
-                      .run();
+              {editor?.isActive("codeBlock") && (
+                <CodeLanguages
+                  value={
+                    (editor.getAttributes("codeBlock") as { language?: string })
+                      .language ?? selectedLanguage
                   }
-                }}
-              />
-            )}
-          </div>
+                  onValueChange={(language) => {
+                    setSelectedLanguage(language);
+                    if (editor?.isActive("codeBlock")) {
+                      editor
+                        .chain()
+                        .focus()
+                        .updateAttributes("codeBlock", { language })
+                        .run();
+                    }
+                  }}
+                />
+              )}
+            </div>
 
-          {[1, 2, 3].map((level) => (
-            <ToggleGroupItem
-              key={`heading-${level}`}
-              value={`heading-${level}`}
-              aria-label={`Toggle heading ${level}`}
-              onClick={() =>
-                editor
-                  ?.chain()
-                  .focus()
-                  .toggleHeading({ level: level as Level })
-                  .run()
-              }
-              data-state={editor?.isActive("heading", { level }) ? "on" : "off"}
-              onMouseDown={(e) => e.preventDefault()}
-            >
-              {level === 1 && <Heading1 className="size-4" />}
-              {level === 2 && <Heading2 className="size-4" />}
-              {level === 3 && <Heading3 className="size-4" />}
-            </ToggleGroupItem>
-          ))}
+            {/* Link button with popover */}
+            <Popover open={showLinkPopover} onOpenChange={setShowLinkPopover}>
+              <PopoverTrigger asChild>
+                <Tooltip delayDuration={300}>
+                  <TooltipTrigger asChild>
+                    <ToggleGroupItem
+                      value="link"
+                      aria-label="Insert Link"
+                      data-state={editor?.isActive("link") ? "on" : "off"}
+                      onMouseDown={(e) => e.preventDefault()}
+                    >
+                      <LinkIcon className="size-4" />
+                    </ToggleGroupItem>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">Insert Link</TooltipContent>
+                </Tooltip>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-3">
+                <div className="flex flex-col gap-2">
+                  <label htmlFor="link-url" className="text-xs font-medium">
+                    URL
+                  </label>
+                  <input
+                    id="link-url"
+                    type="text"
+                    value={linkUrl}
+                    onChange={(e) => setLinkUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && setLink()}
+                    placeholder="https://example.com"
+                    className="rounded-md border border-input bg-transparent px-3 py-1 text-sm"
+                    autoFocus
+                  />
+                  <div className="flex justify-end gap-2 pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowLinkPopover(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={setLink}>
+                      Apply
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
 
-          <ToggleGroupItem
-            value="bullet-list"
-            aria-label="Toggle bullet list"
-            onClick={() => editor?.chain().focus().toggleBulletList().run()}
-            data-state={editor?.isActive("bulletList") ? "on" : "off"}
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            <List className="size-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="ordered-list"
-            aria-label="Toggle ordered list"
-            onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-            data-state={editor?.isActive("orderedList") ? "on" : "off"}
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            <ListOrdered className="size-4" />
-          </ToggleGroupItem>
-          <ToggleGroupItem
-            value="blockquote"
-            aria-label="Toggle blockquote"
-            onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-            data-state={editor?.isActive("blockquote") ? "on" : "off"}
-            onMouseDown={(e) => e.preventDefault()}
-          >
-            <Quote className="size-4" />
-          </ToggleGroupItem>
-        </ToggleGroup>
-      </div>
+            {/* Heading buttons */}
+            {headingButtons.map(renderToolbarButton)}
+
+            {/* List and quote buttons */}
+            {listButtons.map(renderToolbarButton)}
+          </ToggleGroup>
+        </div>
+      </TooltipProvider>
       <EditorContent editor={editor} className="px-3 py-2 outline-none" />
     </div>
   );

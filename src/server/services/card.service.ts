@@ -502,7 +502,7 @@ class CardService extends BaseService {
     const board = await boardService.getWithDetails(boardId);
 
     const { object } = await generateObject({
-      model: google("gemini-2.0-flash-exp"),
+      model: google("gemini-2.5-pro-exp-03-25"),
       prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:

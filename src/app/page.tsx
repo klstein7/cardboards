@@ -2,6 +2,7 @@ import { type Metadata } from "next";
 
 import { FeaturesSection } from "~/app/_components/features";
 import { HeroSection } from "~/app/_components/hero-section";
+import { Footer } from "~/components/layout/footer";
 
 export const metadata: Metadata = {
   title: "cardboards - Manage your projects with ease",
@@ -16,10 +17,11 @@ export const metadata: Metadata = {
 
 export default async function HomePage() {
   return (
-    <main className="flex min-h-screen flex-col overflow-y-auto">
+    <main className="flex h-screen flex-col overflow-y-auto">
       <div className="container mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <HeroSection />
         <FeaturesSection />
+        <Footer />
       </div>
     </main>
   );
