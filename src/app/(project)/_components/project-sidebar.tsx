@@ -106,7 +106,7 @@ export function ProjectSidebar({
             </Tooltip>
           </div>
 
-          <div className="flex h-full flex-col bg-accent-foreground py-6">
+          <div className="flex h-full flex-col py-6">
             {/* Logo */}
             <div
               className={cn(

@@ -498,8 +498,16 @@ class CardService extends BaseService {
   /**
    * Generate cards with AI
    */
-  async generate(boardId: string, prompt: string) {
+  async generate(
+    boardId: string,
+    prompt: string,
+    focusType?: "planning" | "task" | "review",
+    detailLevel: "High-Level" | "Standard" | "Detailed" = "Standard",
+  ) {
     const board = await boardService.getWithDetails(boardId);
+
+    const effectiveFocusType = focusType ?? "general";
+    const goalText = prompt.trim();
 
     const { object } = await generateObject({
       model: google("gemini-2.5-pro-exp-03-25"),
@@ -508,6 +516,11 @@ class CardService extends BaseService {
           Generate cards that align with our system's structure and constraints:
 
           IMPORTANT: Avoid generating duplicate cards. Each card should be unique and distinct from existing cards on the board.
+
+          USER REQUEST:
+          - Main Goal: "${goalText}"
+          - Focus Area: "${effectiveFocusType}" 
+          - Detail Level: "${detailLevel}"
 
           Card Properties:
           - title: Required, max 255 characters, clear and actionable
@@ -524,6 +537,17 @@ class CardService extends BaseService {
           - labels: Optional array of text labels for categorization
           - order: Required, integer for card positioning
           - columnId: Required, must match an existing column
+
+          Focus Area Guidelines:
+          - planning: Generate cards focused on preparation, organization, research, and strategy. These cards represent the initial stages of work.
+          - task: Generate cards focused on implementation, execution, and actionable work items. These are the core activities to complete.
+          - review: Generate cards focused on testing, evaluation, quality assurance, feedback, and refinement. These represent verification and validation.
+          - general: If no focus is specified, provide a balanced mix of cards across different stages.
+
+          Detail Level Guidelines:
+          - High-Level: Generate broad, general tasks that capture main objectives. Fewer cards with wider scope.
+          - Standard: Generate a balanced mix of tasks with moderate detail. This is the default level of granularity.
+          - Detailed: Generate specific, granular tasks broken down into smaller components. More cards with narrower scope.
 
           Guidelines for Generation:
           1. Uniqueness:
@@ -555,15 +579,14 @@ class CardService extends BaseService {
              - Align with project context
 
           6. Maximum Cards:
-             - Generate no more than 10 cards.
+            - For High-Level detail: Generate 3-5 cards
+            - For Standard detail: Generate 5-8 cards
+            - For Detailed detail: Generate 8-10 cards
 
           Board Context:
           - ${JSON.stringify(board)}
 
           Based on the provided board context and prompt, generate cards that follow these specifications while maintaining data integrity.
-
-          Prompt:
-          ${prompt}
         `,
       schema: CardGenerateResponseSchema,
     });

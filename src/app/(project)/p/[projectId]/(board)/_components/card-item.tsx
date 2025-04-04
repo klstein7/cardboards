@@ -182,7 +182,7 @@ export function CardItem({
     <div
       ref={cardElementRef}
       className={cn(
-        "relative flex cursor-grab select-none flex-col gap-3 p-0.5 transition-all duration-300",
+        "relative flex cursor-grab select-none flex-col gap-2.5 p-0.5 transition-all duration-300",
         activeCard?.id === card.id && "cursor-grabbing opacity-50",
       )}
       onClick={() => setSelectedCardId(card.id.toString())}
@@ -202,7 +202,7 @@ export function CardItem({
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-card/95 text-muted-foreground shadow-md transition-all duration-200 hover:bg-card hover:text-foreground hover:shadow-lg"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-card/95 text-muted-foreground shadow-md transition-all duration-200 hover:bg-card hover:text-foreground hover:shadow-lg"
                 onClick={async (e) => {
                   e.stopPropagation();
                   await setSelectedCardId(card.id.toString());
@@ -225,7 +225,11 @@ export function CardItem({
       />
 
       {closestEdge && (
-        <DropIndicator edge={closestEdge} gap={4} color="hsl(var(--primary))" />
+        <DropIndicator
+          edge={closestEdge}
+          gap={3.5}
+          color="hsl(var(--primary))"
+        />
       )}
     </div>
   );

@@ -122,11 +122,21 @@ export const cardRouter = createTRPCRouter({
       z.object({
         boardId: z.string(),
         prompt: z.string(),
+        focusType: z.enum(["planning", "task", "review"]).optional(),
+        detailLevel: z
+          .enum(["High-Level", "Standard", "Detailed"])
+          .optional()
+          .default("Standard"),
       }),
     )
     .mutation(async ({ input }) => {
       await authService.canAccessBoard(input.boardId);
-      return cardService.generate(input.boardId, input.prompt);
+      return cardService.generate(
+        input.boardId,
+        input.prompt,
+        input.focusType,
+        input.detailLevel,
+      );
     }),
 
   countByBoardId: authedProcedure.input(z.string()).query(async ({ input }) => {

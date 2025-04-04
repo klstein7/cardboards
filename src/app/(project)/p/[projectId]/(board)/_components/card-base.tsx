@@ -49,7 +49,7 @@ export const CardBase = memo(
     return (
       <div
         className={cn(
-          "group relative flex flex-col gap-3 rounded-lg border bg-card/50 p-4 shadow backdrop-blur-[2px] transition-all duration-200",
+          "group relative flex flex-col gap-2.5 rounded-lg border bg-card/50 p-3.5 shadow backdrop-blur-[2px] transition-all duration-200",
           activeCard?.id === card.id && !isDragging && "opacity-30",
           isCompleted && "opacity-40 grayscale filter",
           priority && "border-l-4",
@@ -68,7 +68,7 @@ export const CardBase = memo(
         {children}
 
         {/* Header area with metadata */}
-        <div className="mb-2 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <span className="font-medium">Created</span>
             <span>
@@ -76,7 +76,7 @@ export const CardBase = memo(
             </span>
           </div>
           {card.dueDate && (
-            <div className="flex items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-1 shadow-sm">
+            <div className="flex items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-0.5 shadow-sm">
               <CalendarIcon className="h-3.5 w-3.5" />
               <span className="font-medium">
                 {format(card.dueDate, "MMM d")}
@@ -86,10 +86,10 @@ export const CardBase = memo(
         </div>
 
         {/* Title and description */}
-        <div className="flex flex-col space-y-2">
+        <div className="flex flex-col space-y-1.5">
           <h3
             className={cn(
-              "line-clamp-2 text-lg font-semibold tracking-tight",
+              "line-clamp-2 text-base font-semibold tracking-tight",
               isCompleted && "text-muted-foreground line-through",
             )}
           >
@@ -99,7 +99,7 @@ export const CardBase = memo(
             <div
               className={cn(
                 "prose prose-sm prose-invert line-clamp-2 text-xs text-muted-foreground",
-                isCompleted && "line-clamp-1 line-through",
+                isCompleted && "line-through",
               )}
               dangerouslySetInnerHTML={{ __html: card.description ?? "" }}
             />
@@ -107,13 +107,13 @@ export const CardBase = memo(
         </div>
 
         {/* Footer area with labels, priority, and assignee */}
-        <div className="mt-auto flex flex-col gap-2.5">
+        <div className="mt-auto flex flex-col gap-2">
           {card.labels && card.labels.length > 0 && (
             <div className="flex flex-wrap gap-1.5">
               {card.labels.map((label, index) => (
                 <div
                   key={index}
-                  className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground shadow-sm"
+                  className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground shadow-sm"
                 >
                   {label}
                 </div>
@@ -124,7 +124,7 @@ export const CardBase = memo(
             {priority && (
               <div
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full px-2.5 py-1",
+                  "flex items-center gap-1.5 rounded-full px-2.5 py-0.5",
                   "bg-opacity-20 shadow-sm transition-colors",
                 )}
                 style={{
@@ -138,7 +138,7 @@ export const CardBase = memo(
             )}
             {card.assignedTo && (
               <div className="flex items-center gap-1">
-                <Avatar className="h-7 w-7 border-2 border-background shadow-sm ring-1 ring-background transition-transform">
+                <Avatar className="h-6 w-6 border-2 border-background shadow-sm ring-1 ring-background transition-transform">
                   <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
                   <AvatarFallback className="text-xs font-medium">
                     {card.assignedTo.user.name?.[0] ?? ""}

@@ -61,6 +61,11 @@ export const CardListSchema = z.object({
 export const CardGenerateSchema = z.object({
   boardId: z.string(),
   prompt: z.string(),
+  focusType: z.enum(["planning", "task", "review"]).optional(),
+  detailLevel: z
+    .enum(["High-Level", "Standard", "Detailed"])
+    .optional()
+    .default("Standard"),
 });
 
 export const GeneratedCardSchema = z.object({

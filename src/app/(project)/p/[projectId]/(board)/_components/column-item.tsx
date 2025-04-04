@@ -2,6 +2,7 @@
 
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
 import { attachClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import {
   CheckCircle2,
@@ -40,6 +41,7 @@ interface ColumnItemProps {
 
 export function ColumnItem({ column }: ColumnItemProps) {
   const columnRef = useRef<HTMLDivElement>(null);
+  const cardListRef = useRef<HTMLDivElement>(null);
   const [isDropping, setIsDropping] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -94,7 +96,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
     const columnElement = columnRef.current;
     if (!columnElement) return;
 
-    return combine(
+    const cleanup = combine(
       dropTargetForElements({
         element: columnElement,
         canDrop({ source }) {
@@ -125,7 +127,20 @@ export function ColumnItem({ column }: ColumnItemProps) {
         },
       }),
     );
+
+    return cleanup;
   }, [column, moveCardMutation]);
+
+  useEffect(() => {
+    const cardListElement = cardListRef.current;
+    if (!cardListElement) return;
+
+    const cleanup = autoScrollForElements({
+      element: cardListElement,
+    });
+
+    return cleanup;
+  }, []);
 
   useEffect(() => {
     if (justMoved) {
@@ -301,6 +316,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
       </div>
 
       <div
+        ref={cardListRef}
         className={cn(
           "flex-1 overflow-y-auto p-2",
           column.isCompleted && "bg-success/5 dark:bg-success/10",
