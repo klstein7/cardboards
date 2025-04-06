@@ -2,6 +2,8 @@
 
 import { ChartArea, Kanban, Menu, Plus, Settings, Star } from "lucide-react";
 import dynamic from "next/dynamic";
+import { Nunito } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
@@ -35,6 +37,11 @@ const UserButton = dynamic(
   },
 );
 
+const nunito = Nunito({
+  subsets: ["latin"],
+  weight: ["400", "700", "800", "900", "1000"],
+});
+
 interface MobileNavProps {
   projectId: string;
 }
@@ -65,8 +72,26 @@ export function MobileNav({ projectId }: MobileNavProps) {
         <div className="flex h-full flex-col px-4 py-6">
           <SheetHeader className="text-left">
             <div className="mb-6 flex items-center">
-              <Star className="h-6 w-6 flex-shrink-0 fill-yellow-400 text-yellow-400" />
-              <SheetTitle className="ml-3 text-lg">Starboard</SheetTitle>
+              <SheetTitle asChild>
+                <Link
+                  href={`/p/${projectId}/overview/boards`}
+                  className="flex flex-shrink-0 items-center gap-2 outline-none"
+                  onClick={() => setOpen(false)}
+                >
+                  <Image
+                    src="/logo-small.png"
+                    alt="Cardboards Logo"
+                    width={32}
+                    height={32}
+                    className="flex-shrink-0"
+                  />
+                  <span
+                    className={cn("text-2xl font-extrabold", nunito.className)}
+                  >
+                    cardboards
+                  </span>
+                </Link>
+              </SheetTitle>
             </div>
           </SheetHeader>
 
