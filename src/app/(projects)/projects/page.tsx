@@ -7,7 +7,7 @@ import { ProjectList } from "../_components/project-list";
 import { ProjectsHeader } from "../_components/projects-header";
 
 export const metadata: Metadata = {
-  title: "Projects | Kanban Board",
+  title: "Projects | cardboards",
   description: "Manage and organize your projects in one place",
 };
 

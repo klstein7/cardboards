@@ -1,4 +1,5 @@
 import { subDays } from "date-fns";
+import { type Metadata } from "next";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
@@ -9,6 +10,11 @@ import { ScrollReset } from "./_components/scroll-reset";
 import { AnalyticsStoreProvider } from "./_store";
 
 type Params = Promise<{ projectId: string }>;
+
+export const metadata: Metadata = {
+  title: "Analytics | cardboards",
+  description: "View project analytics and performance metrics",
+};
 
 interface AnalyticsLayoutProps {
   children: React.ReactNode;

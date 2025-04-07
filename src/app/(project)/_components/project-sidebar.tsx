@@ -64,7 +64,18 @@ export function ProjectSidebar({
   const boards = useBoards(projectId);
   const isAdmin = useIsAdmin();
 
-  const isActivePathOrSubPath = (path: string) => pathname.startsWith(path);
+  const isActivePathOrSubPath = (basePath: string) => {
+    const baseSegments = basePath.split("/").filter(Boolean);
+    const currentSegments = pathname.split("/").filter(Boolean);
+
+    if (baseSegments.length > currentSegments.length) return false;
+
+    for (let i = 0; i < baseSegments.length; i++) {
+      if (baseSegments[i] !== currentSegments[i]) return false;
+    }
+
+    return true;
+  };
 
   const isActiveBoardPath = (boardId: string) =>
     pathname === `/p/${projectId}/b/${boardId}`;
@@ -151,7 +162,7 @@ export function ProjectSidebar({
                         isExpanded
                           ? "justify-start gap-2 px-3"
                           : "justify-center",
-                        pathname === `/p/${projectId}/overview/boards` &&
+                        isActivePathOrSubPath(`/p/${projectId}/overview`) &&
                           "bg-muted/75",
                       )}
                     >
@@ -182,9 +193,8 @@ export function ProjectSidebar({
                         isExpanded
                           ? "justify-start gap-2 px-3"
                           : "justify-center",
-                        isActivePathOrSubPath(
-                          `/p/${projectId}/analytics/overview`,
-                        ) && "bg-muted/75",
+                        isActivePathOrSubPath(`/p/${projectId}/analytics`) &&
+                          "bg-muted/75",
                       )}
                     >
                       <ChartArea className="h-5 w-5 flex-shrink-0" />

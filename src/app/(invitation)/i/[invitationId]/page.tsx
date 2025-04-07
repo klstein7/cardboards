@@ -1,6 +1,13 @@
+import { type Metadata } from "next";
+
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import InvitationCard from "../../_components/invitation-card";
+
+export const metadata: Metadata = {
+  title: "Invitation | cardboards",
+  description: "Accept your invitation to join a project",
+};
 
 export default async function InvitationPage({
   params,

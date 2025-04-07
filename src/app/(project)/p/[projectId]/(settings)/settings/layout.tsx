@@ -1,9 +1,16 @@
+import { type Metadata } from "next";
+
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { SettingsSidebar } from "../_components/settings-sidebar";
 import { SettingsToolbar } from "../_components/settings-toolbar";
 
 type Params = Promise<{ projectId: string }>;
+
+export const metadata: Metadata = {
+  title: "Settings | cardboards",
+  description: "Configure and customize your project settings",
+};
 
 interface SettingsLayoutProps {
   children: React.ReactNode;

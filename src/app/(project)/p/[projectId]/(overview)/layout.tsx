@@ -1,3 +1,5 @@
+import { type Metadata } from "next";
+
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectToolbar } from "../../../_components/project-toolbar";
@@ -5,6 +7,11 @@ import { ProjectStats } from "./_components/project-stats";
 import { ProjectTabs } from "./_components/project-tabs";
 
 type Params = Promise<{ projectId: string }>;
+
+export const metadata: Metadata = {
+  title: "Overview | cardboards",
+  description: "Get a high-level view of your project status and activities",
+};
 
 interface OverviewLayoutProps {
   children: React.ReactNode;

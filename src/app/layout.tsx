@@ -14,12 +14,6 @@ const font = Jost({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
-export const metadata: Metadata = {
-  title: "Kanban",
-  description: "Your minimal and easy to use kanban board",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
