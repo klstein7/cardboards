@@ -90,11 +90,16 @@ export default {
           "0%, 100%": { boxShadow: "0 0 0 0 rgba(var(--column-color-rgb), 0)" },
           "50%": { boxShadow: "0 0 0 4px rgba(var(--column-color-rgb), 0.3)" },
         },
+        "pulse-slow": {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" },
+        },
       },
       animation: {
         "collapsible-down": "collapsible-down 0.2s ease-out",
         "collapsible-up": "collapsible-up 0.2s ease-out",
         "column-moved": "column-pulse 1.5s ease-in-out",
+        "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },

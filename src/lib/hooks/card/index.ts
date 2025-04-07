@@ -8,5 +8,5 @@ export * from "./use-create-card";
 export * from "./use-create-many-cards";
 export * from "./use-delete-card";
 export * from "./use-duplicate-card";
-export * from "./use-generate-cards";
+export * from "./use-generate-single-card";
 export * from "./use-move-card";

@@ -1,6 +1,5 @@
 "use client";
 
-import { Sparkles, Wrench } from "lucide-react";
 import { useState } from "react";
 
 import {
@@ -11,10 +10,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { CreateCardForm } from "./create-card-form";
-import { GenerateCardForm } from "./generate-card-form";
+import { CreateCardFormWithAI } from "./create-card-form-with-ai";
 
 interface CreateCardDialogProps {
   columnId: string;
@@ -33,39 +30,17 @@ export function CreateCardDialog({ columnId, trigger }: CreateCardDialogProps) {
         onInteractOutside={(e) => e.preventDefault()}
       >
         <DialogHeader>
-          <DialogTitle>Create cards</DialogTitle>
+          <DialogTitle>Create card</DialogTitle>
           <DialogDescription>
-            Add one or multiple cards to organize and track your tasks within
-            this column.
+            Add a card to organize and track your tasks within this column.
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs defaultValue="auto" className="w-full">
-          <TabsList>
-            <TabsTrigger value="auto">
-              <div className="flex items-center gap-2">
-                <Sparkles className="size-4" />
-                Create with AI
-              </div>
-            </TabsTrigger>
-            <TabsTrigger value="manual">
-              <div className="flex items-center gap-2">
-                <Wrench className="size-4" />
-                Manual
-              </div>
-            </TabsTrigger>
-          </TabsList>
-
-          {/* AI Tab Content */}
-          <TabsContent className="pt-2" value="auto">
-            <GenerateCardForm columnId={columnId} setOpen={setOpen} />
-          </TabsContent>
-
-          {/* Manual Tab Content */}
-          <TabsContent className="pt-2" value="manual">
-            <CreateCardForm columnId={columnId} open={open} setOpen={setOpen} />
-          </TabsContent>
-        </Tabs>
+        <CreateCardFormWithAI
+          columnId={columnId}
+          open={open}
+          setOpen={setOpen}
+        />
       </DialogContent>
     </Dialog>
   );

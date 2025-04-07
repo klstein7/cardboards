@@ -81,6 +81,10 @@ export const CardGenerateResponseSchema = z.object({
   cards: z.array(GeneratedCardSchema),
 });
 
+export const CardGenerateSingleResponseSchema = z.object({
+  card: GeneratedCardSchema,
+});
+
 export type CardCreate = z.infer<typeof CardCreateSchema>;
 export type CardCreateMany = z.infer<typeof CardCreateManySchema>;
 export type CardCreateManyPayload = z.infer<typeof CardCreateManyPayloadSchema>;
@@ -91,3 +95,6 @@ export type CardSearchPayload = z.infer<typeof CardSearchSchemaPayload>;
 export type CardList = z.infer<typeof CardListSchema>;
 export type CardGenerate = z.infer<typeof CardGenerateSchema>;
 export type CardGenerateResponse = z.infer<typeof CardGenerateResponseSchema>;
+export type CardGenerateSingleResponse = z.infer<
+  typeof CardGenerateSingleResponseSchema
+>;

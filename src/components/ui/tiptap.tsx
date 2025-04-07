@@ -20,7 +20,7 @@ import {
   Strikethrough,
   Terminal,
 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -230,6 +230,13 @@ export function Tiptap({
       }
     },
   });
+
+  // Update editor content when value prop changes
+  useEffect(() => {
+    if (editor && value !== editor.getHTML()) {
+      editor.commands.setContent(value);
+    }
+  }, [editor, value]);
 
   // Handle link insertion
   const setLink = useCallback(() => {

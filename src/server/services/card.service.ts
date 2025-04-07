@@ -11,6 +11,7 @@ import {
   type CardCreate,
   type CardCreateManyPayload,
   CardGenerateResponseSchema,
+  CardGenerateSingleResponseSchema,
   type CardMove,
   type CardUpdatePayload,
 } from "../zod";
@@ -510,7 +511,7 @@ class CardService extends BaseService {
     const goalText = prompt.trim();
 
     const { object } = await generateObject({
-      model: google("gemini-2.5-pro-exp-03-25"),
+      model: google("gemini-2.0-flash-exp"),
       prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:
@@ -592,6 +593,70 @@ class CardService extends BaseService {
     });
 
     return object.cards;
+  }
+
+  /**
+   * Generate a single card with AI
+   * This is optimized for the new form approach where we need just one high-quality card
+   */
+  async generateSingle(
+    boardId: string,
+    prompt: string,
+    focusType?: "planning" | "task" | "review",
+    detailLevel: "High-Level" | "Standard" | "Detailed" = "Standard",
+  ) {
+    const board = await boardService.getWithDetails(boardId);
+
+    const effectiveFocusType = focusType ?? "general";
+    const goalText = prompt.trim();
+
+    const { object } = await generateObject({
+      model: google("gemini-2.0-flash-exp"),
+      prompt: `
+          You are an AI project management assistant specializing in Kanban methodology.
+          Generate a SINGLE high-quality card based on the user's request.
+          
+          USER REQUEST:
+          - Task Description: "${goalText}"
+          - Focus Area: "${effectiveFocusType}"
+          - Detail Level: "${detailLevel}"
+          
+          Card Properties:
+          - title: Required, max 255 characters, clear and actionable. Start with a verb.
+          - description: Detailed HTML content with acceptance criteria. Use proper HTML formatting:
+            * <p> for paragraphs
+            * <ul>/<li> for lists
+            * <strong> for bold text
+            * <em> for italic text
+            * Use proper heading tags if needed
+          - priority: One of ["low", "medium", "high", "urgent"] based on importance
+          - labels: 2-4 relevant categorical tags for the card
+          
+          Focus Area Guidelines:
+          - planning: Focus on preparation, organization, research, or strategy.
+          - task: Focus on implementation, execution, and actionable work.
+          - review: Focus on testing, evaluation, quality checks, or feedback.
+          - general: Balanced approach if no specific focus is given.
+          
+          Detail Level Guidelines:
+          - High-Level: Broader scope, more strategic
+          - Standard: Balanced detail level
+          - Detailed: More specific with clear acceptance criteria
+          
+          Title Format: Use a clear action verb and be specific
+          Description Format: Include a brief overview followed by acceptance criteria in a bulleted list
+          Priority: Assign appropriate priority based on urgency and importance
+          Labels: Include relevant keywords as labels to categorize the card
+          
+          Board Context:
+          ${board.name}
+          
+          Create a SINGLE comprehensive card that addresses the user's request with maximum usefulness.
+      `,
+      schema: CardGenerateSingleResponseSchema,
+    });
+
+    return object.card;
   }
 
   /**

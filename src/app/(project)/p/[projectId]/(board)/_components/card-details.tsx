@@ -17,7 +17,6 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
-import { useIsMobile } from "~/lib/hooks/utils";
 import { useCurrentBoardId } from "~/lib/hooks/utils/use-current-board-id";
 import { useCurrentProjectId } from "~/lib/hooks/utils/use-current-project-id";
 import { type Priority } from "~/lib/utils";
@@ -37,7 +36,6 @@ export function CardDetails() {
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const projectId = useCurrentProjectId();
   const boardId = useCurrentBoardId();
-  const isMobile = useIsMobile();
 
   const card = useCard(selectedCardId ? Number(selectedCardId) : null);
   const updateCardMutation = useUpdateCard();

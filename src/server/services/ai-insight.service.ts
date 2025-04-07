@@ -209,13 +209,6 @@ class AiInsightService extends BaseService {
       );
       const cards = (await Promise.all(cardPromises)).flat();
 
-      // Get board history data
-      const boardHistory = await historyService.listByEntity(
-        "board",
-        boardId,
-        txOrDb,
-      );
-
       // Get card history data (limited to last 50 entries for performance)
       const cardHistoryPromises = cards
         .slice(0, 10)
@@ -240,117 +233,32 @@ class AiInsightService extends BaseService {
         (h) => h.action === "update",
       );
 
-      // Get 10 most recent events
-      const recentEvents = [...boardHistory, ...flattenedCardHistory]
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        )
-        .slice(0, 10);
-
-      // Format recent events for display
-      const recentEventsText =
-        recentEvents.length > 0
-          ? `
-RECENT EVENTS:
-${recentEvents
-  .map((event) => {
-    const date = new Date(event.createdAt).toLocaleDateString();
-    const entityType =
-      event.entityType.charAt(0).toUpperCase() + event.entityType.slice(1);
-    return `- ${date}: ${entityType} ${event.action} ${event.changes ? `(${event.changes.substring(0, 30)}${event.changes.length > 30 ? "..." : ""})` : ""}`;
-  })
-  .join("\n")}`
-          : "";
-
-      // Format card data for the prompt
-      const cardDetailsText =
-        cards.length > 0
-          ? `
-CARD DETAILS:
-${cards
-  .slice(0, 20)
-  .map((card, index) => {
-    const columnName =
-      columns.find((col) => col.id === card.columnId)?.name ?? "Unknown Column";
-    return `- Card ${index + 1}: "${card.title}" (in ${columnName})${card.description ? ` - ${card.description.substring(0, 50)}${card.description.length > 50 ? "..." : ""}` : ""}`;
-  })
-  .join(
-    "\n",
-  )}${cards.length > 20 ? `\n... and ${cards.length - 20} more cards` : ""}
-`
-          : "";
-
-      // Create a historical summary
-      const historyText = `
-HISTORICAL DATA:
-- Board changes: ${boardHistory.length} events
-- Card movements: ${cardMoves.length} in recent history
-- Cards created: ${cardCreations.length} in recent history
-- Cards updated: ${cardUpdates.length} in recent history
-${recentEventsText}
-      `;
-
-      // Add card stats to provide more context
-      const cardsByColumn = columns.map((col) => ({
-        column: col.name,
-        count: cards.filter((c) => c.columnId === col.id).length,
-      }));
-
-      // Calculate basic metrics like cards per column and potential bottlenecks
-      const avgCardsPerColumn = cards.length / columns.length;
-      const potentialBottlenecks = cardsByColumn
-        .filter((col) => col.count > avgCardsPerColumn * 1.5)
-        .map((col) => col.column);
-
-      const cardStatsText = `
-CARD STATISTICS:
-- Average cards per column: ${avgCardsPerColumn.toFixed(1)}
-- Potential bottlenecks: ${potentialBottlenecks.length > 0 ? potentialBottlenecks.join(", ") : "None detected"}
-      `;
-
       const { object } = await generateObject({
         model: google("gemini-2.0-flash-exp"),
         schema: AiInsightGenerateResponseSchema,
         prompt: `
-You're a helpful teammate providing insights on this Kanban board:
+You're analyzing a Kanban board: "${board.name}" with ${cards.length} tasks across ${columns.length} columns.
 
-### BOARD INFO: ${board.name}
-• Columns: ${columns.length} (${columns.map((col) => col.name).join(", ")})
-• Tasks: ${cards.length}
-• Distribution: ${columns.map((col) => `${col.name}: ${cards.filter((c) => c.columnId === col.id).length}`).join(" | ")}
-
-### CARD STATS
-${cardStatsText.trim()}
-
-### CARD DETAILS
-${cardDetailsText.trim()}
-
-### ACTIVITY
-${historyText.trim()}
+Key statistics:
+- Column distribution: ${columns.map((col) => `${col.name}: ${cards.filter((c) => c.columnId === col.id).length}`).join(" | ")}
+- Recent activity: ${cardMoves.length} card moves, ${cardCreations.length} new cards, ${cardUpdates.length} updates
 
 ${
   previousInsights.length > 0
-    ? `### PREVIOUS INSIGHTS (provide different insights this time)
-${previousInsights.map((insight) => `• ${insight.title}: ${insight.content} (${insight.severity})`).join("\n")}`
+    ? `Previous insights (provide different ones this time): ${previousInsights
+        .slice(0, 3)
+        .map((i) => i.title)
+        .join(", ")}`
     : ""
 }
 
-### YOUR TASK
-Give 1-3 specific, actionable insights in a friendly, conversational tone. Talk like you're chatting with a teammate, not writing a report.
+Generate 1-3 actionable insights for this board. For each:
+1. Title (3-5 words)
+2. Content (1-2 sentences, max 30 words)
+3. Severity ("info", "warning", "critical")
+4. Type ("sprint_prediction", "bottleneck", "productivity", "risk_assessment", "recommendation")
 
-For each insight:
-1. Give a practical, action-oriented title (3-5 words)
-2. Provide specific advice with clear next steps (1-2 conversational sentences, max 30 words)
-3. Assign a severity ("info", "warning", or "critical")
-4. Choose a relevant type ("sprint_prediction", "bottleneck", "productivity", "risk_assessment", "recommendation")
-
-Make each insight useful by answering:
-• Who should do what?
-• Why does it matter?
-• How will we know if it's working?
-
-Be specific about tasks, columns, and team members where possible. Use examples from the actual cards.
+Be practical, specific, and conversational - like talking to a teammate.
 `,
       });
 
@@ -410,92 +318,22 @@ Be specific about tasks, columns, and team members where possible. Use examples 
       );
       const cards = (await Promise.all(cardPromises)).flat();
 
-      // Get project history data (limited to 100 recent events)
+      // Get project history data (limited to recent events)
       const projectHistory = await historyService.listByProjectPaginated(
         projectId,
-        100,
+        50,
         0,
         txOrDb,
       );
 
       // Analyze history entries
-      const recentActions = projectHistory.items.slice(0, 20);
       const cardMoves = projectHistory.items.filter(
         (h) => h.entityType === "card" && h.action === "move",
       );
-      const boardChanges = projectHistory.items.filter(
-        (h) => h.entityType === "board",
-      );
 
-      // Format 10 most recent events for display
-      const recentEventsText =
-        projectHistory.items.length > 0
-          ? `
-RECENT EVENTS:
-${projectHistory.items
-  .slice(0, 10)
-  .map((event) => {
-    const date = new Date(event.createdAt).toLocaleDateString();
-    const entityType =
-      event.entityType.charAt(0).toUpperCase() + event.entityType.slice(1);
-    return `- ${date}: ${entityType} ${event.action} ${event.changes ? `(${event.changes.substring(0, 30)}${event.changes.length > 30 ? "..." : ""})` : ""}`;
-  })
-  .join("\n")}`
-          : "";
-
-      // Format card data for the prompt
-      const cardDetailsText =
-        cards.length > 0
-          ? `
-CARD DETAILS:
-${cards
-  .slice(0, 25)
-  .map((card, index) => {
-    const columnName =
-      columns.find((col) => col.id === card.columnId)?.name ?? "Unknown Column";
-    const boardName =
-      boards.find(
-        (board) =>
-          board.id === columns.find((col) => col.id === card.columnId)?.boardId,
-      )?.name ?? "Unknown Board";
-    return `- Card ${index + 1}: "${card.title}" (in ${columnName}, ${boardName})${card.description ? ` - ${card.description.substring(0, 50)}${card.description.length > 50 ? "..." : ""}` : ""}`;
-  })
-  .join(
-    "\n",
-  )}${cards.length > 25 ? `\n... and ${cards.length - 25} more cards` : ""}
-`
-          : "";
-
-      // Create historical activity summary
-      const historyText = `
-HISTORICAL DATA:
-- Total history entries: ${projectHistory.pagination.total} events
-- Recent card movements: ${cardMoves.length} in latest history
-- Board-related changes: ${boardChanges.length} in latest history
-- Activity level: ${recentActions.length > 15 ? "High" : recentActions.length > 5 ? "Medium" : "Low"} (based on recent actions)
-${recentEventsText}
-      `;
-
-      // Add board and card stats to provide more context
-      const columnCountByBoard = boards.map((board) => ({
-        board: board.name,
-        columnCount: columns.filter((col) => col.boardId === board.id).length,
-        cardCount: cards.filter(
-          (card) =>
-            columns.find((col) => col.id === card.columnId)?.boardId ===
-            board.id,
-        ).length,
-      }));
-
-      // Calculate the completion rate based on cards in "Done" or similar columns
-      const doneColumnPatterns = ["Done", "Completed", "Finished"];
-      const doneColumns = columns.filter((col) =>
-        doneColumnPatterns.some((pattern) =>
-          col.name.toLowerCase().includes(pattern.toLowerCase()),
-        ),
-      );
-
-      const completedCards = doneColumns.reduce(
+      // Calculate the completion rate based on cards in columns marked as completed
+      const completedColumns = columns.filter((col) => col.isCompleted);
+      const completedCards = completedColumns.reduce(
         (count, col) =>
           count + cards.filter((c) => c.columnId === col.id).length,
         0,
@@ -506,62 +344,46 @@ ${recentEventsText}
           ? `${Math.round((completedCards / cards.length) * 100)}%`
           : "No data";
 
-      // Find potentially overloaded boards
-      const avgCardsPerBoard = cards.length / boards.length;
-      const overloadedBoards = columnCountByBoard
-        .filter((b) => b.cardCount > avgCardsPerBoard * 1.5)
-        .map((b) => b.board);
-
-      const projectStatsText = `
-PROJECT STATISTICS:
-- Cards per board: ${columnCountByBoard.map((b) => `${b.board}: ${b.cardCount}`).join(", ")}
-- Completion rate: ${completionRate}
-- Potentially overloaded boards: ${overloadedBoards.length > 0 ? overloadedBoards.join(", ") : "None detected"}
-      `;
+      // Add board and card stats
+      const columnCountByBoard = boards.map((board) => ({
+        board: board.name,
+        columnCount: columns.filter((col) => col.boardId === board.id).length,
+        cardCount: cards.filter(
+          (card) =>
+            columns.find((col) => col.id === card.columnId)?.boardId ===
+            board.id,
+        ).length,
+      }));
 
       const { object } = await generateObject({
         model: google("gemini-2.0-flash-exp"),
         schema: AiInsightGenerateResponseSchema,
         prompt: `
-You're a helpful teammate providing insights on this project:
+You're analyzing project: "${project.name}" with ${boards.length} boards, ${columns.length} columns, and ${cards.length} tasks.
 
-### PROJECT INFO: ${project.name}
-• Boards: ${boards.length} (${boards.map((b) => b.name).join(", ")})
-• Columns: ${columns.length}
-• Tasks: ${cards.length}
-• Distribution across boards: ${columnCountByBoard.map((b) => `${b.board}: ${b.cardCount}`).join(" | ")}
-
-### PROJECT STATS
-${projectStatsText.trim()}
-
-### CARD DETAILS
-${cardDetailsText.trim()}
-
-### ACTIVITY
-${historyText.trim()}
+Key statistics:
+- Boards: ${boards.map((b) => b.name).join(", ")}
+- Distribution: ${columnCountByBoard.map((b) => `${b.board}: ${b.cardCount}`).join(" | ")}
+- Completion rate: ${completionRate}
+- Recent activity: ${cardMoves.length} card moves in recent history
 
 ${
   previousInsights.length > 0
-    ? `### PREVIOUS INSIGHTS (provide different insights this time)
-${previousInsights.map((insight) => `• ${insight.title}: ${insight.content} (${insight.severity})`).join("\n")}`
+    ? `Previous insights (provide different ones this time): ${previousInsights
+        .slice(0, 3)
+        .map((i) => i.title)
+        .join(", ")}`
     : ""
 }
 
-### YOUR TASK
-Give 1-3 specific, actionable insights in a friendly, conversational tone. Talk like you're chatting with a teammate, not writing a report.
+Generate 1-3 actionable insights for this project. For each:
+1. Title (3-5 words)
+2. Content (1-2 sentences, max 30 words)
+3. Severity ("info", "warning", "critical")
+4. Type ("sprint_prediction", "bottleneck", "productivity", "risk_assessment", "recommendation")
 
-For each insight:
-1. Give a practical, action-oriented title (3-5 words)
-2. Provide specific advice with clear next steps (1-2 conversational sentences, max 30 words)
-3. Assign a severity ("info", "warning", or "critical") 
-4. Choose a relevant type ("sprint_prediction", "bottleneck", "productivity", "risk_assessment", "recommendation")
-
-Make each insight useful by answering:
-• Who should do what?
-• Why does it matter?
-• How will we know if it's working?
-
-Be specific about boards, tasks, and team members where possible. Use examples from the actual cards.
+Be practical, specific, and conversational - like talking to a teammate.
+Only reference boards that exist in this project: ${boards.map((b) => b.name).join(", ")}
 `,
       });
 

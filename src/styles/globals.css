@@ -4,29 +4,29 @@
 
 @layer base {
   :root {
-    /* Light mode - Logo Colors - Higher Contrast */
-    --background: 40 30% 98%; /* Very light warm off-white */
-    --foreground: 227 20% 12%; /* Darker text for better contrast */
-    --muted: 227 10% 92%; /* Lighter grey */
-    --muted-foreground: 227 15% 30%; /* Darker muted text for better contrast */
-    --popover: 0 0% 100%; /* White */
-    --popover-foreground: 227 20% 12%; /* Match foreground */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 227 20% 12%; /* Match foreground */
-    --border: 227 15% 75%; /* Darker subtle grey border */
-    --input: 227 15% 75%; /* Match border */
+    /* Light mode - Neutral Tones - Increased Contrast */
+    --background: 0 0% 98%; /* Lighter neutral-50 */
+    --foreground: 0 0% 7%; /* Darker neutral-900 */
+    --muted: 0 0% 92%; /* Lighter neutral-100/200 */
+    --muted-foreground: 0 0% 35%; /* Darker neutral-600/700 */
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 0 0% 7%; /* Darker neutral-900 */
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 0 0% 7%; /* Darker neutral-900 */
+    --border: 0 0% 80%; /* Darker neutral-300/400 */
+    --input: 0 0% 80%; /* Darker neutral-300/400 */
 
-    /* Primary - Blue from tape (darker) */
-    --primary: 210 70% 40%; /* Slightly darker for better contrast */
-    --primary-foreground: 210 100% 98%; /* White */
+    /* Primary - Blue */
+    --primary: 210 70% 40%;
+    --primary-foreground: 210 100% 98%;
 
-    /* Secondary - Muted Green (darker as requested) */
-    --secondary: 150 60% 40%; /* Darker green */
-    --secondary-foreground: 150 100% 98%; /* White */
+    /* Secondary - Neutral Grey */
+    --secondary: 0 0% 40%; /* neutral-600 */
+    --secondary-foreground: 0 0% 98%; /* neutral-50 */
 
-    /* Accent - Using primary blue */
-    --accent: 210 70% 40%; /* Match primary */
-    --accent-foreground: 210 100% 98%; /* White */
+    /* Accent - Matching Primary Blue */
+    --accent: 210 70% 40%;
+    --accent-foreground: 210 100% 98%;
 
     /* Destructive */
     --destructive: 0 85% 45%; /* Slightly darker red for better contrast */
@@ -56,7 +56,7 @@
     --due-overdue: 0 90% 45%;
     --due-today: 210 70% 40%;
     --due-week: 150 80% 35%; /* Darker original chart green */
-    --due-later: 150 60% 40%; /* Secondary Green */
+    --due-later: 0 0% 40%; /* Secondary Neutral Grey */
     --due-none: 227 10% 45%; /* Darker Grey */
 
     --radius: 0.5rem;
@@ -78,14 +78,14 @@
     --chart-pink-color: hsl(330 85% 55%);
     --primary-color: hsl(210 70% 40%); /* Blue */
 
-    /* Sidebar Colors - Adjusted for light theme contrast */
-    --sidebar-background: 40 30% 98%;
-    --sidebar-foreground: 227 20% 12%;
+    /* Sidebar Colors - Adjusted for light neutral theme */
+    --sidebar-background: 0 0% 96%; /* neutral-100 */
+    --sidebar-foreground: 0 0% 9%; /* neutral-900 */
     --sidebar-primary: 210 70% 40%;
     --sidebar-primary-foreground: 210 100% 98%;
-    --sidebar-accent: 227 10% 92%;
-    --sidebar-accent-foreground: 227 15% 30%;
-    --sidebar-border: 227 15% 75%;
+    --sidebar-accent: 0 0% 90%; /* neutral-200 */
+    --sidebar-accent-foreground: 0 0% 40%; /* neutral-600 */
+    --sidebar-border: 0 0% 83%; /* neutral-300 */
     --sidebar-ring: 210 70% 40%;
 
     /* Animation keyframes for fadeIn effect */
@@ -93,29 +93,29 @@
   }
 
   .dark {
-    /* Dark mode - Logo Colors - Higher Contrast */
-    --background: 227 20% 8%; /* Darker background for better contrast */
-    --foreground: 30 45% 98%; /* Lighter warm neutral text */
-    --muted: 227 15% 18%; /* Darker muted */
-    --muted-foreground: 30 30% 85%; /* Lighter muted text for better contrast */
-    --popover: 227 20% 12%; /* Slightly lighter than bg */
-    --popover-foreground: 30 45% 98%; /* Match foreground */
-    --card: 227 20% 12%; /* Slightly lighter than bg */
-    --card-foreground: 30 45% 98%; /* Match foreground */
-    --border: 227 20% 35%; /* Lighter border for contrast */
-    --input: 227 20% 35%; /* Match border */
+    /* Dark mode - Neutral Tones - Increased Contrast */
+    --background: 0 0% 7%; /* Darker neutral-900/950 */
+    --foreground: 0 0% 100%; /* Lighter neutral-0/white */
+    --muted: 0 0% 13%; /* Darker neutral-800/850 */
+    --muted-foreground: 0 0% 70%; /* Lighter neutral-400/300 */
+    --popover: 0 0% 10%; /* Darker than bg */
+    --popover-foreground: 0 0% 100%; /* Lighter neutral-0/white */
+    --card: 0 0% 10%; /* Darker than bg */
+    --card-foreground: 0 0% 100%; /* Lighter neutral-0/white */
+    --border: 0 0% 25%; /* Lighter neutral-700/600 */
+    --input: 0 0% 25%; /* Lighter neutral-700/600 */
 
-    /* Primary - Blue from tape (adjusted dark mode) */
-    --primary: 210 70% 65%; /* Slightly less bright for better contrast */
-    --primary-foreground: 210 35% 10%; /* Darker text for contrast */
+    /* Primary - Blue */
+    --primary: 210 70% 65%;
+    --primary-foreground: 210 35% 10%;
 
-    /* Secondary - Muted Green (darker as requested) */
-    --secondary: 150 50% 60%; /* Darker green in dark mode */
-    --secondary-foreground: 150 30% 12%; /* Darker text for contrast */
+    /* Secondary - Neutral Grey */
+    --secondary: 0 0% 63%; /* neutral-400 */
+    --secondary-foreground: 0 0% 9%; /* neutral-900 */
 
-    /* Accent - Using primary blue */
+    /* Accent - Matching Primary Blue */
     --accent: 210 70% 65%;
-    --accent-foreground: 210 35% 10%; /* Match primary-foreground */
+    --accent-foreground: 210 35% 10%;
 
     /* Destructive (adjusted dark mode) */
     --destructive: 0 85% 65%;
@@ -145,7 +145,7 @@
     --due-overdue: 0 90% 65%;
     --due-today: 210 70% 65%;
     --due-week: 150 75% 55%; /* Original chart green */
-    --due-later: 150 50% 60%; /* Secondary Green */
+    --due-later: 0 0% 63%; /* Secondary Neutral Grey */
     --due-none: 227 10% 75%;
 
     /* Color variables (HSL format) - Adjusted */
@@ -165,14 +165,14 @@
     --chart-pink-color: hsl(330 85% 70%);
     --primary-color: hsl(210 70% 65%); /* Blue */
 
-    /* Sidebar Colors - Adjusted */
-    --sidebar-background: 227 20% 12%; /* Match card */
-    --sidebar-foreground: 30 45% 98%; /* Match foreground */
+    /* Sidebar Colors - Adjusted for dark neutral theme */
+    --sidebar-background: 0 0% 12%; /* Match card/popover */
+    --sidebar-foreground: 0 0% 98%; /* neutral-50 */
     --sidebar-primary: 210 70% 65%; /* Match primary blue */
     --sidebar-primary-foreground: 210 35% 10%; /* Match primary-foreground */
-    --sidebar-accent: 227 15% 18%; /* Match muted */
-    --sidebar-accent-foreground: 30 30% 85%; /* Match muted-foreground */
-    --sidebar-border: 227 20% 35%; /* Match border */
+    --sidebar-accent: 0 0% 15%; /* neutral-800 */
+    --sidebar-accent-foreground: 0 0% 63%; /* neutral-400 */
+    --sidebar-border: 0 0% 20%; /* neutral-700 */
     --sidebar-ring: 210 70% 65%; /* Match ring blue */
   }
 }
@@ -210,14 +210,14 @@
 .bg-grid-pattern {
   background-size: 40px 40px;
   background-image:
-    linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
 }
 
 .dark .bg-grid-pattern {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
 }
 
 @layer utilities {

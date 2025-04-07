@@ -1,13 +1,13 @@
 "use client";
 
-import { ChartArea, Kanban, Menu, Plus, Settings, Star } from "lucide-react";
+import { ChartArea, Kanban, Menu, Plus, Settings } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Nunito } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
+import { BrandIcon } from "~/components/brand/brand-icon";
 import { Button } from "~/components/ui/button";
 import {
   Sheet,
@@ -78,13 +78,9 @@ export function MobileNav({ projectId }: MobileNavProps) {
                   className="flex flex-shrink-0 items-center gap-2 outline-none"
                   onClick={() => setOpen(false)}
                 >
-                  <Image
-                    src="/logo-small.png"
-                    alt="Cardboards Logo"
-                    width={32}
-                    height={32}
-                    className="flex-shrink-0"
-                  />
+                  <div className="flex items-center justify-center">
+                    <BrandIcon variant="small" />
+                  </div>
                   <span
                     className={cn("text-2xl font-extrabold", nunito.className)}
                   >

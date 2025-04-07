@@ -4,17 +4,17 @@ import {
   ChartArea,
   ChevronLeft,
   ChevronRight,
-  Kanban,
+  LayoutDashboard,
   Palette,
   Plus,
   Settings,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Nunito } from "next/font/google";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { BrandIcon } from "~/components/brand/brand-icon";
 import { Button } from "~/components/ui/button";
 import {
   Tooltip,
@@ -120,13 +120,7 @@ export function ProjectSidebar({
                     href={`/p/${projectId}/overview/boards`}
                     className="flex flex-shrink-0 items-center gap-2 outline-none"
                   >
-                    <Image
-                      src="/logo-small.png"
-                      alt="Starboard Logo"
-                      width={32}
-                      height={32}
-                      className="flex-shrink-0"
-                    />
+                    <BrandIcon variant="small" />
 
                     <span
                       className={cn(
@@ -161,7 +155,7 @@ export function ProjectSidebar({
                           "bg-muted/75",
                       )}
                     >
-                      <Kanban className="h-5 w-5 flex-shrink-0" />
+                      <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
                       <span
                         className={cn(
                           "transition-opacity duration-300 ease-in-out",
