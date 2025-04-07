@@ -1,4 +1,3 @@
-import { IconLayoutKanban } from "@tabler/icons-react";
 import { type HTMLAttributes } from "react";
 
 import { cn } from "~/lib/utils";
@@ -55,10 +54,88 @@ export function BrandIcon({
           padding,
         )}
       >
-        <IconLayoutKanban
-          size={numericSize}
-          className="text-background dark:text-background"
-        />
+        <svg
+          width={numericSize * 0.8}
+          height={numericSize * 0.8}
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="text-background antialiased dark:text-background"
+        >
+          {/* Drop shadow filter */}
+          <defs>
+            <filter id="shadow" x="0" y="0" width="200%" height="200%">
+              <feDropShadow
+                dx="0.2"
+                dy="0.4"
+                stdDeviation="0.3"
+                floodOpacity="0.1"
+              />
+            </filter>
+          </defs>
+
+          {/* Main left column */}
+          <rect
+            x="1"
+            y="3"
+            width="10"
+            height="18"
+            rx="2"
+            fill="currentColor"
+            filter="url(#shadow)"
+          />
+
+          {/* Task lines in left column */}
+          <line
+            x1="3"
+            y1="7"
+            x2="9"
+            y2="7"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+          <line
+            x1="3"
+            y1="10"
+            x2="7"
+            y2="10"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+          <line
+            x1="3"
+            y1="13"
+            x2="8"
+            y2="13"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+
+          {/* Main right column */}
+          <rect
+            x="12.5"
+            y="3"
+            width="9.5"
+            height="9"
+            rx="2"
+            fill="currentColor"
+            filter="url(#shadow)"
+          />
+
+          {/* Task line in right column */}
+          <line
+            x1="14.5"
+            y1="7"
+            x2="20"
+            y2="7"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+        </svg>
       </div>
     </div>
   );
