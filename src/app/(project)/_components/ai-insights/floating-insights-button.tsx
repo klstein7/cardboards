@@ -38,13 +38,16 @@ export function FloatingInsightsButton({
             onClick={() => setOpen(!open)}
             size="icon"
             className={cn(
-              "fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-lg transition-all hover:shadow-xl",
+              "fixed bottom-6 right-6 z-40 h-10 w-10 rounded-full shadow-lg transition-all hover:shadow-xl",
+              "bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500",
+              "ring-2 ring-amber-300/20 hover:ring-amber-300/30",
               open && "translate-x-[-344px]",
               className,
             )}
             variant="default"
           >
-            <Lightbulb className="h-5 w-5" />
+            <div className="absolute -inset-1 z-0 animate-pulse rounded-full bg-amber-400/20 opacity-75" />
+            <Lightbulb className="relative z-10 h-6 w-6 text-white" />
             <span className="sr-only">Toggle AI Insights</span>
           </Button>
 
@@ -71,11 +74,14 @@ export function FloatingInsightsButton({
               size="icon"
               className={cn(
                 "fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-lg transition-all hover:shadow-xl",
+                "bg-gradient-to-br from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500",
+                "ring-2 ring-amber-300/20 hover:ring-amber-300/30",
                 className,
               )}
               variant="default"
             >
-              <Lightbulb className="h-5 w-5" />
+              <div className="absolute -inset-1 z-0 animate-pulse rounded-full bg-amber-400/20 opacity-75" />
+              <Lightbulb className="relative z-10 h-6 w-6 text-white" />
               <span className="sr-only">Open AI Insights</span>
             </Button>
           </SheetTrigger>

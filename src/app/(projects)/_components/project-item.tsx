@@ -1,6 +1,10 @@
+"use client";
+
 import {
+  ActivityIcon,
   ArrowRightIcon,
   CalendarIcon,
+  ClockIcon,
   LayoutGridIcon,
   StarIcon,
   UsersIcon,
@@ -25,15 +29,42 @@ export function ProjectItem({ project }: { project: Project }) {
   const userCount = project.projectUsers?.length ?? 0;
   const isFavorite = project.isFavorite ?? false;
 
-  const progressPercentage = Math.min(
-    100,
-    (boardCount > 0 ? 50 : 0) + (userCount > 1 ? 50 : 25),
+  // Calculate project age in days
+  const projectAgeDays = Math.floor(
+    (Date.now() - project.createdAt.getTime()) / (1000 * 60 * 60 * 24),
   );
 
-  const getStatusColor = () => {
-    if (progressPercentage < 30) return "bg-rose-500/50";
-    if (progressPercentage < 70) return "bg-amber-500/50";
-    return "bg-emerald-500/50";
+  // Determine project activity level
+  const getActivityLevel = () => {
+    // Consider a project active if it has boards and team members
+    if (boardCount >= 3 && userCount >= 3) return "high";
+    if (boardCount >= 1 && userCount >= 1) return "medium";
+    return "low";
+  };
+
+  const activityLevel = getActivityLevel();
+
+  // Get activity status color and label
+  const getActivityColor = () => {
+    switch (activityLevel) {
+      case "high":
+        return "text-emerald-500";
+      case "medium":
+        return "text-amber-500";
+      case "low":
+        return "text-rose-500";
+    }
+  };
+
+  const getActivityLabel = () => {
+    switch (activityLevel) {
+      case "high":
+        return "High activity";
+      case "medium":
+        return "Active";
+      case "low":
+        return "New project";
+    }
   };
 
   return (
@@ -83,18 +114,25 @@ export function ProjectItem({ project }: { project: Project }) {
         </CardHeader>
 
         <CardContent className="flex flex-1 flex-col pt-2">
-          <div className="mb-5 space-y-1.5">
+          {/* Project status indicators */}
+          <div className="mb-5 space-y-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-muted-foreground">Completion</span>
-              <span className="font-medium text-foreground">
-                {progressPercentage}%
-              </span>
-            </div>
-            <div className="h-1 w-full overflow-hidden rounded-full bg-secondary/50">
-              <div
-                className={cn("h-full rounded-full", getStatusColor())}
-                style={{ width: `${progressPercentage}%` }}
-              />
+              <div className="flex items-center gap-2">
+                <ActivityIcon className={cn("h-4 w-4", getActivityColor())} />
+                <span className={cn("font-medium", getActivityColor())}>
+                  {getActivityLabel()}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <ClockIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                <span className="text-muted-foreground">
+                  {projectAgeDays === 0
+                    ? "Today"
+                    : projectAgeDays === 1
+                      ? "Yesterday"
+                      : `${projectAgeDays} days ago`}
+                </span>
+              </div>
             </div>
           </div>
 

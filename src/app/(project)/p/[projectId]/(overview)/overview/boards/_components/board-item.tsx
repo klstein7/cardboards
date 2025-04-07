@@ -10,7 +10,11 @@ import {
   CardFooter,
   CardHeader,
 } from "~/components/ui/card";
-import { useCardCountByBoardId, useColumns } from "~/lib/hooks";
+import {
+  useCardCountByBoardId,
+  useColumns,
+  useCompletedCardCountByBoardId,
+} from "~/lib/hooks";
 import { cn } from "~/lib/utils";
 
 export function BoardItem({
@@ -23,11 +27,19 @@ export function BoardItem({
   const [isHovered, setIsHovered] = useState(false);
   const columns = useColumns(board.id);
   const cardCount = useCardCountByBoardId(board.id);
+  const completedCardCount = useCompletedCardCountByBoardId(board.id);
 
   const columnsCount = columns.data?.length ?? 0;
   const cardsCount = cardCount.data ?? 0;
+  const completedCardsCount = completedCardCount.data ?? 0;
 
-  const progressPercentage = Math.min(100, (columnsCount / 8) * 100);
+  // Check if data is still loading
+  const isLoading = cardCount.isPending || completedCardCount.isPending;
+
+  const progressPercentage =
+    cardsCount > 0
+      ? Math.min(100, Math.round((completedCardsCount / cardsCount) * 100))
+      : 0;
 
   return (
     <Link
@@ -57,21 +69,8 @@ export function BoardItem({
               <h3 className="text-base font-medium tracking-tight text-foreground">
                 {board.name}
               </h3>
-              <div className="flex h-7 w-7 items-center justify-center rounded-md border border-border/40 bg-secondary/30">
-                <KanbanIcon
-                  className="h-4 w-4"
-                  style={{ color: board.color }}
-                />
-              </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className="bg-primary/5 text-[10px] font-normal"
-                style={{ borderColor: board.color + "40", color: board.color }}
-              >
-                Kanban
-              </Badge>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <CalendarIcon className="h-3 w-3" />
                 <span>
@@ -91,17 +90,25 @@ export function BoardItem({
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">Completion</span>
               <span className="font-medium text-foreground">
-                {Math.round(progressPercentage)}%
+                {isLoading ? (
+                  <span className="inline-block h-4 w-8 animate-pulse rounded bg-muted"></span>
+                ) : (
+                  `${progressPercentage}%`
+                )}
               </span>
             </div>
             <div className="h-1 w-full overflow-hidden rounded-full bg-secondary/50">
-              <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${progressPercentage}%`,
-                  backgroundColor: board.color,
-                }}
-              />
+              {isLoading ? (
+                <div className="h-full w-full animate-pulse bg-muted/70"></div>
+              ) : (
+                <div
+                  className="h-full rounded-full"
+                  style={{
+                    width: `${progressPercentage}%`,
+                    backgroundColor: board.color,
+                  }}
+                />
+              )}
             </div>
           </div>
 
@@ -125,7 +132,13 @@ export function BoardItem({
                   className="h-4 w-4"
                   style={{ color: board.color }}
                 />
-                <span className="text-sm font-medium">{cardsCount}</span>
+                <span className="text-sm font-medium">
+                  {isLoading ? (
+                    <span className="inline-block h-4 w-4 animate-pulse rounded bg-muted"></span>
+                  ) : (
+                    cardsCount
+                  )}
+                </span>
               </div>
               <div className="mt-0.5 text-[10px] text-muted-foreground">
                 {cardsCount === 1 ? "Card" : "Cards"}

@@ -166,6 +166,13 @@ export const cardRouter = createTRPCRouter({
     return cardService.countByBoardId(input);
   }),
 
+  countCompletedByBoardId: authedProcedure
+    .input(z.string())
+    .query(async ({ input }) => {
+      await authService.canAccessBoard(input);
+      return cardService.countCompletedByBoardId(input);
+    }),
+
   countByProjectId: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {

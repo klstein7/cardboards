@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Card } from "~/components/ui/card";
 import { type AiInsight } from "~/lib/hooks/ai/use-ai-insights";
@@ -20,6 +20,9 @@ interface InsightCardProps {
 
 export function InsightCard({ insight, index = 0 }: InsightCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
+  const contentRef = useRef<HTMLParagraphElement>(null);
+
   const typeInfo = getInsightTypeInfo(insight.insightType ?? "");
   const TypeIcon = typeInfo.icon;
   const severityColor = getSeverityColor(insight.severity ?? "info");
@@ -28,8 +31,32 @@ export function InsightCard({ insight, index = 0 }: InsightCardProps) {
   // Calculate staggered animation delay based on index
   const animationDelay = `${index * 75}ms`;
 
-  // Determine if content should be expandable
-  const hasLongContent = (insight.content?.length ?? 0) > 100;
+  // Check if content overflows the container
+  useEffect(() => {
+    const checkOverflow = () => {
+      const element = contentRef.current;
+      if (!element) return;
+
+      // If content is already large, skip the calculation
+      if ((insight.content?.length ?? 0) > 280) {
+        setHasOverflow(true);
+        return;
+      }
+
+      // Check if the content height exceeds the line-clamp-3 height
+      const lineHeight =
+        parseInt(window.getComputedStyle(element).lineHeight) || 20;
+      const maxHeight = lineHeight * 3;
+
+      setHasOverflow(element.scrollHeight > maxHeight + 5); // Add small buffer for accuracy
+    };
+
+    checkOverflow();
+
+    // Recheck on window resize
+    window.addEventListener("resize", checkOverflow);
+    return () => window.removeEventListener("resize", checkOverflow);
+  }, [insight.content]);
 
   return (
     <Card
@@ -88,6 +115,7 @@ export function InsightCard({ insight, index = 0 }: InsightCardProps) {
         {/* Content with better handling for long text */}
         <div className="relative">
           <p
+            ref={contentRef}
             className={cn(
               "text-xs leading-relaxed text-foreground/80 dark:text-foreground/90",
               expanded ? "" : "line-clamp-3",
@@ -97,7 +125,7 @@ export function InsightCard({ insight, index = 0 }: InsightCardProps) {
           </p>
 
           {/* Expand/collapse button for long content */}
-          {hasLongContent && (
+          {hasOverflow && (
             <button
               onClick={() => setExpanded(!expanded)}
               className="mt-1 flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"

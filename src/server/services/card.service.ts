@@ -478,6 +478,25 @@ class CardService extends BaseService {
   }
 
   /**
+   * Count completed cards by board ID (cards in columns marked as completed)
+   */
+  async countCompletedByBoardId(
+    boardId: string,
+    tx: Transaction | Database = this.db,
+  ) {
+    return this.executeWithTx(async (txOrDb) => {
+      const [result] = await txOrDb
+        .select({ count: count() })
+        .from(cards)
+        .innerJoin(columns, eq(cards.columnId, columns.id))
+        .where(
+          and(eq(columns.boardId, boardId), eq(columns.isCompleted, true)),
+        );
+
+      return result?.count ?? 0;
+    }, tx);
+  }
+  /**
    * Count cards by project ID
    */
   async countByProjectId(
