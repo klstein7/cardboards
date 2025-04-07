@@ -125,7 +125,7 @@ export function BoardList({ projectId }: BoardListProps) {
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-medium">Boards</h2>
           {totalBoards > 0 && (
-            <span className="inline-flex h-5 items-center rounded-full bg-secondary px-2 text-xs">
+            <span className="nav-badge">
               {hasFilters ? `${filteredCount}/${totalBoards}` : totalBoards}
             </span>
           )}

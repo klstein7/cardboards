@@ -84,9 +84,13 @@
     --sidebar-primary: 210 70% 40%;
     --sidebar-primary-foreground: 210 100% 98%;
     --sidebar-accent: 0 0% 90%; /* neutral-200 */
-    --sidebar-accent-foreground: 0 0% 40%; /* neutral-600 */
+    --sidebar-accent-foreground: 0 0% 20%; /* Darker for better contrast */
     --sidebar-border: 0 0% 83%; /* neutral-300 */
     --sidebar-ring: 210 70% 40%;
+
+    /* Navigation badge background and text - NEW */
+    --nav-badge-bg: 0 0% 85%;
+    --nav-badge-text: 0 0% 20%;
 
     /* Animation keyframes for fadeIn effect */
     --animate-duration: 0.3s;
@@ -171,9 +175,13 @@
     --sidebar-primary: 210 70% 65%; /* Match primary blue */
     --sidebar-primary-foreground: 210 35% 10%; /* Match primary-foreground */
     --sidebar-accent: 0 0% 15%; /* neutral-800 */
-    --sidebar-accent-foreground: 0 0% 63%; /* neutral-400 */
+    --sidebar-accent-foreground: 0 0% 85%; /* Lighter for better contrast */
     --sidebar-border: 0 0% 20%; /* neutral-700 */
     --sidebar-ring: 210 70% 65%; /* Match ring blue */
+
+    /* Navigation badge background and text - NEW */
+    --nav-badge-bg: 0 0% 30%;
+    --nav-badge-text: 0 0% 95%;
   }
 }
 
@@ -218,6 +226,16 @@
   background-image:
     linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+}
+
+/* Navigation badge styles - NEW */
+.nav-badge {
+  background-color: hsl(var(--nav-badge-bg));
+  color: hsl(var(--nav-badge-text));
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 500;
 }
 
 @layer utilities {

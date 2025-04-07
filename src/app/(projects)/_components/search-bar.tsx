@@ -97,7 +97,7 @@ export function SearchBar({
         <div className="flex items-center justify-between px-1 pt-2">
           <div className="flex items-center gap-2">
             <h2 className="text-lg font-medium">Projects</h2>
-            <span className="inline-flex h-5 items-center rounded-full bg-secondary px-2 text-xs">
+            <span className="nav-badge">
               {hasFilters ? `${filteredCount}/${totalProjects}` : totalProjects}
             </span>
           </div>
