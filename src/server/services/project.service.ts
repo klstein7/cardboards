@@ -8,6 +8,7 @@ import { boards, cards, columns, projects, projectUsers } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
 import { historyService } from "./history.service";
+import { notificationService } from "./notification.service";
 import { projectUserService } from "./project-user.service";
 import { userService } from "./user.service";
 
@@ -95,6 +96,32 @@ class ProjectService extends BaseService {
         txOrDb,
       );
 
+      // Notify project members if the name changed
+      if (data.name && data.name !== existingProject.name) {
+        const members = await txOrDb
+          .select({ userId: projectUsers.userId })
+          .from(projectUsers)
+          .where(eq(projectUsers.projectId, projectId));
+
+        const { userId: actorUserId } = await auth();
+
+        const notificationsData = members
+          .filter((member) => member.userId !== actorUserId)
+          .map((member) => ({
+            userId: member.userId,
+            projectId,
+            entityType: "project" as const,
+            entityId: projectId,
+            type: "project_update" as const,
+            title: `Project "${existingProject.name}" renamed`,
+            content: `The project "${existingProject.name}" was renamed to "${updated.name}".`,
+          }));
+
+        if (notificationsData.length > 0) {
+          await notificationService.createMany(notificationsData, txOrDb);
+        }
+      }
+
       return updated;
     }, tx);
   }
@@ -181,19 +208,27 @@ class ProjectService extends BaseService {
         throw new Error("Project not found");
       }
 
-      // Record the project data before deletion
-      const changes = JSON.stringify({
-        before: project,
-        after: null,
-      });
+      // Notify members BEFORE deleting
+      const members = await txOrDb
+        .select({ userId: projectUsers.userId })
+        .from(projectUsers)
+        .where(eq(projectUsers.projectId, projectId));
 
-      // Delete the project
+      const notificationsData = members.map((member) => ({
+        userId: member.userId,
+        projectId,
+        entityType: "project" as const,
+        entityId: projectId,
+        type: "project_update" as const, // Using 'project_update' type for deletion notification
+        title: `Project "${project.name}" is being deleted`,
+        content: `The project "${project.name}" is scheduled for deletion.`,
+      }));
+
+      if (notificationsData.length > 0) {
+        await notificationService.createMany(notificationsData, txOrDb);
+      }
+
       await txOrDb.delete(projects).where(eq(projects.id, projectId));
-
-      // Record history for project deletion
-      // Note: This needs to happen outside the transaction since we've deleted the project
-      // We'll create this record in a separate transaction
-      await historyService.recordProjectAction(projectId, "delete", changes);
     }, tx);
   }
 

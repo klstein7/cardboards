@@ -11,6 +11,7 @@ import { cardCommentRouter } from "./card-comment";
 import { columnRouter } from "./column";
 import { historyRouter } from "./history";
 import { invitationRouter } from "./invitation";
+import { notificationRouter } from "./notification";
 import { projectRouter } from "./project";
 import { projectUserRouter } from "./project-user";
 
@@ -37,6 +38,7 @@ export const appRouter = createTRPCRouter({
   column: columnRouter,
   history: historyRouter,
   invitation: invitationRouter,
+  notification: notificationRouter,
   project: projectRouter,
   projectUser: projectUserRouter,
 });

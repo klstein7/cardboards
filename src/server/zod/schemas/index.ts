@@ -4,6 +4,7 @@ export * from "./card.schema";
 export * from "./card-comment.schema";
 export * from "./column.schema";
 export * from "./history.schema";
+export * from "./notification.schema";
 export * from "./project.schema";
 export * from "./project-user.schema";
 export * from "./user.schema";

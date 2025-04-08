@@ -1,6 +1,7 @@
 import "server-only";
 
 import { google } from "@ai-sdk/google";
+import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
 import { count, eq } from "drizzle-orm";
 
@@ -17,7 +18,9 @@ import { BaseService } from "./base.service";
 import { cardService } from "./card.service";
 import { columnService } from "./column.service";
 import { historyService } from "./history.service";
+import { notificationService } from "./notification.service";
 import { projectService } from "./project.service";
+import { projectUserService } from "./project-user.service";
 
 /**
  * Service for managing board-related operations
@@ -92,6 +95,30 @@ class BoardService extends BaseService {
           ],
           txOrDb,
         );
+      }
+
+      const { userId: actorUserId } = await auth();
+      if (!actorUserId) {
+        throw new Error("User not authenticated");
+      }
+
+      const members = await projectUserService.list(board.projectId, txOrDb);
+      const project = await projectService.get(board.projectId, txOrDb);
+
+      const notificationsData = members
+        .filter((member) => member.userId !== actorUserId) // Don't notify the creator
+        .map((member) => ({
+          userId: member.userId,
+          projectId: board.projectId,
+          entityType: "board" as const,
+          entityId: board.id,
+          type: "project_update" as const, // Re-using project_update type for board creation
+          title: `New board created: "${board.name}"`,
+          content: `A new board named "${board.name}" was created in the project "${project.name}".`,
+        }));
+
+      if (notificationsData.length > 0) {
+        await notificationService.createMany(notificationsData, txOrDb);
       }
 
       return board;
@@ -192,6 +219,33 @@ class BoardService extends BaseService {
         txOrDb,
       );
 
+      // Notify project members if the board name changed
+      if (data.name && data.name !== existingBoard.name) {
+        const { userId: actorUserId } = await auth();
+        if (!actorUserId) {
+          throw new Error("User not authenticated");
+        }
+
+        const members = await projectUserService.list(board.projectId, txOrDb);
+        const project = await projectService.get(board.projectId, txOrDb);
+
+        const notificationsData = members
+          .filter((member) => member.userId !== actorUserId) // Don't notify the actor
+          .map((member) => ({
+            userId: member.userId,
+            projectId: board.projectId,
+            entityType: "board" as const,
+            entityId: board.id,
+            type: "project_update" as const, // Re-using project_update type
+            title: `Board "${existingBoard.name}" renamed`,
+            content: `In project "${project.name}", the board "${existingBoard.name}" was renamed to "${board.name}".`,
+          }));
+
+        if (notificationsData.length > 0) {
+          await notificationService.createMany(notificationsData, txOrDb);
+        }
+      }
+
       return board;
     }, tx);
   }
@@ -208,6 +262,31 @@ class BoardService extends BaseService {
 
       if (!board) {
         throw new Error("Board not found");
+      }
+
+      // Notify members BEFORE deleting
+      const { userId: actorUserId } = await auth();
+      if (!actorUserId) {
+        throw new Error("User not authenticated");
+      }
+
+      const members = await projectUserService.list(board.projectId, txOrDb);
+      const project = await projectService.get(board.projectId, txOrDb);
+
+      const notificationsData = members
+        .filter((member) => member.userId !== actorUserId) // Don't notify the actor
+        .map((member) => ({
+          userId: member.userId,
+          projectId: board.projectId,
+          entityType: "board" as const,
+          entityId: board.id,
+          type: "project_update" as const, // Re-using project_update type
+          title: `Board "${board.name}" deleted`,
+          content: `In project "${project.name}", the board "${board.name}" is scheduled for deletion.`,
+        }));
+
+      if (notificationsData.length > 0) {
+        await notificationService.createMany(notificationsData, txOrDb);
       }
 
       // Record the board data before deletion
@@ -310,7 +389,6 @@ class BoardService extends BaseService {
         schema: BoardGenerateResponseSchema,
       });
 
-      // Process the AI response - adjust to match your schema
       const responseData = response.object;
 
       // Create the board with the provided columns
@@ -326,8 +404,6 @@ class BoardService extends BaseService {
       // Add the generated cards to their respective columns
       const boardColumns = await columnService.list(board.id, txOrDb);
 
-      // Create all cards - you might need to adjust this based on your card schema
-      // This is a placeholder based on the error messages we saw
       const firstColumn = boardColumns[0];
       if (firstColumn) {
         const cardsToCreate = responseData.columns[0]?.cards ?? [];

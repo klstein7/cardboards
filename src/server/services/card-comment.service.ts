@@ -11,10 +11,12 @@ import {
   columns,
   projects,
   projectUsers,
+  users,
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
 import { historyService } from "./history.service";
+import { notificationService } from "./notification.service";
 import { projectService } from "./project.service";
 
 /**
@@ -50,21 +52,26 @@ class CardCommentService extends BaseService {
         throw new Error("User is not authenticated");
       }
 
-      const [project] = await txOrDb
+      // Get the card details
+      const [cardDetails] = await txOrDb
         .select({
+          title: cards.title,
+          assignedToId: cards.assignedToId,
+          card: cards,
           projectId: projects.id,
+          columnName: columns.name,
         })
-        .from(projects)
-        .innerJoin(boards, eq(boards.projectId, projects.id))
-        .innerJoin(columns, eq(columns.boardId, boards.id))
-        .innerJoin(cards, eq(cards.columnId, columns.id))
+        .from(cards)
+        .innerJoin(columns, eq(columns.id, cards.columnId))
+        .innerJoin(boards, eq(boards.id, columns.boardId))
+        .innerJoin(projects, eq(projects.id, boards.projectId))
         .where(eq(cards.id, data.cardId));
 
-      if (!project) {
-        throw new Error("Project not found");
+      if (!cardDetails) {
+        throw new Error("Card not found");
       }
 
-      const { projectId } = project;
+      const { projectId } = cardDetails;
 
       const [projectUser] = await txOrDb
         .select({
@@ -94,6 +101,17 @@ class CardCommentService extends BaseService {
         throw new Error("Failed to create comment");
       }
 
+      // Get commenter's name
+      const [commenter] = await txOrDb
+        .select({
+          userName: users.name,
+        })
+        .from(projectUsers)
+        .innerJoin(users, eq(users.id, projectUsers.userId))
+        .where(eq(projectUsers.id, projectUser.projectUserId));
+
+      const commenterName = commenter?.userName ?? "A user";
+
       // Record history for card comment creation
       await historyService.create(
         {
@@ -104,6 +122,35 @@ class CardCommentService extends BaseService {
         },
         txOrDb,
       );
+
+      // If card is assigned to someone else, create notification for assigned user
+      if (
+        cardDetails.assignedToId &&
+        cardDetails.assignedToId !== projectUser.projectUserId
+      ) {
+        // Get assigned user's ID
+        const [assignedProjectUser] = await txOrDb
+          .select({
+            userId: projectUsers.userId,
+          })
+          .from(projectUsers)
+          .where(eq(projectUsers.id, cardDetails.assignedToId));
+
+        if (assignedProjectUser) {
+          await notificationService.create(
+            {
+              userId: assignedProjectUser.userId,
+              projectId,
+              entityType: "card_comment",
+              entityId: comment.id,
+              type: "comment",
+              title: `New comment on "${cardDetails.title}"`,
+              content: `${commenterName} commented on a card assigned to you: "${cardDetails.title}" in column "${cardDetails.columnName}"`,
+            },
+            txOrDb,
+          );
+        }
+      }
 
       return comment;
     }, tx);

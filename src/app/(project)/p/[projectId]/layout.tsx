@@ -1,6 +1,6 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { FloatingInsightsButton } from "../../_components/ai-insights/floating-insights-button";
+import { FloatingActionMenu } from "../../_components/floating-action-menu";
 import { ProjectClientLayout } from "./_components/project-client-layout";
 
 type Params = Promise<{ projectId: string }>;
@@ -38,7 +38,7 @@ export default async function ProjectLayout({
       <ProjectClientLayout projectId={projectId} project={project}>
         {children}
       </ProjectClientLayout>
-      <FloatingInsightsButton entityType="project" entityId={projectId} />
+      <FloatingActionMenu entityType="project" entityId={projectId} />
     </HydrateClient>
   );
 }

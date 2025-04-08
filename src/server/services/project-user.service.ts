@@ -4,9 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 import { and, count, eq } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { projectUsers } from "../db/schema";
+import { projects, projectUsers } from "../db/schema";
 import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
+import { notificationService } from "./notification.service";
 
 /**
  * Update current user preferences data shape
@@ -16,7 +17,7 @@ export interface ProjectUserPreferencesUpdate {
 }
 
 /**
- * Service for managing project user operations
+ * Service for managing project users
  */
 class ProjectUserService extends BaseService {
   /**
@@ -52,6 +53,28 @@ class ProjectUserService extends BaseService {
       if (!projectUser) {
         throw new Error("Failed to create project user");
       }
+
+      // Get project and user names for notification
+      const [project] = await txOrDb
+        .select({
+          name: projects.name,
+        })
+        .from(projects)
+        .where(eq(projects.id, data.projectId));
+
+      // Create notification for the user
+      await notificationService.create(
+        {
+          userId: data.userId,
+          projectId: data.projectId,
+          entityType: "project",
+          entityId: data.projectId,
+          type: "project_update",
+          title: `You were added to project "${project?.name ?? "Untitled"}"`,
+          content: `You have been added to the project "${project?.name ?? "Untitled"}" as a ${data.role}.`,
+        },
+        txOrDb,
+      );
 
       return projectUser;
     }, tx);

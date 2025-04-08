@@ -295,6 +295,65 @@ export const aiInsights = createTable(
   ],
 );
 
+export const notifications = createTable(
+  "notification",
+  {
+    id: varchar("id", { length: 255 })
+      .primaryKey()
+      .$defaultFn(() => createId()),
+    userId: varchar("user_id", { length: 255 })
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    projectId: varchar("project_id", { length: 255 }).references(
+      () => projects.id,
+      { onDelete: "cascade" },
+    ),
+    entityType: varchar("entity_type", {
+      length: 50,
+      enum: [
+        "project",
+        "board",
+        "column",
+        "card",
+        "card_comment",
+        "invitation",
+        "project_user",
+        "ai_insight",
+      ],
+    }).notNull(),
+    entityId: varchar("entity_id", { length: 255 }).notNull(),
+    type: varchar("type", {
+      length: 50,
+      enum: [
+        "mention",
+        "assignment",
+        "comment",
+        "due_date",
+        "invitation",
+        "column_update",
+        "card_move",
+        "insight",
+        "project_update",
+      ],
+    }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    content: varchar("content", { length: 1000 }),
+    isRead: boolean("is_read").notNull().default(false),
+    metadata: text("metadata"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdateFn(() => new Date()),
+  },
+  (table) => [
+    index("notification_user_id_idx").on(table.userId),
+    index("notification_project_id_idx").on(table.projectId),
+    index("notification_entity_idx").on(table.entityType, table.entityId),
+    index("notification_is_read_idx").on(table.isRead),
+    index("notification_created_at_idx").on(table.createdAt),
+  ],
+);
+
 export const invitationRelations = relations(invitations, ({ one }) => ({
   project: one(projects, {
     fields: [invitations.projectId],
@@ -303,6 +362,17 @@ export const invitationRelations = relations(invitations, ({ one }) => ({
   invitedBy: one(projectUsers, {
     fields: [invitations.invitedById],
     references: [projectUsers.id],
+  }),
+}));
+
+export const notificationRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+  project: one(projects, {
+    fields: [notifications.projectId],
+    references: [projects.id],
   }),
 }));
 
@@ -319,6 +389,7 @@ export const aiInsightRelations = relations(aiInsights, ({ one }) => ({
 
 export const userRelations = relations(users, ({ many }) => ({
   projectUsers: many(projectUsers),
+  notifications: many(notifications),
 }));
 
 export const projectUserRelations = relations(
@@ -340,6 +411,7 @@ export const projectRelations = relations(projects, ({ many }) => ({
   boards: many(boards),
   projectUsers: many(projectUsers),
   insights: many(aiInsights),
+  notifications: many(notifications),
 }));
 
 export const boardRelations = relations(boards, ({ many, one }) => ({

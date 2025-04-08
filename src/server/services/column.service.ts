@@ -1,5 +1,6 @@
 import "server-only";
 
+import { auth } from "@clerk/nextjs/server";
 import { and, asc, eq, gte, sql } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
@@ -12,6 +13,9 @@ import {
 import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { historyService } from "./history.service";
+import { notificationService } from "./notification.service";
+import { projectService } from "./project.service";
+import { projectUserService } from "./project-user.service";
 
 /**
  * Service for managing column operations
@@ -178,6 +182,33 @@ class ColumnService extends BaseService {
         txOrDb,
       );
 
+      // Notify project members if the column name changed
+      if (data.name && data.name !== existingColumn.name) {
+        const { userId: actorUserId } = await auth();
+        if (!actorUserId) {
+          throw new Error("User not authenticated");
+        }
+
+        const members = await projectUserService.list(board.projectId, txOrDb);
+        const project = await projectService.get(board.projectId, txOrDb);
+
+        const notificationsData = members
+          .filter((member) => member.userId !== actorUserId) // Don't notify the actor
+          .map((member) => ({
+            userId: member.userId,
+            projectId: board.projectId,
+            entityType: "column" as const,
+            entityId: column.id,
+            type: "column_update" as const,
+            title: `Column "${existingColumn.name}" renamed`,
+            content: `In project "${project.name}", the column "${existingColumn.name}" was renamed to "${column.name}".`,
+          }));
+
+        if (notificationsData.length > 0) {
+          await notificationService.createMany(notificationsData, txOrDb);
+        }
+      }
+
       return column;
     }, tx);
   }
@@ -191,6 +222,31 @@ class ColumnService extends BaseService {
 
       // Get board for project ID
       const board = await boardService.get(column.boardId, txOrDb);
+
+      // Notify members BEFORE deleting
+      const { userId: actorUserId } = await auth();
+      if (!actorUserId) {
+        throw new Error("User not authenticated");
+      }
+
+      const members = await projectUserService.list(board.projectId, txOrDb);
+      const project = await projectService.get(board.projectId, txOrDb);
+
+      const notificationsData = members
+        .filter((member) => member.userId !== actorUserId)
+        .map((member) => ({
+          userId: member.userId,
+          projectId: board.projectId,
+          entityType: "column" as const,
+          entityId: column.id,
+          type: "column_update" as const,
+          title: `Column "${column.name}" deleted`,
+          content: `In project "${project.name}", the column "${column.name}" was deleted.`,
+        }));
+
+      if (notificationsData.length > 0) {
+        await notificationService.createMany(notificationsData, txOrDb);
+      }
 
       // Record the column data before deletion
       const changes = JSON.stringify({

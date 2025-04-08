@@ -24,6 +24,7 @@ export * from "./card-comment.service";
 export * from "./column.service";
 export * from "./history.service";
 export * from "./invitation.service";
+export * from "./notification.service";
 export * from "./project.service";
 export * from "./project-user.service";
 export * from "./user.service";

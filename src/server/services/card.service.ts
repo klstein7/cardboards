@@ -3,10 +3,22 @@ import "server-only";
 import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
-import { and, asc, count, desc, eq, gt, gte, lt, lte, sql } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  gt,
+  gte,
+  isNotNull,
+  lt,
+  lte,
+  sql,
+} from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { boards, cards, columns } from "../db/schema";
+import { boards, cards, columns, projectUsers, users } from "../db/schema";
 import {
   type CardCreate,
   type CardCreateManyPayload,
@@ -19,6 +31,7 @@ import { BaseService } from "./base.service";
 import { boardService } from "./board.service";
 import { columnService } from "./column.service";
 import { historyService } from "./history.service";
+import { notificationService } from "./notification.service";
 import { projectService } from "./project.service";
 import { projectUserService } from "./project-user.service";
 
@@ -168,6 +181,11 @@ class CardService extends BaseService {
     return this.executeWithTx(async (txOrDb) => {
       // Get the card before update to track changes
       const existingCard = await this.get(cardId, txOrDb);
+      const { userId: actorUserId } = await auth(); // Get actor user ID
+
+      if (!actorUserId) {
+        throw new Error("User is not authenticated");
+      }
 
       // Prepare data for the update
       const updateData = { ...data };
@@ -212,6 +230,51 @@ class CardService extends BaseService {
         changes,
         txOrDb,
       );
+
+      // Check if assignedToId changed and is not null
+      if (
+        updateData.assignedToId !== undefined && // Check if assignedToId is part of the update
+        updateData.assignedToId !== existingCard.assignedToId && // Check if it actually changed
+        updateData.assignedToId !== null // Check if someone is being assigned (not unassigned)
+      ) {
+        const assignedProjectUserId = updateData.assignedToId;
+
+        // Get the actual user ID of the assigned person
+        const [assignedProjectUser] = await txOrDb
+          .select({ userId: projectUsers.userId })
+          .from(projectUsers)
+          .where(eq(projectUsers.id, assignedProjectUserId));
+
+        // Only notify if assigned user is different from the actor
+        if (assignedProjectUser && assignedProjectUser.userId !== actorUserId) {
+          // Get actor's name
+          const [actor] = await txOrDb
+            .select({ name: users.name })
+            .from(users)
+            .where(eq(users.id, actorUserId));
+          const actorName = actor?.name ?? "Someone";
+
+          // Get column details for notification content
+          const [column] = await txOrDb
+            .select({ name: columns.name })
+            .from(columns)
+            .where(eq(columns.id, card.columnId));
+
+          // Create notification for the newly assigned user
+          await notificationService.create(
+            {
+              userId: assignedProjectUser.userId,
+              projectId,
+              entityType: "card",
+              entityId: card.id.toString(),
+              type: "assignment",
+              title: `You were assigned to card "${card.title}"`,
+              content: `${actorName} assigned you to the card "${card.title}" in column "${column?.name ?? "Unknown"}".`,
+            },
+            txOrDb,
+          );
+        }
+      }
 
       return card;
     }, tx);
@@ -755,8 +818,6 @@ class CardService extends BaseService {
           priority: existingCard.priority,
           labels: existingCard.labels,
           order: lastCardOrder + 1,
-          // Don't copy assignedToId - leave it unassigned
-          // Don't copy dueDate - leave it undefined
         })
         .returning();
 
@@ -778,6 +839,78 @@ class CardService extends BaseService {
       );
 
       return duplicatedCard;
+    }, tx);
+  }
+
+  /**
+   * Send due date notifications for cards that are due soon
+   */
+  async sendDueDateReminders(tx: Transaction | Database = this.db) {
+    return this.executeWithTx(async (txOrDb) => {
+      const now = new Date();
+      // Find cards due in the next 24 hours
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // Find cards with due dates within the next 24 hours that don't have a reminder sent yet
+      const dueSoonCards = await txOrDb.query.cards.findMany({
+        where: and(
+          isNotNull(cards.dueDate),
+          lte(cards.dueDate, tomorrow),
+          gt(cards.dueDate, now),
+          isNotNull(cards.assignedToId),
+        ),
+        with: {
+          column: true,
+          assignedTo: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      const results = [];
+
+      // Create notifications for each card
+      for (const card of dueSoonCards) {
+        if (!card.assignedTo?.user) continue;
+
+        const dueTime = card.dueDate
+          ? new Date(card.dueDate).toLocaleString()
+          : "soon";
+
+        // Find the project ID by getting the board
+        const [board] = await txOrDb
+          .select({
+            projectId: boards.projectId,
+          })
+          .from(boards)
+          .where(eq(boards.id, card.column.boardId));
+
+        if (!board) continue;
+
+        // Send notification
+        const notification = await notificationService.create(
+          {
+            userId: card.assignedTo.user.id,
+            projectId: board.projectId,
+            entityType: "card",
+            entityId: card.id.toString(),
+            type: "due_date",
+            title: `Reminder: "${card.title}" is due soon`,
+            content: `The card "${card.title}" in column "${card.column.name}" is due ${dueTime}.`,
+          },
+          txOrDb,
+        );
+
+        results.push(notification);
+      }
+
+      return {
+        sent: results.length,
+        notifications: results,
+      };
     }, tx);
   }
 }

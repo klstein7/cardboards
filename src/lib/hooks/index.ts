@@ -4,6 +4,7 @@ export * from "./card-comment";
 export * from "./column";
 export * from "./history";
 export * from "./invitation";
+export * from "./notification";
 export * from "./project";
 export * from "./project-user";
 export * from "./utils";
