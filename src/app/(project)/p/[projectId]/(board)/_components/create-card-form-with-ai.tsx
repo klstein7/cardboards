@@ -24,7 +24,7 @@ import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { Tiptap } from "~/components/ui/tiptap";
 import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { useCreateCard, useGenerateSingleCard } from "~/lib/hooks";
+import { useCreateCard, useGenerateSingleCard, useIsMobile } from "~/lib/hooks";
 import { useStrictCurrentBoardId } from "~/lib/hooks/utils";
 import {
   type CardCreate,
@@ -54,6 +54,7 @@ export function CreateCardFormWithAI({
   setOpen,
 }: CreateCardFormWithAIProps) {
   const boardId = useStrictCurrentBoardId();
+  const isMobile = useIsMobile();
 
   // AI-related state
   const [goal, setGoal] = useState("");
@@ -164,7 +165,7 @@ export function CreateCardFormWithAI({
   }, [open, form]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* AI Generation Section with improved visuals */}
       <div
         className={`relative overflow-hidden rounded-lg border ${
@@ -178,16 +179,16 @@ export function CreateCardFormWithAI({
 
         {/* Subtle glow effect when content is generated */}
         {generatedCard && (
-          <div className="animate-pulse-slow absolute inset-0 rounded-lg bg-primary/5 opacity-30"></div>
+          <div className="absolute inset-0 animate-pulse-slow rounded-lg bg-primary/5 opacity-30"></div>
         )}
 
-        <div className="relative p-5">
+        <div className="relative p-4 sm:p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 font-medium text-foreground/90">
               {generatedCard ? (
                 <Zap className="h-4 w-4 animate-pulse text-primary" />
               ) : (
-                <Sparkles className="animate-pulse-slow h-4 w-4 text-primary opacity-80" />
+                <Sparkles className="h-4 w-4 animate-pulse-slow text-primary opacity-80" />
               )}
               <span className="bg-gradient-to-r from-foreground/90 to-foreground/70 bg-clip-text text-transparent">
                 AI Assistant
@@ -195,9 +196,10 @@ export function CreateCardFormWithAI({
             </h3>
 
             {generatedCard && (
-              <div className="inline-flex items-center rounded-full border border-green-200/30 bg-green-100/20 px-3 py-0.5 text-xs font-medium text-green-700 shadow-sm dark:bg-green-900/20 dark:text-green-400">
-                <CheckCircle2 className="mr-1.5 h-3 w-3" />
-                Content generated
+              <div className="inline-flex items-center rounded-full border border-green-200/30 bg-green-100/20 px-2 py-0.5 text-xs font-medium text-green-700 shadow-sm dark:bg-green-900/20 dark:text-green-400 sm:px-3">
+                <CheckCircle2 className="mr-1 h-3 w-3 sm:mr-1.5" />
+                <span className="hidden sm:inline">Content generated</span>
+                <span className="sm:hidden">Generated</span>
               </div>
             )}
           </div>
@@ -205,7 +207,7 @@ export function CreateCardFormWithAI({
           <div className="space-y-4">
             {generatedCard ? (
               <div className="rounded-md border border-border/40 bg-card/80 p-3 text-sm shadow-sm backdrop-blur-sm">
-                <div className="flex gap-3">
+                <div className="flex gap-2 sm:gap-3">
                   <Info className="mt-0.5 h-4 w-4 shrink-0 text-primary/70" />
                   <div>
                     <p className="font-medium text-foreground">
@@ -227,14 +229,21 @@ export function CreateCardFormWithAI({
                       Describe your task
                     </Label>
                     <span className="rounded-full bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
-                      AI will generate all fields
+                      <span className="hidden sm:inline">
+                        AI will generate all fields
+                      </span>
+                      <span className="sm:hidden">AI generated</span>
                     </span>
                   </div>
                   <div className="group/input relative">
                     <Input
                       id="goal"
                       value={goal}
-                      placeholder="Example: Create login page, Design user profile, Fix navigation bug..."
+                      placeholder={
+                        isMobile
+                          ? "Describe your task..."
+                          : "Example: Create login page, Design user profile, Fix navigation bug..."
+                      }
                       className="border-border/40 pr-10 shadow-sm transition-all focus-visible:border-primary/40 focus-visible:ring-primary/20"
                       onChange={(e) => setGoal(e.target.value)}
                     />
@@ -242,7 +251,7 @@ export function CreateCardFormWithAI({
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                       <div className="h-1 w-1 rounded-full bg-primary/60"></div>
@@ -250,7 +259,7 @@ export function CreateCardFormWithAI({
                     </Label>
                     <ToggleGroup
                       type="single"
-                      size="sm"
+                      size={isMobile ? "default" : "sm"}
                       variant="outline"
                       value={selectedTaskType ?? ""}
                       onValueChange={(value) => {
@@ -277,7 +286,7 @@ export function CreateCardFormWithAI({
                     </Label>
                     <ToggleGroup
                       type="single"
-                      size="sm"
+                      size={isMobile ? "default" : "sm"}
                       variant="outline"
                       value={detailLevel}
                       onValueChange={(value) => {
@@ -296,7 +305,7 @@ export function CreateCardFormWithAI({
                           value={level}
                           className="flex-1 rounded text-xs transition-colors data-[state=on]:bg-primary/10 data-[state=on]:text-primary"
                         >
-                          {level}
+                          {level === "High-Level" && isMobile ? "High" : level}
                         </ToggleGroupItem>
                       ))}
                     </ToggleGroup>
@@ -304,7 +313,7 @@ export function CreateCardFormWithAI({
                 </div>
 
                 <Button
-                  size="sm"
+                  size={isMobile ? "default" : "sm"}
                   variant="secondary"
                   className="w-full bg-gradient-to-r from-primary/80 to-primary font-medium text-primary-foreground shadow transition-all duration-300 hover:from-primary hover:to-primary/90"
                   onClick={handleGenerate}
@@ -322,7 +331,7 @@ export function CreateCardFormWithAI({
                 <Button
                   size="sm"
                   variant="outline"
-                  className="text-xs hover:bg-primary/5"
+                  className="text-xs hover:bg-primary/5 hover:text-foreground"
                   onClick={() => {
                     setGeneratedCard(null);
                   }}
@@ -344,7 +353,7 @@ export function CreateCardFormWithAI({
           className="flex flex-col gap-5"
         >
           {/* Title section with enhanced styling */}
-          <div className="rounded-lg border border-border/30 bg-card p-4 shadow-sm">
+          <div className="rounded-lg border border-border/30 bg-card p-3 shadow-sm sm:p-4">
             <FormField
               control={form.control}
               name="title"
@@ -375,7 +384,7 @@ export function CreateCardFormWithAI({
           <div className="overflow-hidden rounded-lg border border-border/30 bg-card shadow-sm transition-all duration-300">
             <button
               type="button"
-              className="flex w-full items-center justify-between p-4 text-sm font-medium transition-colors hover:bg-muted/30"
+              className="flex w-full items-center justify-between p-3 text-sm font-medium transition-colors hover:bg-muted/30 sm:p-4"
               onClick={() => setShowDetails(!showDetails)}
             >
               <div className="flex items-center gap-2">
@@ -392,7 +401,7 @@ export function CreateCardFormWithAI({
             </button>
 
             {showDetails && (
-              <div className="space-y-5 border-t p-4 duration-300 animate-in slide-in-from-top-5">
+              <div className="space-y-5 border-t p-3 duration-300 animate-in slide-in-from-top-5 sm:p-4">
                 <FormField
                   control={form.control}
                   name="description"
@@ -437,7 +446,7 @@ export function CreateCardFormWithAI({
                   </button>
 
                   {showMetadata && (
-                    <div className="space-y-4 border-t p-4 duration-200 animate-in slide-in-from-top-3">
+                    <div className="space-y-4 border-t p-3 duration-200 animate-in slide-in-from-top-3 sm:p-4">
                       <FormField
                         control={form.control}
                         name="dueDate"
@@ -461,7 +470,7 @@ export function CreateCardFormWithAI({
                         )}
                       />
 
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <FormField
                           control={form.control}
                           name="assignedToId"
@@ -519,7 +528,7 @@ export function CreateCardFormWithAI({
                             <FormControl className="w-full">
                               <TagInput
                                 {...field}
-                                className="sm:min-w-[450px]"
+                                className="min-w-full sm:min-w-[450px]"
                                 styleClasses={{
                                   input: "h-9",
                                   inlineTagsContainer: "pl-1 py-0.5",
@@ -552,19 +561,19 @@ export function CreateCardFormWithAI({
             )}
           </div>
 
-          <div className="mt-2 flex justify-end gap-3 border-t border-border/30 pt-5">
+          <div className="mt-2 flex justify-end gap-3 border-t border-border/30 pt-4">
             <Button
               variant="outline"
               type="button"
               onClick={() => setOpen(false)}
-              className="px-5"
+              className="px-4 sm:px-5"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               isLoading={createCardMutation.isPending}
-              className="bg-primary/90 px-6 font-medium shadow-sm hover:bg-primary"
+              className="bg-primary/90 px-5 font-medium shadow-sm hover:bg-primary sm:px-6"
             >
               Create
             </Button>

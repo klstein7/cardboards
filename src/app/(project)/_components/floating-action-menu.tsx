@@ -60,19 +60,30 @@ export function FloatingActionMenu({
       <>
         {/* Only show main action button when no panels are open */}
         {!notificationsOpen && !insightsOpen && (
-          <Button
-            onClick={toggleMenu}
-            size="icon"
-            className={cn(
-              "fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-md hover:shadow-lg",
-              "border border-border bg-background text-foreground transition-all",
-              className,
+          <div className="fixed bottom-6 right-6 z-40">
+            <Button
+              onClick={toggleMenu}
+              size="icon"
+              className={cn(
+                "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
+                "border border-border bg-background text-foreground transition-all",
+                className,
+              )}
+              variant="outline"
+            >
+              {isOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Plus className="h-5 w-5" />
+              )}
+              <span className="sr-only">Toggle action menu</span>
+            </Button>
+            {!isOpen && unreadCount > 0 && (
+              <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
             )}
-            variant="outline"
-          >
-            {isOpen ? <X className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
-            <span className="sr-only">Toggle action menu</span>
-          </Button>
+          </div>
         )}
 
         {/* Action menu options */}
@@ -173,23 +184,30 @@ export function FloatingActionMenu({
     <>
       {/* Only show main action button when no panels are open */}
       {!notificationsOpen && !insightsOpen && (
-        <Button
-          onClick={toggleMenu}
-          size="icon"
-          className={cn(
-            "fixed bottom-6 right-6 z-40 h-12 w-12 rounded-full shadow-md hover:shadow-lg",
-            "border border-border bg-background text-foreground transition-all",
-            className,
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button
+            onClick={toggleMenu}
+            size="icon"
+            className={cn(
+              "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
+              "border border-border bg-background text-foreground transition-all",
+              className,
+            )}
+            variant="outline"
+          >
+            {isOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <MoreVertical className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle action menu</span>
+          </Button>
+          {!isOpen && unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
           )}
-          variant="outline"
-        >
-          {isOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <MoreVertical className="h-5 w-5" />
-          )}
-          <span className="sr-only">Toggle action menu</span>
-        </Button>
+        </div>
       )}
 
       {/* Action menu options */}

@@ -1,7 +1,7 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
 import { FloatingActionMenu } from "../../_components/floating-action-menu";
-import { ProjectClientLayout } from "./_components/project-client-layout";
+import { ProjectClientLayout } from "../../_components/project-client-layout";
 
 type Params = Promise<{ projectId: string }>;
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { pusherChannels } from "~/pusher/channels";
+import { pusher } from "~/pusher/server";
 import { authService, invitationService } from "~/server/services";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
@@ -21,6 +23,18 @@ export const invitationRouter = createTRPCRouter({
     // Get invitation first to verify it exists
     await invitationService.get(input);
 
-    return invitationService.accept(input, ctx.userId);
+    const projectUser = await invitationService.accept(input, ctx.userId);
+
+    await pusher.trigger(
+      pusherChannels.projectUser.name,
+      pusherChannels.projectUser.events.added.name,
+      {
+        input: projectUser,
+        returning: projectUser,
+        userId: ctx.userId,
+      },
+    );
+
+    return projectUser;
   }),
 });

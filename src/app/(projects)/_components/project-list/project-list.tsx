@@ -81,6 +81,7 @@ export function ProjectList() {
   const totalProjects = projects.data?.length ?? 0;
   const filteredCount = filteredProjects.length;
   const hasFilters = searchQuery.trim() !== "";
+  const hasProjects = totalProjects > 0;
 
   const container: Variants = {
     hidden: { opacity: 0 },
@@ -106,7 +107,7 @@ export function ProjectList() {
     return <LoadingState />;
   }
 
-  if (projects.data.length === 0) {
+  if (!hasProjects) {
     return <EmptyState />;
   }
 

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { pusherChannels } from "~/pusher/channels";
+import { pusher } from "~/pusher/server";
 import { authService, projectUserService } from "~/server/services";
 import { ProjectUserUpdateSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
@@ -21,15 +23,60 @@ export const projectUserRouter = createTRPCRouter({
         data: ProjectUserUpdateSchema.shape.data,
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       // Verify current user is a project admin
       await authService.requireProjectAdmin(input.projectId);
 
-      return projectUserService.update(
+      const projectUser = await projectUserService.update(
         input.projectId,
         input.userId,
         input.data,
       );
+
+      await pusher.trigger(
+        pusherChannels.projectUser.name,
+        pusherChannels.projectUser.events.updated.name,
+        {
+          input: projectUser,
+          returning: projectUser,
+          userId: ctx.userId,
+        },
+      );
+
+      return projectUser;
+    }),
+
+  // Remove a user from a project (requires admin permission)
+  remove: authedProcedure
+    .input(
+      z.object({
+        projectId: z.string(),
+        userId: z.string(),
+      }),
+    )
+    .mutation(async ({ input, ctx }) => {
+      // Verify current user is a project admin
+      await authService.requireProjectAdmin(input.projectId);
+
+      // Get the project user before removing for event payload
+      const projectUser = await projectUserService.getByProjectIdAndUserId(
+        input.projectId,
+        input.userId,
+      );
+
+      await projectUserService.remove(input.projectId, input.userId);
+
+      await pusher.trigger(
+        pusherChannels.projectUser.name,
+        pusherChannels.projectUser.events.removed.name,
+        {
+          input: projectUser,
+          returning: projectUser,
+          userId: ctx.userId,
+        },
+      );
+
+      return projectUser;
     }),
 
   // Update current user's project preferences (requires project membership)
@@ -42,13 +89,25 @@ export const projectUserRouter = createTRPCRouter({
         }),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       // Verify user can access this project
       await authService.canAccessProject(input.projectId);
-      return projectUserService.updateCurrentUserPreferences(
+      const projectUser = await projectUserService.updateCurrentUserPreferences(
         input.projectId,
         input.data,
       );
+
+      await pusher.trigger(
+        pusherChannels.projectUser.name,
+        pusherChannels.projectUser.events.updated.name,
+        {
+          input: projectUser,
+          returning: projectUser,
+          userId: ctx.userId,
+        },
+      );
+
+      return projectUser;
     }),
 
   // Count users in a project (requires any access to project)

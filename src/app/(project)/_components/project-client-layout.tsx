@@ -4,9 +4,10 @@ import React, { useState } from "react";
 
 import { cn } from "~/lib/utils";
 
-import { DynamicHeader } from "../../../_components/dynamic-header";
-import { MobileNav } from "../../../_components/mobile-nav";
-import { ProjectSidebar } from "../../../_components/project-sidebar";
+import { DynamicHeader } from "./dynamic-header";
+import { MobileNav } from "./mobile-nav";
+import { ProjectRealtimeProvider } from "./project-realtime-provider";
+import { ProjectSidebar } from "./project-sidebar";
 
 interface ProjectClientLayoutProps {
   children: React.ReactNode;
@@ -43,7 +44,7 @@ export function ProjectClientLayout({
         </div>
         <MobileNav projectId={projectId} />
         <div className="h-[calc(100%-var(--header-height))] overflow-y-auto">
-          {children}
+          <ProjectRealtimeProvider>{children}</ProjectRealtimeProvider>
         </div>
       </div>
     </div>

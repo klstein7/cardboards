@@ -69,7 +69,8 @@ class InvitationService extends BaseService {
 
       await userService.syncCurrentUser(txOrDb);
 
-      await projectUserService.create(
+      // Create the project user and return it
+      const projectUser = await projectUserService.create(
         {
           projectId: invitation.projectId,
           userId,
@@ -77,6 +78,8 @@ class InvitationService extends BaseService {
         },
         txOrDb,
       );
+
+      return projectUser;
     }, tx);
   }
 }

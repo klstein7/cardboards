@@ -3,6 +3,9 @@ import "server-only";
 import { auth } from "@clerk/nextjs/server";
 import { and, desc, eq, sql } from "drizzle-orm";
 
+import { pusherChannels } from "~/pusher/channels";
+import { pusher } from "~/pusher/server";
+
 import { type Database, type Transaction } from "../db";
 import { notifications } from "../db/schema";
 import {
@@ -29,6 +32,17 @@ class NotificationService extends BaseService {
       if (!notification) {
         throw new Error("Failed to create notification");
       }
+
+      // Emit event after creation
+      void pusher.trigger(
+        pusherChannels.notification.name,
+        pusherChannels.notification.events.created.name,
+        {
+          input: data,
+          returning: notification,
+          userId: data.userId,
+        },
+      );
 
       return notification;
     }, tx);

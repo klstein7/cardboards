@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { pusherChannels } from "~/pusher/channels";
+import { pusher } from "~/pusher/server";
 import { authService, notificationService } from "~/server/services";
 import {
   NotificationFilterSchema,
@@ -46,12 +48,36 @@ export const notificationRouter = createTRPCRouter({
         );
       }
 
-      return notificationService.markAsRead(input);
+      const updatedNotification = await notificationService.markAsRead(input);
+
+      await pusher.trigger(
+        pusherChannels.notification.name,
+        pusherChannels.notification.events.markedAsRead.name,
+        {
+          input,
+          returning: updatedNotification,
+          userId: ctx.userId,
+        },
+      );
+
+      return updatedNotification;
     }),
 
   // Mark all notifications as read for current user
   markAllAsRead: authedProcedure.mutation(async ({ ctx }) => {
-    return notificationService.markAllAsRead(ctx.userId);
+    const result = await notificationService.markAllAsRead(ctx.userId);
+
+    await pusher.trigger(
+      pusherChannels.notification.name,
+      pusherChannels.notification.events.allMarkedAsRead.name,
+      {
+        input: null,
+        returning: { userId: ctx.userId },
+        userId: ctx.userId,
+      },
+    );
+
+    return result;
   }),
 
   // Update a notification
@@ -72,7 +98,22 @@ export const notificationRouter = createTRPCRouter({
         );
       }
 
-      return notificationService.update(input.id, input.data);
+      const updatedNotification = await notificationService.update(
+        input.id,
+        input.data,
+      );
+
+      await pusher.trigger(
+        pusherChannels.notification.name,
+        pusherChannels.notification.events.updated.name,
+        {
+          input,
+          returning: updatedNotification,
+          userId: ctx.userId,
+        },
+      );
+
+      return updatedNotification;
     }),
 
   // Delete a notification
@@ -84,11 +125,35 @@ export const notificationRouter = createTRPCRouter({
       throw new Error("Unauthorized: This notification doesn't belong to you");
     }
 
-    return notificationService.delete(input);
+    const deletedNotification = await notificationService.delete(input);
+
+    await pusher.trigger(
+      pusherChannels.notification.name,
+      pusherChannels.notification.events.deleted.name,
+      {
+        input,
+        returning: deletedNotification,
+        userId: ctx.userId,
+      },
+    );
+
+    return deletedNotification;
   }),
 
   // Delete all notifications for current user
   deleteAll: authedProcedure.mutation(async ({ ctx }) => {
-    return notificationService.deleteAllForUser(ctx.userId);
+    const result = await notificationService.deleteAllForUser(ctx.userId);
+
+    await pusher.trigger(
+      pusherChannels.notification.name,
+      pusherChannels.notification.events.allMarkedAsRead.name,
+      {
+        input: null,
+        returning: { userId: ctx.userId },
+        userId: ctx.userId,
+      },
+    );
+
+    return result;
   }),
 });

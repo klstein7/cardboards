@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { pusherChannels } from "~/pusher/channels";
+import { pusher } from "~/pusher/server";
 import { authService, projectService } from "~/server/services";
 import { ProjectCreateSchema, ProjectUpdatePayloadSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
@@ -7,8 +9,20 @@ import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 export const projectRouter = createTRPCRouter({
   create: authedProcedure
     .input(ProjectCreateSchema)
-    .mutation(async ({ input }) => {
-      return projectService.create(input);
+    .mutation(async ({ input, ctx }) => {
+      const project = await projectService.create(input);
+
+      await pusher.trigger(
+        pusherChannels.project.name,
+        pusherChannels.project.events.created.name,
+        {
+          input: project,
+          returning: project,
+          userId: ctx.userId,
+        },
+      );
+
+      return project;
     }),
 
   list: authedProcedure.query(() => {
@@ -27,13 +41,40 @@ export const projectRouter = createTRPCRouter({
         projectId: z.string(),
       }),
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       await authService.requireProjectAdmin(input.projectId);
-      return projectService.update(input.projectId, input.data);
+      const project = await projectService.update(input.projectId, input.data);
+
+      await pusher.trigger(
+        pusherChannels.project.name,
+        pusherChannels.project.events.updated.name,
+        {
+          input: {
+            projectId: input.projectId,
+            data: input.data,
+          },
+          returning: project,
+          userId: ctx.userId,
+        },
+      );
+
+      return project;
     }),
 
-  delete: authedProcedure.input(z.string()).mutation(async ({ input }) => {
+  delete: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
     await authService.requireProjectAdmin(input);
-    return projectService.del(input);
+    const project = await projectService.del(input);
+
+    await pusher.trigger(
+      pusherChannels.project.name,
+      pusherChannels.project.events.deleted.name,
+      {
+        input,
+        returning: project,
+        userId: ctx.userId,
+      },
+    );
+
+    return project;
   }),
 });

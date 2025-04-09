@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 
 export default async function ProjectsPage() {
   await trpc.project.list.prefetch();
+  const projects = await trpc.project.list();
+  const hasProjects = projects.length > 0;
 
   return (
     <HydrateClient>
@@ -26,11 +28,15 @@ export default async function ProjectsPage() {
           </header>
 
           {/* Main Content */}
-          <div className="mx-auto max-w-7xl space-y-6 pt-8">
-            {/* Projects Header with Title and Actions */}
-            <ProjectsHeader />
+          <div className="mx-auto max-w-7xl pt-8">
+            {/* Only show Projects header when there are projects */}
+            {hasProjects && (
+              <div className="mb-6">
+                <ProjectsHeader />
+              </div>
+            )}
 
-            {/* Projects List with integrated search */}
+            {/* Projects List with integrated search or empty state */}
             <ProjectList />
           </div>
         </div>
