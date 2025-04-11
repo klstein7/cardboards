@@ -3,17 +3,17 @@ import { z } from "zod";
 import { baseProcedure, createTRPCRouter } from "~/trpc/init";
 
 // Import domain-specific routers
-import { aiInsightRouter } from "./ai-insight";
-import { analyticsRouter } from "./analytics";
-import { boardRouter } from "./board";
-import { cardRouter } from "./card";
-import { cardCommentRouter } from "./card-comment";
-import { columnRouter } from "./column";
-import { historyRouter } from "./history";
-import { invitationRouter } from "./invitation";
-import { notificationRouter } from "./notification";
-import { projectRouter } from "./project";
-import { projectUserRouter } from "./project-user";
+import { aiInsightRouter } from "./ai-insight.router";
+import { analyticsRouter } from "./analytics.router";
+import { boardRouter } from "./board.router";
+import { cardRouter } from "./card.router";
+import { cardCommentRouter } from "./card-comment.router";
+import { columnRouter } from "./column.router";
+import { historyRouter } from "./history.router";
+import { invitationRouter } from "./invitation.router";
+import { notificationRouter } from "./notification.router";
+import { projectRouter } from "./project.router";
+import { projectUserRouter } from "./project-user.router";
 
 export const appRouter = createTRPCRouter({
   // Test endpoint (does not require authentication)
