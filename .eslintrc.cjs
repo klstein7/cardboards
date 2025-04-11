@@ -4,11 +4,12 @@ const config = {
   parserOptions: {
     project: true,
   },
-  plugins: ["@typescript-eslint", "drizzle", "simple-import-sort"],
+  plugins: ["@typescript-eslint", "drizzle", "simple-import-sort", "vitest"],
   extends: [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended-type-checked",
     "plugin:@typescript-eslint/stylistic-type-checked",
+    "plugin:vitest/recommended",
   ],
   rules: {
     "simple-import-sort/imports": "error",
@@ -51,5 +52,18 @@ const config = {
     ],
   },
   ignorePatterns: ["src/components/ui/*"],
+  overrides: [
+    {
+      // For test files only
+      files: ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      // Test-specific ESLint rules
+      rules: {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+        "@typescript-eslint/unbound-method": "off",
+      },
+    },
+  ],
 };
 module.exports = config;
