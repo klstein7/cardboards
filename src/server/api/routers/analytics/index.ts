@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { analyticsService, authService } from "~/server/services";
+// Import the services object from container
+// import { analyticsService, authService } from "~/server/services"; // Old import from index
+import { services } from "~/server/services/container";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 // Define reusable input schema for analytics queries
@@ -15,9 +17,9 @@ export const analyticsRouter = createTRPCRouter({
   getProjectProgress: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      return analyticsService.getProjectProgress(
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      return services.analyticsService.getProjectProgress(
         input.projectId,
         input.startDate,
         input.endDate,
@@ -28,9 +30,9 @@ export const analyticsRouter = createTRPCRouter({
   getTaskCompletionTrend: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      return analyticsService.getTaskCompletionTrend(
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      return services.analyticsService.getTaskCompletionTrend(
         input.projectId,
         input.startDate,
         input.endDate,
@@ -41,9 +43,9 @@ export const analyticsRouter = createTRPCRouter({
   getUserActivity: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      return analyticsService.getUserActivity(
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      return services.analyticsService.getUserActivity(
         input.projectId,
         input.startDate,
         input.endDate,
@@ -54,9 +56,9 @@ export const analyticsRouter = createTRPCRouter({
   getPriorityDistribution: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      return analyticsService.getPriorityDistribution(
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      return services.analyticsService.getPriorityDistribution(
         input.projectId,
         input.startDate,
         input.endDate,
@@ -67,9 +69,9 @@ export const analyticsRouter = createTRPCRouter({
   getTasksPerDueDate: authedProcedure
     .input(analyticsInputSchema)
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      return analyticsService.getTasksPerDueDate(
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      return services.analyticsService.getTasksPerDueDate(
         input.projectId,
         input.startDate,
         input.endDate,

@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { aiInsightService, authService } from "~/server/services";
+// Import the services object from container
+// import { aiInsightService, authService } from "~/server/services"; // Old import from index
+import { services } from "~/server/services/container";
 import {
   AiInsightCreateSchema,
   AiInsightListByEntitySchema,
@@ -14,24 +16,24 @@ export const aiInsightRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       // If entity is a project, verify user has access to the project
       if (input.entityType === "project") {
-        await authService.canAccessProject(input.entityId);
+        await services.authService.canAccessProject(input.entityId);
       }
       // If entity is a board, verify user has access to the board
       else if (input.entityType === "board") {
-        await authService.canAccessBoard(input.entityId);
+        await services.authService.canAccessBoard(input.entityId);
       }
 
-      return aiInsightService.create(input);
+      return services.aiInsightService.create(input);
     }),
 
   get: authedProcedure.input(z.string()).query(async ({ input }) => {
-    const insight = await aiInsightService.get(input);
+    const insight = await services.aiInsightService.get(input);
 
     // Check if user has access to the related project or board
     if (insight.projectId) {
-      await authService.canAccessProject(insight.projectId);
+      await services.authService.canAccessProject(insight.projectId);
     } else if (insight.boardId) {
-      await authService.canAccessBoard(insight.boardId);
+      await services.authService.canAccessBoard(insight.boardId);
     }
 
     return insight;
@@ -42,12 +44,15 @@ export const aiInsightRouter = createTRPCRouter({
     .query(async ({ input }) => {
       // Verify user has access to the entity
       if (input.entityType === "project") {
-        await authService.canAccessProject(input.entityId);
+        await services.authService.canAccessProject(input.entityId);
       } else if (input.entityType === "board") {
-        await authService.canAccessBoard(input.entityId);
+        await services.authService.canAccessBoard(input.entityId);
       }
 
-      return aiInsightService.listByEntity(input.entityType, input.entityId);
+      return services.aiInsightService.listByEntity(
+        input.entityType,
+        input.entityId,
+      );
     }),
 
   listActiveByEntity: authedProcedure
@@ -55,12 +60,12 @@ export const aiInsightRouter = createTRPCRouter({
     .query(async ({ input }) => {
       // Verify user has access to the entity
       if (input.entityType === "project") {
-        await authService.canAccessProject(input.entityId);
+        await services.authService.canAccessProject(input.entityId);
       } else if (input.entityType === "board") {
-        await authService.canAccessBoard(input.entityId);
+        await services.authService.canAccessBoard(input.entityId);
       }
 
-      return aiInsightService.listActiveByEntity(
+      return services.aiInsightService.listActiveByEntity(
         input.entityType,
         input.entityId,
       );
@@ -70,43 +75,43 @@ export const aiInsightRouter = createTRPCRouter({
     .input(AiInsightUpdateSchema)
     .mutation(async ({ input }) => {
       // Get the insight to check permissions
-      const insight = await aiInsightService.get(input.id);
+      const insight = await services.aiInsightService.get(input.id);
 
       // Verify user has access to the project
       if (insight.projectId) {
-        await authService.requireProjectAdmin(insight.projectId);
+        await services.authService.requireProjectAdmin(insight.projectId);
       }
 
-      return aiInsightService.update(input.id, input.data);
+      return services.aiInsightService.update(input.id, input.data);
     }),
 
   delete: authedProcedure.input(z.string()).mutation(async ({ input }) => {
     // Get the insight to check permissions
-    const insight = await aiInsightService.get(input);
+    const insight = await services.aiInsightService.get(input);
 
     // Verify user has admin permissions for the project
     if (insight.projectId) {
-      await authService.requireProjectAdmin(insight.projectId);
+      await services.authService.requireProjectAdmin(insight.projectId);
     }
 
-    return aiInsightService.del(input);
+    return services.aiInsightService.del(input);
   }),
 
   generateBoardInsights: authedProcedure
     .input(z.string())
     .mutation(async ({ input: boardId }) => {
       // Verify user has access to the board
-      await authService.canAccessBoard(boardId);
+      await services.authService.canAccessBoard(boardId);
 
-      return aiInsightService.generateBoardInsights(boardId);
+      return services.aiInsightService.generateBoardInsights(boardId);
     }),
 
   generateProjectInsights: authedProcedure
     .input(z.string())
     .mutation(async ({ input: projectId }) => {
       // Verify user has access to the project
-      await authService.canAccessProject(projectId);
+      await services.authService.canAccessProject(projectId);
 
-      return aiInsightService.generateProjectInsights(projectId);
+      return services.aiInsightService.generateProjectInsights(projectId);
     }),
 });

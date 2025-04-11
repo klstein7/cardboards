@@ -7,23 +7,45 @@ import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projects, projectUsers } from "../db/schema";
 import { type ProjectCreate, type ProjectUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
-import { historyService } from "./history.service";
-import { notificationService } from "./notification.service";
-import { projectUserService } from "./project-user.service";
-import { userService } from "./user.service";
+import { type HistoryService } from "./history.service";
+import { type NotificationService } from "./notification.service";
+import { type ProjectUserService } from "./project-user.service";
+import { type UserService } from "./user.service";
+
+// Define simpler type for selected member IDs
+type MemberId = { userId: string };
 
 /**
  * Service for managing project-related operations
  */
-class ProjectService extends BaseService {
+export class ProjectService extends BaseService {
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly projectUserService: ProjectUserService;
+  private readonly userService: UserService;
+
+  constructor(
+    db: Database,
+    historyService: HistoryService,
+    notificationService: NotificationService,
+    projectUserService: ProjectUserService,
+    userService: UserService,
+  ) {
+    super(db);
+    this.historyService = historyService;
+    this.notificationService = notificationService;
+    this.projectUserService = projectUserService;
+    this.userService = userService;
+  }
+
   /**
    * Create a new project
    */
-  async create(data: ProjectCreate, tx: Transaction | Database = this.db) {
+  async create(data: ProjectCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
-      await userService.syncCurrentUser(txOrDb);
+      await this.userService.syncCurrentUser(txOrDb);
 
       const [project] = await txOrDb.insert(projects).values(data).returning();
 
@@ -31,7 +53,7 @@ class ProjectService extends BaseService {
         throw new Error("Failed to create project");
       }
 
-      await projectUserService.create(
+      await this.projectUserService.create(
         {
           projectId: project.id,
           userId,
@@ -40,7 +62,7 @@ class ProjectService extends BaseService {
         txOrDb,
       );
 
-      await historyService.recordProjectAction(
+      await this.historyService.recordProjectAction(
         project.id,
         "create",
         undefined,
@@ -48,7 +70,7 @@ class ProjectService extends BaseService {
       );
 
       return project;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -57,10 +79,9 @@ class ProjectService extends BaseService {
   async update(
     projectId: string,
     data: ProjectUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the project before update to track changes
       const existingProject = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
       });
@@ -82,21 +103,18 @@ class ProjectService extends BaseService {
         throw new Error("Failed to update project");
       }
 
-      // Record changes
       const changes = JSON.stringify({
         before: existingProject,
         after: updated,
       });
 
-      // Record history for project update
-      await historyService.recordProjectAction(
+      await this.historyService.recordProjectAction(
         projectId,
         "update",
         changes,
         txOrDb,
       );
 
-      // Notify project members if the name changed
       if (data.name && data.name !== existingProject.name) {
         const members = await txOrDb
           .select({ userId: projectUsers.userId })
@@ -106,8 +124,8 @@ class ProjectService extends BaseService {
         const { userId: actorUserId } = await auth();
 
         const notificationsData = members
-          .filter((member) => member.userId !== actorUserId)
-          .map((member) => ({
+          .filter((member: MemberId) => member.userId !== actorUserId)
+          .map((member: MemberId) => ({
             userId: member.userId,
             projectId,
             entityType: "project" as const,
@@ -118,18 +136,18 @@ class ProjectService extends BaseService {
           }));
 
         if (notificationsData.length > 0) {
-          await notificationService.createMany(notificationsData, txOrDb);
+          await this.notificationService.createMany(notificationsData, txOrDb);
         }
       }
 
       return updated;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List all projects
    */
-  async list(tx: Transaction | Database = this.db) {
+  async list(tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -157,13 +175,11 @@ class ProjectService extends BaseService {
         },
       });
 
-      // Get all project user records for the current user
       const currentUserProjectRecords = await txOrDb
         .select()
         .from(projectUsers)
         .where(eq(projectUsers.userId, userId));
 
-      // Map the projects to include isFavorite status
       return projects.map((project) => {
         const projectUser = currentUserProjectRecords.find(
           (pu) => pu.projectId === project.id,
@@ -174,13 +190,13 @@ class ProjectService extends BaseService {
           isFavorite: projectUser?.isFavorite ?? false,
         };
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get a project by ID
    */
-  async get(projectId: string, tx: Transaction | Database = this.db) {
+  async get(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
@@ -191,15 +207,14 @@ class ProjectService extends BaseService {
       }
 
       return project;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a project
    */
-  async del(projectId: string, tx: Transaction | Database = this.db) {
+  async del(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the project before deletion to record in history
       const project = await txOrDb.query.projects.findFirst({
         where: eq(projects.id, projectId),
       });
@@ -208,37 +223,33 @@ class ProjectService extends BaseService {
         throw new Error("Project not found");
       }
 
-      // Notify members BEFORE deleting
       const members = await txOrDb
         .select({ userId: projectUsers.userId })
         .from(projectUsers)
         .where(eq(projectUsers.projectId, projectId));
 
-      const notificationsData = members.map((member) => ({
+      const notificationsData = members.map((member: MemberId) => ({
         userId: member.userId,
         projectId,
         entityType: "project" as const,
         entityId: projectId,
-        type: "project_update" as const, // Using 'project_update' type for deletion notification
+        type: "project_update" as const,
         title: `Project "${project.name}" is being deleted`,
         content: `The project "${project.name}" is scheduled for deletion.`,
       }));
 
       if (notificationsData.length > 0) {
-        await notificationService.createMany(notificationsData, txOrDb);
+        await this.notificationService.createMany(notificationsData, txOrDb);
       }
 
       await txOrDb.delete(projects).where(eq(projects.id, projectId));
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get project ID by card ID
    */
-  async getProjectIdByCardId(
-    cardId: number,
-    tx: Transaction | Database = this.db,
-  ) {
+  async getProjectIdByCardId(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({
@@ -254,8 +265,6 @@ class ProjectService extends BaseService {
       }
 
       return result.projectId;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const projectService = new ProjectService();

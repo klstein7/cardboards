@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-import { authService } from "~/server/services/auth.service";
-import { historyService } from "~/server/services/history.service";
+// Import the services object
+import { services } from "~/server/services/container";
 import {
   type HistoryListByEntity,
   HistoryListByEntitySchema,
@@ -17,18 +17,21 @@ export const historyRouter = createTRPCRouter({
   getByEntity: authedProcedure
     .input(HistoryListByEntitySchema)
     .query(async ({ input }: { input: HistoryListByEntity }) => {
-      // Check access based on entity type
+      // Access services via the services object
       if (input.entityType === "project") {
-        await authService.canAccessProject(input.entityId);
+        await services.authService.canAccessProject(input.entityId);
       } else if (input.entityType === "board") {
-        await authService.canAccessBoard(input.entityId);
+        await services.authService.canAccessBoard(input.entityId);
       } else if (input.entityType === "column") {
-        await authService.canAccessColumn(input.entityId);
+        await services.authService.canAccessColumn(input.entityId);
       } else if (input.entityType === "card") {
-        await authService.canAccessCard(Number(input.entityId));
+        await services.authService.canAccessCard(Number(input.entityId));
       }
 
-      return historyService.listByEntity(input.entityType, input.entityId);
+      return services.historyService.listByEntity(
+        input.entityType,
+        input.entityId,
+      );
     }),
 
   /**
@@ -37,10 +40,10 @@ export const historyRouter = createTRPCRouter({
   getByProject: authedProcedure
     .input(HistoryListByProjectSchema)
     .query(async ({ input }: { input: HistoryListByProject }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
 
-      return historyService.listByProject(input.projectId);
+      return services.historyService.listByProject(input.projectId);
     }),
 
   /**
@@ -60,10 +63,10 @@ export const historyRouter = createTRPCRouter({
       }: {
         input: { projectId: string; limit: number; offset: number };
       }) => {
-        // Verify user can access this project
-        await authService.canAccessProject(input.projectId);
+        // Access services via the services object
+        await services.authService.canAccessProject(input.projectId);
 
-        return historyService.listByProjectPaginated(
+        return services.historyService.listByProjectPaginated(
           input.projectId,
           input.limit,
           input.offset,

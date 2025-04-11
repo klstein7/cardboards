@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, notificationService } from "~/server/services";
+import { services } from "~/server/services/container";
 import {
   NotificationFilterSchema,
   NotificationUpdatePayloadSchema,
@@ -14,7 +14,7 @@ export const notificationRouter = createTRPCRouter({
   getCurrentUserNotifications: authedProcedure
     .input(NotificationFilterSchema.optional())
     .query(async ({ ctx, input }) => {
-      return notificationService.getForUser(ctx.userId, input);
+      return services.notificationService.getForUser(ctx.userId, input);
     }),
 
   // Get notifications for a project
@@ -26,20 +26,23 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .query(async ({ input }) => {
-      await authService.canAccessProject(input.projectId);
-      return notificationService.getForProject(input.projectId, input.filter);
+      await services.authService.canAccessProject(input.projectId);
+      return services.notificationService.getForProject(
+        input.projectId,
+        input.filter,
+      );
     }),
 
   // Get unread count for current user
   getUnreadCount: authedProcedure.query(async ({ ctx }) => {
-    return notificationService.getUnreadCount(ctx.userId);
+    return services.notificationService.getUnreadCount(ctx.userId);
   }),
 
   // Mark a notification as read
   markAsRead: authedProcedure
     .input(z.string())
     .mutation(async ({ input, ctx }) => {
-      const notification = await notificationService.get(input);
+      const notification = await services.notificationService.get(input);
 
       // Check if notification belongs to current user
       if (notification.userId !== ctx.userId) {
@@ -48,7 +51,8 @@ export const notificationRouter = createTRPCRouter({
         );
       }
 
-      const updatedNotification = await notificationService.markAsRead(input);
+      const updatedNotification =
+        await services.notificationService.markAsRead(input);
 
       await pusher.trigger(
         pusherChannels.notification.name,
@@ -65,7 +69,7 @@ export const notificationRouter = createTRPCRouter({
 
   // Mark all notifications as read for current user
   markAllAsRead: authedProcedure.mutation(async ({ ctx }) => {
-    const result = await notificationService.markAllAsRead(ctx.userId);
+    const result = await services.notificationService.markAllAsRead(ctx.userId);
 
     await pusher.trigger(
       pusherChannels.notification.name,
@@ -89,7 +93,7 @@ export const notificationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      const notification = await notificationService.get(input.id);
+      const notification = await services.notificationService.get(input.id);
 
       // Check if notification belongs to current user
       if (notification.userId !== ctx.userId) {
@@ -98,7 +102,7 @@ export const notificationRouter = createTRPCRouter({
         );
       }
 
-      const updatedNotification = await notificationService.update(
+      const updatedNotification = await services.notificationService.update(
         input.id,
         input.data,
       );
@@ -118,14 +122,15 @@ export const notificationRouter = createTRPCRouter({
 
   // Delete a notification
   delete: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
-    const notification = await notificationService.get(input);
+    const notification = await services.notificationService.get(input);
 
     // Check if notification belongs to current user
     if (notification.userId !== ctx.userId) {
       throw new Error("Unauthorized: This notification doesn't belong to you");
     }
 
-    const deletedNotification = await notificationService.delete(input);
+    const deletedNotification =
+      await services.notificationService.delete(input);
 
     await pusher.trigger(
       pusherChannels.notification.name,
@@ -142,7 +147,9 @@ export const notificationRouter = createTRPCRouter({
 
   // Delete all notifications for current user
   deleteAll: authedProcedure.mutation(async ({ ctx }) => {
-    const result = await notificationService.deleteAllForUser(ctx.userId);
+    const result = await services.notificationService.deleteAllForUser(
+      ctx.userId,
+    );
 
     await pusher.trigger(
       pusherChannels.notification.name,

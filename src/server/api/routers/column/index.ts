@@ -2,26 +2,26 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService } from "~/server/services";
-import { columnService } from "~/server/services/column.service";
+import { services } from "~/server/services/container";
 import { ColumnShiftSchema, ColumnUpdateSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const columnRouter = createTRPCRouter({
   // List columns for a board (requires board access)
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    // Verify user can access this board
-    await authService.canAccessBoard(input);
-    return columnService.list(input);
+    await services.authService.canAccessBoard(input);
+    return services.columnService.list(input);
   }),
 
   // Update a column (requires admin access)
   update: authedProcedure
     .input(ColumnUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      // Verify user has admin access to this column
-      await authService.requireColumnAdmin(input.columnId);
-      const column = await columnService.update(input.columnId, input.data);
+      await services.authService.requireColumnAdmin(input.columnId);
+      const column = await services.columnService.update(
+        input.columnId,
+        input.data,
+      );
 
       await pusher.trigger(
         pusherChannels.column.name,
@@ -40,9 +40,11 @@ export const columnRouter = createTRPCRouter({
   shift: authedProcedure
     .input(ColumnShiftSchema)
     .mutation(async ({ input, ctx }) => {
-      // Verify user has admin access to this column
-      await authService.requireColumnAdmin(input.columnId);
-      const column = await columnService.shift(input.columnId, input.data);
+      await services.authService.requireColumnAdmin(input.columnId);
+      const column = await services.columnService.shift(
+        input.columnId,
+        input.data,
+      );
 
       await pusher.trigger(
         pusherChannels.column.name,
@@ -68,9 +70,8 @@ export const columnRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Verify user has admin access to this board
-      await authService.requireBoardAdmin(input.boardId);
-      const column = await columnService.create(input);
+      await services.authService.requireBoardAdmin(input.boardId);
+      const column = await services.columnService.create(input);
 
       await pusher.trigger(
         pusherChannels.column.name,
@@ -87,9 +88,8 @@ export const columnRouter = createTRPCRouter({
 
   // Delete a column (requires admin access)
   delete: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
-    // Verify user has admin access to this column
-    await authService.requireColumnAdmin(input);
-    const column = await columnService.del(input);
+    await services.authService.requireColumnAdmin(input);
+    const column = await services.columnService.del(input);
 
     await pusher.trigger(
       pusherChannels.column.name,

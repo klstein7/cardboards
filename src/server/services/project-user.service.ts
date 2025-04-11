@@ -7,7 +7,7 @@ import { type Database, type Transaction } from "../db";
 import { projects, projectUsers } from "../db/schema";
 import { type ProjectUserCreate, type ProjectUserUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
-import { notificationService } from "./notification.service";
+import { type NotificationService } from "./notification.service";
 
 /**
  * Update current user preferences data shape
@@ -19,11 +19,18 @@ export interface ProjectUserPreferencesUpdate {
 /**
  * Service for managing project users
  */
-class ProjectUserService extends BaseService {
+export class ProjectUserService extends BaseService {
+  private readonly notificationService: NotificationService;
+
+  constructor(db: Database, notificationService: NotificationService) {
+    super(db);
+    this.notificationService = notificationService;
+  }
+
   /**
    * List all users for a project
    */
-  async list(projectId: string, tx: Transaction | Database = this.db) {
+  async list(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       return txOrDb.query.projectUsers.findMany({
         where: eq(projectUsers.projectId, projectId),
@@ -31,13 +38,13 @@ class ProjectUserService extends BaseService {
           user: true,
         },
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Create a new project user
    */
-  async create(data: ProjectUserCreate, tx: Transaction | Database = this.db) {
+  async create(data: ProjectUserCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [projectUser] = await txOrDb
         .insert(projectUsers)
@@ -63,7 +70,7 @@ class ProjectUserService extends BaseService {
         .where(eq(projects.id, data.projectId));
 
       // Create notification for the user
-      await notificationService.create(
+      await this.notificationService.create(
         {
           userId: data.userId,
           projectId: data.projectId,
@@ -77,7 +84,7 @@ class ProjectUserService extends BaseService {
       );
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -86,7 +93,7 @@ class ProjectUserService extends BaseService {
   async getByProjectIdAndUserId(
     projectId: string,
     userId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const projectUser = await txOrDb.query.projectUsers.findFirst({
@@ -101,7 +108,7 @@ class ProjectUserService extends BaseService {
       }
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -111,7 +118,7 @@ class ProjectUserService extends BaseService {
     projectId: string,
     userId: string,
     data: ProjectUserUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       // Don't allow removing the last admin
@@ -169,17 +176,13 @@ class ProjectUserService extends BaseService {
       }
 
       return projectUserResult;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Remove a user from a project
    */
-  async remove(
-    projectId: string,
-    userId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async remove(projectId: string, userId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [projectUser] = await txOrDb
         .select()
@@ -226,16 +229,13 @@ class ProjectUserService extends BaseService {
             eq(projectUsers.userId, userId),
           ),
         );
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Count users by project ID
    */
-  async countByProjectId(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async countByProjectId(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({ count: count() })
@@ -243,16 +243,13 @@ class ProjectUserService extends BaseService {
         .where(eq(projectUsers.projectId, projectId));
 
       return result?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get the current user's project user record
    */
-  async getCurrentProjectUser(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async getCurrentProjectUser(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -272,7 +269,7 @@ class ProjectUserService extends BaseService {
       }
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -281,7 +278,7 @@ class ProjectUserService extends BaseService {
   async updateCurrentUserPreferences(
     projectId: string,
     data: ProjectUserPreferencesUpdate,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
@@ -321,8 +318,6 @@ class ProjectUserService extends BaseService {
       }
 
       return updatedProjectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const projectUserService = new ProjectUserService();

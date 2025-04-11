@@ -2,28 +2,32 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, invitationService } from "~/server/services";
+import { services } from "~/server/services/container";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const invitationRouter = createTRPCRouter({
   // Create a project invitation link (requires admin permission)
   create: authedProcedure.input(z.string()).mutation(async ({ input }) => {
-    // Verify current user is a project admin
-    await authService.requireProjectAdmin(input);
-    return invitationService.create(input);
+    // Access services via the services object
+    await services.authService.requireProjectAdmin(input);
+    return services.invitationService.create(input);
   }),
 
   // Get an invitation by ID
   get: authedProcedure.input(z.string()).query(async ({ input }) => {
-    return invitationService.get(input);
+    // Access services via the services object
+    return services.invitationService.get(input);
   }),
 
   // Accept an invitation to join a project
   accept: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
-    // Get invitation first to verify it exists
-    await invitationService.get(input);
+    // Access services via the services object
+    await services.invitationService.get(input);
 
-    const projectUser = await invitationService.accept(input, ctx.userId);
+    const projectUser = await services.invitationService.accept(
+      input,
+      ctx.userId,
+    );
 
     await pusher.trigger(
       pusherChannels.projectUser.name,

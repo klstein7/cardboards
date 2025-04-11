@@ -3,6 +3,7 @@ import "server-only";
 import { format, isWithinInterval, startOfWeek, subDays } from "date-fns";
 import { eq } from "drizzle-orm";
 
+import { type Database } from "../db";
 import { columns, projects } from "../db/schema";
 import { BaseService } from "./base.service";
 
@@ -17,7 +18,11 @@ interface DataPoint {
 /**
  * Service for analytics operations
  */
-class AnalyticsService extends BaseService {
+export class AnalyticsService extends BaseService {
+  constructor(db: Database) {
+    super(db);
+  }
+
   /**
    * Filter data by date range
    */
@@ -504,5 +509,3 @@ class AnalyticsService extends BaseService {
     });
   }
 }
-
-export const analyticsService = new AnalyticsService();

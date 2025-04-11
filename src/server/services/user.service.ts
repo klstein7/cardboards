@@ -10,11 +10,15 @@ import { BaseService } from "./base.service";
 /**
  * Service for managing user-related operations
  */
-class UserService extends BaseService {
+export class UserService extends BaseService {
+  constructor(db: Database) {
+    super(db);
+  }
+
   /**
    * Synchronize a user record in the database
    */
-  async sync(data: UserSync, tx: Transaction | Database = this.db) {
+  async sync(data: UserSync, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [user] = await txOrDb
         .insert(users)
@@ -32,13 +36,13 @@ class UserService extends BaseService {
       }
 
       return user;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Synchronize the current authenticated user
    */
-  async syncCurrentUser(tx: Transaction | Database = this.db) {
+  async syncCurrentUser(tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const user = await currentUser();
 
@@ -63,8 +67,6 @@ class UserService extends BaseService {
         },
         txOrDb,
       );
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const userService = new UserService();

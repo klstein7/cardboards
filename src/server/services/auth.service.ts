@@ -6,21 +6,25 @@ import { and, eq } from "drizzle-orm";
 import { type Database, type Transaction } from "../db";
 import { boards, cards, columns, projectUsers } from "../db/schema";
 import { BaseService } from "./base.service";
-import { projectUserService } from "./project-user.service";
+import { type ProjectUserService } from "./project-user.service";
 
 /**
  * Service for handling authorization and authentication
  */
-class AuthService extends BaseService {
+export class AuthService extends BaseService {
+  private readonly projectUserService: ProjectUserService;
+
+  constructor(db: Database, projectUserService: ProjectUserService) {
+    super(db);
+    this.projectUserService = projectUserService;
+  }
+
   /**
    * Verify the current user has admin rights in the project
    */
-  async requireProjectAdmin(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async requireProjectAdmin(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      const projectUser = await projectUserService.getCurrentProjectUser(
+      const projectUser = await this.projectUserService.getCurrentProjectUser(
         projectId,
         txOrDb,
       );
@@ -30,13 +34,13 @@ class AuthService extends BaseService {
       }
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user can access the specified board
    */
-  async canAccessBoard(boardId: string, tx: Transaction | Database = this.db) {
+  async canAccessBoard(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -59,16 +63,13 @@ class AuthService extends BaseService {
       await this.canAccessProject(board.projectId, txOrDb);
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user has admin rights for the specified board
    */
-  async requireBoardAdmin(
-    boardId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async requireBoardAdmin(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const board = await this.canAccessBoard(boardId, txOrDb);
 
@@ -76,13 +77,13 @@ class AuthService extends BaseService {
       await this.requireProjectAdmin(board.projectId, txOrDb);
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user can access the specified card
    */
-  async canAccessCard(cardId: number, tx: Transaction | Database = this.db) {
+  async canAccessCard(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -105,13 +106,13 @@ class AuthService extends BaseService {
       await this.canAccessColumn(card.columnId, txOrDb);
 
       return card;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user has admin rights for the specified card
    */
-  async requireCardAdmin(cardId: number, tx: Transaction | Database = this.db) {
+  async requireCardAdmin(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const card = await this.canAccessCard(cardId, txOrDb);
 
@@ -143,16 +144,13 @@ class AuthService extends BaseService {
       await this.requireProjectAdmin(board.projectId, txOrDb);
 
       return card;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user can access the specified column
    */
-  async canAccessColumn(
-    columnId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async canAccessColumn(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -175,16 +173,13 @@ class AuthService extends BaseService {
       await this.canAccessBoard(column.boardId, txOrDb);
 
       return column;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user has admin rights for the specified column
    */
-  async requireColumnAdmin(
-    columnId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async requireColumnAdmin(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const column = await this.canAccessColumn(columnId, txOrDb);
 
@@ -204,16 +199,13 @@ class AuthService extends BaseService {
       await this.requireProjectAdmin(board.projectId, txOrDb);
 
       return column;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Verify the current user can access the specified project
    */
-  async canAccessProject(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async canAccessProject(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -236,20 +228,17 @@ class AuthService extends BaseService {
       }
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Check if the current user is an admin for the specified project
    * This is a non-throwing version of requireProjectAdmin
    */
-  async isProjectAdmin(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async isProjectAdmin(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       try {
-        const projectUser = await projectUserService.getCurrentProjectUser(
+        const projectUser = await this.projectUserService.getCurrentProjectUser(
           projectId,
           txOrDb,
         );
@@ -259,8 +248,6 @@ class AuthService extends BaseService {
         console.error("Error checking if user is project admin", error);
         return false;
       }
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const authService = new AuthService();

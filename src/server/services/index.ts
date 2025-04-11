@@ -19,6 +19,7 @@ export * from "./analytics.service";
 export * from "./auth.service";
 export * from "./base.service";
 export * from "./board.service";
+export * from "./board-context.service";
 export * from "./card.service";
 export * from "./card-comment.service";
 export * from "./column.service";

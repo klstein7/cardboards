@@ -3,36 +3,64 @@ import "server-only";
 import { google } from "@ai-sdk/google";
 import { auth } from "@clerk/nextjs/server";
 import { generateObject } from "ai";
-import { count, eq } from "drizzle-orm";
+import { count, eq, type InferSelectModel } from "drizzle-orm";
 
 import { type Color, COLORS } from "~/lib/utils";
 
 import { type Database, type Transaction } from "../db";
-import { boards } from "../db/schema";
+import { boards, type projectUsers } from "../db/schema";
 import {
   type BoardCreate,
   BoardGenerateResponseSchema,
   type BoardUpdatePayload,
 } from "../zod";
 import { BaseService } from "./base.service";
-import { cardService } from "./card.service";
-import { columnService } from "./column.service";
-import { historyService } from "./history.service";
-import { notificationService } from "./notification.service";
-import { projectService } from "./project.service";
-import { projectUserService } from "./project-user.service";
+import { type CardService } from "./card.service";
+import { type ColumnService } from "./column.service";
+import { type HistoryService } from "./history.service";
+import { type NotificationService } from "./notification.service";
+import { type ProjectService } from "./project.service";
+import { type ProjectUserService } from "./project-user.service";
+
+// Define local type for ProjectUser
+type ProjectUser = InferSelectModel<typeof projectUsers>;
 
 /**
  * Service for managing board-related operations
  */
-class BoardService extends BaseService {
+export class BoardService extends BaseService {
+  private readonly cardService: CardService;
+  private readonly columnService: ColumnService;
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly projectService: ProjectService;
+  private readonly projectUserService: ProjectUserService;
+
+  constructor(
+    db: Database,
+    cardService: CardService,
+    columnService: ColumnService,
+    historyService: HistoryService,
+    notificationService: NotificationService,
+    projectService: ProjectService,
+    projectUserService: ProjectUserService,
+  ) {
+    super(db);
+    this.cardService = cardService;
+    this.columnService = columnService;
+    this.historyService = historyService;
+    this.notificationService = notificationService;
+    this.projectService = projectService;
+    this.projectUserService = projectUserService;
+  }
+
   /**
    * Create a new board with optional custom columns
    */
   async create(
     data: BoardCreate,
     customColumns?: { name: string; order: number; isCompleted: boolean }[],
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const colorKeys = Object.keys(COLORS) as Color[];
@@ -55,8 +83,7 @@ class BoardService extends BaseService {
         throw new Error("Failed to create board");
       }
 
-      // Record history for board creation
-      await historyService.recordBoardAction(
+      await this.historyService.recordBoardAction(
         board.id,
         board.projectId,
         "create",
@@ -65,7 +92,7 @@ class BoardService extends BaseService {
       );
 
       if (customColumns) {
-        await columnService.createMany(
+        await this.columnService.createMany(
           customColumns.map((column) => ({
             boardId: board.id,
             ...column,
@@ -73,8 +100,7 @@ class BoardService extends BaseService {
           txOrDb,
         );
       } else {
-        // Create default columns
-        await columnService.createMany(
+        await this.columnService.createMany(
           [
             {
               boardId: board.id,
@@ -102,44 +128,47 @@ class BoardService extends BaseService {
         throw new Error("User not authenticated");
       }
 
-      const members = await projectUserService.list(board.projectId, txOrDb);
-      const project = await projectService.get(board.projectId, txOrDb);
+      const members = await this.projectUserService.list(
+        board.projectId,
+        txOrDb,
+      );
+      const project = await this.projectService.get(board.projectId, txOrDb);
 
       const notificationsData = members
-        .filter((member) => member.userId !== actorUserId) // Don't notify the creator
-        .map((member) => ({
+        .filter((member: ProjectUser) => member.userId !== actorUserId)
+        .map((member: ProjectUser) => ({
           userId: member.userId,
           projectId: board.projectId,
           entityType: "board" as const,
           entityId: board.id,
-          type: "project_update" as const, // Re-using project_update type for board creation
+          type: "project_update" as const,
           title: `New board created: "${board.name}"`,
           content: `A new board named "${board.name}" was created in the project "${project.name}".`,
         }));
 
       if (notificationsData.length > 0) {
-        await notificationService.createMany(notificationsData, txOrDb);
+        await this.notificationService.createMany(notificationsData, txOrDb);
       }
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List all boards for a project
    */
-  async list(projectId: string, tx: Transaction | Database = this.db) {
+  async list(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(
       (txOrDb) =>
         txOrDb.select().from(boards).where(eq(boards.projectId, projectId)),
-      tx,
+      tx ?? this.db,
     );
   }
 
   /**
    * Get a board by ID
    */
-  async get(boardId: string, tx: Transaction | Database = this.db) {
+  async get(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [board] = await txOrDb
         .select()
@@ -151,20 +180,20 @@ class BoardService extends BaseService {
       }
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get a board with all its details (columns and cards)
    */
-  async getWithDetails(boardId: string, tx: Transaction | Database = this.db) {
+  async getWithDetails(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const board = await this.get(boardId, txOrDb);
-      const columns = await columnService.list(board.id, txOrDb);
+      const columns = await this.columnService.list(board.id, txOrDb);
 
       const cards = [];
       for (const column of columns) {
-        const columnCards = await cardService.list(column.id, txOrDb);
+        const columnCards = await this.cardService.list(column.id, txOrDb);
         cards.push(...columnCards);
       }
 
@@ -173,7 +202,7 @@ class BoardService extends BaseService {
         columns,
         cards,
       };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -182,10 +211,9 @@ class BoardService extends BaseService {
   async update(
     boardId: string,
     data: BoardUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the board before update to track changes
       const existingBoard = await txOrDb.query.boards.findFirst({
         where: eq(boards.id, boardId),
       });
@@ -204,14 +232,12 @@ class BoardService extends BaseService {
         throw new Error("Failed to update board");
       }
 
-      // Record changes
       const changes = JSON.stringify({
         before: existingBoard,
         after: board,
       });
 
-      // Record history for board update
-      await historyService.recordBoardAction(
+      await this.historyService.recordBoardAction(
         board.id,
         board.projectId,
         "update",
@@ -219,43 +245,44 @@ class BoardService extends BaseService {
         txOrDb,
       );
 
-      // Notify project members if the board name changed
       if (data.name && data.name !== existingBoard.name) {
         const { userId: actorUserId } = await auth();
         if (!actorUserId) {
           throw new Error("User not authenticated");
         }
 
-        const members = await projectUserService.list(board.projectId, txOrDb);
-        const project = await projectService.get(board.projectId, txOrDb);
+        const members = await this.projectUserService.list(
+          board.projectId,
+          txOrDb,
+        );
+        const project = await this.projectService.get(board.projectId, txOrDb);
 
         const notificationsData = members
-          .filter((member) => member.userId !== actorUserId) // Don't notify the actor
-          .map((member) => ({
+          .filter((member: ProjectUser) => member.userId !== actorUserId)
+          .map((member: ProjectUser) => ({
             userId: member.userId,
             projectId: board.projectId,
             entityType: "board" as const,
             entityId: board.id,
-            type: "project_update" as const, // Re-using project_update type
+            type: "project_update" as const,
             title: `Board "${existingBoard.name}" renamed`,
             content: `In project "${project.name}", the board "${existingBoard.name}" was renamed to "${board.name}".`,
           }));
 
         if (notificationsData.length > 0) {
-          await notificationService.createMany(notificationsData, txOrDb);
+          await this.notificationService.createMany(notificationsData, txOrDb);
         }
       }
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a board
    */
-  async del(boardId: string, tx: Transaction | Database = this.db) {
+  async del(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the board before deletion to record in history
       const board = await txOrDb.query.boards.findFirst({
         where: eq(boards.id, boardId),
       });
@@ -264,32 +291,33 @@ class BoardService extends BaseService {
         throw new Error("Board not found");
       }
 
-      // Notify members BEFORE deleting
       const { userId: actorUserId } = await auth();
       if (!actorUserId) {
         throw new Error("User not authenticated");
       }
 
-      const members = await projectUserService.list(board.projectId, txOrDb);
-      const project = await projectService.get(board.projectId, txOrDb);
+      const members = await this.projectUserService.list(
+        board.projectId,
+        txOrDb,
+      );
+      const project = await this.projectService.get(board.projectId, txOrDb);
 
       const notificationsData = members
-        .filter((member) => member.userId !== actorUserId) // Don't notify the actor
-        .map((member) => ({
+        .filter((member: ProjectUser) => member.userId !== actorUserId)
+        .map((member: ProjectUser) => ({
           userId: member.userId,
           projectId: board.projectId,
           entityType: "board" as const,
           entityId: board.id,
-          type: "project_update" as const, // Re-using project_update type
+          type: "project_update" as const,
           title: `Board "${board.name}" deleted`,
           content: `In project "${project.name}", the board "${board.name}" is scheduled for deletion.`,
         }));
 
       if (notificationsData.length > 0) {
-        await notificationService.createMany(notificationsData, txOrDb);
+        await this.notificationService.createMany(notificationsData, txOrDb);
       }
 
-      // Record the board data before deletion
       const changes = JSON.stringify({
         before: board,
         after: null,
@@ -304,8 +332,7 @@ class BoardService extends BaseService {
         throw new Error("Failed to delete board");
       }
 
-      // Record history for board deletion
-      await historyService.recordBoardAction(
+      await this.historyService.recordBoardAction(
         board.id,
         board.projectId,
         "delete",
@@ -314,7 +341,7 @@ class BoardService extends BaseService {
       );
 
       return board;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -323,10 +350,10 @@ class BoardService extends BaseService {
   async generate(
     projectId: string,
     prompt: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      const project = await projectService.get(projectId, txOrDb);
+      const project = await this.projectService.get(projectId, txOrDb);
 
       const response = await generateObject({
         model: google("gemini-2.0-flash-exp"),
@@ -391,7 +418,6 @@ class BoardService extends BaseService {
 
       const responseData = response.object;
 
-      // Create the board with the provided columns
       const board = await this.create(
         {
           name: responseData.name,
@@ -401,14 +427,13 @@ class BoardService extends BaseService {
         txOrDb,
       );
 
-      // Add the generated cards to their respective columns
-      const boardColumns = await columnService.list(board.id, txOrDb);
+      const boardColumns = await this.columnService.list(board.id, txOrDb);
 
       const firstColumn = boardColumns[0];
       if (firstColumn) {
         const cardsToCreate = responseData.columns[0]?.cards ?? [];
         if (cardsToCreate.length > 0) {
-          await cardService.createMany(
+          await this.cardService.createMany(
             board.id,
             cardsToCreate.map((card) => ({
               title: card.title,
@@ -423,16 +448,13 @@ class BoardService extends BaseService {
       }
 
       return this.getWithDetails(board.id, txOrDb);
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Count the number of boards in a project
    */
-  async countByProjectId(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async countByProjectId(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({ count: count() })
@@ -440,8 +462,6 @@ class BoardService extends BaseService {
         .where(eq(boards.projectId, projectId));
 
       return result?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const boardService = new BoardService();

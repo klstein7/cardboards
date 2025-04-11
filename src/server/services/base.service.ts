@@ -1,14 +1,14 @@
 import "server-only";
 
-import { type Database, db, type Transaction } from "../db";
+import { type Database, type Transaction } from "../db";
 
 /**
  * Base service class to standardize common patterns across services
  */
 export abstract class BaseService {
-  protected db: Database;
+  protected readonly db: Database;
 
-  constructor() {
+  constructor(db: Database) {
     this.db = db;
   }
 

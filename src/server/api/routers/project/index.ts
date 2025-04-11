@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, projectService } from "~/server/services";
+import { services } from "~/server/services/container";
 import { ProjectCreateSchema, ProjectUpdatePayloadSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
@@ -10,7 +10,7 @@ export const projectRouter = createTRPCRouter({
   create: authedProcedure
     .input(ProjectCreateSchema)
     .mutation(async ({ input, ctx }) => {
-      const project = await projectService.create(input);
+      const project = await services.projectService.create(input);
 
       await pusher.trigger(
         pusherChannels.project.name,
@@ -26,12 +26,12 @@ export const projectRouter = createTRPCRouter({
     }),
 
   list: authedProcedure.query(() => {
-    return projectService.list();
+    return services.projectService.list();
   }),
 
   get: authedProcedure.input(z.string()).query(async ({ input }) => {
-    await authService.canAccessProject(input);
-    return projectService.get(input);
+    await services.authService.canAccessProject(input);
+    return services.projectService.get(input);
   }),
 
   update: authedProcedure
@@ -42,8 +42,11 @@ export const projectRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      await authService.requireProjectAdmin(input.projectId);
-      const project = await projectService.update(input.projectId, input.data);
+      await services.authService.requireProjectAdmin(input.projectId);
+      const project = await services.projectService.update(
+        input.projectId,
+        input.data,
+      );
 
       await pusher.trigger(
         pusherChannels.project.name,
@@ -62,8 +65,8 @@ export const projectRouter = createTRPCRouter({
     }),
 
   delete: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
-    await authService.requireProjectAdmin(input);
-    const project = await projectService.del(input);
+    await services.authService.requireProjectAdmin(input);
+    const project = await services.projectService.del(input);
 
     await pusher.trigger(
       pusherChannels.project.name,

@@ -15,18 +15,34 @@ import {
 } from "../db/schema";
 import { type CardCommentCreate, type CardCommentUpdatePayload } from "../zod";
 import { BaseService } from "./base.service";
-import { historyService } from "./history.service";
-import { notificationService } from "./notification.service";
-import { projectService } from "./project.service";
+import { type HistoryService } from "./history.service";
+import { type NotificationService } from "./notification.service";
+import { type ProjectService } from "./project.service";
 
 /**
  * Service for managing card comments
  */
-class CardCommentService extends BaseService {
+export class CardCommentService extends BaseService {
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly projectService: ProjectService;
+
+  constructor(
+    db: Database,
+    historyService: HistoryService,
+    notificationService: NotificationService,
+    projectService: ProjectService,
+  ) {
+    super(db);
+    this.historyService = historyService;
+    this.notificationService = notificationService;
+    this.projectService = projectService;
+  }
+
   /**
    * Get a comment by ID
    */
-  async get(id: string, tx: Transaction | Database = this.db) {
+  async get(id: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [comment] = await txOrDb
         .select()
@@ -38,13 +54,13 @@ class CardCommentService extends BaseService {
       }
 
       return comment;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Create a new card comment
    */
-  async create(data: CardCommentCreate, tx: Transaction | Database = this.db) {
+  async create(data: CardCommentCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -113,7 +129,7 @@ class CardCommentService extends BaseService {
       const commenterName = commenter?.userName ?? "A user";
 
       // Record history for card comment creation
-      await historyService.create(
+      await this.historyService.create(
         {
           entityType: "card_comment",
           entityId: comment.id,
@@ -137,7 +153,7 @@ class CardCommentService extends BaseService {
           .where(eq(projectUsers.id, cardDetails.assignedToId));
 
         if (assignedProjectUser) {
-          await notificationService.create(
+          await this.notificationService.create(
             {
               userId: assignedProjectUser.userId,
               projectId,
@@ -153,13 +169,13 @@ class CardCommentService extends BaseService {
       }
 
       return comment;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List all comments for a card
    */
-  async list(cardId: number, tx: Transaction | Database = this.db) {
+  async list(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       return txOrDb.query.cardComments.findMany({
         where: eq(cardComments.cardId, cardId),
@@ -172,18 +188,18 @@ class CardCommentService extends BaseService {
           },
         },
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a comment
    */
-  async remove(id: string, tx: Transaction | Database = this.db) {
+  async remove(id: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const comment = await this.get(id, txOrDb);
 
       // Get the project ID from the card
-      const projectId = await projectService.getProjectIdByCardId(
+      const projectId = await this.projectService.getProjectIdByCardId(
         comment.cardId,
         txOrDb,
       );
@@ -235,7 +251,7 @@ class CardCommentService extends BaseService {
       }
 
       // Record history for card comment deletion
-      await historyService.create(
+      await this.historyService.create(
         {
           entityType: "card_comment",
           entityId: id,
@@ -247,7 +263,7 @@ class CardCommentService extends BaseService {
       );
 
       return deletedComment;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -256,13 +272,13 @@ class CardCommentService extends BaseService {
   async update(
     id: string,
     data: CardCommentUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const comment = await this.get(id, txOrDb);
 
       // Get the project ID from the card
-      const projectId = await projectService.getProjectIdByCardId(
+      const projectId = await this.projectService.getProjectIdByCardId(
         comment.cardId,
         txOrDb,
       );
@@ -318,7 +334,7 @@ class CardCommentService extends BaseService {
       }
 
       // Record history for card comment update
-      await historyService.create(
+      await this.historyService.create(
         {
           entityType: "card_comment",
           entityId: id,
@@ -330,8 +346,6 @@ class CardCommentService extends BaseService {
       );
 
       return updatedComment;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const cardCommentService = new CardCommentService();

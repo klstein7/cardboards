@@ -28,12 +28,12 @@ import {
   type CardUpdatePayload,
 } from "../zod";
 import { BaseService } from "./base.service";
-import { boardService } from "./board.service";
-import { columnService } from "./column.service";
-import { historyService } from "./history.service";
-import { notificationService } from "./notification.service";
-import { projectService } from "./project.service";
-import { projectUserService } from "./project-user.service";
+import { type BoardContextService } from "./board-context.service";
+import { type ColumnService } from "./column.service";
+import { type HistoryService } from "./history.service";
+import { type NotificationService } from "./notification.service";
+import { type ProjectService } from "./project.service";
+import { type ProjectUserService } from "./project-user.service";
 
 // Type for labels in card create/update
 interface Label {
@@ -44,13 +44,38 @@ interface Label {
 /**
  * Service for managing card-related operations
  */
-class CardService extends BaseService {
+export class CardService extends BaseService {
+  private readonly boardContextService: BoardContextService;
+  private readonly columnService: ColumnService;
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly projectService: ProjectService;
+  private readonly projectUserService: ProjectUserService;
+
+  constructor(
+    db: Database,
+    boardContextService: BoardContextService,
+    columnService: ColumnService,
+    historyService: HistoryService,
+    notificationService: NotificationService,
+    projectService: ProjectService,
+    projectUserService: ProjectUserService,
+  ) {
+    super(db);
+    this.boardContextService = boardContextService;
+    this.columnService = columnService;
+    this.historyService = historyService;
+    this.notificationService = notificationService;
+    this.projectService = projectService;
+    this.projectUserService = projectUserService;
+  }
+
   /**
    * Get the order value for the last card in a column
    */
   private async getLastCardOrder(
     columnId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const lastCard = await txOrDb.query.cards.findFirst({
@@ -59,13 +84,13 @@ class CardService extends BaseService {
       });
 
       return lastCard?.order ?? -1;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Create a new card
    */
-  async create(data: CardCreate, tx: Transaction | Database = this.db) {
+  async create(data: CardCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const lastCardOrder = await this.getLastCardOrder(data.columnId, txOrDb);
 
@@ -82,21 +107,22 @@ class CardService extends BaseService {
         throw new Error("Failed to create card");
       }
 
-      // Get the column and board to get project ID
-      const column = await columnService.get(data.columnId, txOrDb);
-      const board = await boardService.get(column.boardId, txOrDb);
+      const column = await this.columnService.get(data.columnId, txOrDb);
+      const projectId = await this.boardContextService.getProjectId(
+        column.boardId,
+        txOrDb,
+      );
 
-      // Record history for card creation
-      await historyService.recordCardAction(
+      await this.historyService.recordCardAction(
         card.id,
-        board.projectId,
+        projectId,
         "create",
         JSON.stringify({ title: card.title }),
         txOrDb,
       );
 
       return card;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -105,7 +131,7 @@ class CardService extends BaseService {
   async createMany(
     boardId: string,
     cardData: CardCreateManyPayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       if (cardData.length === 0) return [];
@@ -113,11 +139,15 @@ class CardService extends BaseService {
       let columnId = cardData[0]!.columnId;
 
       if (!columnId) {
-        const firstColumn = await columnService.getFirstColumnByBoardId(
+        const firstColumn = await this.columnService.getFirstColumnByBoardId(
           boardId,
           txOrDb,
         );
-        columnId = firstColumn.id;
+        columnId = firstColumn?.id;
+      }
+
+      if (!columnId) {
+        throw new Error(`Board ${boardId} has no columns to add cards to.`);
       }
 
       const lastCardOrder = await this.getLastCardOrder(columnId, txOrDb);
@@ -135,14 +165,15 @@ class CardService extends BaseService {
         )
         .returning();
 
-      // Get the board to get project ID
-      const board = await boardService.get(boardId, txOrDb);
+      const projectId = await this.boardContextService.getProjectId(
+        boardId,
+        txOrDb,
+      );
 
-      // Record history for each created card
       for (const card of createdCards) {
-        await historyService.recordCardAction(
+        await this.historyService.recordCardAction(
           card.id,
-          board.projectId,
+          projectId,
           "create",
           JSON.stringify({ title: card.title }),
           txOrDb,
@@ -150,13 +181,13 @@ class CardService extends BaseService {
       }
 
       return createdCards;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get a card by ID
    */
-  async get(cardId: number, tx: Transaction | Database = this.db) {
+  async get(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const card = await txOrDb.query.cards.findFirst({
         where: eq(cards.id, cardId),
@@ -167,7 +198,7 @@ class CardService extends BaseService {
       }
 
       return card;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -176,21 +207,18 @@ class CardService extends BaseService {
   async update(
     cardId: number,
     data: CardUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the card before update to track changes
       const existingCard = await this.get(cardId, txOrDb);
-      const { userId: actorUserId } = await auth(); // Get actor user ID
+      const { userId: actorUserId } = await auth();
 
       if (!actorUserId) {
         throw new Error("User is not authenticated");
       }
 
-      // Prepare data for the update
       const updateData = { ...data };
 
-      // Extract text from labels if they are Label objects
       if (updateData.labels && Array.isArray(updateData.labels)) {
         const firstItem = updateData.labels[0];
         if (firstItem && typeof firstItem === "object" && "text" in firstItem) {
@@ -210,20 +238,17 @@ class CardService extends BaseService {
         throw new Error("Failed to update card");
       }
 
-      // Get project ID for history tracking
-      const projectId = await projectService.getProjectIdByCardId(
+      const projectId = await this.projectService.getProjectIdByCardId(
         cardId,
         txOrDb,
       );
 
-      // Record changes
       const changes = JSON.stringify({
         before: existingCard,
         after: card,
       });
 
-      // Record history for card update
-      await historyService.recordCardAction(
+      await this.historyService.recordCardAction(
         card.id,
         projectId,
         "update",
@@ -231,37 +256,31 @@ class CardService extends BaseService {
         txOrDb,
       );
 
-      // Check if assignedToId changed and is not null
       if (
-        updateData.assignedToId !== undefined && // Check if assignedToId is part of the update
-        updateData.assignedToId !== existingCard.assignedToId && // Check if it actually changed
-        updateData.assignedToId !== null // Check if someone is being assigned (not unassigned)
+        updateData.assignedToId !== undefined &&
+        updateData.assignedToId !== existingCard.assignedToId &&
+        updateData.assignedToId !== null
       ) {
         const assignedProjectUserId = updateData.assignedToId;
 
-        // Get the actual user ID of the assigned person
         const [assignedProjectUser] = await txOrDb
           .select({ userId: projectUsers.userId })
           .from(projectUsers)
           .where(eq(projectUsers.id, assignedProjectUserId));
 
-        // Only notify if assigned user is different from the actor
         if (assignedProjectUser && assignedProjectUser.userId !== actorUserId) {
-          // Get actor's name
           const [actor] = await txOrDb
             .select({ name: users.name })
             .from(users)
             .where(eq(users.id, actorUserId));
           const actorName = actor?.name ?? "Someone";
 
-          // Get column details for notification content
           const [column] = await txOrDb
             .select({ name: columns.name })
             .from(columns)
             .where(eq(columns.id, card.columnId));
 
-          // Create notification for the newly assigned user
-          await notificationService.create(
+          await this.notificationService.create(
             {
               userId: assignedProjectUser.userId,
               projectId,
@@ -277,29 +296,26 @@ class CardService extends BaseService {
       }
 
       return card;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a card
    */
-  async del(cardId: number, tx: Transaction | Database = this.db) {
+  async del(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const card = await this.get(cardId, txOrDb);
 
-      // Get project ID for history tracking
-      const projectId = await projectService.getProjectIdByCardId(
+      const projectId = await this.projectService.getProjectIdByCardId(
         cardId,
         txOrDb,
       );
 
-      // Record the card data before deletion
       const changes = JSON.stringify({
         before: card,
         after: null,
       });
 
-      // Update order of cards after this one
       await txOrDb
         .update(cards)
         .set({
@@ -318,8 +334,7 @@ class CardService extends BaseService {
         throw new Error("Failed to delete card");
       }
 
-      // Record history for card deletion
-      await historyService.recordCardAction(
+      await this.historyService.recordCardAction(
         cardId,
         projectId,
         "delete",
@@ -328,37 +343,33 @@ class CardService extends BaseService {
       );
 
       return deletedCard;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Move a card to a different position or column
    */
-  async move(data: CardMove, tx: Transaction | Database = this.db) {
+  async move(data: CardMove, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { cardId, destinationColumnId, newOrder } = data;
       const card = await this.get(cardId, txOrDb);
 
-      // Get project ID for history tracking
-      const projectId = await projectService.getProjectIdByCardId(
+      const projectId = await this.projectService.getProjectIdByCardId(
         cardId,
         txOrDb,
       );
 
-      // Store original values for history
       const originalValues = {
         columnId: card.columnId,
         order: card.order,
       };
 
-      // If moving within the same column
       if (card.columnId === destinationColumnId) {
         if (card.order === newOrder) {
-          return card; // No change needed
+          return card;
         }
 
         if (card.order < newOrder) {
-          // Moving down
           await txOrDb
             .update(cards)
             .set({
@@ -372,7 +383,6 @@ class CardService extends BaseService {
               ),
             );
         } else {
-          // Moving up
           await txOrDb
             .update(cards)
             .set({
@@ -387,7 +397,6 @@ class CardService extends BaseService {
             );
         }
 
-        // Update the card's order
         const [updatedCardResult] = await txOrDb
           .update(cards)
           .set({
@@ -401,10 +410,8 @@ class CardService extends BaseService {
           throw new Error("Failed to move card within column");
         }
 
-        // Get column name for better history display
-        const column = await columnService.get(card.columnId, txOrDb);
+        const column = await this.columnService.get(card.columnId, txOrDb);
 
-        // Record changes with column name and card title
         const changes = JSON.stringify({
           cardTitle: card.title,
           from: {
@@ -416,11 +423,10 @@ class CardService extends BaseService {
             order: updatedCardResult.order,
             columnName: column.name,
           },
-          sameName: true, // Indicates it's within the same column
+          sameName: true,
         });
 
-        // Record history for card move
-        await historyService.recordCardAction(
+        await this.historyService.recordCardAction(
           cardId,
           projectId,
           "move",
@@ -431,17 +437,13 @@ class CardService extends BaseService {
         return updatedCardResult;
       }
 
-      // Moving to different column
-      // 1. Get the destination column
-      const destinationColumn = await columnService.get(
+      const destinationColumn = await this.columnService.get(
         destinationColumnId,
         txOrDb,
       );
 
-      // Get source column name for history
-      const sourceColumn = await columnService.get(card.columnId, txOrDb);
+      const sourceColumn = await this.columnService.get(card.columnId, txOrDb);
 
-      // 2. Update the order of cards in the original column
       await txOrDb
         .update(cards)
         .set({
@@ -451,7 +453,6 @@ class CardService extends BaseService {
           and(eq(cards.columnId, card.columnId), gt(cards.order, card.order)),
         );
 
-      // 3. Update the order of cards in the destination column
       await txOrDb
         .update(cards)
         .set({
@@ -464,7 +465,6 @@ class CardService extends BaseService {
           ),
         );
 
-      // 4. Move the card itself
       const [updatedCardResult] = await txOrDb
         .update(cards)
         .set({
@@ -479,7 +479,6 @@ class CardService extends BaseService {
         throw new Error("Failed to move card to another column");
       }
 
-      // Record changes with column names for better activity display
       const changes = JSON.stringify({
         cardTitle: card.title,
         from: {
@@ -493,8 +492,7 @@ class CardService extends BaseService {
         },
       });
 
-      // Record history for card move
-      await historyService.recordCardAction(
+      await this.historyService.recordCardAction(
         cardId,
         projectId,
         "move",
@@ -503,13 +501,13 @@ class CardService extends BaseService {
       );
 
       return updatedCardResult;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List all cards in a column
    */
-  async list(columnId: string, tx: Transaction | Database = this.db) {
+  async list(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       return txOrDb.query.cards.findMany({
         where: eq(cards.columnId, columnId),
@@ -522,13 +520,13 @@ class CardService extends BaseService {
           },
         },
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Count cards by board ID
    */
-  async countByBoardId(boardId: string, tx: Transaction | Database = this.db) {
+  async countByBoardId(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({ count: count() })
@@ -537,16 +535,13 @@ class CardService extends BaseService {
         .where(eq(columns.boardId, boardId));
 
       return result?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Count completed cards by board ID (cards in columns marked as completed)
    */
-  async countCompletedByBoardId(
-    boardId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async countCompletedByBoardId(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({ count: count() })
@@ -557,15 +552,12 @@ class CardService extends BaseService {
         );
 
       return result?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
   /**
    * Count cards by project ID
    */
-  async countByProjectId(
-    projectId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async countByProjectId(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [result] = await txOrDb
         .select({ count: count() })
@@ -575,7 +567,7 @@ class CardService extends BaseService {
         .where(eq(boards.projectId, projectId));
 
       return result?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -586,15 +578,20 @@ class CardService extends BaseService {
     prompt: string,
     focusType?: "planning" | "task" | "review",
     detailLevel: "High-Level" | "Standard" | "Detailed" = "Standard",
+    tx?: Transaction | Database,
   ) {
-    const board = await boardService.getWithDetails(boardId);
+    return this.executeWithTx(async (txOrDb) => {
+      const boardDetails = await this.boardContextService.getBoardDetails(
+        boardId,
+        txOrDb,
+      );
 
-    const effectiveFocusType = focusType ?? "general";
-    const goalText = prompt.trim();
+      const effectiveFocusType = focusType ?? "general";
+      const goalText = prompt.trim();
 
-    const { object } = await generateObject({
-      model: google("gemini-2.0-flash-exp"),
-      prompt: `
+      const { object } = await generateObject({
+        model: google("gemini-2.0-flash-exp"),
+        prompt: `
           You are an AI project management assistant specializing in Kanban methodology. 
           Generate cards that align with our system's structure and constraints:
 
@@ -666,15 +663,16 @@ class CardService extends BaseService {
             - For Standard detail: Generate 5-8 cards
             - For Detailed detail: Generate 8-10 cards
 
-          Board Context:
-          - ${JSON.stringify(board)}
+          Board Context (Name and ID):
+          - ${JSON.stringify(boardDetails)}
 
           Based on the provided board context and prompt, generate cards that follow these specifications while maintaining data integrity.
         `,
-      schema: CardGenerateResponseSchema,
-    });
+        schema: CardGenerateResponseSchema,
+      });
 
-    return object.cards;
+      return object.cards;
+    }, tx ?? this.db);
   }
 
   /**
@@ -686,15 +684,20 @@ class CardService extends BaseService {
     prompt: string,
     focusType?: "planning" | "task" | "review",
     detailLevel: "High-Level" | "Standard" | "Detailed" = "Standard",
+    tx?: Transaction | Database,
   ) {
-    const board = await boardService.getWithDetails(boardId);
+    return this.executeWithTx(async (txOrDb) => {
+      const boardDetails = await this.boardContextService.getBoardDetails(
+        boardId,
+        txOrDb,
+      );
 
-    const effectiveFocusType = focusType ?? "general";
-    const goalText = prompt.trim();
+      const effectiveFocusType = focusType ?? "general";
+      const goalText = prompt.trim();
 
-    const { object } = await generateObject({
-      model: google("gemini-2.0-flash-exp"),
-      prompt: `
+      const { object } = await generateObject({
+        model: google("gemini-2.0-flash-exp"),
+        prompt: `
           You are an AI project management assistant specializing in Kanban methodology.
           Generate a SINGLE high-quality card based on the user's request.
           
@@ -730,189 +733,151 @@ class CardService extends BaseService {
           Priority: Assign appropriate priority based on urgency and importance
           Labels: Include relevant keywords as labels to categorize the card
           
-          Board Context:
-          ${board.name}
+          Board Context (Name and ID):
+          ${boardDetails.name}
           
           Create a SINGLE comprehensive card that addresses the user's request with maximum usefulness.
       `,
-      schema: CardGenerateSingleResponseSchema,
-    });
+        schema: CardGenerateSingleResponseSchema,
+      });
 
-    return object.card;
+      return object.card;
+    }, tx ?? this.db);
   }
 
   /**
    * Assign a card to the current user
    */
-  async assignToCurrentUser(
-    cardId: number,
-    tx: Transaction | Database = this.db,
-  ) {
+  async assignToCurrentUser(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      const card = await this.get(cardId, txOrDb);
-      const column = await columnService.get(card.columnId, txOrDb);
-
-      // Get board to find project
-      const [board] = await txOrDb
-        .select({
-          projectId: boards.projectId,
-        })
-        .from(boards)
-        .where(eq(boards.id, column.boardId));
-
-      if (!board) {
-        throw new Error("Board not found");
-      }
-
       const { userId } = await auth();
 
       if (!userId) {
         throw new Error("User is not authenticated");
       }
 
-      // Get the project user ID for the current user
-      const projectUser = await projectUserService.getCurrentProjectUser(
-        board.projectId,
+      const projectId = await this.projectService.getProjectIdByCardId(
+        cardId,
         txOrDb,
       );
 
-      // Update the card with the project user ID
-      const [updatedCard] = await txOrDb
-        .update(cards)
-        .set({
-          assignedToId: projectUser.id,
-          updatedAt: new Date(),
-        })
-        .where(eq(cards.id, cardId))
-        .returning();
+      const projectUser = await this.projectUserService.getCurrentProjectUser(
+        projectId,
+        txOrDb,
+      );
 
-      if (!updatedCard) {
-        throw new Error("Card not found");
-      }
-
-      return updatedCard;
-    }, tx);
+      return this.update(cardId, { assignedToId: projectUser.id }, txOrDb);
+    }, tx ?? this.db);
   }
 
   /**
    * Duplicate a card
    */
-  async duplicate(cardId: number, tx: Transaction | Database = this.db) {
+  async duplicate(cardId: number, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the existing card
-      const existingCard = await this.get(cardId, txOrDb);
-
-      // Get the last card order in the column
+      const originalCard = await this.get(cardId, txOrDb);
       const lastCardOrder = await this.getLastCardOrder(
-        existingCard.columnId,
+        originalCard.columnId,
         txOrDb,
       );
 
-      // Create a new card with the same properties but a new order
-      const [duplicatedCard] = await txOrDb
+      const [newCard] = await txOrDb
         .insert(cards)
         .values({
-          title: `${existingCard.title} (Copy)`,
-          description: existingCard.description,
-          columnId: existingCard.columnId,
-          priority: existingCard.priority,
-          labels: existingCard.labels,
+          ...originalCard,
+          id: undefined,
+          title: `${originalCard.title} (Copy)`,
           order: lastCardOrder + 1,
+          assignedToId: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          labels: originalCard.labels ?? [],
         })
         .returning();
 
-      if (!duplicatedCard) {
+      if (!newCard) {
         throw new Error("Failed to duplicate card");
       }
 
-      // Get the column and board to get project ID
-      const column = await columnService.get(duplicatedCard.columnId, txOrDb);
-      const board = await boardService.get(column.boardId, txOrDb);
-
-      // Record history for card creation
-      await historyService.recordCardAction(
-        duplicatedCard.id,
-        board.projectId,
-        "create",
-        JSON.stringify({ title: duplicatedCard.title }),
+      const projectId = await this.projectService.getProjectIdByCardId(
+        newCard.id,
         txOrDb,
       );
 
-      return duplicatedCard;
-    }, tx);
+      await this.historyService.recordCardAction(
+        newCard.id,
+        projectId,
+        "create",
+        JSON.stringify({ title: newCard.title, duplicatedFrom: cardId }),
+        txOrDb,
+      );
+
+      return newCard;
+    }, tx ?? this.db);
   }
 
   /**
-   * Send due date notifications for cards that are due soon
+   * Send reminders for cards due soon or overdue
    */
-  async sendDueDateReminders(tx: Transaction | Database = this.db) {
+  async sendDueDateReminders(tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      const now = new Date();
-      // Find cards due in the next 24 hours
-      const tomorrow = new Date(now);
-      tomorrow.setDate(tomorrow.getDate() + 1);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(today.getDate() + 1);
 
-      // Find cards with due dates within the next 24 hours that don't have a reminder sent yet
-      const dueSoonCards = await txOrDb.query.cards.findMany({
-        where: and(
-          isNotNull(cards.dueDate),
-          lte(cards.dueDate, tomorrow),
-          gt(cards.dueDate, now),
-          isNotNull(cards.assignedToId),
-        ),
-        with: {
-          column: true,
-          assignedTo: {
-            with: {
-              user: true,
-            },
-          },
-        },
-      });
-
-      const results = [];
-
-      // Create notifications for each card
-      for (const card of dueSoonCards) {
-        if (!card.assignedTo?.user) continue;
-
-        const dueTime = card.dueDate
-          ? new Date(card.dueDate).toLocaleString()
-          : "soon";
-
-        // Find the project ID by getting the board
-        const [board] = await txOrDb
-          .select({
-            projectId: boards.projectId,
-          })
-          .from(boards)
-          .where(eq(boards.id, card.column.boardId));
-
-        if (!board) continue;
-
-        // Send notification
-        const notification = await notificationService.create(
-          {
-            userId: card.assignedTo.user.id,
-            projectId: board.projectId,
-            entityType: "card",
-            entityId: card.id.toString(),
-            type: "due_date",
-            title: `Reminder: "${card.title}" is due soon`,
-            content: `The card "${card.title}" in column "${card.column.name}" is due ${dueTime}.`,
-          },
-          txOrDb,
+      const dueCards = await txOrDb
+        .select({
+          cardId: cards.id,
+          cardTitle: cards.title,
+          dueDate: cards.dueDate,
+          assignedToId: cards.assignedToId,
+          userId: projectUsers.userId,
+          projectId: boards.projectId,
+          columnName: columns.name,
+          boardName: boards.name,
+        })
+        .from(cards)
+        .innerJoin(columns, eq(cards.columnId, columns.id))
+        .innerJoin(boards, eq(columns.boardId, boards.id))
+        .leftJoin(projectUsers, eq(cards.assignedToId, projectUsers.id))
+        .where(
+          and(
+            isNotNull(cards.dueDate),
+            lte(cards.dueDate, tomorrow),
+            eq(columns.isCompleted, false),
+            isNotNull(cards.assignedToId),
+          ),
         );
 
-        results.push(notification);
+      const notifications = [];
+      for (const card of dueCards) {
+        if (!card.userId || !card.projectId) continue;
+
+        const dueDate = card.dueDate!;
+        const isOverdue = dueDate < today;
+
+        notifications.push({
+          userId: card.userId,
+          projectId: card.projectId,
+          entityType: "card" as const,
+          entityId: card.cardId.toString(),
+          type: "due_date" as const,
+          title: isOverdue
+            ? `Card "${card.cardTitle}" is overdue!`
+            : `Card "${card.cardTitle}" is due today!`,
+          content: `The card "${card.cardTitle}" in column "${card.columnName}" on board "${card.boardName}" ${isOverdue ? "was due on" : "is due today,"} ${dueDate.toLocaleDateString()}.`,
+        });
       }
 
-      return {
-        sent: results.length,
-        notifications: results,
-      };
-    }, tx);
+      if (notifications.length > 0) {
+        await this.notificationService.createMany(notifications, txOrDb);
+        console.log(`Sent ${notifications.length} due date reminders.`);
+      } else {
+        console.log("No due date reminders to send.");
+      }
+
+      return notifications.length;
+    }, tx ?? this.db);
   }
 }
-
-export const cardService = new CardService();

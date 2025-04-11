@@ -2,32 +2,67 @@ import "server-only";
 
 import { google } from "@ai-sdk/google";
 import { generateObject } from "ai";
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, type InferSelectModel } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { aiInsights } from "../db/schema";
+import {
+  aiInsights,
+  type boards,
+  type cards,
+  type columns,
+  type history,
+} from "../db/schema";
 import {
   type AiInsightCreate,
   AiInsightGenerateResponseSchema,
   type AiInsightUpdatePayload,
 } from "../zod";
 import { BaseService } from "./base.service";
-import { boardService } from "./board.service";
-import { cardService } from "./card.service";
-import { columnService } from "./column.service";
-import { historyService } from "./history.service";
-import { projectService } from "./project.service";
+import { type BoardService } from "./board.service";
+import { type CardService } from "./card.service";
+import { type ColumnService } from "./column.service";
+import { type HistoryService } from "./history.service";
+import { type ProjectService } from "./project.service";
+
+// Define local types using InferSelectModel
+type Board = InferSelectModel<typeof boards>;
+type Card = InferSelectModel<typeof cards>;
+type Column = InferSelectModel<typeof columns>;
+type History = InferSelectModel<typeof history>;
+// Define type for the column count structure
+type BoardStats = { board: string; cardCount: number; columnCount: number };
 
 /**
  * Service for managing AI insight-related operations
  */
-class AiInsightService extends BaseService {
+export class AiInsightService extends BaseService {
+  private readonly boardService: BoardService;
+  private readonly cardService: CardService;
+  private readonly columnService: ColumnService;
+  private readonly historyService: HistoryService;
+  private readonly projectService: ProjectService;
+
+  constructor(
+    db: Database,
+    boardService: BoardService,
+    cardService: CardService,
+    columnService: ColumnService,
+    historyService: HistoryService,
+    projectService: ProjectService,
+  ) {
+    super(db);
+    this.boardService = boardService;
+    this.cardService = cardService;
+    this.columnService = columnService;
+    this.historyService = historyService;
+    this.projectService = projectService;
+  }
+
   /**
    * Create a new AI insight entry
    */
-  async create(data: AiInsightCreate, tx: Transaction | Database = this.db) {
+  async create(data: AiInsightCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      // Determine projectId or boardId based on entityType
       let projectId = data.projectId;
       let boardId = data.boardId;
 
@@ -36,9 +71,8 @@ class AiInsightService extends BaseService {
       } else if (data.entityType === "board" && !boardId) {
         boardId = data.entityId;
 
-        // If no project ID is provided but we have a board ID, fetch the project ID
         if (!projectId && boardId) {
-          const board = await boardService.get(boardId, txOrDb);
+          const board = await this.boardService.get(boardId, txOrDb);
           projectId = board.projectId;
         }
       }
@@ -57,13 +91,13 @@ class AiInsightService extends BaseService {
       }
 
       return insight;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get an AI insight by ID
    */
-  async get(insightId: string, tx: Transaction | Database = this.db) {
+  async get(insightId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const insight = await txOrDb.query.aiInsights.findFirst({
         where: eq(aiInsights.id, insightId),
@@ -78,7 +112,7 @@ class AiInsightService extends BaseService {
       }
 
       return insight;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -87,7 +121,7 @@ class AiInsightService extends BaseService {
   async listByEntity(
     entityType: AiInsightCreate["entityType"],
     entityId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       let insightQuery;
@@ -105,7 +139,7 @@ class AiInsightService extends BaseService {
       }
 
       return insightQuery;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -114,7 +148,7 @@ class AiInsightService extends BaseService {
   async listActiveByEntity(
     entityType: AiInsightCreate["entityType"],
     entityId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       let whereClause;
@@ -135,7 +169,7 @@ class AiInsightService extends BaseService {
         where: whereClause,
         orderBy: desc(aiInsights.createdAt),
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -144,7 +178,7 @@ class AiInsightService extends BaseService {
   async update(
     insightId: string,
     data: AiInsightUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const [insight] = await txOrDb
@@ -158,13 +192,13 @@ class AiInsightService extends BaseService {
       }
 
       return insight;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete an AI insight
    */
-  async del(insightId: string, tx: Transaction | Database = this.db) {
+  async del(insightId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [insight] = await txOrDb
         .delete(aiInsights)
@@ -176,61 +210,53 @@ class AiInsightService extends BaseService {
       }
 
       return insight;
-    }, tx);
+    }, tx ?? this.db);
   }
 
-  async generateBoardInsights(
-    boardId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async generateBoardInsights(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get board details
-      const board = await boardService.get(boardId, txOrDb);
+      const board = await this.boardService.get(boardId, txOrDb);
 
-      // Get last 10 insights for this board to avoid repetition
       const previousInsights = await txOrDb.query.aiInsights.findMany({
         where: eq(aiInsights.boardId, boardId),
         orderBy: desc(aiInsights.createdAt),
         limit: 10,
       });
 
-      // Set all existing insights for this board to inactive
       await txOrDb
         .update(aiInsights)
         .set({ isActive: false })
         .where(eq(aiInsights.boardId, boardId));
 
-      // Get all columns for this board
-      const columns = await columnService.list(boardId, txOrDb);
+      const columns = await this.columnService.list(boardId, txOrDb);
 
-      // Get all cards for each column
-      const cardPromises = columns.map((column) =>
-        cardService.list(column.id, txOrDb),
+      const cardPromises = columns.map((column: Column) =>
+        this.cardService.list(column.id, txOrDb),
       );
       const cards = (await Promise.all(cardPromises)).flat();
 
-      // Get card history data (limited to last 50 entries for performance)
       const cardHistoryPromises = cards
         .slice(0, 10)
-        .map((card) =>
-          historyService.listByEntity("card", card.id.toString(), txOrDb),
+        .map((card: Card) =>
+          this.historyService.listByEntity("card", card.id.toString(), txOrDb),
         );
       const cardHistories = await Promise.all(cardHistoryPromises);
       const flattenedCardHistory = cardHistories
         .flat()
         .sort(
-          (a, b) =>
+          (a: History, b: History) =>
             new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
         )
         .slice(0, 50);
 
-      // Analyze card movements from history
-      const cardMoves = flattenedCardHistory.filter((h) => h.action === "move");
+      const cardMoves = flattenedCardHistory.filter(
+        (h: History) => h.action === "move",
+      );
       const cardCreations = flattenedCardHistory.filter(
-        (h) => h.action === "create",
+        (h: History) => h.action === "create",
       );
       const cardUpdates = flattenedCardHistory.filter(
-        (h) => h.action === "update",
+        (h: History) => h.action === "update",
       );
 
       const { object } = await generateObject({
@@ -240,7 +266,7 @@ class AiInsightService extends BaseService {
 You're analyzing a Kanban board: "${board.name}" with ${cards.length} tasks across ${columns.length} columns.
 
 Key statistics:
-- Column distribution: ${columns.map((col) => `${col.name}: ${cards.filter((c) => c.columnId === col.id).length}`).join(" | ")}
+- Column distribution: ${columns.map((col: Column) => `${col.name}: ${cards.filter((c: Card) => c.columnId === col.id).length}`).join(" | ")}
 - Recent activity: ${cardMoves.length} card moves, ${cardCreations.length} new cards, ${cardUpdates.length} updates
 
 ${
@@ -262,7 +288,6 @@ Be practical, specific, and conversational - like talking to a teammate.
 `,
       });
 
-      // Persist generated insights to database
       const createdInsights = [];
       for (const insight of object.insights) {
         const insightData: AiInsightCreate = {
@@ -283,59 +308,54 @@ Be practical, specific, and conversational - like talking to a teammate.
       }
 
       return createdInsights;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   async generateProjectInsights(
     projectId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get last 10 insights for this project to avoid repetition
       const previousInsights = await txOrDb.query.aiInsights.findMany({
         where: eq(aiInsights.projectId, projectId),
         orderBy: desc(aiInsights.createdAt),
         limit: 10,
       });
 
-      // Set all existing insights for this project to inactive
       await txOrDb
         .update(aiInsights)
         .set({ isActive: false })
         .where(eq(aiInsights.projectId, projectId));
 
-      const project = await projectService.get(projectId, txOrDb);
-      const boards = await boardService.list(projectId, txOrDb);
+      const project = await this.projectService.get(projectId, txOrDb);
+      const boards = await this.boardService.list(projectId, txOrDb);
 
-      const columnPromises = boards.flatMap((board) =>
-        columnService.list(board.id, txOrDb),
+      const columnPromises = boards.flatMap((board: Board) =>
+        this.columnService.list(board.id, txOrDb),
       );
 
       const columns = (await Promise.all(columnPromises)).flat();
 
-      const cardPromises = columns.flatMap((col) =>
-        cardService.list(col.id, txOrDb),
+      const cardPromises = columns.flatMap((col: Column) =>
+        this.cardService.list(col.id, txOrDb),
       );
       const cards = (await Promise.all(cardPromises)).flat();
 
-      // Get project history data (limited to recent events)
-      const projectHistory = await historyService.listByProjectPaginated(
+      const projectHistory = await this.historyService.listByProjectPaginated(
         projectId,
         50,
         0,
         txOrDb,
       );
 
-      // Analyze history entries
       const cardMoves = projectHistory.items.filter(
-        (h) => h.entityType === "card" && h.action === "move",
+        (h: History) => h.entityType === "card" && h.action === "move",
       );
 
-      // Calculate the completion rate based on cards in columns marked as completed
-      const completedColumns = columns.filter((col) => col.isCompleted);
+      const completedColumns = columns.filter((col: Column) => col.isCompleted);
       const completedCards = completedColumns.reduce(
-        (count, col) =>
-          count + cards.filter((c) => c.columnId === col.id).length,
+        (count: number, col: Column) =>
+          count + cards.filter((c: Card) => c.columnId === col.id).length,
         0,
       );
 
@@ -344,13 +364,13 @@ Be practical, specific, and conversational - like talking to a teammate.
           ? `${Math.round((completedCards / cards.length) * 100)}%`
           : "No data";
 
-      // Add board and card stats
-      const columnCountByBoard = boards.map((board) => ({
+      const columnCountByBoard: BoardStats[] = boards.map((board: Board) => ({
         board: board.name,
-        columnCount: columns.filter((col) => col.boardId === board.id).length,
+        columnCount: columns.filter((col: Column) => col.boardId === board.id)
+          .length,
         cardCount: cards.filter(
-          (card) =>
-            columns.find((col) => col.id === card.columnId)?.boardId ===
+          (card: Card) =>
+            columns.find((col: Column) => col.id === card.columnId)?.boardId ===
             board.id,
         ).length,
       }));
@@ -362,8 +382,8 @@ Be practical, specific, and conversational - like talking to a teammate.
 You're analyzing project: "${project.name}" with ${boards.length} boards, ${columns.length} columns, and ${cards.length} tasks.
 
 Key statistics:
-- Boards: ${boards.map((b) => b.name).join(", ")}
-- Distribution: ${columnCountByBoard.map((b) => `${b.board}: ${b.cardCount}`).join(" | ")}
+- Boards: ${boards.map((b: Board) => b.name).join(", ")}
+- Distribution: ${columnCountByBoard.map((b: BoardStats) => `${b.board}: ${b.cardCount}`).join(" | ")}
 - Completion rate: ${completionRate}
 - Recent activity: ${cardMoves.length} card moves in recent history
 
@@ -383,11 +403,10 @@ Generate 1-3 actionable insights for this project. For each:
 4. Type ("sprint_prediction", "bottleneck", "productivity", "risk_assessment", "recommendation")
 
 Be practical, specific, and conversational - like talking to a teammate.
-Only reference boards that exist in this project: ${boards.map((b) => b.name).join(", ")}
+Only reference boards that exist in this project: ${boards.map((b: Board) => b.name).join(", ")}
 `,
       });
 
-      // Persist generated insights to database
       const createdInsights = [];
       for (const insight of object.insights) {
         const insightData: AiInsightCreate = {
@@ -407,9 +426,6 @@ Only reference boards that exist in this project: ${boards.map((b) => b.name).jo
       }
 
       return createdInsights;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-// Export a singleton instance
-export const aiInsightService = new AiInsightService();

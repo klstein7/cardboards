@@ -7,16 +7,23 @@ import { type Database, type Transaction } from "../db";
 import { history } from "../db/schema";
 import { type HistoryCreate } from "../zod";
 import { BaseService } from "./base.service";
-import { projectUserService } from "./project-user.service";
+import { type ProjectUserService } from "./project-user.service";
 
 /**
  * Service for managing history-related operations
  */
-class HistoryService extends BaseService {
+export class HistoryService extends BaseService {
+  private readonly projectUserService: ProjectUserService;
+
+  constructor(db: Database, projectUserService: ProjectUserService) {
+    super(db);
+    this.projectUserService = projectUserService;
+  }
+
   /**
    * Create a new history entry
    */
-  async create(data: HistoryCreate, tx: Transaction | Database = this.db) {
+  async create(data: HistoryCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
 
@@ -25,10 +32,11 @@ class HistoryService extends BaseService {
 
       if (data.projectId && userId) {
         try {
-          const projectUser = await projectUserService.getCurrentProjectUser(
-            data.projectId,
-            txOrDb,
-          );
+          const projectUser =
+            await this.projectUserService.getCurrentProjectUser(
+              data.projectId,
+              txOrDb,
+            );
           performedById = projectUser.id;
         } catch (error) {
           // If we can't get the project user, just don't set the performedById
@@ -49,13 +57,13 @@ class HistoryService extends BaseService {
       }
 
       return entry;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get a history entry by ID
    */
-  async get(historyId: string, tx: Transaction | Database = this.db) {
+  async get(historyId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const entry = await txOrDb.query.history.findFirst({
         where: eq(history.id, historyId),
@@ -74,7 +82,7 @@ class HistoryService extends BaseService {
       }
 
       return entry;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -83,7 +91,7 @@ class HistoryService extends BaseService {
   async listByEntity(
     entityType: HistoryCreate["entityType"],
     entityId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       // For entity-specific history, we need to verify access to the entity
@@ -103,13 +111,13 @@ class HistoryService extends BaseService {
           },
         },
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List history entries for a project
    */
-  async listByProject(projectId: string, tx: Transaction | Database = this.db) {
+  async listByProject(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       // Verify user can access this project
       // Authentication check removed
@@ -125,7 +133,7 @@ class HistoryService extends BaseService {
           },
         },
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -135,7 +143,7 @@ class HistoryService extends BaseService {
     projectId: string,
     limit = 10,
     offset = 0,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       // Verify user can access this project
@@ -172,7 +180,7 @@ class HistoryService extends BaseService {
           offset,
         },
       };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -182,7 +190,7 @@ class HistoryService extends BaseService {
     projectId: string,
     action: HistoryCreate["action"],
     changes?: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.create(
       {
@@ -204,7 +212,7 @@ class HistoryService extends BaseService {
     projectId: string,
     action: HistoryCreate["action"],
     changes?: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.create(
       {
@@ -226,7 +234,7 @@ class HistoryService extends BaseService {
     projectId: string,
     action: HistoryCreate["action"],
     changes?: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.create(
       {
@@ -248,7 +256,7 @@ class HistoryService extends BaseService {
     projectId: string,
     action: HistoryCreate["action"],
     changes?: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.create(
       {
@@ -262,5 +270,3 @@ class HistoryService extends BaseService {
     );
   }
 }
-
-export const historyService = new HistoryService();

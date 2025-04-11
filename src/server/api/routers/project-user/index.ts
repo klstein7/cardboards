@@ -2,16 +2,16 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, projectUserService } from "~/server/services";
+import { services } from "~/server/services/container";
 import { ProjectUserUpdateSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const projectUserRouter = createTRPCRouter({
   // List all users in a project (requires project membership)
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    // Verify user can access this project
-    await authService.canAccessProject(input);
-    return projectUserService.list(input);
+    // Access services via the services object
+    await services.authService.canAccessProject(input);
+    return services.projectUserService.list(input);
   }),
 
   // Update a project user (requires admin permission)
@@ -24,10 +24,10 @@ export const projectUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Verify current user is a project admin
-      await authService.requireProjectAdmin(input.projectId);
+      // Access services via the services object
+      await services.authService.requireProjectAdmin(input.projectId);
 
-      const projectUser = await projectUserService.update(
+      const projectUser = await services.projectUserService.update(
         input.projectId,
         input.userId,
         input.data,
@@ -55,16 +55,16 @@ export const projectUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Verify current user is a project admin
-      await authService.requireProjectAdmin(input.projectId);
+      // Access services via the services object
+      await services.authService.requireProjectAdmin(input.projectId);
 
-      // Get the project user before removing for event payload
-      const projectUser = await projectUserService.getByProjectIdAndUserId(
-        input.projectId,
-        input.userId,
-      );
+      const projectUser =
+        await services.projectUserService.getByProjectIdAndUserId(
+          input.projectId,
+          input.userId,
+        );
 
-      await projectUserService.remove(input.projectId, input.userId);
+      await services.projectUserService.remove(input.projectId, input.userId);
 
       await pusher.trigger(
         pusherChannels.projectUser.name,
@@ -90,12 +90,13 @@ export const projectUserRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input, ctx }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input.projectId);
-      const projectUser = await projectUserService.updateCurrentUserPreferences(
-        input.projectId,
-        input.data,
-      );
+      // Access services via the services object
+      await services.authService.canAccessProject(input.projectId);
+      const projectUser =
+        await services.projectUserService.updateCurrentUserPreferences(
+          input.projectId,
+          input.data,
+        );
 
       await pusher.trigger(
         pusherChannels.projectUser.name,
@@ -114,17 +115,17 @@ export const projectUserRouter = createTRPCRouter({
   countByProjectId: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input);
-      return projectUserService.countByProjectId(input);
+      // Access services via the services object
+      await services.authService.canAccessProject(input);
+      return services.projectUserService.countByProjectId(input);
     }),
 
   // Get current user's membership in a project
   getCurrentProjectUser: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      // Verify user can access this project
-      await authService.canAccessProject(input);
-      return projectUserService.getCurrentProjectUser(input);
+      // Access services via the services object
+      await services.authService.canAccessProject(input);
+      return services.projectUserService.getCurrentProjectUser(input);
     }),
 });

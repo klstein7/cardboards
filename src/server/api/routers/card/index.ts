@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, cardService } from "~/server/services";
+import { services } from "~/server/services/container";
 import {
   CardCreateManySchema,
   CardCreateSchema,
@@ -15,8 +15,8 @@ export const cardRouter = createTRPCRouter({
   create: authedProcedure
     .input(CardCreateSchema)
     .mutation(async ({ input, ctx }) => {
-      await authService.canAccessColumn(input.columnId);
-      const card = await cardService.create(input);
+      await services.authService.canAccessColumn(input.columnId);
+      const card = await services.cardService.create(input);
 
       await pusher.trigger(
         pusherChannels.card.name,
@@ -34,20 +34,20 @@ export const cardRouter = createTRPCRouter({
   createMany: authedProcedure
     .input(CardCreateManySchema)
     .mutation(async ({ input }) => {
-      await authService.canAccessBoard(input.boardId);
-      return cardService.createMany(input.boardId, input.data);
+      await services.authService.canAccessBoard(input.boardId);
+      return services.cardService.createMany(input.boardId, input.data);
     }),
 
   get: authedProcedure.input(z.number()).query(async ({ input }) => {
-    await authService.canAccessCard(input);
-    return cardService.get(input);
+    await services.authService.canAccessCard(input);
+    return services.cardService.get(input);
   }),
 
   update: authedProcedure
     .input(CardUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      await authService.canAccessCard(input.cardId);
-      const card = await cardService.update(input.cardId, input.data);
+      await services.authService.canAccessCard(input.cardId);
+      const card = await services.cardService.update(input.cardId, input.data);
 
       await pusher.trigger(
         pusherChannels.card.name,
@@ -65,8 +65,8 @@ export const cardRouter = createTRPCRouter({
   move: authedProcedure
     .input(CardMoveSchema)
     .mutation(async ({ input, ctx }) => {
-      await authService.canAccessCard(input.cardId);
-      const card = await cardService.move({
+      await services.authService.canAccessCard(input.cardId);
+      const card = await services.cardService.move({
         cardId: input.cardId,
         destinationColumnId: input.destinationColumnId,
         sourceColumnId: input.sourceColumnId,
@@ -89,8 +89,8 @@ export const cardRouter = createTRPCRouter({
   delete: authedProcedure
     .input(z.object({ cardId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      await authService.canAccessCard(input.cardId);
-      const card = await cardService.del(input.cardId);
+      await services.authService.canAccessCard(input.cardId);
+      const card = await services.cardService.del(input.cardId);
 
       await pusher.trigger(
         pusherChannels.card.name,
@@ -108,13 +108,13 @@ export const cardRouter = createTRPCRouter({
   duplicate: authedProcedure
     .input(z.object({ cardId: z.number() }))
     .mutation(async ({ input }) => {
-      await authService.canAccessCard(input.cardId);
-      return cardService.duplicate(input.cardId);
+      await services.authService.canAccessCard(input.cardId);
+      return services.cardService.duplicate(input.cardId);
     }),
 
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    await authService.canAccessColumn(input);
-    return cardService.list(input);
+    await services.authService.canAccessColumn(input);
+    return services.cardService.list(input);
   }),
 
   generate: authedProcedure
@@ -130,8 +130,8 @@ export const cardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await authService.canAccessBoard(input.boardId);
-      return cardService.generate(
+      await services.authService.canAccessBoard(input.boardId);
+      return services.cardService.generate(
         input.boardId,
         input.prompt,
         input.focusType,
@@ -152,8 +152,8 @@ export const cardRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
-      await authService.canAccessBoard(input.boardId);
-      return cardService.generateSingle(
+      await services.authService.canAccessBoard(input.boardId);
+      return services.cardService.generateSingle(
         input.boardId,
         input.prompt,
         input.focusType,
@@ -162,29 +162,29 @@ export const cardRouter = createTRPCRouter({
     }),
 
   countByBoardId: authedProcedure.input(z.string()).query(async ({ input }) => {
-    await authService.canAccessBoard(input);
-    return cardService.countByBoardId(input);
+    await services.authService.canAccessBoard(input);
+    return services.cardService.countByBoardId(input);
   }),
 
   countCompletedByBoardId: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      await authService.canAccessBoard(input);
-      return cardService.countCompletedByBoardId(input);
+      await services.authService.canAccessBoard(input);
+      return services.cardService.countCompletedByBoardId(input);
     }),
 
   countByProjectId: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      await authService.canAccessProject(input);
-      return cardService.countByProjectId(input);
+      await services.authService.canAccessProject(input);
+      return services.cardService.countByProjectId(input);
     }),
 
   assignToCurrentUser: authedProcedure
     .input(z.object({ cardId: z.number() }))
     .mutation(async ({ input, ctx }) => {
-      await authService.canAccessCard(input.cardId);
-      const card = await cardService.assignToCurrentUser(input.cardId);
+      await services.authService.canAccessCard(input.cardId);
+      const card = await services.cardService.assignToCurrentUser(input.cardId);
 
       await pusher.trigger(
         pusherChannels.card.name,

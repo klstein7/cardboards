@@ -1,30 +1,55 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { and, asc, eq, gte, sql } from "drizzle-orm";
+import { and, asc, eq, gte, type InferSelectModel, sql } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { columns } from "../db/schema";
+import { columns, type projectUsers } from "../db/schema";
 import {
   type ColumnCreate,
   type ColumnShiftPayload,
   type ColumnUpdatePayload,
 } from "../zod";
 import { BaseService } from "./base.service";
-import { boardService } from "./board.service";
-import { historyService } from "./history.service";
-import { notificationService } from "./notification.service";
-import { projectService } from "./project.service";
-import { projectUserService } from "./project-user.service";
+import { type BoardContextService } from "./board-context.service";
+import { type HistoryService } from "./history.service";
+import { type NotificationService } from "./notification.service";
+import { type ProjectService } from "./project.service";
+import { type ProjectUserService } from "./project-user.service";
+
+// Define local type for ProjectUser
+type ProjectUser = InferSelectModel<typeof projectUsers>;
 
 /**
  * Service for managing column operations
  */
-class ColumnService extends BaseService {
+export class ColumnService extends BaseService {
+  private readonly boardContextService: BoardContextService;
+  private readonly historyService: HistoryService;
+  private readonly notificationService: NotificationService;
+  private readonly projectService: ProjectService;
+  private readonly projectUserService: ProjectUserService;
+
+  constructor(
+    db: Database,
+    boardContextService: BoardContextService,
+    historyService: HistoryService,
+    notificationService: NotificationService,
+    projectService: ProjectService,
+    projectUserService: ProjectUserService,
+  ) {
+    super(db);
+    this.boardContextService = boardContextService;
+    this.historyService = historyService;
+    this.notificationService = notificationService;
+    this.projectService = projectService;
+    this.projectUserService = projectUserService;
+  }
+
   /**
    * Get a column by ID
    */
-  async get(columnId: string, tx: Transaction | Database = this.db) {
+  async get(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const column = await txOrDb.query.columns.findFirst({
         where: eq(columns.id, columnId),
@@ -35,13 +60,13 @@ class ColumnService extends BaseService {
       }
 
       return column;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Create a new column
    */
-  async create(data: ColumnCreate, tx: Transaction | Database = this.db) {
+  async create(data: ColumnCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const existingColumns = await this.list(data.boardId, txOrDb);
       const lastOrder =
@@ -82,26 +107,29 @@ class ColumnService extends BaseService {
         throw new Error("Failed to create column");
       }
 
-      // Get project ID from board for history tracking
-      const board = await boardService.get(data.boardId, txOrDb);
+      // Use injected context service to get projectId
+      const projectId = await this.boardContextService.getProjectId(
+        data.boardId,
+        txOrDb,
+      );
 
-      // Record history for column creation
-      await historyService.recordColumnAction(
+      // Use injected service
+      await this.historyService.recordColumnAction(
         column.id,
-        board.projectId,
+        projectId,
         "create",
         undefined,
         txOrDb,
       );
 
       return column;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Create multiple columns at once
    */
-  async createMany(data: ColumnCreate[], tx: Transaction | Database = this.db) {
+  async createMany(data: ColumnCreate[], tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       await txOrDb.insert(columns).values(
         data.map((d, index) => ({
@@ -109,28 +137,25 @@ class ColumnService extends BaseService {
           order: d.order ?? index,
         })),
       );
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * List all columns for a board
    */
-  async list(boardId: string, tx: Transaction | Database = this.db) {
+  async list(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       return txOrDb.query.columns.findMany({
         where: eq(columns.boardId, boardId),
         orderBy: asc(columns.order),
       });
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get the first column for a board
    */
-  async getFirstColumnByBoardId(
-    boardId: string,
-    tx: Transaction | Database = this.db,
-  ) {
+  async getFirstColumnByBoardId(boardId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const columns = await this.list(boardId, txOrDb);
 
@@ -139,7 +164,7 @@ class ColumnService extends BaseService {
       }
 
       return columns[0]!;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -148,10 +173,9 @@ class ColumnService extends BaseService {
   async update(
     columnId: string,
     data: ColumnUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      // Get the column before update to track changes
       const existingColumn = await this.get(columnId, txOrDb);
 
       const [column] = await txOrDb
@@ -164,8 +188,11 @@ class ColumnService extends BaseService {
         throw new Error("Failed to update column");
       }
 
-      // Get board for project ID
-      const board = await boardService.get(column.boardId, txOrDb);
+      // Use injected context service to get projectId
+      const projectId = await this.boardContextService.getProjectId(
+        column.boardId,
+        txOrDb,
+      );
 
       // Record changes
       const changes = JSON.stringify({
@@ -173,10 +200,10 @@ class ColumnService extends BaseService {
         after: column,
       });
 
-      // Record history for column update
-      await historyService.recordColumnAction(
+      // Use injected service
+      await this.historyService.recordColumnAction(
         column.id,
-        board.projectId,
+        projectId,
         "update",
         changes,
         txOrDb,
@@ -189,14 +216,15 @@ class ColumnService extends BaseService {
           throw new Error("User not authenticated");
         }
 
-        const members = await projectUserService.list(board.projectId, txOrDb);
-        const project = await projectService.get(board.projectId, txOrDb);
+        // Use injected services
+        const members = await this.projectUserService.list(projectId, txOrDb);
+        const project = await this.projectService.get(projectId, txOrDb);
 
         const notificationsData = members
-          .filter((member) => member.userId !== actorUserId) // Don't notify the actor
-          .map((member) => ({
+          .filter((member: ProjectUser) => member.userId !== actorUserId)
+          .map((member: ProjectUser) => ({
             userId: member.userId,
-            projectId: board.projectId,
+            projectId: projectId,
             entityType: "column" as const,
             entityId: column.id,
             type: "column_update" as const,
@@ -205,23 +233,27 @@ class ColumnService extends BaseService {
           }));
 
         if (notificationsData.length > 0) {
-          await notificationService.createMany(notificationsData, txOrDb);
+          // Use injected service
+          await this.notificationService.createMany(notificationsData, txOrDb);
         }
       }
 
       return column;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a column
    */
-  async del(columnId: string, tx: Transaction | Database = this.db) {
+  async del(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const column = await this.get(columnId, txOrDb);
 
-      // Get board for project ID
-      const board = await boardService.get(column.boardId, txOrDb);
+      // Use injected context service to get projectId
+      const projectId = await this.boardContextService.getProjectId(
+        column.boardId,
+        txOrDb,
+      );
 
       // Notify members BEFORE deleting
       const { userId: actorUserId } = await auth();
@@ -229,14 +261,15 @@ class ColumnService extends BaseService {
         throw new Error("User not authenticated");
       }
 
-      const members = await projectUserService.list(board.projectId, txOrDb);
-      const project = await projectService.get(board.projectId, txOrDb);
+      // Use injected services
+      const members = await this.projectUserService.list(projectId, txOrDb);
+      const project = await this.projectService.get(projectId, txOrDb);
 
       const notificationsData = members
-        .filter((member) => member.userId !== actorUserId)
-        .map((member) => ({
+        .filter((member: ProjectUser) => member.userId !== actorUserId)
+        .map((member: ProjectUser) => ({
           userId: member.userId,
-          projectId: board.projectId,
+          projectId: projectId,
           entityType: "column" as const,
           entityId: column.id,
           type: "column_update" as const,
@@ -245,7 +278,8 @@ class ColumnService extends BaseService {
         }));
 
       if (notificationsData.length > 0) {
-        await notificationService.createMany(notificationsData, txOrDb);
+        // Use injected service
+        await this.notificationService.createMany(notificationsData, txOrDb);
       }
 
       // Record the column data before deletion
@@ -276,17 +310,17 @@ class ColumnService extends BaseService {
         throw new Error("Failed to delete column");
       }
 
-      // Record history for column deletion
-      await historyService.recordColumnAction(
+      // Use injected service
+      await this.historyService.recordColumnAction(
         column.id,
-        board.projectId,
+        projectId,
         "delete",
         changes,
         txOrDb,
       );
 
       return deletedColumn;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -295,7 +329,7 @@ class ColumnService extends BaseService {
   async shift(
     columnId: string,
     data: ColumnShiftPayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const column = await this.get(columnId, txOrDb);
@@ -334,10 +368,12 @@ class ColumnService extends BaseService {
         throw new Error("Error shifting column");
       }
 
-      // After successful shift operation, add history tracking
-      // Get the column after shift
+      // Use injected service to get projectId
       const updatedColumnAfter = await this.get(columnId, txOrDb);
-      const board = await boardService.get(updatedColumnAfter.boardId, txOrDb);
+      const projectId = await this.boardContextService.getProjectId(
+        updatedColumnAfter.boardId,
+        txOrDb,
+      );
 
       // Record the move action
       const changes = JSON.stringify({
@@ -345,17 +381,16 @@ class ColumnService extends BaseService {
         to: { order: updatedColumnAfter.order },
       });
 
-      await historyService.recordColumnAction(
+      // Use injected service
+      await this.historyService.recordColumnAction(
         columnId,
-        board.projectId,
+        projectId,
         "move",
         changes,
         txOrDb,
       );
 
       return updatedColumn;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const columnService = new ColumnService();

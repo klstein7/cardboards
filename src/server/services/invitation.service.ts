@@ -4,20 +4,36 @@ import { eq } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
 import { invitations } from "../db/schema";
-import { projectUserService, userService } from "./";
 import { BaseService } from "./base.service";
+import { type ProjectUserService } from "./project-user.service";
+import { type UserService } from "./user.service";
 
 /**
  * Service for managing invitation-related operations
  */
-class InvitationService extends BaseService {
+export class InvitationService extends BaseService {
+  private readonly projectUserService: ProjectUserService;
+  private readonly userService: UserService;
+
+  constructor(
+    db: Database,
+    projectUserService: ProjectUserService,
+    userService: UserService,
+  ) {
+    super(db);
+    this.projectUserService = projectUserService;
+    this.userService = userService;
+  }
+
   /**
    * Create a new invitation
    */
-  async create(projectId: string) {
+  async create(projectId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      const projectUser =
-        await projectUserService.getCurrentProjectUser(projectId);
+      const projectUser = await this.projectUserService.getCurrentProjectUser(
+        projectId,
+        txOrDb,
+      );
 
       const [invitation] = await txOrDb
         .insert(invitations)
@@ -32,13 +48,13 @@ class InvitationService extends BaseService {
       }
 
       return invitation;
-    });
+    }, tx ?? this.db);
   }
 
   /**
    * Get an invitation by ID
    */
-  async get(invitationId: string) {
+  async get(invitationId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const invitation = await txOrDb.query.invitations.findFirst({
         where: eq(invitations.id, invitationId),
@@ -49,7 +65,7 @@ class InvitationService extends BaseService {
       }
 
       return invitation;
-    });
+    }, tx ?? this.db);
   }
 
   /**
@@ -58,19 +74,18 @@ class InvitationService extends BaseService {
   async accept(
     invitationId: string,
     userId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
-      const invitation = await this.get(invitationId);
+      const invitation = await this.get(invitationId, txOrDb);
 
       if (invitation.expiresAt.getTime() < Date.now()) {
         throw new Error("Invitation expired");
       }
 
-      await userService.syncCurrentUser(txOrDb);
+      await this.userService.syncCurrentUser(txOrDb);
 
-      // Create the project user and return it
-      const projectUser = await projectUserService.create(
+      const projectUser = await this.projectUserService.create(
         {
           projectId: invitation.projectId,
           userId,
@@ -80,8 +95,6 @@ class InvitationService extends BaseService {
       );
 
       return projectUser;
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const invitationService = new InvitationService();

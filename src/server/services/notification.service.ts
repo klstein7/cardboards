@@ -18,11 +18,15 @@ import { BaseService } from "./base.service";
 /**
  * Service for managing notification operations
  */
-class NotificationService extends BaseService {
+export class NotificationService extends BaseService {
+  constructor(db: Database) {
+    super(db);
+  }
+
   /**
    * Create a new notification
    */
-  async create(data: NotificationCreate, tx: Transaction | Database = this.db) {
+  async create(data: NotificationCreate, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [notification] = await txOrDb
         .insert(notifications)
@@ -45,7 +49,7 @@ class NotificationService extends BaseService {
       );
 
       return notification;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -53,7 +57,7 @@ class NotificationService extends BaseService {
    */
   async createMany(
     dataArray: NotificationCreate[],
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       if (dataArray.length === 0) return [];
@@ -64,13 +68,13 @@ class NotificationService extends BaseService {
         .returning();
 
       return createdNotifications;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Get a notification by ID
    */
-  async get(id: string, tx: Transaction | Database = this.db) {
+  async get(id: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const notification = await txOrDb.query.notifications.findFirst({
         where: eq(notifications.id, id),
@@ -81,7 +85,7 @@ class NotificationService extends BaseService {
       }
 
       return notification;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -90,7 +94,7 @@ class NotificationService extends BaseService {
   async getForUser(
     userId: string,
     filters: Partial<NotificationFilter> = { limit: 20, offset: 0 },
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const { isRead, type, limit = 20, offset = 0 } = filters;
@@ -130,7 +134,7 @@ class NotificationService extends BaseService {
           offset,
         },
       };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -139,7 +143,7 @@ class NotificationService extends BaseService {
   async getForProject(
     projectId: string,
     filters: Partial<NotificationFilter> = { limit: 20, offset: 0 },
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const { isRead, type, limit = 20, offset = 0 } = filters;
@@ -179,7 +183,7 @@ class NotificationService extends BaseService {
           offset,
         },
       };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -187,7 +191,7 @@ class NotificationService extends BaseService {
    */
   async getUnreadCount(
     userId: string,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ): Promise<number> {
     return this.executeWithTx(async (txOrDb) => {
       const countResult = await txOrDb
@@ -201,7 +205,7 @@ class NotificationService extends BaseService {
         );
 
       return countResult?.[0]?.count ?? 0;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -210,7 +214,7 @@ class NotificationService extends BaseService {
   async update(
     id: string,
     data: NotificationUpdatePayload,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const [updatedNotification] = await txOrDb
@@ -227,20 +231,20 @@ class NotificationService extends BaseService {
       }
 
       return updatedNotification;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Mark notification as read
    */
-  async markAsRead(id: string, tx: Transaction | Database = this.db) {
+  async markAsRead(id: string, tx?: Transaction | Database) {
     return this.update(id, { isRead: true }, tx);
   }
 
   /**
    * Mark all notifications as read for a user
    */
-  async markAllAsRead(userId: string, tx: Transaction | Database = this.db) {
+  async markAllAsRead(userId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       await txOrDb
         .update(notifications)
@@ -256,13 +260,13 @@ class NotificationService extends BaseService {
         );
 
       return { success: true };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete a notification
    */
-  async delete(id: string, tx: Transaction | Database = this.db) {
+  async delete(id: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       const [deletedNotification] = await txOrDb
         .delete(notifications)
@@ -274,20 +278,20 @@ class NotificationService extends BaseService {
       }
 
       return deletedNotification;
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
    * Delete all notifications for a user
    */
-  async deleteAllForUser(userId: string, tx: Transaction | Database = this.db) {
+  async deleteAllForUser(userId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
       await txOrDb
         .delete(notifications)
         .where(eq(notifications.userId, userId));
 
       return { success: true };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -295,7 +299,7 @@ class NotificationService extends BaseService {
    */
   async deleteOldReadNotifications(
     olderThan: Date,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const result = await txOrDb
@@ -309,7 +313,7 @@ class NotificationService extends BaseService {
         .returning({ id: notifications.id });
 
       return { count: result.length };
-    }, tx);
+    }, tx ?? this.db);
   }
 
   /**
@@ -317,7 +321,7 @@ class NotificationService extends BaseService {
    */
   async createForCurrentUser(
     data: Omit<NotificationCreate, "userId">,
-    tx: Transaction | Database = this.db,
+    tx?: Transaction | Database,
   ) {
     return this.executeWithTx(async (txOrDb) => {
       const { userId } = await auth();
@@ -333,8 +337,6 @@ class NotificationService extends BaseService {
         },
         txOrDb,
       );
-    }, tx);
+    }, tx ?? this.db);
   }
 }
-
-export const notificationService = new NotificationService();

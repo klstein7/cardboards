@@ -1,6 +1,8 @@
 import { z } from "zod";
 
-import { authService, cardCommentService } from "~/server/services";
+// Import the services object from container
+// import { authService, cardCommentService } from "~/server/services"; // Old import from index
+import { services } from "~/server/services/container";
 import { CardCommentCreateSchema, CardCommentUpdateSchema } from "~/server/zod";
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
@@ -9,37 +11,42 @@ export const cardCommentRouter = createTRPCRouter({
   create: authedProcedure
     .input(CardCommentCreateSchema)
     .mutation(async ({ input }) => {
-      // Verify user can access this card
-      await authService.canAccessCard(input.cardId);
-      return cardCommentService.create(input);
+      // Access services via the services object
+      await services.authService.canAccessCard(input.cardId);
+      return services.cardCommentService.create(input);
     }),
 
   // List comments for a card (requires card access)
   list: authedProcedure.input(z.number()).query(async ({ input }) => {
-    // Verify user can access this card
-    await authService.canAccessCard(input);
-    return cardCommentService.list(input);
+    // Access services via the services object
+    await services.authService.canAccessCard(input);
+    return services.cardCommentService.list(input);
   }),
 
   // Remove a comment (requires access to the comment's card)
   remove: authedProcedure.input(z.string()).mutation(async ({ input }) => {
-    // Get the comment first to verify the card relationship
-    const comment = await cardCommentService.get(input);
+    // Access services via the services object
+    const comment = await services.cardCommentService.get(input);
 
     // Verify user can access the card this comment belongs to
-    await authService.canAccessCard(comment.cardId);
-    return cardCommentService.remove(input);
+    await services.authService.canAccessCard(comment.cardId);
+    return services.cardCommentService.remove(input);
   }),
 
   // Update a comment (requires access to the comment's card)
   update: authedProcedure
     .input(CardCommentUpdateSchema)
     .mutation(async ({ input }) => {
-      // Get the comment first to verify the card relationship
-      const comment = await cardCommentService.get(input.cardCommentId);
+      // Access services via the services object
+      const comment = await services.cardCommentService.get(
+        input.cardCommentId,
+      );
 
       // Verify user can access the card this comment belongs to
-      await authService.canAccessCard(comment.cardId);
-      return cardCommentService.update(input.cardCommentId, input.data);
+      await services.authService.canAccessCard(comment.cardId);
+      return services.cardCommentService.update(
+        input.cardCommentId,
+        input.data,
+      );
     }),
 });

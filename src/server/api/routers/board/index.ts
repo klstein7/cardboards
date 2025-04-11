@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { pusherChannels } from "~/pusher/channels";
 import { pusher } from "~/pusher/server";
-import { authService, boardService } from "~/server/services";
+import { services } from "~/server/services/container";
 import {
   BoardCreateSchema,
   BoardGenerateSchema,
@@ -14,8 +14,8 @@ export const boardRouter = createTRPCRouter({
   create: authedProcedure
     .input(BoardCreateSchema)
     .mutation(async ({ input, ctx }) => {
-      await authService.requireProjectAdmin(input.projectId);
-      const board = await boardService.create(input);
+      await services.authService.requireProjectAdmin(input.projectId);
+      const board = await services.boardService.create(input);
 
       await pusher.trigger(
         pusherChannels.board.name,
@@ -31,20 +31,23 @@ export const boardRouter = createTRPCRouter({
     }),
 
   list: authedProcedure.input(z.string()).query(async ({ input }) => {
-    await authService.canAccessProject(input);
-    return boardService.list(input);
+    await services.authService.canAccessProject(input);
+    return services.boardService.list(input);
   }),
 
   get: authedProcedure.input(z.string()).query(async ({ input }) => {
-    await authService.canAccessBoard(input);
-    return boardService.get(input);
+    await services.authService.canAccessBoard(input);
+    return services.boardService.get(input);
   }),
 
   update: authedProcedure
     .input(BoardUpdateSchema)
     .mutation(async ({ input, ctx }) => {
-      await authService.requireBoardAdmin(input.boardId);
-      const board = await boardService.update(input.boardId, input.data);
+      await services.authService.requireBoardAdmin(input.boardId);
+      const board = await services.boardService.update(
+        input.boardId,
+        input.data,
+      );
 
       await pusher.trigger(
         pusherChannels.board.name,
@@ -60,8 +63,8 @@ export const boardRouter = createTRPCRouter({
     }),
 
   delete: authedProcedure.input(z.string()).mutation(async ({ input, ctx }) => {
-    await authService.requireBoardAdmin(input);
-    const board = await boardService.del(input);
+    await services.authService.requireBoardAdmin(input);
+    const board = await services.boardService.del(input);
 
     await pusher.trigger(
       pusherChannels.board.name,
@@ -79,14 +82,14 @@ export const boardRouter = createTRPCRouter({
   generate: authedProcedure
     .input(BoardGenerateSchema)
     .mutation(async ({ input }) => {
-      await authService.requireProjectAdmin(input.projectId);
-      return boardService.generate(input.projectId, input.prompt);
+      await services.authService.requireProjectAdmin(input.projectId);
+      return services.boardService.generate(input.projectId, input.prompt);
     }),
 
   countByProjectId: authedProcedure
     .input(z.string())
     .query(async ({ input }) => {
-      await authService.canAccessProject(input);
-      return boardService.countByProjectId(input);
+      await services.authService.canAccessProject(input);
+      return services.boardService.countByProjectId(input);
     }),
 });
