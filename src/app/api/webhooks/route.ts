@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 
 import { env } from "~/env";
-import { userService } from "~/server/services";
+import { services } from "~/server/services/container";
 
 export async function POST(req: Request) {
   const WEBHOOK_SECRET = env.WEBHOOK_SECRET;
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
     });
   }
 
-  await userService.sync({
+  await services.userService.sync({
     id: data.id,
     email: primaryEmail.email_address,
     name: data.first_name ?? "",
