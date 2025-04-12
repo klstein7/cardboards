@@ -5,12 +5,8 @@ import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
 import { Separator } from "~/components/ui/separator";
-import {
-  Sidebar,
-  SidebarHeader,
-  SidebarSection,
-  SidebarTitle,
-} from "~/components/ui/sidebar";
+import { Sheet, SheetContent, SheetTitle } from "~/components/ui/sheet";
+import { useIsMobile } from "~/lib/hooks";
 import {
   type AiInsight,
   useAiInsights,
@@ -27,18 +23,23 @@ import {
 } from "./insight-states";
 import { type EntityType } from "./insight-utils";
 
-interface AiInsightsSidebarProps {
+interface AiInsightsProps {
   entityType: EntityType;
   entityId: string;
   className?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function AiInsightsSidebar({
+export function AiInsights({
   entityType,
   entityId,
   className,
-}: AiInsightsSidebarProps) {
+  open,
+  onOpenChange,
+}: AiInsightsProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const isMobile = useIsMobile();
 
   const { data, isLoading: isLoadingInsights } = useAiInsights(
     entityType,
@@ -66,69 +67,75 @@ export function AiInsightsSidebar({
   };
 
   return (
-    <Sidebar
-      position="right"
-      size="lg"
-      open={true}
-      persistent={true}
-      className={cn(
-        "h-full w-full overflow-auto border-l bg-background shadow-md dark:bg-background/95",
-        className,
-      )}
-    >
-      <div className="flex h-full flex-col">
-        <SidebarHeader className="pb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 dark:bg-amber-500/20">
-              <Lightbulb className="h-4.5 w-4.5 text-amber-500" />
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent
+        side="right"
+        className={cn(
+          "overflow-auto p-0 shadow-md dark:bg-background/95",
+          isMobile && "w-[344px]",
+          className,
+        )}
+      >
+        <SheetTitle className="sr-only">AI Insights</SheetTitle>
+
+        <div className="flex h-full flex-col p-6">
+          <div className="pb-4 text-left">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 dark:bg-amber-500/20">
+                <Lightbulb className="h-4.5 w-4.5 text-amber-500" />
+              </div>
+              <h2 className="text-lg font-semibold">AI Insights</h2>
             </div>
-            <SidebarTitle className="text-lg">AI Insights</SidebarTitle>
+            <p className="mt-1.5 text-sm text-muted-foreground/90 dark:text-muted-foreground/95">
+              AI-powered analytics and suggestions to improve your workflow.
+            </p>
           </div>
-          <p className="mt-1.5 text-sm text-muted-foreground/90 dark:text-muted-foreground/95">
-            AI-powered analytics and suggestions to improve your workflow.
-          </p>
-        </SidebarHeader>
 
-        <SidebarSection className="border-0 pb-0">
-          <Button
-            size="default"
-            variant="outline"
-            onClick={handleGenerateInsights}
-            disabled={isGenerating}
-            className="w-full gap-2.5 rounded-md py-5 shadow-sm"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                <span>Generating...</span>
-              </>
+          <div className="border-b py-3">
+            <Button
+              size="default"
+              variant="outline"
+              onClick={handleGenerateInsights}
+              disabled={isGenerating}
+              className="w-full gap-2.5 rounded-md py-5 shadow-sm"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span>Generating...</span>
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="h-4 w-4" />
+                  <span>Generate new insights</span>
+                </>
+              )}
+            </Button>
+          </div>
+
+          <Separator className="my-6 opacity-50" />
+
+          <div className="flex-1 pb-4">
+            {isLoadingInsights ? (
+              <InsightsLoading />
+            ) : isGenerating ? (
+              <InsightsGenerating />
+            ) : insights.length === 0 ? (
+              <InsightsEmpty />
             ) : (
-              <>
-                <RefreshCw className="h-4 w-4" />
-                <span>Generate new insights</span>
-              </>
+              <div className="grid grid-cols-1 gap-3 px-3">
+                {insights.map((insight, index) => (
+                  <InsightCard
+                    key={insight.id}
+                    insight={insight}
+                    index={index}
+                  />
+                ))}
+              </div>
             )}
-          </Button>
-        </SidebarSection>
-
-        <Separator className="my-6 opacity-50" />
-
-        <div className="flex-1 pb-4">
-          {isLoadingInsights ? (
-            <InsightsLoading />
-          ) : isGenerating ? (
-            <InsightsGenerating />
-          ) : insights.length === 0 ? (
-            <InsightsEmpty />
-          ) : (
-            <div className="grid grid-cols-1 gap-3 px-3">
-              {insights.map((insight, index) => (
-                <InsightCard key={insight.id} insight={insight} index={index} />
-              ))}
-            </div>
-          )}
+          </div>
         </div>
-      </div>
-    </Sidebar>
+      </SheetContent>
+    </Sheet>
   );
 }

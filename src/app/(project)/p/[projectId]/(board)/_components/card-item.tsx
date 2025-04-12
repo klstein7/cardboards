@@ -249,7 +249,7 @@ export function CardItem({
 
           <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
             <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
               onClick={() => setSelectedCardId(card.id.toString())}
             >
               <Edit className="size-4 text-muted-foreground" />
@@ -257,7 +257,7 @@ export function CardItem({
             </ContextMenuItem>
 
             <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
               onClick={() =>
                 assignToCurrentUserMutation.mutate({ cardId: card.id })
               }
@@ -269,7 +269,7 @@ export function CardItem({
             <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
 
             <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted focus:bg-muted"
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
               onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
             >
               <Copy className="size-4 text-muted-foreground" />
@@ -280,7 +280,7 @@ export function CardItem({
 
             <AlertDialogTrigger asChild>
               <ContextMenuItem
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:bg-destructive/10"
+                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
                 onSelect={(e) => e.preventDefault()}
               >
                 <Trash className="size-4" />

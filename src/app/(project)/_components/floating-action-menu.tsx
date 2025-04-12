@@ -8,8 +8,8 @@ import { useIsMobile } from "~/lib/hooks";
 import { useNotificationUnreadCount } from "~/lib/hooks/notification";
 import { cn } from "~/lib/utils";
 
-import { AiInsightsSidebar } from "./ai-insights";
-import { NotificationsSidebar } from "./notifications";
+import { AiInsights } from "./ai-insights";
+import { Notifications } from "./notifications";
 
 interface FloatingActionMenuProps {
   entityType: "project" | "board";
@@ -22,72 +22,65 @@ export function FloatingActionMenu({
   entityId,
   className,
 }: FloatingActionMenuProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [insightsOpen, setInsightsOpen] = useState(false);
   const isMobile = useIsMobile();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
   const toggleMenu = () => {
-    if (notificationsOpen || insightsOpen) {
-      // If a panel is open, close it instead of toggling the menu
-      setNotificationsOpen(false);
-      setInsightsOpen(false);
-      return;
-    }
-
-    setIsOpen(!isOpen);
+    // Close panels if open when toggling the main menu
+    if (notificationsOpen) setNotificationsOpen(false);
+    if (insightsOpen) setInsightsOpen(false);
+    setMenuOpen(!menuOpen);
   };
 
   const openNotifications = () => {
     setNotificationsOpen(true);
-    setIsOpen(false);
+    setMenuOpen(false); // Close the main menu when a panel opens
+    if (insightsOpen) setInsightsOpen(false); // Close other panel
   };
 
   const openInsights = () => {
     setInsightsOpen(true);
-    setIsOpen(false);
+    setMenuOpen(false); // Close the main menu when a panel opens
+    if (notificationsOpen) setNotificationsOpen(false); // Close other panel
   };
 
-  const handleClosePanel = () => {
-    setNotificationsOpen(false);
-    setInsightsOpen(false);
-  };
-
-  // For mobile we handle our own UI state
+  // For mobile we use a simplified menu
   if (isMobile) {
     return (
       <>
-        {/* Only show main action button when no panels are open */}
-        {!notificationsOpen && !insightsOpen && (
-          <div className="fixed bottom-6 right-6 z-40">
-            <Button
-              onClick={toggleMenu}
-              size="icon"
-              className={cn(
-                "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
-                "border border-border bg-background text-foreground transition-all",
-                className,
-              )}
-              variant="outline"
-            >
-              {isOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Plus className="h-5 w-5" />
-              )}
-              <span className="sr-only">Toggle action menu</span>
-            </Button>
-            {!isOpen && unreadCount > 0 && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <Button
+            onClick={toggleMenu}
+            size="icon"
+            className={cn(
+              "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
+              "border border-border bg-background text-foreground transition-all",
+              className,
+            )}
+            variant="outline"
+          >
+            {menuOpen ? (
+              <X className="h-5 w-5" />
+            ) : (
+              <Plus className="h-5 w-5" />
+            )}
+            <span className="sr-only">Toggle action menu</span>
+          </Button>
+          {!menuOpen &&
+            !notificationsOpen &&
+            !insightsOpen &&
+            unreadCount > 0 && (
               <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
                 {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
-          </div>
-        )}
+        </div>
 
         {/* Action menu options */}
-        {isOpen && !notificationsOpen && !insightsOpen && (
+        {menuOpen && (
           <div className="fixed bottom-[88px] right-6 z-30 flex flex-col gap-4">
             {/* Notifications button */}
             <Button
@@ -126,92 +119,54 @@ export function FloatingActionMenu({
           </div>
         )}
 
-        {/* Notifications panel */}
-        {notificationsOpen && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-              onClick={handleClosePanel}
-            />
-            <div className="fixed bottom-0 right-0 top-0 z-30 h-full w-[344px]">
-              <Button
-                onClick={handleClosePanel}
-                size="icon"
-                className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-background/80 shadow-sm hover:bg-background"
-                variant="ghost"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </Button>
-              <NotificationsSidebar className="h-full" />
-            </div>
-          </>
-        )}
-
-        {/* Insights panel */}
-        {insightsOpen && (
-          <>
-            {/* Backdrop */}
-            <div
-              className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-              onClick={handleClosePanel}
-            />
-            <div className="fixed bottom-0 right-0 top-0 z-30 h-full w-[344px]">
-              <Button
-                onClick={handleClosePanel}
-                size="icon"
-                className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-background/80 shadow-sm hover:bg-background"
-                variant="ghost"
-              >
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-              </Button>
-              <AiInsightsSidebar
-                entityType={entityType}
-                entityId={entityId}
-                className="h-full"
-              />
-            </div>
-          </>
-        )}
+        {/* Render controlled Sheet components */}
+        <Notifications
+          open={notificationsOpen}
+          onOpenChange={setNotificationsOpen}
+        />
+        <AiInsights
+          entityType={entityType}
+          entityId={entityId}
+          open={insightsOpen}
+          onOpenChange={setInsightsOpen}
+        />
       </>
     );
   }
 
-  // For desktop we use direct DOM for better control instead of Sheet
+  // For desktop we show a more traditional menu
   return (
     <>
-      {/* Only show main action button when no panels are open */}
-      {!notificationsOpen && !insightsOpen && (
-        <div className="fixed bottom-6 right-6 z-40">
-          <Button
-            onClick={toggleMenu}
-            size="icon"
-            className={cn(
-              "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
-              "border border-border bg-background text-foreground transition-all",
-              className,
-            )}
-            variant="outline"
-          >
-            {isOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <MoreVertical className="h-5 w-5" />
-            )}
-            <span className="sr-only">Toggle action menu</span>
-          </Button>
-          {!isOpen && unreadCount > 0 && (
+      <div className="fixed bottom-6 right-6 z-40">
+        <Button
+          onClick={toggleMenu}
+          size="icon"
+          className={cn(
+            "h-12 w-12 rounded-full shadow-md hover:shadow-lg",
+            "border border-border bg-background text-foreground transition-all",
+            className,
+          )}
+          variant="outline"
+        >
+          {menuOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <MoreVertical className="h-5 w-5" />
+          )}
+          <span className="sr-only">Toggle action menu</span>
+        </Button>
+        {!menuOpen &&
+          !notificationsOpen &&
+          !insightsOpen &&
+          unreadCount > 0 && (
             <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-destructive text-[10px] font-semibold text-destructive-foreground">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
-        </div>
-      )}
+      </div>
 
       {/* Action menu options */}
-      {isOpen && !notificationsOpen && !insightsOpen && (
+      {menuOpen && (
         <div className="fixed bottom-[88px] right-6 z-30 flex flex-col gap-4">
           {/* Notifications button */}
           <Button
@@ -250,55 +205,17 @@ export function FloatingActionMenu({
         </div>
       )}
 
-      {/* Notifications panel */}
-      {notificationsOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-            onClick={handleClosePanel}
-          />
-          <div className="fixed bottom-0 right-0 top-0 z-30 h-full w-[400px] duration-300 animate-in slide-in-from-right">
-            <Button
-              onClick={handleClosePanel}
-              size="icon"
-              className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-background/80 shadow-sm hover:bg-background"
-              variant="ghost"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-            <NotificationsSidebar className="h-full" />
-          </div>
-        </>
-      )}
-
-      {/* Insights panel */}
-      {insightsOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-20 bg-black/20 backdrop-blur-sm transition-opacity duration-300"
-            onClick={handleClosePanel}
-          />
-          <div className="fixed bottom-0 right-0 top-0 z-30 h-full w-[400px] duration-300 animate-in slide-in-from-right">
-            <Button
-              onClick={handleClosePanel}
-              size="icon"
-              className="absolute right-4 top-4 z-10 h-8 w-8 rounded-full bg-background/80 shadow-sm hover:bg-background"
-              variant="ghost"
-            >
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-            <AiInsightsSidebar
-              entityType={entityType}
-              entityId={entityId}
-              className="h-full"
-            />
-          </div>
-        </>
-      )}
+      {/* Render controlled Sheet components */}
+      <Notifications
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+      />
+      <AiInsights
+        entityType={entityType}
+        entityId={entityId}
+        open={insightsOpen}
+        onOpenChange={setInsightsOpen}
+      />
     </>
   );
 }
