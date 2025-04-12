@@ -4,7 +4,6 @@ import { Lightbulb, Loader2, RefreshCw } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
-import { Separator } from "~/components/ui/separator";
 import { Sheet, SheetContent, SheetTitle } from "~/components/ui/sheet";
 import { useIsMobile } from "~/lib/hooks";
 import {
@@ -71,33 +70,35 @@ export function AiInsights({
       <SheetContent
         side="right"
         className={cn(
-          "overflow-auto p-0 shadow-md dark:bg-background/95",
-          isMobile && "w-[344px]",
+          "overflow-auto p-0 shadow-lg dark:bg-neutral-900/95",
+          isMobile && "w-[344px] sm:w-[400px]",
           className,
         )}
       >
         <SheetTitle className="sr-only">AI Insights</SheetTitle>
 
-        <div className="flex h-full flex-col p-6">
-          <div className="pb-4 text-left">
+        <div className="flex h-full flex-col">
+          <div className="border-b p-6 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/10 dark:bg-amber-500/20">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10 dark:bg-amber-500/20">
                 <Lightbulb className="h-4.5 w-4.5 text-amber-500" />
               </div>
-              <h2 className="text-lg font-semibold">AI Insights</h2>
+              <h2 className="text-lg font-semibold text-foreground">
+                AI Insights
+              </h2>
             </div>
-            <p className="mt-1.5 text-sm text-muted-foreground/90 dark:text-muted-foreground/95">
+            <p className="mt-2 text-sm text-muted-foreground">
               AI-powered analytics and suggestions to improve your workflow.
             </p>
           </div>
 
-          <div className="border-b py-3">
+          <div className="border-b px-6 py-4">
             <Button
               size="default"
-              variant="outline"
+              variant="secondary"
               onClick={handleGenerateInsights}
               disabled={isGenerating}
-              className="w-full gap-2.5 rounded-md py-5 shadow-sm"
+              className="w-full gap-2 rounded-md"
             >
               {isGenerating ? (
                 <>
@@ -113,9 +114,7 @@ export function AiInsights({
             </Button>
           </div>
 
-          <Separator className="my-6 opacity-50" />
-
-          <div className="flex-1 pb-4">
+          <div className="flex-1 overflow-y-auto p-4 px-2">
             {isLoadingInsights ? (
               <InsightsLoading />
             ) : isGenerating ? (
@@ -123,7 +122,7 @@ export function AiInsights({
             ) : insights.length === 0 ? (
               <InsightsEmpty />
             ) : (
-              <div className="grid grid-cols-1 gap-3 px-3">
+              <div className="grid grid-cols-1 gap-2">
                 {insights.map((insight, index) => (
                   <InsightCard
                     key={insight.id}
