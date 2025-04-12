@@ -27,14 +27,11 @@ export default async function AnalyticsLayout({
 }: AnalyticsLayoutProps) {
   const { projectId } = await params;
 
-  // Default date range (30 days)
   const endDate = new Date();
   const startDate = subDays(endDate, 30);
 
-  // Prefetch project data
   await trpc.project.get.prefetch(projectId);
 
-  // Prefetch all analytics data with date range
   await Promise.all([
     trpc.analytics.getProjectProgress.prefetch({
       projectId,
@@ -72,16 +69,18 @@ export default async function AnalyticsLayout({
         <ScrollReset />
         <div className="flex h-full w-full flex-col overflow-hidden">
           <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
-            <AnalyticsToolbar projectId={projectId} />
+            <AnalyticsToolbar projectId={projectId} className="max-w-7xl" />
           </div>
 
           <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
             <div className="py-4">
-              <SummaryStats projectId={projectId} />
+              <SummaryStats projectId={projectId} className="max-w-7xl" />
             </div>
 
             <div className="mt-6">
-              <AnalyticsTabs projectId={projectId}>{children}</AnalyticsTabs>
+              <AnalyticsTabs projectId={projectId} className="max-w-7xl">
+                {children}
+              </AnalyticsTabs>
             </div>
           </main>
         </div>

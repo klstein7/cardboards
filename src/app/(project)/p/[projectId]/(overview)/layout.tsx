@@ -38,16 +38,18 @@ export default async function OverviewLayout({
     <HydrateClient>
       <div className="flex h-full w-full flex-col overflow-hidden">
         <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
-          <ProjectToolbar projectId={projectId} />
+          <ProjectToolbar projectId={projectId} className="max-w-7xl" />
         </div>
 
         <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
           <div className="py-4">
-            <ProjectStats projectId={projectId} />
+            <ProjectStats projectId={projectId} className="max-w-7xl" />
           </div>
 
           <div className="mt-6">
-            <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
+            <ProjectTabs projectId={projectId} className="max-w-7xl">
+              {children}
+            </ProjectTabs>
           </div>
         </main>
       </div>

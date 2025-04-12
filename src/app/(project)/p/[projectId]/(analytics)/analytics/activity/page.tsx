@@ -28,8 +28,6 @@ export default function AnalyticsActivityPage({ params }: { params: Params }) {
     },
   };
 
-  // Since we're now using Next.js loading states with loading.tsx,
-  // we can simplify this component to just render the chart
   return (
     <TabsContent value="activity" className="space-y-6">
       <div className="grid gap-6 md:grid-cols-1">

@@ -28,8 +28,6 @@ export default function AnalyticsProgressPage({ params }: { params: Params }) {
     },
   };
 
-  // Since we're using Next.js loading states with loading.tsx,
-  // we can simplify this component to just render the chart
   return (
     <TabsContent value="progress" className="space-y-6">
       <ProgressChart data={progressData} chartConfig={chartConfig} />

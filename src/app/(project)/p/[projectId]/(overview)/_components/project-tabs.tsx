@@ -4,20 +4,26 @@ import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode } from "react";
 
 import { Tabs, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
 
 interface ProjectTabsListProps {
   projectId: string;
   children: ReactNode;
+  className?: string;
 }
 
-export function ProjectTabs({ projectId, children }: ProjectTabsListProps) {
+export function ProjectTabs({
+  projectId,
+  children,
+  className,
+}: ProjectTabsListProps) {
   const router = useRouter();
   const pathname = usePathname();
 
   const value = pathname.split("/").pop();
 
   return (
-    <Tabs value={value} className="w-full space-y-4">
+    <Tabs value={value} className={cn("w-full space-y-4", className)}>
       <TabsList className="mb-4 w-full max-w-md">
         <TabsTrigger
           value="boards"

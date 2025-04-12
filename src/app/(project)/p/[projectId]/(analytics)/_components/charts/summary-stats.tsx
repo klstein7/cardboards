@@ -15,9 +15,10 @@ import { useAnalyticsStore } from "../../_store/analytics-store";
 
 interface SummaryStatsProps {
   projectId: string;
+  className?: string;
 }
 
-export function SummaryStats({ projectId }: SummaryStatsProps) {
+export function SummaryStats({ projectId, className }: SummaryStatsProps) {
   const { startDate, endDate } = useAnalyticsStore();
 
   const { progress, activity, priorities, isPending, isError } = useAnalytics(
@@ -58,7 +59,9 @@ export function SummaryStats({ projectId }: SummaryStatsProps) {
     : 0;
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4">
+    <div
+      className={cn("mb-6 grid grid-cols-2 gap-4 md:grid-cols-4", className)}
+    >
       <StatCard
         icon={<ListTodoIcon className="h-5 w-5 text-primary" />}
         label="Total Tasks"

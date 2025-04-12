@@ -8,18 +8,22 @@ import {
   useCardCountByProjectId,
   useProjectUserCountByProjectId,
 } from "~/lib/hooks";
+import { cn } from "~/lib/utils";
 
 interface ProjectStatsProps {
   projectId: string;
+  className?: string;
 }
 
-export function ProjectStats({ projectId }: ProjectStatsProps) {
+export function ProjectStats({ projectId, className }: ProjectStatsProps) {
   const boardCount = useBoardCountByProjectId(projectId);
   const memberCount = useProjectUserCountByProjectId(projectId);
   const cardCount = useCardCountByProjectId(projectId);
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-3">
+    <div
+      className={cn("mb-6 grid grid-cols-2 gap-4 md:grid-cols-3", className)}
+    >
       <StatCard
         icon={<LayoutGridIcon className="h-5 w-5 text-primary" />}
         value={boardCount.data ?? 0}

@@ -5,14 +5,14 @@ import { usePathname } from "next/navigation";
 
 import { BaseToolbar } from "~/components/shared/base-toolbar";
 import { Badge } from "~/components/ui/badge";
+import { cn } from "~/lib/utils";
 
 interface SettingsToolbarProps {
   projectId: string;
+  className?: string;
 }
 
-export function SettingsToolbar({
-  projectId: _projectId,
-}: SettingsToolbarProps) {
+export function SettingsToolbar({ className }: SettingsToolbarProps) {
   const pathname = usePathname();
 
   let sectionTitle = "General Settings";
@@ -41,5 +41,7 @@ export function SettingsToolbar({
     </>
   );
 
-  return <BaseToolbar left={settingsInfo} />;
+  return (
+    <BaseToolbar left={settingsInfo} className={cn("max-w-7xl", className)} />
+  );
 }

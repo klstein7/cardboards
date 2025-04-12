@@ -29,12 +29,12 @@ export default async function SettingsLayout({
     <HydrateClient>
       <div className="flex h-full flex-col overflow-hidden">
         <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
-          <SettingsToolbar projectId={projectId} />
+          <SettingsToolbar projectId={projectId} className="max-w-7xl" />
         </div>
 
         <div className="flex flex-1 overflow-hidden md:flex-row">
           <SettingsSidebar projectId={projectId} className="shrink-0" />
-          <main className="flex-1 overflow-auto px-4 pb-6 pt-6 sm:px-6 lg:px-8">
+          <main className="max-w-5xl flex-1 overflow-auto px-4 pb-6 pt-6 sm:px-6 lg:px-8">
             {children}
           </main>
         </div>

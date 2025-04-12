@@ -16,15 +16,26 @@ export default function MembersSettingsPageSkeleton() {
           <div className="space-y-4">
             {/* Search and filter controls */}
             <div className="flex flex-wrap items-center gap-3">
-              <Skeleton className="h-10 w-full max-w-md" />
-              <Skeleton className="h-10 w-24" />
+              <Skeleton className="h-10 min-w-[200px] flex-1" />{" "}
+              {/* Search Input Skeleton */}
+              <Skeleton className="h-10 w-24" /> {/* Filter Button Skeleton */}
             </div>
 
             {/* Data table */}
             <div className="rounded-md border">
               {/* Table header */}
               <div className="border-b">
-                <Skeleton className="m-3 h-10 w-full" />
+                {/* Mimic TableRow structure with padding and height */}
+                <div className="flex h-12 items-center px-4">
+                  <Skeleton className="h-5 w-2/5" />{" "}
+                  {/* User Header Skeleton */}
+                  <Skeleton className="ml-4 h-5 w-1/5" />{" "}
+                  {/* Role Header Skeleton */}
+                  <Skeleton className="ml-4 h-5 w-1/5" />{" "}
+                  {/* Joined Header Skeleton */}
+                  <Skeleton className="ml-auto h-5 w-8" />{" "}
+                  {/* Actions Header Skeleton */}
+                </div>
               </div>
 
               {/* Table rows */}
@@ -49,12 +60,16 @@ export default function MembersSettingsPageSkeleton() {
             </div>
 
             {/* Pagination */}
-            <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-              <Skeleton className="h-5 w-48" />
-              <div className="flex gap-2">
-                <Skeleton className="h-8 w-8 rounded-md" />
-                <Skeleton className="h-8 w-8 rounded-md" />
-                <Skeleton className="h-8 w-8 rounded-md" />
+            <div className="flex flex-col items-center justify-between gap-4 pt-2 sm:flex-row">
+              <Skeleton className="h-5 w-48" />{" "}
+              {/* Rows per page / Count Skeleton */}
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-8 w-8 rounded-md" />{" "}
+                {/* Prev Button Skeleton */}
+                <Skeleton className="h-8 w-20 rounded-md" />{" "}
+                {/* Page Numbers Skeleton */}
+                <Skeleton className="h-8 w-8 rounded-md" />{" "}
+                {/* Next Button Skeleton */}
               </div>
             </div>
           </div>

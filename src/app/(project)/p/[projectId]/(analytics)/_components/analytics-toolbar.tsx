@@ -26,14 +26,19 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { useAnalytics } from "~/lib/hooks/analytics";
+import { cn } from "~/lib/utils";
 
 import { useAnalyticsStore } from "../_store";
 
 interface AnalyticsToolbarProps {
   projectId: string;
+  className?: string;
 }
 
-export function AnalyticsToolbar({ projectId }: AnalyticsToolbarProps) {
+export function AnalyticsToolbar({
+  projectId,
+  className,
+}: AnalyticsToolbarProps) {
   const {
     startDate: globalStartDate,
     endDate: globalEndDate,
@@ -187,7 +192,7 @@ export function AnalyticsToolbar({ projectId }: AnalyticsToolbarProps) {
     <BaseToolbar
       left={filterInfo}
       right={filterControls}
-      className="flex-col sm:flex-row"
+      className={cn("flex-col sm:flex-row", className)}
     />
   );
 }

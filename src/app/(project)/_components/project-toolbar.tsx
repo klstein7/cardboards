@@ -21,9 +21,10 @@ import {
 
 interface ProjectToolbarProps {
   projectId: string;
+  className?: string;
 }
 
-export function ProjectToolbar({ projectId }: ProjectToolbarProps) {
+export function ProjectToolbar({ projectId, className }: ProjectToolbarProps) {
   const projectUsers = useProjectUsers(projectId);
   const currentUser = useCurrentProjectUser();
   const updatePreferences = useUpdateCurrentUserPreferences();
@@ -122,5 +123,11 @@ export function ProjectToolbar({ projectId }: ProjectToolbarProps) {
     </>
   );
 
-  return <BaseToolbar left={projectInfo} right={projectActions} />;
+  return (
+    <BaseToolbar
+      className={className}
+      left={projectInfo}
+      right={projectActions}
+    />
+  );
 }

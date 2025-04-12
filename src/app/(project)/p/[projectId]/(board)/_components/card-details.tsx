@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Save } from "lucide-react";
+import { FileText } from "lucide-react";
 import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -43,11 +43,7 @@ export function CardDetails() {
   const [editing, setEditing] = useState<
     "title" | "description" | "dueDate" | null
   >(null);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
 
-  // Create a ref to track the latest card data to avoid dependency issues
   const cardDataRef = useRef<typeof card.data | null>(null);
   useEffect(() => {
     cardDataRef.current = card.data;
@@ -61,28 +57,26 @@ export function CardDetails() {
     }
   }, [editing]);
 
-  // Helper function to save changes
   const saveChanges = async (data: Record<string, unknown>) => {
     if (!selectedCardId) return;
 
-    try {
-      setSaveStatus("saving");
-      await updateCardMutation.mutateAsync({
-        cardId: Number(selectedCardId),
-        data,
-      });
-      setSaveStatus("saved");
-      toast.success("Card updated successfully");
-      // Reset to idle after showing "saved" for 2 seconds
-      const timer = setTimeout(() => setSaveStatus("idle"), 2000);
-      return () => clearTimeout(timer);
-    } catch (error) {
-      setSaveStatus("error");
-      toast.error("Failed to save changes", {
-        description: error instanceof Error ? error.message : "Unknown error",
-      });
-      console.error("Failed to save changes:", error);
-    }
+    const promise = updateCardMutation.mutateAsync({
+      cardId: Number(selectedCardId),
+      data,
+    });
+
+    toast.promise(promise, {
+      loading: "Saving changes...",
+      success: "Card updated successfully!",
+      error: (err) => {
+        console.error("Failed to save changes:", err);
+        return err instanceof Error ? err.message : "Failed to save changes";
+      },
+    });
+
+    await promise.catch(() => {
+      /* Catch error to prevent unhandled rejection */
+    });
   };
 
   const handleTitleChange = async (value: string) => {
@@ -107,7 +101,7 @@ export function CardDetails() {
       }}
     >
       <DialogContent
-        className="p-4 sm:p-6 md:max-w-2xl"
+        className="relative p-4 sm:p-6 md:max-w-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -130,23 +124,6 @@ export function CardDetails() {
                   />
                 </div>
                 <div className="flex items-center gap-2">
-                  {saveStatus === "saving" && (
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Save className="mr-1 h-3 w-3 animate-pulse" />
-                      Saving...
-                    </div>
-                  )}
-                  {saveStatus === "saved" && (
-                    <div className="flex items-center text-xs text-green-600 dark:text-green-400">
-                      <Save className="mr-1 h-3 w-3" />
-                      Saved
-                    </div>
-                  )}
-                  {saveStatus === "error" && (
-                    <div className="flex items-center text-xs text-red-600 dark:text-red-400">
-                      Failed to save
-                    </div>
-                  )}
                   {selectedCardId && projectId && boardId && (
                     <Link
                       href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}

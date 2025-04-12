@@ -1,7 +1,7 @@
 "use client";
 
-import { CheckCircle, Save, XCircle } from "lucide-react";
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 
 import { CardDetailsCommentList } from "~/app/(project)/p/[projectId]/(board)/_components/card-details-comment-list";
 import { CardDetailsCreateCommentForm } from "~/app/(project)/p/[projectId]/(board)/_components/card-details-create-comment-form";
@@ -15,7 +15,6 @@ import { Separator } from "~/components/ui/separator";
 import { Skeleton } from "~/components/ui/skeleton";
 import { useCard } from "~/lib/hooks/card/use-card";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
-import { cn } from "~/lib/utils";
 import { getColor, getPriorityByValue, type Priority } from "~/lib/utils";
 
 interface CardEditorProps {
@@ -28,9 +27,6 @@ export function CardEditor({ cardId }: CardEditorProps) {
   const [editing, setEditing] = useState<
     "title" | "description" | "dueDate" | null
   >(null);
-  const [saveStatus, setSaveStatus] = useState<
-    "idle" | "saving" | "saved" | "error"
-  >("idle");
 
   // Create a ref to track the latest card data to avoid dependency issues
   const cardDataRef = useRef(card);
@@ -40,23 +36,23 @@ export function CardEditor({ cardId }: CardEditorProps) {
   const saveChanges = async (data: Record<string, unknown>) => {
     if (!card) return;
 
-    try {
-      setSaveStatus("saving");
-      await updateCardMutation.mutateAsync({
-        cardId: card.id,
-        data,
-      });
-      setSaveStatus("saved");
-      // Reset to idle after showing "saved" for 2 seconds
-      const timer = setTimeout(() => setSaveStatus("idle"), 2000);
-      return () => clearTimeout(timer);
-    } catch (error) {
-      setSaveStatus("error");
-      console.error("Failed to save changes:", error);
-      // Keep error state showing longer
-      const timer = setTimeout(() => setSaveStatus("idle"), 3000);
-      return () => clearTimeout(timer);
-    }
+    const promise = updateCardMutation.mutateAsync({
+      cardId: card.id,
+      data,
+    });
+
+    toast.promise(promise, {
+      loading: "Saving changes...",
+      success: "Card updated successfully!",
+      error: (err) => {
+        console.error("Failed to save changes:", err);
+        return err instanceof Error ? err.message : "Failed to save changes";
+      },
+    });
+
+    await promise.catch(() => {
+      /* Catch error to prevent unhandled rejection */
+    });
   };
 
   const handleTitleChange = async (value: string) => {
@@ -97,38 +93,6 @@ export function CardEditor({ cardId }: CardEditorProps) {
               >
                 {priorityInfo.label}
               </Badge>
-            )}
-          </div>
-
-          <div
-            className={cn(
-              "flex h-8 items-center gap-1.5 rounded-md border px-2.5 py-0.5 text-xs font-medium transition-all duration-300",
-              saveStatus === "idle" && "opacity-0",
-              saveStatus === "saving" &&
-                "border-blue-200 bg-blue-50 text-blue-600 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-400",
-              saveStatus === "saved" &&
-                "border-green-200 bg-green-50 text-green-600 dark:border-green-900 dark:bg-green-950/30 dark:text-green-400",
-              saveStatus === "error" &&
-                "border-red-200 bg-red-50 text-red-600 dark:border-red-900 dark:bg-red-950/30 dark:text-red-400",
-            )}
-          >
-            {saveStatus === "saving" && (
-              <>
-                <Save className="h-3.5 w-3.5 animate-[spin_2s_linear_infinite]" />
-                Saving changes...
-              </>
-            )}
-            {saveStatus === "saved" && (
-              <>
-                <CheckCircle className="h-3.5 w-3.5" />
-                Changes saved
-              </>
-            )}
-            {saveStatus === "error" && (
-              <>
-                <XCircle className="h-3.5 w-3.5" />
-                Failed to save
-              </>
             )}
           </div>
         </div>

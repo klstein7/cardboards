@@ -30,12 +30,12 @@ export function CardPrioritySelect({
             value={priority.value}
             className="flex items-center gap-2"
           >
-            <div
-              className="flex items-center gap-3"
-              style={{ color: priority.color }}
-            >
-              <priority.icon className={`h-4 w-4`} />
-              <div className={`text-sm font-medium`}>{priority.label}</div>
+            <div className="flex items-center gap-3">
+              <priority.icon
+                className={`h-4 w-4`}
+                style={{ color: priority.color }}
+              />
+              <span className={`text-sm font-medium`}>{priority.label}</span>
             </div>
           </SelectItem>
         ))}
