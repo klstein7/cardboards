@@ -38,8 +38,8 @@ export const CardBase = memo(
     const getStatusIndicator = () => {
       if (isCompleted) {
         return (
-          <div className="bg-success text-success-foreground absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full shadow-sm">
-            <CheckIcon className="h-3.5 w-3.5" />
+          <div className="bg-success text-success-foreground absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full shadow-sm">
+            <CheckIcon className="h-3 w-3" />
           </div>
         );
       }
@@ -49,13 +49,13 @@ export const CardBase = memo(
     return (
       <div
         className={cn(
-          "group relative flex flex-col gap-2.5 rounded-lg border bg-card/50 p-3.5 shadow backdrop-blur-[2px] transition-all duration-200",
-          activeCard?.id === card.id && !isDragging && "opacity-30",
-          isCompleted && "opacity-40 grayscale filter",
-          priority && "border-l-4",
-          isDragging && "rotate-[0.2deg] shadow-md",
+          "group relative flex flex-col gap-2 rounded-md border bg-card p-3 transition-all duration-200",
+          activeCard?.id === card.id && !isDragging && "opacity-50",
+          isCompleted && "opacity-60",
+          priority && "border-l-[3px]",
+          isDragging && "shadow-md",
           isDragging && "pointer-events-none select-none",
-          "hover:translate-y-[-2px] hover:bg-card/80 hover:shadow-lg",
+          "hover:translate-y-[-1px] hover:bg-card/95 hover:shadow-sm",
           className,
         )}
         style={{
@@ -68,7 +68,7 @@ export const CardBase = memo(
         {children}
 
         {/* Header area with metadata */}
-        <div className="mb-1.5 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-1">
             <span className="font-medium">Created</span>
             <span>
@@ -76,8 +76,8 @@ export const CardBase = memo(
             </span>
           </div>
           {card.dueDate && (
-            <div className="flex items-center gap-1.5 rounded-full bg-secondary/50 px-2.5 py-0.5 shadow-sm">
-              <CalendarIcon className="h-3.5 w-3.5" />
+            <div className="flex items-center gap-1 rounded-full bg-secondary/40 px-2 py-0.5 text-muted-foreground">
+              <CalendarIcon className="h-3 w-3" />
               <span className="font-medium">
                 {format(card.dueDate, "MMM d")}
               </span>
@@ -86,10 +86,10 @@ export const CardBase = memo(
         </div>
 
         {/* Title and description */}
-        <div className="flex flex-col space-y-1.5">
+        <div className="flex flex-col space-y-1">
           <h3
             className={cn(
-              "line-clamp-2 text-base font-semibold tracking-tight",
+              "line-clamp-2 text-base font-medium tracking-tight",
               isCompleted && "text-muted-foreground line-through",
             )}
           >
@@ -109,11 +109,11 @@ export const CardBase = memo(
         {/* Footer area with labels, priority, and assignee */}
         <div className="mt-auto flex flex-col gap-2">
           {card.labels && card.labels.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1">
               {card.labels.map((label, index) => (
                 <div
                   key={index}
-                  className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground shadow-sm"
+                  className="rounded-full bg-secondary/40 px-2 py-0.5 text-xs font-medium text-muted-foreground"
                 >
                   {label}
                 </div>
@@ -124,23 +124,23 @@ export const CardBase = memo(
             {priority && (
               <div
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full px-2.5 py-0.5",
-                  "bg-opacity-20 shadow-sm transition-colors",
+                  "flex items-center gap-1 rounded-full px-2 py-0.5",
+                  "bg-opacity-10 transition-colors",
                 )}
                 style={{
                   color: priorityColor,
-                  backgroundColor: `${priorityColor}15`, // Using opacity in hex
+                  backgroundColor: `${priorityColor}10`,
                 }}
               >
-                <priority.icon className="h-3.5 w-3.5" />
+                <priority.icon className="h-3 w-3" />
                 <span className="text-xs font-medium">{priority.label}</span>
               </div>
             )}
             {card.assignedTo && (
               <div className="flex items-center gap-1">
-                <Avatar className="h-6 w-6 border-2 border-background shadow-sm ring-1 ring-background transition-transform">
+                <Avatar className="h-5 w-5 border border-background ring-1 ring-background/30">
                   <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-                  <AvatarFallback className="text-xs font-medium">
+                  <AvatarFallback className="text-xs">
                     {card.assignedTo.user.name?.[0] ?? ""}
                   </AvatarFallback>
                 </Avatar>
