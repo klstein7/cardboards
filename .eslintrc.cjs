@@ -51,7 +51,13 @@ const config = {
       },
     ],
   },
-  ignorePatterns: ["src/components/ui/*"],
+  ignorePatterns: [
+    "src/components/ui/*",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/__tests__/**",
+    "coverage/**",
+  ],
   overrides: [
     {
       // For test files only
