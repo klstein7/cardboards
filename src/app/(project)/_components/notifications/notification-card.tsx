@@ -3,7 +3,6 @@
 import { CheckCircle2, Trash2 } from "lucide-react";
 import { useState } from "react";
 
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
@@ -14,7 +13,7 @@ import {
 import { cn } from "~/lib/utils";
 import { type Notification } from "~/server/zod";
 
-import { getNotificationTypeInfo, timeAgo } from "./notification-utils";
+import { timeAgo } from "./notification-utils";
 
 interface NotificationCardProps {
   notification: Notification;
@@ -25,12 +24,10 @@ export function NotificationCard({
   notification,
   index = 0,
 }: NotificationCardProps) {
-  const [isHovering, setIsHovering] = useState(false);
+  const [, setIsHovering] = useState(false);
   const { mutate: markAsRead } = useMarkNotificationAsRead();
   const { mutate: deleteNotification } = useDeleteNotification();
 
-  const typeInfo = getNotificationTypeInfo(notification.type);
-  const TypeIcon = typeInfo.icon;
   const isUnread = !notification.isRead;
 
   // Calculate staggered animation delay based on index

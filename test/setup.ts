@@ -1,4 +1,5 @@
 import "server-only";
+
 import { beforeEach, vi } from "vitest";
 
 // Mock the clerk/nextjs auth module

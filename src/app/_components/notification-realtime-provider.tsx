@@ -29,7 +29,7 @@ export function NotificationRealtimeProvider({
   useNotificationEvent(
     "created",
     (data: RealtimePayload<unknown, { userId: string }>) => {
-      const { returning, userId: eventUserId } = data;
+      const { returning } = data;
 
       // Only invalidate if the notification is for the current user
       if (returning.userId === userId) {
