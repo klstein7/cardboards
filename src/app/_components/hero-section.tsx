@@ -48,7 +48,7 @@ export function HeroSection() {
                 alt="Interactive preview of our Kanban board interface showing task management and team collaboration features"
                 width={1200}
                 height={675}
-                className="w-full"
+                className="w-full antialiased"
                 priority
               />
             </div>
