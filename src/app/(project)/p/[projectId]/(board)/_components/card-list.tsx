@@ -131,7 +131,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
         }
       },
     });
-  }, [cards.data, columnId, moveCardMutation, queryClient]);
+  }, [cards.data, columnId, moveCardMutation, queryClient, trpc.card.list]);
 
   if (cards.error) {
     return <div>Error: {cards.error.message}</div>;

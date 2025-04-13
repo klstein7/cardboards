@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Tag, TagInput } from "emblor";
-import { CheckCircle2, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { type z } from "zod";
@@ -19,12 +19,9 @@ import {
   FormLabel,
   FormMessage,
 } from "~/components/ui/form";
-import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
 import { Tiptap } from "~/components/ui/tiptap";
-import { ToggleGroup, ToggleGroupItem } from "~/components/ui/toggle-group";
-import { useCreateCard, useIsMobile } from "~/lib/hooks";
+import { useCreateCard } from "~/lib/hooks";
 import {
   type CardCreate,
   CardCreateSchema,
@@ -45,8 +42,6 @@ export function CreateCardFormWithAI({
   open,
   setOpen,
 }: CreateCardFormWithAIProps) {
-  const isMobile = useIsMobile();
-
   // UI state
   const [showDetails, setShowDetails] = useState(false);
   const [showMetadata, setShowMetadata] = useState(false);
