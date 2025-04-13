@@ -18,6 +18,7 @@ import {
 import { Button } from "~/components/ui/button";
 import { useCards, useMoveCard } from "~/lib/hooks";
 import { cn, triggerPostMoveFlash } from "~/lib/utils";
+import { useTRPC } from "~/trpc/client";
 
 import { CardItem } from "./card-item";
 import { CardSkeleton } from "./card-skeleton";
@@ -31,6 +32,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const cards = useCards(columnId);
   const moveCardMutation = useMoveCard();
   const queryClient = useQueryClient();
+  const trpc = useTRPC();
 
   useEffect(() => {
     return monitorForElements({
@@ -105,10 +107,9 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
           const sourceData = source.data as unknown as CardDragData;
 
           const targetCards =
-            queryClient.getQueryData<Card[]>([
-              "cards",
-              targetData.payload.id,
-            ]) ?? [];
+            queryClient.getQueryData<Card[]>(
+              trpc.card.list.queryOptions(targetData.payload.id).queryKey,
+            ) ?? [];
 
           const newOrder = edge === "top" ? 0 : targetCards.length;
 

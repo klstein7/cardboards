@@ -75,7 +75,7 @@ export function ActivityItem({ item }: ActivityItemProps) {
   const ActionIcon = actionIcons[item.action];
 
   return (
-    <div className="group flex items-start gap-4 rounded-lg border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:bg-muted/50 hover:shadow-sm">
+    <div className="group flex items-start gap-4 border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:bg-muted/50 hover:shadow-sm">
       <Avatar className="h-10 w-10 shrink-0 border border-border/50 shadow-sm transition-all duration-200 ease-in-out group-hover:border-border/80 group-hover:shadow-md">
         <AvatarImage
           src={user?.imageUrl ?? undefined}
