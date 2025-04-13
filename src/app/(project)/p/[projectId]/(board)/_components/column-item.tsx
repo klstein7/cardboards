@@ -33,6 +33,7 @@ import { cn } from "~/lib/utils";
 
 import { CardList } from "./card-list";
 import { CreateCardDialog } from "./create-card-dialog";
+import { DeleteColumnDialog } from "./delete-column-dialog";
 import { EditColumnDialog } from "./edit-column-dialog";
 
 interface ColumnItemProps {
@@ -45,6 +46,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const [isDropping, setIsDropping] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [justMoved, setJustMoved] = useState(false);
   const isAdmin = useIsAdmin();
 
@@ -300,6 +302,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 disabled={isMovingColumn}
+                onClick={() => setIsDeleteDialogOpen(true)}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 <span>Delete column</span>
@@ -312,6 +315,12 @@ export function ColumnItem({ column }: ColumnItemProps) {
           column={column}
           open={isEditOpen}
           onOpenChange={setIsEditOpen}
+        />
+
+        <DeleteColumnDialog
+          column={column}
+          open={isDeleteDialogOpen}
+          onOpenChange={setIsDeleteDialogOpen}
         />
       </div>
 

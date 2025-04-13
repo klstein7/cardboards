@@ -247,48 +247,34 @@ export class ColumnService extends BaseService {
    */
   async del(columnId: string, tx?: Transaction | Database) {
     return this.executeWithTx(async (txOrDb) => {
-      const column = await this.get(columnId, txOrDb);
+      // 1. Get the column being deleted
+      const columnToDelete = await this.get(columnId, txOrDb);
 
-      // Use injected context service to get projectId
+      // 2. Check if it's the last column on the board
+      const allColumnsOnBoard = await this.list(columnToDelete.boardId, txOrDb);
+      if (allColumnsOnBoard.length <= 1) {
+        throw new Error(
+          "Cannot delete the last column. A board must have at least one column.",
+        );
+      }
+
+      // 3. Proceed with deletion logic if it's not the last column
       const projectId = await this.boardContextService.getProjectId(
-        column.boardId,
+        columnToDelete.boardId,
         txOrDb,
       );
 
-      // Notify members BEFORE deleting
-      const { userId: actorUserId } = await auth();
-      if (!actorUserId) {
-        throw new Error("User not authenticated");
-      }
+      await this.historyService.recordColumnAction(
+        columnId,
+        projectId,
+        "delete",
+        JSON.stringify(columnToDelete),
+        txOrDb,
+      );
 
-      // Use injected services
-      const members = await this.projectUserService.list(projectId, txOrDb);
-      const project = await this.projectService.get(projectId, txOrDb);
+      await txOrDb.delete(columns).where(eq(columns.id, columnId));
 
-      const notificationsData = members
-        .filter((member: ProjectUser) => member.userId !== actorUserId)
-        .map((member: ProjectUser) => ({
-          userId: member.userId,
-          projectId: projectId,
-          entityType: "column" as const,
-          entityId: column.id,
-          type: "column_update" as const,
-          title: `Column "${column.name}" deleted`,
-          content: `In project "${project.name}", the column "${column.name}" was deleted.`,
-        }));
-
-      if (notificationsData.length > 0) {
-        // Use injected service
-        await this.notificationService.createMany(notificationsData, txOrDb);
-      }
-
-      // Record the column data before deletion
-      const changes = JSON.stringify({
-        before: column,
-        after: null,
-      });
-
-      // Update order of columns after this one
+      // Update order of subsequent columns
       await txOrDb
         .update(columns)
         .set({
@@ -296,30 +282,12 @@ export class ColumnService extends BaseService {
         })
         .where(
           and(
-            eq(columns.boardId, column.boardId),
-            gte(columns.order, column.order),
+            eq(columns.boardId, columnToDelete.boardId),
+            gte(columns.order, columnToDelete.order),
           ),
         );
 
-      const [deletedColumn] = await txOrDb
-        .delete(columns)
-        .where(eq(columns.id, columnId))
-        .returning();
-
-      if (!deletedColumn) {
-        throw new Error("Failed to delete column");
-      }
-
-      // Use injected service
-      await this.historyService.recordColumnAction(
-        column.id,
-        projectId,
-        "delete",
-        changes,
-        txOrDb,
-      );
-
-      return deletedColumn;
+      return columnToDelete;
     }, tx ?? this.db);
   }
 

@@ -190,7 +190,9 @@ describe("ColumnService", () => {
       // Mock update operation for shifting
       mockDb.update.mockReturnValue({
         set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
+          where: vi.fn().mockReturnValue({
+            returning: vi.fn().mockResolvedValue(undefined),
+          }),
         }),
       } as any);
 
@@ -469,130 +471,153 @@ describe("ColumnService", () => {
   });
 
   describe("del", () => {
-    it("should delete a column and notify members", async () => {
-      // Setup
-      const columnId = "column-123";
-      const column = {
-        id: columnId,
-        name: "Test Column",
-        boardId: "board-123",
-        order: 1,
-        isCompleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        description: null,
-      };
+    const columnId = "col-to-delete";
+    const boardId = "board-123";
+    const projectId = "project-123";
+    const columnToDelete = {
+      id: columnId,
+      name: "Old Column",
+      boardId,
+      order: 1,
+      isCompleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      description: null,
+    };
+    const otherColumn = {
+      id: "col-other",
+      name: "Another Column",
+      boardId,
+      order: 0,
+      isCompleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      description: null,
+    };
+    const subsequentColumn = {
+      id: "col-subsequent",
+      name: "Subsequent Column",
+      boardId,
+      order: 2,
+      isCompleted: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      description: null,
+    };
 
-      // Mock get operation
-      const getSpy = vi.spyOn(columnService, "get");
-      getSpy.mockResolvedValue(column as any);
+    // Mocks for chained Drizzle calls
+    let deleteWhereMock: any;
+    let deleteMock: any;
+    let updateWhereMock: any;
+    let updateSetMock: any;
+    let updateMock: any;
 
-      // Mock projectUserService.list for this test
+    beforeEach(() => {
+      // Reset mocks for DB operations specifically for 'del' tests
+      mockDb.query = {
+        columns: {
+          findFirst: vi.fn(),
+          findMany: vi.fn(),
+        },
+      } as any;
+
+      // Set up chained mocks for delete/update
+      deleteWhereMock = vi.fn();
+      deleteMock = vi.fn().mockReturnValue({ where: deleteWhereMock });
+      vi.mocked(mockDb.delete).mockImplementation(deleteMock);
+
+      updateWhereMock = vi.fn();
+      updateSetMock = vi.fn().mockReturnValue({ where: updateWhereMock });
+      updateMock = vi.fn().mockReturnValue({ set: updateSetMock });
+      vi.mocked(mockDb.update).mockImplementation(updateMock);
+
+      // Mock dependencies
+      mockBoardContextService.getProjectId.mockResolvedValue(projectId);
       mockProjectUserService.list.mockResolvedValue([
-        { userId: "user-123", role: "admin" },
-        { userId: "user-456", role: "member" },
+        { userId: "user-123" },
+        { userId: "user-456" },
       ]);
-
-      // Mock projectService.get for this test
       mockProjectService.get.mockResolvedValue({
-        id: "project-123",
+        id: projectId,
         name: "Test Project",
       });
+    });
 
-      // Mock update operation (for shifting order)
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      } as any);
+    it("should delete a column and update subsequent column orders", async () => {
+      // Arrange: Mock DB calls for successful deletion
+      vi.mocked(mockDb.query.columns.findFirst).mockResolvedValue(
+        columnToDelete,
+      );
+      vi.mocked(mockDb.query.columns.findMany).mockResolvedValue([
+        otherColumn,
+        columnToDelete,
+        subsequentColumn,
+      ]);
+      deleteWhereMock.mockResolvedValue(undefined); // Simulate successful delete
+      updateWhereMock.mockResolvedValue(undefined); // Simulate successful update
 
-      // Mock delete operation
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([column]),
-        }),
-      } as any);
-
-      // Mock boardContextService.getProjectId for this test
-      mockBoardContextService.getProjectId.mockResolvedValue("project-123");
-
-      // Execute
+      // Act
       const result = await columnService.del(columnId);
 
       // Assert
-      expect(result).toEqual(column);
-      expect(getSpy).toHaveBeenCalledWith(columnId, expect.anything());
-      expect(mockProjectUserService.list).toHaveBeenCalledWith(
-        "project-123",
-        expect.anything(),
+      expect(result).toEqual(columnToDelete);
+      expect(mockDb.query.columns.findFirst).toHaveBeenCalledWith(
+        expect.objectContaining({ where: eq(columns.id, columnId) }),
       );
-      expect(mockProjectService.get).toHaveBeenCalledWith(
-        "project-123",
-        expect.anything(),
+      expect(mockDb.query.columns.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: eq(columns.boardId, boardId) }),
       );
-      expect(mockNotificationService.createMany).toHaveBeenCalled();
-      expect(mockDb.update).toHaveBeenCalledWith(columns); // For shifting
-      expect(mockDb.delete).toHaveBeenCalledWith(columns);
+      // Check delete call chain
+      expect(deleteMock).toHaveBeenCalledWith(columns);
+      expect(deleteWhereMock).toHaveBeenCalledWith(eq(columns.id, columnId));
+
       expect(mockHistoryService.recordColumnAction).toHaveBeenCalledWith(
         columnId,
-        "project-123",
+        projectId,
         "delete",
-        expect.any(String),
+        JSON.stringify(columnToDelete),
         expect.anything(),
+      );
+      // Check order update call chain
+      expect(updateMock).toHaveBeenCalledWith(columns);
+      expect(updateSetMock).toHaveBeenCalledWith({
+        order: sql`${columns.order} - 1`,
+      });
+      expect(updateWhereMock).toHaveBeenCalledWith(
+        and(
+          eq(columns.boardId, boardId),
+          gte(columns.order, columnToDelete.order),
+        ),
       );
     });
 
-    it("should throw if deletion fails", async () => {
-      // Setup
-      const columnId = "column-123";
-      const column = {
-        id: columnId,
-        name: "Test Column",
-        boardId: "board-123",
-        order: 1,
-        isCompleted: false,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        description: null,
-      };
-
-      // Mock get operation
-      const getSpy = vi.spyOn(columnService, "get");
-      getSpy.mockResolvedValue(column as any);
-
-      // Mock projectUserService.list for this test
-      mockProjectUserService.list.mockResolvedValue([
-        { userId: "user-123", role: "admin" },
-        { userId: "user-456", role: "member" },
+    it("should throw an error if trying to delete the last column", async () => {
+      // Arrange: Mock DB calls for last column scenario
+      vi.mocked(mockDb.query.columns.findFirst).mockResolvedValue(
+        columnToDelete,
+      );
+      vi.mocked(mockDb.query.columns.findMany).mockResolvedValue([
+        columnToDelete,
       ]);
 
-      // Mock projectService.get for this test
-      mockProjectService.get.mockResolvedValue({
-        id: "project-123",
-        name: "Test Project",
-      });
-
-      // Mock update operation (for shifting order)
-      mockDb.update.mockReturnValue({
-        set: vi.fn().mockReturnValue({
-          where: vi.fn().mockResolvedValue(undefined),
-        }),
-      } as any);
-
-      // Mock delete operation to return empty array
-      mockDb.delete.mockReturnValue({
-        where: vi.fn().mockReturnValue({
-          returning: vi.fn().mockResolvedValue([]),
-        }),
-      } as any);
-
-      // Mock boardContextService.getProjectId for this test
-      mockBoardContextService.getProjectId.mockResolvedValue("project-123");
-
-      // Assert
+      // Act & Assert
       await expect(columnService.del(columnId)).rejects.toThrow(
-        "Failed to delete column",
+        "Cannot delete the last column. A board must have at least one column.",
       );
+      expect(deleteMock).not.toHaveBeenCalled(); // Ensure delete was not called
+      expect(mockHistoryService.recordColumnAction).not.toHaveBeenCalled(); // Ensure history was not recorded
+    });
+
+    it("should throw if the initial get fails", async () => {
+      // Arrange: Mock findFirst to simulate column not found
+      vi.mocked(mockDb.query.columns.findFirst).mockResolvedValue(undefined);
+
+      // Act & Assert
+      await expect(columnService.del(columnId)).rejects.toThrow(
+        "Column not found",
+      );
+      expect(mockDb.query.columns.findMany).not.toHaveBeenCalled(); // list shouldn't be called
+      expect(deleteMock).not.toHaveBeenCalled();
     });
   });
 
