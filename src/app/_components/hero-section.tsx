@@ -1,21 +1,13 @@
-"use client";
-
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 
 import { FadeIn } from "~/components/animations/fade-in";
 import { Logo } from "~/components/brand/logo";
 import { Button } from "~/components/ui/button";
 
+import { HeroImage } from "./hero-image";
+
 export function HeroSection() {
-  const { theme, systemTheme } = useTheme();
-
-  const isSystemDark =
-    (systemTheme === "dark" && theme === "system") ||
-    (systemTheme === "light" && theme === "system");
-
   return (
     <section
       className="relative w-full rounded-xl bg-gradient-to-b from-primary/5 to-background pb-24 pt-20"
@@ -50,22 +42,7 @@ export function HeroSection() {
             </div>
           </FadeIn>
 
-          <FadeIn className="relative w-full max-w-6xl">
-            <div className="overflow-hidden rounded-xl border bg-background/95 shadow-xl transition-all hover:shadow-2xl">
-              <Image
-                src={
-                  isSystemDark
-                    ? "/hero-board-dark.png"
-                    : "/hero-board-light.png"
-                }
-                alt="Interactive preview of our Kanban board interface showing task management and team collaboration features"
-                width={1200}
-                height={675}
-                className="w-full antialiased"
-                priority
-              />
-            </div>
-          </FadeIn>
+          <HeroImage />
         </div>
       </div>
     </section>

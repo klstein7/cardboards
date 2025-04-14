@@ -13,8 +13,8 @@ import {
 } from "~/components/ui/dropdown-menu";
 
 interface ThemeToggleProps {
-  side: "right" | "top" | "bottom" | "left";
-  align: "start" | "center" | "end";
+  side?: "right" | "top" | "bottom" | "left";
+  align?: "start" | "center" | "end";
 }
 
 export function ThemeToggle({

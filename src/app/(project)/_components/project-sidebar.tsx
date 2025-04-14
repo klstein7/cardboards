@@ -327,11 +327,11 @@ export function ProjectSidebar({
                       Theme
                     </span>
                     <div className="ml-auto">
-                      <ThemeToggle isHovered={false} />
+                      <ThemeToggle />
                     </div>
                   </div>
                 ) : (
-                  <ThemeToggle isHovered={false} />
+                  <ThemeToggle />
                 )}
               </div>
 
