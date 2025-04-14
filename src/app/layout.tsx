@@ -1,5 +1,6 @@
 import "~/styles/globals.css";
 
+import { GoogleTagManager } from "@next/third-parties/google";
 import { Jost } from "next/font/google";
 import NextTopLoader from "nextjs-toploader";
 import { NuqsAdapter } from "nuqs/adapters/next/app";
@@ -22,6 +23,7 @@ export default function RootLayout({
       className={`${font.className} dark`}
       suppressHydrationWarning
     >
+      <GoogleTagManager gtmId="AW-828669453" />
       <body className="h-full overflow-hidden">
         <NextTopLoader showSpinner={false} />
         <NuqsAdapter>
