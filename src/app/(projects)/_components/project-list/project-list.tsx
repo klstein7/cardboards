@@ -1,6 +1,5 @@
 "use client";
 
-import { motion, type Variants } from "framer-motion";
 import { Star } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
@@ -83,22 +82,6 @@ export function ProjectList() {
   const hasFilters = searchQuery.trim() !== "";
   const hasProjects = totalProjects > 0;
 
-  const container: Variants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.2,
-      },
-    },
-  };
-
-  const item: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-  };
-
   if (projects.isError) {
     return <ErrorState error={projects.error} refetch={projects.refetch} />;
   }
@@ -112,7 +95,7 @@ export function ProjectList() {
   }
 
   return (
-    <div className="w-full max-w-7xl space-y-6">
+    <div className="w-full">
       {/* Search and Filter */}
       <SearchBar
         searchQuery={searchQuery}
@@ -124,79 +107,78 @@ export function ProjectList() {
         hasFilters={hasFilters}
       />
 
-      {hasFilters && filteredProjects.length === 0 ? (
-        <div className="grid place-items-center rounded-lg border border-dashed py-10">
-          <div className="flex flex-col items-center">
-            <h3 className="text-base font-medium">No matching projects</h3>
-            <p className="mb-3 mt-1 text-center text-sm text-muted-foreground">
-              No projects match your search criteria.
-            </p>
-            <button
-              onClick={() => setSearchQuery("")}
-              className="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-primary ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground"
-            >
-              Clear search
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-10">
-          {/* Favorites Section */}
-          {hasFavorites && (
-            <section>
-              <div className="mb-4 flex items-center border-b border-border/50 pb-2 dark:border-border/40">
-                <Star className="mr-2 h-4 w-4 fill-primary text-primary drop-shadow-sm" />
-                <h3 className="text-base font-medium text-foreground">
-                  Favorites
-                </h3>
-              </div>
-              <motion.div
-                className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                variants={container}
-                initial="hidden"
-                animate="show"
-              >
-                {sortedFavorites.map((project) => (
-                  <motion.div
-                    key={project.id}
-                    variants={item}
-                    className="h-full"
-                  >
-                    <ProjectItem project={project} />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </section>
-          )}
-
-          {/* Projects Section */}
-          <section>
-            <div className="mb-4 flex items-center border-b border-border/50 pb-2 dark:border-border/40">
-              <h3 className="text-base font-medium text-foreground">
-                {hasFavorites ? "All Projects" : "Projects"}
+      {/* Content Area */}
+      <div className="mt-8">
+        {hasFilters && filteredProjects.length === 0 ? (
+          <div className="grid place-items-center rounded-lg border border-border bg-card py-16 shadow-sm">
+            <div className="flex flex-col items-center px-4 text-center">
+              <h3 className="text-lg font-semibold text-foreground">
+                No matching projects
               </h3>
+              <p className="mb-6 mt-2 max-w-md text-sm text-foreground/70">
+                No projects match your search criteria. Try adjusting your
+                search.
+              </p>
+              <button
+                onClick={() => setSearchQuery("")}
+                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Clear search
+              </button>
             </div>
-            <motion.div
-              className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-              variants={container}
-              initial="hidden"
-              animate="show"
-            >
-              {!hasFilters && (
-                <motion.div variants={item} className="h-full">
-                  <CreateProjectCard />
-                </motion.div>
-              )}
+          </div>
+        ) : (
+          <div className="space-y-12">
+            {/* Favorites Section */}
+            {hasFavorites && (
+              <section className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-border py-2">
+                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <h3 className="text-sm font-semibold text-foreground">
+                    Favorites
+                  </h3>
+                  <div className="rounded-full bg-muted/80 px-2 py-0.5 text-xs font-medium text-foreground">
+                    {sortedFavorites.length}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {sortedFavorites.map((project) => (
+                    <div key={project.id} className="group h-full">
+                      <ProjectItem project={project} />
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              {sortedRegulars.map((project) => (
-                <motion.div key={project.id} variants={item} className="h-full">
-                  <ProjectItem project={project} />
-                </motion.div>
-              ))}
-            </motion.div>
-          </section>
-        </div>
-      )}
+            {/* Projects Section */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-2 border-b border-border py-2">
+                <h3 className="text-sm font-semibold text-foreground">
+                  {hasFavorites ? "All Projects" : "Projects"}
+                </h3>
+                <div className="rounded-full bg-muted/80 px-2 py-0.5 text-xs font-medium text-foreground">
+                  {sortedRegulars.length + (!hasFilters ? 1 : 0)}{" "}
+                  {/* +1 for create card */}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {!hasFilters && (
+                  <div className="group h-full">
+                    <CreateProjectCard />
+                  </div>
+                )}
+
+                {sortedRegulars.map((project) => (
+                  <div key={project.id} className="group h-full">
+                    <ProjectItem project={project} />
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
