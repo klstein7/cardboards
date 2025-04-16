@@ -179,7 +179,7 @@ describe("AnalyticsService", () => {
 
       // Mock dates for the cards
       const date1 = subDays(now, 25);
-      const date2 = subDays(now, 20);
+      const date2 = subDays(now, 24); // Make this card be in the same week as date1
       const date3 = subDays(now, 15);
       const date4 = subDays(now, 8);
       const date5 = subDays(now, 2);

@@ -162,14 +162,16 @@ export class AnalyticsService extends BaseService {
         .flatMap((board) => board.columns ?? [])
         .flatMap((column) => column.cards ?? []);
 
+      // Group cards by week
       const cardsByWeek: Record<string, number> = {};
 
-      let currentDay = start;
+      // Initialize weeks
+      const currentDay = new Date(start);
       while (currentDay <= end) {
         const weekStart = startOfWeek(currentDay, { weekStartsOn: 1 });
         const weekKey = format(weekStart, "yyyy-MM-dd");
         cardsByWeek[weekKey] = 0;
-        currentDay = subDays(currentDay, -7);
+        currentDay.setDate(currentDay.getDate() + 7);
       }
 
       allCompletedCards.forEach((card) => {
@@ -179,8 +181,7 @@ export class AnalyticsService extends BaseService {
         if (cardDate >= start && cardDate <= end) {
           const weekStart = startOfWeek(cardDate, { weekStartsOn: 1 });
           const weekKey = format(weekStart, "yyyy-MM-dd");
-          const currentCount = cardsByWeek[weekKey] ?? 0;
-          cardsByWeek[weekKey] = currentCount + 1;
+          cardsByWeek[weekKey] = (cardsByWeek[weekKey] ?? 0) + 1;
         }
       });
 
