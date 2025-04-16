@@ -28,6 +28,8 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
       {
         href: `/p/${projectId}`,
         label: isMobile ? getTruncatedText(projectName, 12) : projectName,
+        isProject: true,
+        projectId: projectId,
       },
     ],
     [projectId, projectName, isMobile],
@@ -38,6 +40,8 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
       href?: string;
       label: string;
       color?: string;
+      isProject?: boolean;
+      projectId?: string;
     }>
   >(baseItems);
 
@@ -55,6 +59,9 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
             ? getTruncatedText(boardData?.name ?? "", 15)
             : (boardData?.name ?? ""),
           color: boardData?.color,
+          isBoard: true,
+          boardId: boardId,
+          projectId: projectId,
         },
       ];
       if (cardId && pathname.includes(`/c/${cardId}`) && cardData) {

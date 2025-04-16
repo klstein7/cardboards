@@ -58,7 +58,7 @@ export function SearchBar({
         <div className="flex items-center gap-2">
           <h2 className="text-lg font-semibold text-foreground">Projects</h2>
           {totalProjects > 0 && (
-            <span className="rounded-full bg-muted/80 px-2.5 py-0.5 text-xs font-medium text-foreground">
+            <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
               {hasFilters ? `${filteredCount}/${totalProjects}` : totalProjects}
             </span>
           )}
@@ -76,7 +76,7 @@ export function SearchBar({
         )}
       </div>
 
-      <div className="flex flex-col gap-3 rounded-md border border-border bg-background/80 p-4 shadow-sm sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/70" />
           <Input

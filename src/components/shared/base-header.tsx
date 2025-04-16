@@ -2,6 +2,10 @@
 
 import React from "react";
 
+import { BoardSelector } from "~/components/shared/board-selector";
+// Custom components and hooks
+import { ProjectSelector } from "~/components/shared/project-selector";
+// UI components
 import {
   BreadcrumbItem,
   BreadcrumbLink,
@@ -15,6 +19,10 @@ interface BreadcrumbItemProps {
   icon?: React.ReactNode;
   label: string;
   color?: string;
+  isProject?: boolean;
+  projectId?: string;
+  isBoard?: boolean;
+  boardId?: string;
 }
 
 interface BaseHeaderProps {
@@ -52,13 +60,24 @@ export function BaseHeader({ items, actions }: BaseHeaderProps) {
                 </>
               )}
               <BreadcrumbItem className="max-w-[40vw] sm:max-w-[50vw]">
-                {item?.href ? (
+                {item?.href && !item.isProject && !item.isBoard ? (
                   <BreadcrumbLink
                     href={item.href}
                     className="truncate whitespace-nowrap text-sm"
                   >
                     {item.label}
                   </BreadcrumbLink>
+                ) : item?.isProject ? (
+                  <ProjectSelector
+                    projectId={item.projectId}
+                    label={item.label}
+                  />
+                ) : item?.isBoard && item.projectId ? (
+                  <BoardSelector
+                    projectId={item.projectId}
+                    boardId={item.boardId}
+                    label={item.label}
+                  />
                 ) : (
                   <div className="flex items-center gap-1">
                     {item?.color && (
