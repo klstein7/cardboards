@@ -93,12 +93,7 @@ export function ProjectItem({ project }: { project: Project }) {
               {project.name}
             </h3>
             <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className="border-primary/40 bg-primary/10 text-[10px] font-normal text-primary-foreground dark:border-primary/40 dark:bg-primary/20 dark:text-primary"
-              >
-                Active
-              </Badge>
+              <Badge>Active</Badge>
               <div className="flex items-center gap-1 text-xs text-muted-foreground/90">
                 <CalendarIcon className="h-3 w-3" />
                 <span>
