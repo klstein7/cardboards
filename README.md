@@ -1,29 +1,112 @@
-# Create T3 App
+# Cardboards
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## What's next? How do I make an app with this?
+**Cardboards** is a modern, AI-enhanced Kanban project management tool designed to streamline your workflow, foster team collaboration, and provide insightful analytics. Built with Next.js, tRPC, Drizzle, and Clerk.
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+🔗 **Live Site:** [https://www.mycardboards.com](https://www.mycardboards.com)
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+![Cardboards Board View](public/hero-board-dark.png)
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+## ✨ Key Features
 
-## Learn More
+* **Intuitive Kanban Boards:** Drag & drop cards, customizable columns, rich task details.
+* **Real-time Collaboration:** Changes instantly reflect for all team members via Pusher.
+* **AI-Powered Assistance:**
+  * Generate entire boards based on a prompt.
+  * Generate individual cards with AI suggestions.
+  * AI-driven insights for projects and boards.
+* **Comprehensive Project Management:**
+  * Organize work into distinct Projects and Boards.
+  * Role-based access control (Admin/Member).
+  * Invite team members via shareable links.
+* **Detailed Task Management:**
+  * Rich text descriptions with a Tiptap-based editor.
+  * Due dates, priorities, labels, and assignees.
+  * Card-specific comments and activity history.
+* **Insightful Analytics:**
+  * Project progress, task completion trends, user activity.
+  * Distribution charts for priorities and due dates.
+* **Modern User Experience:**
+  * Secure authentication with Clerk.
+  * Real-time notifications.
+  * Responsive design with Dark/Light mode.
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## 🛠️ Tech Stack
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **API:** [tRPC](https://trpc.io/)
+* **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
+* **Database:** [PostgreSQL](https://www.postgresql.org/)
+* **Authentication:** [Clerk](https://clerk.com/)
+* **UI:** [Tailwind CSS](https://tailwindcss.com/), [Shadcn/UI](https://ui.shadcn.com/)
+* **Real-time:** [Pusher](https://pusher.com/)
+* **AI:** Google Gemini / OpenAI via Vercel AI SDK
+* **Testing:** [Vitest](https://vitest.dev/)
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+## 🚀 Getting Started
 
-## How do I deploy this?
+Follow these instructions to get a local copy up and running.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+### Prerequisites
+
+* Node.js (v20.x or later recommended)
+* pnpm (v9.x or later recommended)
+* Docker (for running PostgreSQL locally)
+
+### Installation
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/klstein7/cardboards.git
+   cd cardboards
+   ```
+
+2. **Set up environment variables:**
+   * Copy the example environment file:
+     ```bash
+     cp .env.example .env
+     ```
+   * Populate your `.env` file with the necessary API keys and secrets.
+
+3. **Install dependencies:**
+   ```bash
+   pnpm install
+   ```
+
+4. **Set up the database:**
+   * Start the PostgreSQL Docker container:
+     ```bash
+     sh ./start-database.sh
+     ```
+   * Run Drizzle migrations:
+     ```bash
+     pnpm db:migrate
+     ```
+
+5. **Run the development server:**
+   ```bash
+   pnpm dev
+   ```
+   The application should now be running on [http://localhost:3000](http://localhost:3000).
+
+## 🧪 Running Tests
+
+To run the test suite:
+```bash
+pnpm test
+```
+
+For coverage reports:
+```bash
+pnpm test:coverage
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
