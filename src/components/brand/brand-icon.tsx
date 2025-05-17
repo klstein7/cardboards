@@ -74,11 +74,11 @@ export function BrandIcon({
             </filter>
           </defs>
 
-          {/* Main left column */}
+          {/* Left column */}
           <rect
-            x="1"
+            x="0.5"
             y="3"
-            width="10"
+            width="6.5"
             height="18"
             rx="2"
             fill="currentColor"
@@ -87,38 +87,69 @@ export function BrandIcon({
 
           {/* Task lines in left column */}
           <line
-            x1="3"
+            x1="2"
             y1="7"
-            x2="9"
+            x2="5.5"
             y2="7"
             stroke="currentColor"
             strokeOpacity="0.3"
             strokeWidth="1"
           />
           <line
-            x1="3"
+            x1="2"
             y1="10"
-            x2="7"
+            x2="4.5"
             y2="10"
             stroke="currentColor"
             strokeOpacity="0.3"
             strokeWidth="1"
           />
           <line
-            x1="3"
+            x1="2"
             y1="13"
-            x2="8"
+            x2="5"
             y2="13"
             stroke="currentColor"
             strokeOpacity="0.3"
             strokeWidth="1"
           />
 
-          {/* Main right column */}
+          {/* Middle column */}
           <rect
-            x="12.5"
+            x="8.5"
             y="3"
-            width="9.5"
+            width="7"
+            height="13"
+            rx="2"
+            fill="currentColor"
+            filter="url(#shadow)"
+          />
+
+          {/* Task lines in middle column */}
+          <line
+            x1="10"
+            y1="7"
+            x2="14"
+            y2="7"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+          <line
+            x1="10"
+            y1="10"
+            x2="13"
+            y2="10"
+            stroke="currentColor"
+            strokeOpacity="0.3"
+            strokeWidth="1"
+          />
+
+          {/* Right column */}
+          <rect
+            x="17"
+            y="3"
+            width="6.5"
             height="9"
             rx="2"
             fill="currentColor"
@@ -127,9 +158,9 @@ export function BrandIcon({
 
           {/* Task line in right column */}
           <line
-            x1="14.5"
+            x1="18.5"
             y1="7"
-            x2="20"
+            x2="22"
             y2="7"
             stroke="currentColor"
             strokeOpacity="0.3"
