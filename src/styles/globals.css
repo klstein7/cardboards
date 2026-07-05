@@ -17,9 +17,9 @@
     --border: 0 0% 82%;
     --input: 0 0% 82%;
 
-    /* Primary - Acid lime */
-    --primary: 82 85% 55%;
-    --primary-foreground: 0 0% 7%;
+    /* Primary - Cobalt electric blue */
+    --primary: 215 88% 48%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 0 0% 94%;
     --secondary-foreground: 0 0% 12%;
@@ -29,7 +29,7 @@
 
     --destructive: 0 84% 52%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 82 85% 45%;
+    --ring: 215 88% 45%;
 
     --radius: 0rem;
 
@@ -54,7 +54,7 @@
 
     /* Due date colors */
     --due-overdue: 0 84% 52%;
-    --due-today: 82 70% 40%;
+    --due-today: 215 80% 45%;
     --due-week: 150 80% 35%;
     --due-later: 0 0% 45%;
     --due-none: 0 0% 45%;
@@ -73,16 +73,16 @@
     --chart-cyan-color: hsl(182 80% 38%);
     --chart-indigo-color: hsl(235 75% 48%);
     --chart-pink-color: hsl(330 85% 55%);
-    --primary-color: hsl(82 85% 55%);
+    --primary-color: hsl(215 88% 48%);
 
     --sidebar-background: 0 0% 96%;
     --sidebar-foreground: 0 0% 9%;
-    --sidebar-primary: 82 85% 45%;
+    --sidebar-primary: 215 88% 45%;
     --sidebar-primary-foreground: 0 0% 7%;
     --sidebar-accent: 0 0% 90%;
     --sidebar-accent-foreground: 0 0% 20%;
     --sidebar-border: 0 0% 85%;
-    --sidebar-ring: 82 85% 45%;
+    --sidebar-ring: 215 88% 45%;
 
     --nav-badge-bg: 0 0% 85%;
     --nav-badge-text: 0 0% 20%;
@@ -104,8 +104,8 @@
     --border: 0 0% 17%; /* neutral-800, a hair brighter so wire hairlines carry */
     --input: 0 0% 17%;
 
-    /* Primary - lime-300 */
-    --primary: 82 85% 67%;
+    /* Primary - Cobalt electric blue (215 90% 63%) */
+    --primary: 215 90% 63%;
     --primary-foreground: 0 0% 4%;
 
     /* Secondary - quiet neutral surface */
@@ -118,7 +118,7 @@
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 82 85% 67%;
+    --ring: 215 90% 63%;
 
     /* Chart colors */
     --chart-blue: 210 75% 65%;
@@ -141,7 +141,7 @@
 
     /* Due date colors */
     --due-overdue: 0 84% 62%;
-    --due-today: 82 85% 67%;
+    --due-today: 215 90% 63%;
     --due-week: 150 75% 55%;
     --due-later: 0 0% 58%;
     --due-none: 0 0% 55%;
@@ -160,17 +160,17 @@
     --chart-cyan-color: hsl(182 85% 60%);
     --chart-indigo-color: hsl(235 80% 70%);
     --chart-pink-color: hsl(330 85% 70%);
-    --primary-color: hsl(82 85% 67%);
+    --primary-color: hsl(215 90% 63%);
 
     /* Sidebar - same base as the app, separated by a hairline border */
     --sidebar-background: 0 0% 4%;
     --sidebar-foreground: 0 0% 96%;
-    --sidebar-primary: 82 85% 67%;
+    --sidebar-primary: 215 90% 63%;
     --sidebar-primary-foreground: 0 0% 4%;
     --sidebar-accent: 0 0% 13%;
     --sidebar-accent-foreground: 0 0% 96%;
     --sidebar-border: 0 0% 15%;
-    --sidebar-ring: 82 85% 67%;
+    --sidebar-ring: 215 90% 63%;
 
     --nav-badge-bg: 0 0% 15%;
     --nav-badge-text: 0 0% 90%;

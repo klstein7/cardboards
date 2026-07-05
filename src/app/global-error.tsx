@@ -95,7 +95,7 @@ export default function GlobalError({ error, reset }: ErrorProps) {
               style={{
                 cursor: "pointer",
                 border: "none",
-                background: "#bef264",
+                background: "#4c93f6",
                 color: "#0a0a0a",
                 fontWeight: 600,
                 fontSize: "1rem",
