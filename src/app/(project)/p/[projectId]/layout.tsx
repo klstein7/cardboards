@@ -1,6 +1,5 @@
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { FloatingActionMenu } from "../../_components/floating-action-menu";
 import { ProjectClientLayout } from "../../_components/project-client-layout";
 
 type Params = Promise<{ projectId: string }>;
@@ -38,7 +37,6 @@ export default async function ProjectLayout({
       <ProjectClientLayout projectId={projectId} project={project}>
         {children}
       </ProjectClientLayout>
-      <FloatingActionMenu entityType="project" entityId={projectId} />
     </HydrateClient>
   );
 }

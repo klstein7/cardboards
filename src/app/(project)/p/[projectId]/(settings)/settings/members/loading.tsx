@@ -3,7 +3,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 export default function MembersSettingsPageSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border bg-card shadow-sm">
+      <div className="rounded-lg border bg-card ">
         <div className="flex items-center justify-between border-b p-4 sm:p-6">
           <div>
             <Skeleton className="h-7 w-40" />
@@ -45,7 +45,7 @@ export default function MembersSettingsPageSkeleton() {
                   className="flex items-center justify-between border-b p-4 last:border-0"
                 >
                   <div className="flex items-center gap-3">
-                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <Skeleton className="h-8 w-8 rounded-none" />
                     <div className="flex flex-col space-y-1">
                       <Skeleton className="h-5 w-40" />
                       <Skeleton className="h-4 w-32" />

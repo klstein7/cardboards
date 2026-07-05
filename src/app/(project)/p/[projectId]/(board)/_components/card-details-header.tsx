@@ -8,15 +8,15 @@ interface CardDetailsHeaderProps {
 export function CardDetailsHeader({ id, priority }: CardDetailsHeaderProps) {
   return (
     <div className="flex items-center gap-2">
-      <span className="inline-flex h-6 items-center justify-center rounded-md bg-primary/10 px-2 text-sm font-medium text-primary">
+      <span className="inline-flex h-6 items-center justify-center border border-primary/40 px-2 font-mono text-sm font-medium text-primary">
         CARD-{id}
       </span>
       {priority && (
         <div
-          className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium shadow-sm"
+          className="inline-flex items-center gap-1.5 border px-2 py-0.5 font-mono text-xs font-medium uppercase tracking-wider"
           style={{
             color: getPriorityColor(priority),
-            backgroundColor: `${getPriorityColor(priority)}15`,
+            borderColor: `color-mix(in srgb, ${getPriorityColor(priority)} 45%, transparent)`,
           }}
         >
           {getPriorityLabel(priority)}
@@ -29,13 +29,13 @@ export function CardDetailsHeader({ id, priority }: CardDetailsHeaderProps) {
 function getPriorityColor(priority: string | undefined) {
   switch (priority) {
     case "high":
-      return "#ef4444";
+      return "var(--priority-urgent-color)";
     case "medium":
-      return "#f59e0b";
+      return "var(--priority-high-color)";
     case "low":
-      return "#3b82f6";
+      return "var(--priority-medium-color)";
     default:
-      return "#6b7280";
+      return "var(--priority-none-color)";
   }
 }
 

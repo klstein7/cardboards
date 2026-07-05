@@ -167,7 +167,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const sortedCards = cards.data.sort((a, b) => a.order - b.order);
 
   return (
-    <div className="flex max-w-full flex-col p-2">
+    <div className="flex max-w-full flex-col px-3 pb-3">
       <AnimatePresence initial={false}>
         {sortedCards.map((card, index) => (
           <motion.div
@@ -177,7 +177,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              index < sortedCards.length - 1 ? "mb-3" : "",
+              index < sortedCards.length - 1 ? "mb-2" : "",
               moveCardMutation.isPending && "opacity-80",
             )}
           >

@@ -1,8 +1,6 @@
 import "server-only";
 
 import { db } from "../db";
-import { AiInsightService } from "./ai-insight.service";
-import { AnalyticsService } from "./analytics.service";
 import { AuthService } from "./auth.service";
 import { BoardService } from "./board.service";
 import { BoardContextService } from "./board-context.service";
@@ -17,7 +15,6 @@ import { ProjectUserService } from "./project-user.service";
 import { UserService } from "./user.service";
 
 const userService = new UserService(db);
-const analyticsService = new AnalyticsService(db);
 const notificationService = new NotificationService(db);
 const boardContextService = new BoardContextService(db);
 
@@ -72,18 +69,7 @@ const boardService = new BoardService(
   projectUserService,
 );
 
-const aiInsightService = new AiInsightService(
-  db,
-  boardService,
-  cardService,
-  columnService,
-  historyService,
-  projectService,
-);
-
 const services = {
-  aiInsightService,
-  analyticsService,
   authService,
   boardContextService,
   boardService,

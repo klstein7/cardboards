@@ -41,7 +41,7 @@ export function CreateBoardDialog({
         </DialogHeader>
         {!isAdmin ? (
           <div className="flex flex-col items-center justify-center gap-3 py-6 text-center">
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-secondary">
+            <div className="flex h-12 w-12 items-center justify-center border border-border">
               <Lock className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="text-lg font-medium">Admin access required</h3>

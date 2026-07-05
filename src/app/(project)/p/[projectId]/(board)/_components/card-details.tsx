@@ -169,7 +169,7 @@ export function CardDetails() {
                 }}
               />
 
-              <div className="rounded-lg border bg-card/50 p-3 shadow-sm backdrop-blur-[2px] sm:p-4">
+              <div className="rounded-lg border bg-card/50 p-3  backdrop-blur-[2px] sm:p-4">
                 <CardDetailsMetadata
                   dueDate={card.data?.dueDate}
                   assignedToId={card.data?.assignedToId}
@@ -238,7 +238,7 @@ export function CardDetails() {
 
               <Separator className="my-1" />
 
-              <div className="rounded-lg border bg-card/50 p-3 shadow-sm backdrop-blur-[2px] sm:p-4">
+              <div className="rounded-lg border bg-card/50 p-3  backdrop-blur-[2px] sm:p-4">
                 <h3 className="mb-4 text-sm font-medium">Comments</h3>
                 <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
                 <div className="mt-4">

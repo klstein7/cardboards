@@ -63,7 +63,7 @@ export function Notifications({
       <SheetContent
         side="right"
         className={cn(
-          "overflow-auto p-0 shadow-lg dark:bg-neutral-900/95",
+          "overflow-auto p-0",
           isMobile && "w-[344px] sm:w-[400px]",
           className,
         )}
@@ -73,7 +73,7 @@ export function Notifications({
         <div className="flex h-full flex-col">
           <div className="border-b p-6 pb-4">
             <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 dark:bg-primary/20">
+              <div className="flex h-8 w-8 items-center justify-center border border-primary/40">
                 <Bell className="h-4.5 w-4.5 text-primary" />
               </div>
               <h2 className="text-lg font-semibold text-foreground">
@@ -86,7 +86,7 @@ export function Notifications({
           </div>
 
           <div className="border-b px-6 py-3">
-            <div className="flex items-center gap-2 rounded-md border bg-muted/50 p-1">
+            <div className="flex items-center gap-2 border border-border p-1">
               <Button
                 size="sm"
                 variant={filter === "all" ? "secondary" : "ghost"}

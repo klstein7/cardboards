@@ -5,7 +5,7 @@ import { Skeleton } from "~/components/ui/skeleton";
 export default function SettingsLoading() {
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border bg-card shadow-sm">
+      <div className="rounded-lg border bg-card ">
         <div className="flex items-center justify-between border-b p-4 sm:p-6">
           <div>
             <Skeleton className="h-7 w-48" />

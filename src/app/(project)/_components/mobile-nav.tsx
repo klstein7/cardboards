@@ -1,6 +1,6 @@
 "use client";
 
-import { ChartArea, Kanban, Menu, Plus, Settings } from "lucide-react";
+import { Bell, Kanban, Menu, Plus, Settings } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Nunito } from "next/font/google";
 import Link from "next/link";
@@ -18,9 +18,11 @@ import {
   SheetTrigger,
 } from "~/components/ui/sheet";
 import { useBoards } from "~/lib/hooks";
+import { useNotificationUnreadCount } from "~/lib/hooks/notification";
 import { cn } from "~/lib/utils";
 
 import { CreateBoardDialog } from "./create-board-dialog";
+import { Notifications } from "./notifications";
 
 const ThemeToggle = dynamic(
   () => import("./theme-toggle").then((mod) => mod.ThemeToggle),
@@ -33,7 +35,7 @@ const UserButton = dynamic(
   () => import("@clerk/nextjs").then((mod) => mod.UserButton),
   {
     ssr: false,
-    loading: () => <div className="h-8 w-8 rounded-full bg-muted" />,
+    loading: () => <div className="h-8 w-8 border border-border bg-muted" />,
   },
 );
 
@@ -48,8 +50,10 @@ interface MobileNavProps {
 
 export function MobileNav({ projectId }: MobileNavProps) {
   const [open, setOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const params = useParams();
   const boards = useBoards(projectId);
+  const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
   const currentBoardId = params.boardId as string | undefined;
 
@@ -58,12 +62,13 @@ export function MobileNav({ projectId }: MobileNavProps) {
   }
 
   return (
+    <>
     <Sheet open={open} onOpenChange={setOpen} modal={false}>
       <SheetTrigger asChild>
         <Button
-          variant="secondary"
+          variant="outline"
           size="icon"
-          className="fixed right-4 top-4 z-50 h-10 w-10 rounded-full shadow-md sm:hidden"
+          className="fixed right-4 top-4 z-50 h-10 w-10 rounded-none bg-background sm:hidden"
         >
           <Menu className="h-5 w-5" />
         </Button>
@@ -105,17 +110,6 @@ export function MobileNav({ projectId }: MobileNavProps) {
                   </Button>
                 </Link>
               </SheetClose>
-              <SheetClose asChild>
-                <Link href={`/p/${projectId}/analytics`}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start gap-2"
-                  >
-                    <ChartArea className="h-4 w-4" />
-                    Analytics
-                  </Button>
-                </Link>
-              </SheetClose>
             </div>
 
             <div className="space-y-1">
@@ -134,11 +128,12 @@ export function MobileNav({ projectId }: MobileNavProps) {
                           variant="ghost"
                           className={cn(
                             "w-full justify-start gap-2",
-                            currentBoardId === board.id && "bg-muted/75",
+                            currentBoardId === board.id &&
+                              "border-l-2 border-primary font-medium text-primary",
                           )}
                         >
                           <div
-                            className="h-4 w-4 flex-shrink-0 rounded-full"
+                            className="h-3 w-3 flex-shrink-0 rounded-none"
                             style={{ backgroundColor: board.color }}
                           />
                           <span className="truncate">{board.name}</span>
@@ -165,6 +160,25 @@ export function MobileNav({ projectId }: MobileNavProps) {
               projectId={projectId}
             />
 
+            <Button
+              variant="ghost"
+              className="w-full justify-start gap-2"
+              onClick={() => {
+                setOpen(false);
+                setNotificationsOpen(true);
+              }}
+            >
+              <span className="relative">
+                <Bell className="h-4 w-4" />
+                {unreadCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </span>
+              Notifications
+            </Button>
+
             <SheetClose asChild>
               <Link href={`/p/${projectId}/settings`}>
                 <Button variant="ghost" className="w-full justify-start gap-2">
@@ -182,5 +196,10 @@ export function MobileNav({ projectId }: MobileNavProps) {
         </div>
       </SheetContent>
     </Sheet>
+    <Notifications
+      open={notificationsOpen}
+      onOpenChange={setNotificationsOpen}
+    />
+    </>
   );
 }

@@ -22,7 +22,7 @@ export function HeroImage() {
 
   return (
     <FadeIn className="relative w-full max-w-6xl">
-      <div className="overflow-hidden rounded-xl border bg-background/95 shadow-xl transition-all hover:shadow-2xl">
+      <div className="overflow-hidden rounded-xl border bg-background/95  transition-all ">
         <Image
           src={isSystemDark ? "/hero-board-dark.png" : "/hero-board-light.png"}
           alt="Interactive preview of our Kanban board interface showing task management and team collaboration features"

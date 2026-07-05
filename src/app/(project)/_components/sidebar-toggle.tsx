@@ -23,7 +23,7 @@ export function SidebarToggle({
           onClick={() => setIsOpen(!isOpen)}
           variant="outline"
           size="icon"
-          className="h-6 w-6 rounded-full border-muted-foreground/20 bg-background p-0 shadow-md transition-all hover:bg-muted"
+          className="h-6 w-6 rounded-none border-border bg-background p-0 transition-colors hover:border-foreground/60"
           aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
         >
           {isOpen ? (

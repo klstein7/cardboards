@@ -68,12 +68,12 @@ export async function ProjectActivity({
   };
 
   return (
-    <Card className="overflow-hidden border shadow-sm transition-all hover:shadow">
+    <Card className="overflow-hidden border  transition-all ">
       <SectionHeader title="Project Activity" icon={ActivityIcon} />
       <CardContent className="p-0">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center px-4 py-12 text-center">
-            <div className="mb-4 rounded-full bg-muted p-3">
+            <div className="mb-4 border border-border p-3">
               <ActivityIcon className="h-6 w-6 text-muted-foreground" />
             </div>
             <h3 className="mb-1 text-lg font-semibold">No activity yet</h3>

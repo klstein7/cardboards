@@ -58,7 +58,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
             className="h-auto w-full max-w-[450px] rounded-lg border-2 border-dashed bg-background p-8 hover:border-primary hover:bg-secondary/10"
           >
             <div className="flex items-center gap-4">
-              <div className="rounded-full bg-primary/10 p-2.5">
+              <div className="border border-primary/40 p-2.5">
                 <Plus className="h-6 w-6 text-primary" />
               </div>
               <span className="text-xl font-medium text-muted-foreground">

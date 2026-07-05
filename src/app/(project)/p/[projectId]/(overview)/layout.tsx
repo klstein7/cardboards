@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { ProjectToolbar } from "../../../_components/project-toolbar";
+import { ProjectHeader } from "./_components/project-header";
 import { ProjectStats } from "./_components/project-stats";
 import { ProjectTabs } from "./_components/project-tabs";
 
@@ -37,19 +37,19 @@ export default async function OverviewLayout({
   return (
     <HydrateClient>
       <div className="flex h-full w-full flex-col overflow-hidden">
-        <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
-          <ProjectToolbar projectId={projectId} className="max-w-7xl" />
-        </div>
+        <main className="flex-1 overflow-auto px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl">
+            <div className="pt-10 md:pt-14">
+              <ProjectHeader projectId={projectId} />
+            </div>
 
-        <main className="flex-1 overflow-auto px-4 pb-6 sm:px-6 lg:px-8">
-          <div className="py-4">
-            <ProjectStats projectId={projectId} className="max-w-7xl" />
-          </div>
+            <div className="mt-12">
+              <ProjectStats projectId={projectId} />
+            </div>
 
-          <div className="mt-6">
-            <ProjectTabs projectId={projectId} className="max-w-7xl">
-              {children}
-            </ProjectTabs>
+            <div className="mt-14">
+              <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
+            </div>
           </div>
         </main>
       </div>

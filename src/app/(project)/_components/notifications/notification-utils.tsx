@@ -39,63 +39,63 @@ export function getNotificationTypeInfo(
       return {
         label: "Mention",
         icon: Type,
-        color: "text-purple-500",
+        color: "text-muted-foreground",
         description: "Someone mentioned you in a comment",
       };
     case "assignment":
       return {
         label: "Assignment",
         icon: CheckCircle,
-        color: "text-emerald-500",
+        color: "text-muted-foreground",
         description: "You were assigned to a card",
       };
     case "comment":
       return {
         label: "Comment",
         icon: MessageSquare,
-        color: "text-blue-500",
+        color: "text-muted-foreground",
         description: "New comment on a card you're assigned to",
       };
     case "due_date":
       return {
         label: "Due Date",
         icon: Calendar,
-        color: "text-amber-500",
+        color: "text-muted-foreground",
         description: "A card is due soon",
       };
     case "invitation":
       return {
         label: "Invitation",
         icon: VerifiedIcon,
-        color: "text-green-500",
+        color: "text-muted-foreground",
         description: "You were invited to a project",
       };
     case "column_update":
       return {
         label: "Column Update",
         icon: CheckCircle,
-        color: "text-blue-500",
+        color: "text-muted-foreground",
         description: "A column was updated",
       };
     case "card_move":
       return {
         label: "Card Move",
         icon: MoveRight,
-        color: "text-indigo-500",
+        color: "text-muted-foreground",
         description: "A card was moved to a different column",
       };
     case "insight":
       return {
         label: "AI Insight",
         icon: Sparkles,
-        color: "text-amber-500",
+        color: "text-muted-foreground",
         description: "New AI insight generated",
       };
     case "project_update":
       return {
         label: "Project Update",
         icon: Users,
-        color: "text-blue-500",
+        color: "text-muted-foreground",
         description: "Project information was updated",
       };
     default:

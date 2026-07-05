@@ -2,49 +2,62 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { FadeIn } from "~/components/animations/fade-in";
-import { Logo } from "~/components/brand/logo";
+import { BrandIcon } from "~/components/brand/brand-icon";
 import { Button } from "~/components/ui/button";
 
-import { HeroImage } from "./hero-image";
+import { LandingBoardPreview } from "./landing-board-preview";
 
 export function HeroSection() {
   return (
     <section
-      className="relative w-full rounded-xl bg-gradient-to-b from-primary/5 to-background pb-24 pt-20"
+      className="w-full pb-16 pt-10 sm:pt-14"
       aria-labelledby="hero-heading"
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center justify-center gap-16">
-          <FadeIn className="flex flex-col items-center gap-8 text-center">
-            <Logo showText={true} />
-            <div className="rounded-full bg-primary/15 px-4 py-1.5 text-sm font-medium text-primary shadow-sm transition-all duration-300 hover:bg-primary/25">
-              Kanban Project Management
-            </div>
-            <h1
-              id="hero-heading"
-              className="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-6xl"
-            >
-              Manage projects with ease
-            </h1>
-            <p className="max-w-[42rem] text-balance leading-normal text-muted-foreground sm:text-xl sm:leading-8">
-              Streamline your workflow with our intuitive Kanban board. Organize
-              tasks, collaborate with your team, and boost productivity.
-            </p>
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <Link href="/projects">
-                <Button size="lg" className="group w-full sm:w-auto">
-                  <span className="flex items-center gap-2">
-                    Get Started
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </Button>
-              </Link>
-            </div>
-          </FadeIn>
-
-          <HeroImage />
+      <FadeIn>
+        <div className="flex items-center gap-2">
+          <BrandIcon variant="small" />
+          <span className="text-lg font-semibold tracking-tight">
+            cardboards
+          </span>
         </div>
-      </div>
+
+        <h1
+          id="hero-heading"
+          className="mt-14 text-6xl font-semibold tracking-tighter sm:text-8xl"
+        >
+          <span className="block leading-none">Less process.</span>
+          <span className="mt-4 inline-block border-b-4 border-primary pb-2 leading-none md:border-b-8">
+            More done.
+          </span>
+        </h1>
+
+        <div className="mt-10 flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
+          <p className="max-w-md text-lg leading-relaxed text-muted-foreground">
+            cardboards is a kanban board that refuses to become a process.
+            Columns, cards, comments.
+          </p>
+          <div className="flex shrink-0 items-center gap-3">
+            <Link href="/projects">
+              <Button
+                size="lg"
+                className="group bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                Get started
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </Link>
+            <a href="#features">
+              <Button size="lg" variant="outline">
+                See the board
+              </Button>
+            </a>
+          </div>
+        </div>
+      </FadeIn>
+
+      <FadeIn className="mt-14">
+        <LandingBoardPreview />
+      </FadeIn>
     </section>
   );
 }

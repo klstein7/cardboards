@@ -46,9 +46,7 @@ export function DynamicHeader({ projectId, projectName }: DynamicHeaderProps) {
   >(baseItems);
 
   useEffect(() => {
-    if (pathname.includes("/analytics")) {
-      setHeaderItems([...baseItems, { label: "Analytics" }]);
-    } else if (pathname.includes("/settings")) {
+    if (pathname.includes("/settings")) {
       setHeaderItems([...baseItems, { label: "Settings" }]);
     } else if (boardId && pathname.includes(`/b/${boardId}`)) {
       const boardItems = [

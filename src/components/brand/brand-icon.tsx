@@ -1,4 +1,6 @@
-import { type HTMLAttributes } from "react";
+"use client";
+
+import { type HTMLAttributes, useId } from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -6,168 +8,85 @@ interface BrandIconProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "large" | "small" | "xsmall";
 }
 
+const sizeClassName = {
+  xsmall: "w-6 h-6",
+  small: "w-8 h-8",
+  default: "w-12 h-12",
+  large: "w-16 h-16",
+} as const;
+
 export function BrandIcon({
   variant = "default",
   className,
   ...props
 }: BrandIconProps) {
-  const sizeConfig = {
-    xsmall: {
-      className: "w-6 h-6",
-      numericSize: 24,
-      radius: "rounded-md",
-      padding: "p-1",
-    },
-    small: {
-      className: "w-8 h-8",
-      numericSize: 32,
-      radius: "rounded-lg",
-      padding: "p-1",
-    },
-    default: {
-      className: "w-12 h-12",
-      numericSize: 48,
-      radius: "rounded-2xl",
-      padding: "p-2",
-    },
-    large: {
-      className: "w-16 h-16",
-      numericSize: 64,
-      radius: "rounded-3xl",
-      padding: "p-2.5",
-    },
-  };
-
-  const {
-    className: sizeClassName,
-    numericSize,
-    radius,
-    padding,
-  } = sizeConfig[variant];
+  const rawId = useId();
+  const id = rawId.replace(/:/g, "");
+  const cutFront = `${id}-cutFront`;
+  const cutMid = `${id}-cutMid`;
 
   return (
-    <div className={cn("relative", sizeClassName, className)} {...props}>
-      <div
-        className={cn(
-          "flex h-full w-full items-center justify-center bg-foreground dark:bg-foreground",
-          radius,
-          padding,
-        )}
+    <div
+      className={cn("relative shrink-0", sizeClassName[variant], className)}
+      {...props}
+    >
+      <svg
+        viewBox="0 0 156 156"
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-full w-full"
+        role="img"
+        aria-label="cardboards"
       >
-        <svg
-          width={numericSize * 0.8}
-          height={numericSize * 0.8}
-          viewBox="0 0 24 24"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="text-background antialiased dark:text-background"
-        >
-          {/* Drop shadow filter */}
-          <defs>
-            <filter id="shadow" x="0" y="0" width="200%" height="200%">
-              <feDropShadow
-                dx="0.2"
-                dy="0.4"
-                stdDeviation="0.3"
-                floodOpacity="0.1"
-              />
-            </filter>
-          </defs>
-
-          {/* Left column */}
+        <defs>
+          <mask id={cutFront}>
+            <rect x="-100" y="-100" width="500" height="500" fill="white" />
+            <rect
+              x="6"
+              y="6"
+              width="76"
+              height="124"
+              rx="18"
+              fill="black"
+              stroke="black"
+              strokeWidth="12"
+            />
+          </mask>
+          <mask id={cutMid}>
+            <rect x="-100" y="-100" width="500" height="500" fill="white" />
+            <rect
+              x="38"
+              y="-0.8"
+              width="76"
+              height="124"
+              rx="18"
+              fill="black"
+              stroke="black"
+              strokeWidth="12"
+            />
+          </mask>
+        </defs>
+        <g transform="skewY(12)">
           <rect
-            x="0.5"
-            y="3"
-            width="6.5"
-            height="18"
-            rx="2"
-            fill="currentColor"
-            filter="url(#shadow)"
+            x="70"
+            y="-7.6"
+            width="76"
+            height="124"
+            rx="18"
+            fill="#2E2E30"
+            mask={`url(#${cutMid})`}
           />
-
-          {/* Task lines in left column */}
-          <line
-            x1="2"
-            y1="7"
-            x2="5.5"
-            y2="7"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-          <line
-            x1="2"
-            y1="10"
-            x2="4.5"
-            y2="10"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-          <line
-            x1="2"
-            y1="13"
-            x2="5"
-            y2="13"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-
-          {/* Middle column */}
           <rect
-            x="8.5"
-            y="3"
-            width="7"
-            height="13"
-            rx="2"
-            fill="currentColor"
-            filter="url(#shadow)"
+            x="38"
+            y="-0.8"
+            width="76"
+            height="124"
+            rx="18"
+            fill="#55555A"
+            mask={`url(#${cutFront})`}
           />
-
-          {/* Task lines in middle column */}
-          <line
-            x1="10"
-            y1="7"
-            x2="14"
-            y2="7"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-          <line
-            x1="10"
-            y1="10"
-            x2="13"
-            y2="10"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-
-          {/* Right column */}
-          <rect
-            x="17"
-            y="3"
-            width="6.5"
-            height="9"
-            rx="2"
-            fill="currentColor"
-            filter="url(#shadow)"
-          />
-
-          {/* Task line in right column */}
-          <line
-            x1="18.5"
-            y1="7"
-            x2="22"
-            y2="7"
-            stroke="currentColor"
-            strokeOpacity="0.3"
-            strokeWidth="1"
-          />
-        </svg>
-      </div>
+          <rect x="6" y="6" width="76" height="124" rx="18" fill="#BEF264" />
+        </g>
+      </svg>
     </div>
   );
 }

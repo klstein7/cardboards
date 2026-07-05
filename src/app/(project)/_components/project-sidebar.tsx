@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  ChartArea,
+  Bell,
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
@@ -13,6 +13,7 @@ import dynamic from "next/dynamic";
 import { Nunito } from "next/font/google";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from "react";
 
 import { BrandIcon } from "~/components/brand/brand-icon";
 import { Button } from "~/components/ui/button";
@@ -23,10 +24,12 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { useBoards } from "~/lib/hooks";
+import { useNotificationUnreadCount } from "~/lib/hooks/notification";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
 import { CreateBoardDialog } from "./create-board-dialog";
+import { Notifications } from "./notifications";
 import { ProjectSidebarSkeleton } from "./project-sidebar-skeleton";
 
 const ThemeToggle = dynamic(
@@ -46,7 +49,7 @@ const UserButton = dynamic(
   () => import("@clerk/nextjs").then((mod) => mod.UserButton),
   {
     ssr: false,
-    loading: () => <div className="h-8 w-8 rounded-full bg-muted" />,
+    loading: () => <div className="h-8 w-8 border border-border bg-muted" />,
   },
 );
 
@@ -63,6 +66,8 @@ export function ProjectSidebar({
   const pathname = usePathname();
   const boards = useBoards(projectId);
   const isAdmin = useIsAdmin();
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
   const isActivePathOrSubPath = (basePath: string) => {
     const baseSegments = basePath.split("/").filter(Boolean);
@@ -102,7 +107,7 @@ export function ProjectSidebar({
                   onClick={() => setIsExpanded(!isExpanded)}
                   variant="outline"
                   size="icon"
-                  className="h-6 w-6 rounded-full border bg-background shadow-md"
+                  className="h-6 w-6 rounded-none bg-background"
                 >
                   {isExpanded ? (
                     <ChevronLeft className="h-3.5 w-3.5" />
@@ -163,7 +168,7 @@ export function ProjectSidebar({
                           ? "justify-start gap-2 px-3"
                           : "justify-center",
                         isActivePathOrSubPath(`/p/${projectId}/overview`) &&
-                          "bg-muted/75",
+                          "border-l-2 border-primary font-medium text-primary",
                       )}
                     >
                       <LayoutDashboard className="h-5 w-5 flex-shrink-0" />
@@ -180,37 +185,6 @@ export function ProjectSidebar({
                 </TooltipTrigger>
                 {!isExpanded && (
                   <TooltipContent side="right">Dashboard</TooltipContent>
-                )}
-              </Tooltip>
-
-              <Tooltip disableHoverableContent={isExpanded}>
-                <TooltipTrigger asChild>
-                  <Link href={`/p/${projectId}/analytics/overview`}>
-                    <Button
-                      variant="ghost"
-                      className={cn(
-                        "h-10 w-full justify-center px-0",
-                        isExpanded
-                          ? "justify-start gap-2 px-3"
-                          : "justify-center",
-                        isActivePathOrSubPath(`/p/${projectId}/analytics`) &&
-                          "bg-muted/75",
-                      )}
-                    >
-                      <ChartArea className="h-5 w-5 flex-shrink-0" />
-                      <span
-                        className={cn(
-                          "transition-opacity duration-300 ease-in-out",
-                          isExpanded ? "opacity-100" : "hidden opacity-0",
-                        )}
-                      >
-                        Analytics
-                      </span>
-                    </Button>
-                  </Link>
-                </TooltipTrigger>
-                {!isExpanded && (
-                  <TooltipContent side="right">Analytics</TooltipContent>
                 )}
               </Tooltip>
             </div>
@@ -242,11 +216,12 @@ export function ProjectSidebar({
                             isExpanded
                               ? "justify-start gap-2 px-3"
                               : "justify-center",
-                            isActiveBoardPath(board.id) && "bg-muted/75",
+                            isActiveBoardPath(board.id) &&
+                              "border-l-2 border-primary font-medium text-primary",
                           )}
                         >
                           <div
-                            className="h-4 w-4 flex-shrink-0 rounded-full"
+                            className="h-3 w-3 flex-shrink-0 rounded-none"
                             style={{ backgroundColor: board.color }}
                           />
                           <span
@@ -337,6 +312,39 @@ export function ProjectSidebar({
 
               <Tooltip disableHoverableContent={isExpanded}>
                 <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setNotificationsOpen(true)}
+                    className={cn(
+                      "h-10 w-full justify-center px-0",
+                      isExpanded ? "justify-start gap-2 px-3" : "justify-center",
+                    )}
+                  >
+                    <span className="relative flex-shrink-0">
+                      <Bell className="h-5 w-5" />
+                      {unreadCount > 0 && (
+                        <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+                          {unreadCount > 9 ? "9+" : unreadCount}
+                        </span>
+                      )}
+                    </span>
+                    <span
+                      className={cn(
+                        "transition-opacity duration-300 ease-in-out",
+                        isExpanded ? "opacity-100" : "hidden opacity-0",
+                      )}
+                    >
+                      Notifications
+                    </span>
+                  </Button>
+                </TooltipTrigger>
+                {!isExpanded && (
+                  <TooltipContent side="right">Notifications</TooltipContent>
+                )}
+              </Tooltip>
+
+              <Tooltip disableHoverableContent={isExpanded}>
+                <TooltipTrigger asChild>
                   <Link href={`/p/${projectId}/settings`}>
                     <Button
                       variant="ghost"
@@ -346,7 +354,7 @@ export function ProjectSidebar({
                           ? "justify-start gap-2 px-3"
                           : "justify-center",
                         isActivePathOrSubPath(`/p/${projectId}/settings`) &&
-                          "bg-muted/75",
+                          "border-l-2 border-primary font-medium text-primary",
                       )}
                     >
                       <Settings className="h-5 w-5 flex-shrink-0" />
@@ -393,6 +401,10 @@ export function ProjectSidebar({
           isExpanded ? "w-[240px]" : "w-[60px]",
         )}
         aria-hidden="true"
+      />
+      <Notifications
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
       />
     </div>
   );

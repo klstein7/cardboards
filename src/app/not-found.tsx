@@ -8,8 +8,8 @@ import { Button } from "~/components/ui/button";
 export default function NotFound() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center">
-      <div className="mb-6 rounded-full bg-blue-100 p-5">
-        <Search className="h-12 w-12 text-blue-600" />
+      <div className="mb-6 border border-primary/40 p-5">
+        <Search className="h-12 w-12 text-primary" strokeWidth={1.5} />
       </div>
       <h2 className="mb-3 text-3xl font-bold">Page Not Found</h2>
       <p className="mb-8 max-w-md text-base text-muted-foreground">

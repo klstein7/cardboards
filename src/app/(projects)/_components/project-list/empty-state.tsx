@@ -24,7 +24,7 @@ export function EmptyState() {
         <Card className="border-2 border-dashed">
           <CardHeader className="flex flex-row items-center justify-center pt-8">
             <motion.div
-              className="rounded-full bg-primary/10 p-6"
+              className="border border-primary/40 p-6"
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.1, duration: 0.5 }}
@@ -55,8 +55,8 @@ export function EmptyState() {
         </Card>
 
         <div className="mt-8 flex items-center gap-4">
-          <div className="flex-shrink-0 rounded-full bg-amber-100 p-2 dark:bg-amber-900/30">
-            <LightbulbIcon className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+          <div className="flex-shrink-0 border border-primary/40 p-2">
+            <LightbulbIcon className="h-6 w-6 text-primary" />
           </div>
           <p className="text-sm text-muted-foreground">
             <span className="font-medium text-foreground">Pro tip:</span>{" "}

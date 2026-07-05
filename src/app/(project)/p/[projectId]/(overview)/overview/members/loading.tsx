@@ -8,7 +8,7 @@ import { TabsContent } from "~/components/ui/tabs";
 export default function Loading() {
   return (
     <TabsContent value="members" className="space-y-6">
-      <Card className="rounded-lg border bg-card shadow-sm">
+      <Card className="rounded-lg border bg-card ">
         <SectionHeader
           title="Project Members"
           icon={UsersIcon}
@@ -30,7 +30,7 @@ export default function Loading() {
                 >
                   <div className="flex flex-1 items-center gap-6">
                     <div className="flex items-center gap-3">
-                      <Skeleton className="h-10 w-10 rounded-full" />
+                      <Skeleton className="h-10 w-10 rounded-none" />
                       <div className="space-y-1">
                         <Skeleton className="h-4 w-32" />
                         <Skeleton className="h-3 w-40" />

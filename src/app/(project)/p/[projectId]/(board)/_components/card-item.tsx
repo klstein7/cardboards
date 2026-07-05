@@ -202,7 +202,7 @@ export function CardItem({
           <Tooltip>
             <TooltipTrigger asChild>
               <button
-                className="flex h-7 w-7 items-center justify-center rounded-full bg-card/95 text-muted-foreground shadow-md transition-all duration-200 hover:bg-card hover:text-foreground hover:shadow-lg"
+                className="flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors duration-200 hover:border-foreground/60 hover:text-foreground"
                 onClick={async (e) => {
                   e.stopPropagation();
                   await setSelectedCardId(card.id.toString());
@@ -247,7 +247,7 @@ export function CardItem({
             {cardContent}
           </ContextMenuTrigger>
 
-          <ContextMenuContent className="min-w-[220px] rounded-lg border-border/80 p-2 shadow-lg backdrop-blur-sm">
+          <ContextMenuContent className="min-w-[220px] border-border p-2 backdrop-blur-sm">
             <ContextMenuItem
               className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
               onClick={() => setSelectedCardId(card.id.toString())}
@@ -297,7 +297,7 @@ export function CardItem({
             dragState.container,
           )}
 
-        <AlertDialogContent className="max-w-md rounded-lg shadow-lg backdrop-blur-sm">
+        <AlertDialogContent className="max-w-md backdrop-blur-sm">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete card</AlertDialogTitle>
             <AlertDialogDescription>

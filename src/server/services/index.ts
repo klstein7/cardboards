@@ -14,8 +14,6 @@
  * the established patterns for consistency.
  */
 
-export * from "./ai-insight.service";
-export * from "./analytics.service";
 export * from "./auth.service";
 export * from "./base.service";
 export * from "./board.service";

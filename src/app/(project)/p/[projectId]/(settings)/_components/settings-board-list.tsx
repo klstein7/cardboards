@@ -52,7 +52,7 @@ export function SettingsBoardList({ projectId }: SettingsBoardListProps) {
 
       {boards.data.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-4 py-8 text-center sm:px-6 sm:py-12">
-          <div className="mb-3 rounded-full bg-primary/10 p-2.5 sm:mb-4 sm:p-3">
+          <div className="mb-3 border border-primary/40 p-2.5 sm:mb-4 sm:p-3">
             <Kanban className="h-8 w-8 text-primary/70 sm:h-10 sm:w-10" />
           </div>
           <h3 className="text-base font-semibold sm:text-lg">

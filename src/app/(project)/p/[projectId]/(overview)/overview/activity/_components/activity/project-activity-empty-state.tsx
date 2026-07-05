@@ -4,10 +4,10 @@ import { Card, CardContent } from "~/components/ui/card";
 
 export function ProjectActivityEmptyState() {
   return (
-    <Card className="overflow-hidden border shadow-sm transition-all">
+    <Card className="overflow-hidden border  transition-all">
       <CardContent className="pt-6">
         <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="rounded-full bg-muted/80 p-3.5 shadow-sm">
+          <div className="border border-border p-3.5 ">
             <ActivityIcon className="h-7 w-7 text-muted-foreground/70" />
           </div>
           <div className="max-w-xs space-y-1.5">

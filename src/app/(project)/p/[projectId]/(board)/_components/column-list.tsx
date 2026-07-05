@@ -108,7 +108,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showLeftButton && (
         <button
           onClick={scrollLeft}
-          className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
+          className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background hover:border-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
           aria-label="Scroll left"
         >
           <ChevronLeft className="h-6 w-6" />
@@ -124,11 +124,11 @@ export function ColumnList({ boardId }: ColumnListProps) {
         )}
         tabIndex={0}
       >
-        <div className="flex h-full w-fit items-start gap-3 p-3 sm:gap-5 sm:p-6">
+        <div className="flex h-full w-fit items-stretch divide-x divide-border">
           {columns.data.map((column) => (
             <div
               key={column.id}
-              className="h-full w-[calc(100vw-24px)] flex-shrink-0 sm:w-[325px]"
+              className="h-full w-[calc(100vw-8px)] flex-shrink-0 sm:w-[300px]"
             >
               <ColumnItem column={column} />
             </div>
@@ -141,7 +141,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
       {showRightButton && (
         <button
           onClick={scrollRight}
-          className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center rounded-full bg-background/80 shadow-md hover:bg-background focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
+          className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background hover:border-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary sm:flex"
           aria-label="Scroll right"
         >
           <ChevronRight className="h-6 w-6" />

@@ -120,19 +120,19 @@ export function CreateCardFormWithAI({
           className="flex flex-col gap-5"
         >
           {/* Title section with enhanced styling */}
-          <div className="rounded-lg border border-border/30 bg-card p-3 shadow-sm sm:p-4">
+          <div className="rounded-lg border border-border/30 bg-card p-3  sm:p-4">
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="flex items-center gap-2 text-base font-medium">
-                    <div className="h-1.5 w-1.5 rounded-full bg-foreground/70"></div>
+                    <div className="h-1.5 w-1.5 bg-foreground/70"></div>
                     Title
                   </FormLabel>
                   <FormControl>
                     <Textarea
-                      className="mt-1.5 resize-none border-input/60 shadow-sm focus-visible:ring-primary/20"
+                      className="mt-1.5 resize-none border-input/60  focus-visible:ring-primary/20"
                       rows={2}
                       placeholder="e.g. Add a login with Google button to the login page"
                       {...field}
@@ -148,7 +148,7 @@ export function CreateCardFormWithAI({
           </div>
 
           {/* Collapsible Details Section with improved styling */}
-          <div className="overflow-hidden rounded-lg border border-border/30 bg-card shadow-sm transition-all duration-300">
+          <div className="overflow-hidden rounded-lg border border-border/30 bg-card  transition-all duration-300">
             <button
               type="button"
               className="flex w-full items-center justify-between p-3 text-sm font-medium transition-colors hover:bg-muted/30 sm:p-4"
@@ -162,7 +162,7 @@ export function CreateCardFormWithAI({
                 </div>
                 <span className="text-base">Description & Details</span>
               </div>
-              <span className="rounded-full bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
+              <span className="border border-border px-2 py-0.5 text-xs text-muted-foreground">
                 {showDetails ? "Hide" : "Show"}
               </span>
             </button>
@@ -175,7 +175,7 @@ export function CreateCardFormWithAI({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="flex items-center gap-2">
-                        <div className="h-1 w-1 rounded-full bg-foreground/70"></div>
+                        <div className="h-1 w-1 bg-foreground/70"></div>
                         Description
                       </FormLabel>
                       <FormControl>
@@ -207,7 +207,7 @@ export function CreateCardFormWithAI({
                       </div>
                       <span>Additional metadata</span>
                     </div>
-                    <span className="rounded-full bg-muted/50 px-2 py-0.5 text-xs text-muted-foreground">
+                    <span className="border border-border px-2 py-0.5 text-xs text-muted-foreground">
                       {showMetadata ? "Hide" : "Show"}
                     </span>
                   </button>
@@ -220,7 +220,7 @@ export function CreateCardFormWithAI({
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="flex items-center gap-2">
-                              <div className="h-1 w-1 rounded-full bg-foreground/70"></div>
+                              <div className="h-1 w-1 bg-foreground/70"></div>
                               Due date
                             </FormLabel>
                             <FormControl>
@@ -244,7 +244,7 @@ export function CreateCardFormWithAI({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="flex items-center gap-2">
-                                <div className="h-1 w-1 rounded-full bg-foreground/70"></div>
+                                <div className="h-1 w-1 bg-foreground/70"></div>
                                 Assignee
                               </FormLabel>
                               <FormControl>
@@ -266,7 +266,7 @@ export function CreateCardFormWithAI({
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel className="flex items-center gap-2">
-                                <div className="h-1 w-1 rounded-full bg-foreground/70"></div>
+                                <div className="h-1 w-1 bg-foreground/70"></div>
                                 Priority
                               </FormLabel>
                               <FormControl>
@@ -289,7 +289,7 @@ export function CreateCardFormWithAI({
                         render={({ field }) => (
                           <FormItem className="flex w-full flex-col items-start">
                             <FormLabel className="flex items-center gap-2">
-                              <div className="h-1 w-1 rounded-full bg-foreground/70"></div>
+                              <div className="h-1 w-1 bg-foreground/70"></div>
                               Labels
                             </FormLabel>
                             <FormControl className="w-full">
@@ -340,7 +340,7 @@ export function CreateCardFormWithAI({
             <Button
               type="submit"
               isLoading={createCardMutation.isPending}
-              className="bg-primary/90 px-5 font-medium shadow-sm hover:bg-primary sm:px-6"
+              className="bg-primary/90 px-5 font-medium  hover:bg-primary sm:px-6"
             >
               Create
             </Button>

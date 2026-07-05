@@ -66,7 +66,7 @@ export function CreateInvitationButton() {
       onClick={handleInvite}
       className={cn(
         "transition-all duration-300",
-        copied && "bg-green-600 hover:bg-green-700",
+        copied && "bg-primary text-primary-foreground hover:bg-primary/90",
       )}
       disabled={copied || createInvitationMutation.isPending}
     >

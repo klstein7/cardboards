@@ -8,13 +8,13 @@ export function CardDetailsSkeleton() {
       {/* Header skeleton */}
       <div className="flex items-center gap-2 pb-4">
         <Skeleton className="h-6 w-20 rounded-md" />
-        <Skeleton className="h-6 w-28 rounded-full" />
+        <Skeleton className="h-6 w-28 rounded-none" />
       </div>
       <Skeleton className="mb-6 h-5 w-48" />
 
       <div className="flex flex-col gap-6">
         {/* Title skeleton */}
-        <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+        <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
           <div className="flex flex-col gap-1">
             <Skeleton className="h-4 w-12" />
             <Skeleton className="h-8 w-full" />
@@ -22,7 +22,7 @@ export function CardDetailsSkeleton() {
         </div>
 
         {/* Description skeleton */}
-        <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+        <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
           <div className="flex flex-col gap-1">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-24 w-full" />
@@ -30,7 +30,7 @@ export function CardDetailsSkeleton() {
         </div>
 
         {/* Metadata and labels skeleton */}
-        <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+        <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
           {/* Metadata header */}
           <Skeleton className="mb-3 h-5 w-16" />
 

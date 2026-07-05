@@ -110,7 +110,7 @@ export function ProjectList() {
       {/* Content Area */}
       <div className="mt-8">
         {hasFilters && filteredProjects.length === 0 ? (
-          <div className="grid place-items-center rounded-lg border border-border bg-card py-16 shadow-sm">
+          <div className="grid place-items-center border border-border py-16">
             <div className="flex flex-col items-center px-4 text-center">
               <h3 className="text-lg font-semibold text-foreground">
                 No matching projects
@@ -121,7 +121,7 @@ export function ProjectList() {
               </p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-5 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="inline-flex h-10 items-center justify-center border border-primary bg-transparent px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Clear search
               </button>
@@ -133,11 +133,11 @@ export function ProjectList() {
             {hasFavorites && (
               <section className="space-y-4">
                 <div className="flex items-center gap-2 border-b border-border py-2">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                  <Star className="h-4 w-4 fill-primary text-primary" />
                   <h3 className="text-sm font-semibold text-foreground">
                     Favorites
                   </h3>
-                  <div className="rounded-full bg-muted/80 px-2 py-0.5 text-xs font-medium text-foreground">
+                  <div className="border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
                     {sortedFavorites.length}
                   </div>
                 </div>
@@ -157,7 +157,7 @@ export function ProjectList() {
                 <h3 className="text-sm font-semibold text-foreground">
                   {hasFavorites ? "All Projects" : "Projects"}
                 </h3>
-                <div className="rounded-full bg-muted/80 px-2 py-0.5 text-xs font-medium text-foreground">
+                <div className="border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
                   {sortedRegulars.length + (!hasFilters ? 1 : 0)}{" "}
                   {/* +1 for create card */}
                 </div>

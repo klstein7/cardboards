@@ -20,8 +20,8 @@ export default function Error({ error, reset }: ErrorProps) {
 
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center">
-      <div className="mb-6 rounded-full bg-red-100 p-5">
-        <AlertOctagon className="h-12 w-12 text-red-600" />
+      <div className="mb-6 border border-destructive/40 p-5">
+        <AlertOctagon className="h-12 w-12 text-destructive" strokeWidth={1.5} />
       </div>
       <h2 className="mb-3 text-3xl font-bold">Something went wrong!</h2>
       <p className="mb-8 max-w-md text-base text-muted-foreground">
@@ -30,7 +30,7 @@ export default function Error({ error, reset }: ErrorProps) {
           <>
             <span className="mt-2 block text-sm">{error.message}</span>
             {error.digest && (
-              <span className="mt-2 block text-sm text-gray-500">
+              <span className="mt-2 block text-sm text-muted-foreground">
                 Error ID: {error.digest}
               </span>
             )}

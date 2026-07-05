@@ -23,7 +23,7 @@ export function CardDetailsTitle({
   const titleRef = useRef<HTMLTextAreaElement>(null);
 
   return (
-    <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+    <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
       <div className="flex flex-col gap-1">
         <span className="text-xs font-medium text-muted-foreground">Title</span>
         {isEditing ? (

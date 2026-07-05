@@ -72,7 +72,7 @@ export function BoardSelector({
               className={cn("flex gap-2 py-1.5", isActive && "font-medium")}
             >
               <div
-                className="h-3 w-3 shrink-0 rounded-full"
+                className="h-3 w-3 shrink-0 rounded-none"
                 style={{ backgroundColor: board.color }}
               />
               <span className="truncate">{board.name}</span>

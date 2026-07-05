@@ -24,7 +24,7 @@ export default async function ProjectMembersPage({
 
   return (
     <TabsContent value="members" className="space-y-6">
-      <Card className="rounded-lg border bg-card shadow-sm">
+      <Card className="rounded-lg border bg-card ">
         <SectionHeader
           title="Project Members"
           icon={UsersIcon}

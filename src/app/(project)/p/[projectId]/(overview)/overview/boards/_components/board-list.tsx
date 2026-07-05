@@ -171,7 +171,7 @@ export function BoardList({ projectId }: BoardListProps) {
           <EmptyState projectId={projectId} />
         )
       ) : (
-        <div className="grid gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        <div className="divide-y divide-border border-t border-border">
           {sortedBoards.map((board) => (
             <BoardItem key={board.id} projectId={projectId} board={board} />
           ))}

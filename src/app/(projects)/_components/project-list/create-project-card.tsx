@@ -9,10 +9,10 @@ export function CreateProjectCard() {
   return (
     <CreateProjectDialog>
       <DialogTrigger asChild>
-        <Card className="group h-full cursor-pointer border-dashed border-border/60 bg-background shadow-sm transition-all duration-150 hover:border-primary/40 hover:shadow-md">
+        <Card className="group h-full cursor-pointer border-dashed border-border bg-transparent transition-colors duration-150 hover:border-primary/50">
           <CardContent className="flex h-full flex-col items-center justify-center p-5">
             <div className="flex flex-col items-center gap-3 text-center">
-              <div className="rounded-full bg-primary/5 p-2.5 transition-colors group-hover:bg-primary/10">
+              <div className="border border-primary/40 p-2.5 transition-colors group-hover:border-primary">
                 <Plus className="h-5 w-5 text-primary" />
               </div>
               <div className="space-y-1">

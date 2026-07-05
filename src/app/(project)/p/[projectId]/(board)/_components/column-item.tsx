@@ -18,7 +18,6 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { type Column } from "~/app/(project)/_types";
-import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -186,11 +185,9 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card/30 shadow-sm transition-all duration-200",
-        isDropping &&
-          "ring-2 ring-primary ring-offset-2 ring-offset-background",
-        column.isCompleted &&
-          "border-success/50 bg-success/5 dark:bg-success/3",
+        "flex h-full w-full flex-col overflow-hidden transition-all duration-200",
+        isDropping && "bg-primary/[0.04]",
+        column.isCompleted && "bg-primary/5",
         justMoved && "animate-column-moved",
       )}
       style={{
@@ -209,38 +206,27 @@ export function ColumnItem({ column }: ColumnItemProps) {
       }}
       aria-describedby={`${column.name}-column`}
     >
-      <div
-        className={cn(
-          "flex items-center justify-between border-b p-3",
-          !column.isCompleted && "bg-card/50",
-          column.isCompleted &&
-            "border-success/40 bg-success/10 dark:bg-success/15",
-        )}
-      >
+      <div className="flex items-center justify-between px-3 pb-3 pt-4">
         <div className="flex items-center gap-2">
           {column.isCompleted && (
-            <div className="bg-success/20 dark:bg-success/25 flex h-6 w-6 items-center justify-center rounded-full ring-1 ring-green-500/30">
-              <CheckCircle2 className="h-3.5 w-3.5 text-green-600 dark:text-green-500" />
-            </div>
+            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
           )}
           <span
             className={cn(
-              "font-medium text-foreground",
-              column.isCompleted && "text-success dark:text-success/90",
+              "text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground",
+              column.isCompleted && "text-primary",
             )}
           >
             {column.name}
           </span>
-          <Badge
-            variant={column.isCompleted ? "outline" : "secondary"}
+          <span
             className={cn(
-              "ml-1 text-xs",
-              column.isCompleted &&
-                "bg-success/10 dark:bg-success/15 border-green-500/30 text-green-600 dark:text-green-500",
+              "font-mono text-[11px] text-primary",
+              column.isCompleted && "text-primary",
             )}
           >
             {cardCount}
-          </Badge>
+          </span>
         </div>
 
         {isAdmin && (
@@ -328,18 +314,21 @@ export function ColumnItem({ column }: ColumnItemProps) {
         ref={cardListRef}
         className={cn(
           "flex-1 overflow-y-auto p-2",
-          column.isCompleted && "bg-success/5 dark:bg-success/10",
+          column.isCompleted && "bg-primary/5",
         )}
       >
         <CardList columnId={column.id} isCompleted={column.isCompleted} />
       </div>
 
       {!column.isCompleted && (
-        <div className="border-t p-2">
+        <div className="px-3 pb-3 pt-1">
           <CreateCardDialog
             trigger={
-              <Button variant="ghost" className="w-full justify-start">
-                <Plus className="mr-2 h-4 w-4" />
+              <Button
+                variant="ghost"
+                className="h-8 w-full justify-start gap-1.5 px-1 text-sm text-muted-foreground hover:bg-transparent hover:text-primary"
+              >
+                <Plus className="h-3.5 w-3.5" />
                 <span>Add card</span>
               </Button>
             }
@@ -348,13 +337,9 @@ export function ColumnItem({ column }: ColumnItemProps) {
         </div>
       )}
       {column.isCompleted && (
-        <div className="bg-success/10 dark:bg-success/15 border-t border-green-500/30 p-2">
-          <div className="flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-green-600 dark:text-green-500">
-            <div className="bg-success/20 dark:bg-success/25 flex h-5 w-5 items-center justify-center rounded-full">
-              <CheckCircle2 className="h-3 w-3" />
-            </div>
-            <span>Completed Column</span>
-          </div>
+        <div className="flex items-center gap-1.5 px-3 pb-3 pt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
+          <CheckCircle2 className="h-3 w-3" />
+          <span>Completed</span>
         </div>
       )}
     </div>

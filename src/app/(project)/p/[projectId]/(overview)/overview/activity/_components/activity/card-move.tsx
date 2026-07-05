@@ -30,7 +30,7 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ",
             getActionColor(item.action),
           )}
         >
@@ -51,7 +51,7 @@ export function CardMove({ item }: CardMoveProps) {
       <TooltipProvider delayDuration={300}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="mx-1 inline-flex items-center gap-1.5 break-all rounded-md bg-muted/70 px-2 py-0.5 text-xs font-medium shadow-sm transition-colors group-hover:bg-muted/90">
+            <span className="mx-1 inline-flex items-center gap-1.5 break-all rounded-md bg-muted/70 px-2 py-0.5 text-xs font-medium  transition-colors group-hover:bg-muted/90">
               <FileText className="h-3 w-3 shrink-0 opacity-80" />
               <span className="line-clamp-1">{parsedChanges.cardTitle}</span>
             </span>
@@ -75,7 +75,7 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ",
             getActionColor(item.action),
           )}
         >
@@ -86,7 +86,7 @@ export function CardMove({ item }: CardMoveProps) {
         {hasCardTitle && renderCardTitle()} within{" "}
         <Badge
           variant="outline"
-          className="border-border/70 font-normal shadow-sm transition-colors group-hover:border-border/90"
+          className="border-border/70 font-normal  transition-colors group-hover:border-border/90"
         >
           {parsedChanges.from?.columnName ?? "a column"}
         </Badge>
@@ -100,7 +100,7 @@ export function CardMove({ item }: CardMoveProps) {
       <span>
         <span
           className={cn(
-            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
+            "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ",
             getActionColor(item.action),
           )}
         >
@@ -111,14 +111,14 @@ export function CardMove({ item }: CardMoveProps) {
         {hasCardTitle && renderCardTitle()} from{" "}
         <Badge
           variant="outline"
-          className="border-border/70 font-normal shadow-sm transition-colors group-hover:border-border/90"
+          className="border-border/70 font-normal  transition-colors group-hover:border-border/90"
         >
           {parsedChanges.from.columnName}
         </Badge>{" "}
         <ArrowRight className="mx-1 inline h-3.5 w-3.5 text-muted-foreground/70" />{" "}
         <Badge
           variant="outline"
-          className="border-border/70 font-normal shadow-sm transition-colors group-hover:border-border/90"
+          className="border-border/70 font-normal  transition-colors group-hover:border-border/90"
         >
           {parsedChanges.to.columnName}
         </Badge>
@@ -131,7 +131,7 @@ export function CardMove({ item }: CardMoveProps) {
     <span>
       <span
         className={cn(
-          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium shadow-sm",
+          "inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ",
           getActionColor(item.action),
         )}
       >

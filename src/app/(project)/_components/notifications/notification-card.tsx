@@ -45,8 +45,8 @@ export function NotificationCard({
     <Card
       className={cn(
         "motion-safe:animate-fadeIn group relative cursor-pointer select-none overflow-hidden border",
-        "border-border/40 bg-card transition-all duration-200 hover:bg-muted/50 dark:border-neutral-700/60 dark:hover:bg-muted/30",
-        isUnread ? "bg-card" : "bg-card/80 dark:bg-neutral-800/70", // Slightly different background for read
+        "border-border/40 bg-card transition-all duration-200 hover:bg-muted/50",
+        isUnread ? "bg-card" : "bg-card/70", // Slightly dimmer background once read
       )}
       style={{
         animationDelay,
@@ -91,7 +91,7 @@ export function NotificationCard({
             <Button
               variant="ghost"
               size="icon"
-              className="h-6 w-6 rounded-full"
+              className="h-6 w-6"
               onClick={(e) => {
                 e.stopPropagation();
                 handleMarkAsRead();
@@ -104,7 +104,7 @@ export function NotificationCard({
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+            className="h-6 w-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
             onClick={handleDelete}
             title="Delete notification"
           >
@@ -118,17 +118,17 @@ export function NotificationCard({
 
 export function NotificationCardSkeleton() {
   return (
-    <Card className="border-border/40 bg-card/80 dark:border-neutral-700/60 dark:bg-neutral-800/70">
+    <Card className="border-border/40 bg-card/80">
       <div className="flex items-start gap-3 p-3">
         <div className="flex-1 space-y-2">
-          <Skeleton className="h-4 w-3/4 rounded" />
-          <Skeleton className="h-3 w-full rounded" />
-          <Skeleton className="h-3 w-1/2 rounded" />
+          <Skeleton className="h-4 w-3/4" />
+          <Skeleton className="h-3 w-full" />
+          <Skeleton className="h-3 w-1/2" />
         </div>
         <div className="flex shrink-0 flex-col gap-1 opacity-0">
           {/* Keep structure for spacing, but invisible */}
-          <Skeleton className="h-6 w-6 rounded-full" />
-          <Skeleton className="h-6 w-6 rounded-full" />
+          <Skeleton className="h-6 w-6" />
+          <Skeleton className="h-6 w-6" />
         </div>
       </div>
     </Card>

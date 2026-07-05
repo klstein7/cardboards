@@ -234,7 +234,7 @@ export function ProjectMembersDataTable({
               <Filter className="h-4 w-4" />
               Filters
               {activeFiltersCount > 0 && (
-                <span className="ml-1 rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
+                <span className="ml-1 border border-primary/40 px-1.5 py-0.5 font-mono text-xs text-primary">
                   {activeFiltersCount}
                 </span>
               )}

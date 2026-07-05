@@ -39,7 +39,7 @@ export function ProjectClientLayout({
           isSidebarExpanded ? "sm:ml-[240px]" : "sm:ml-[60px]",
         )}
       >
-        <div className="sticky top-0 z-10 w-full bg-background shadow-sm">
+        <div className="sticky top-0 z-10 w-full border-b border-border bg-background">
           <DynamicHeader projectId={projectId} projectName={project.name} />
         </div>
         <MobileNav projectId={projectId} />

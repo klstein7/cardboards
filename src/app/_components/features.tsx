@@ -1,64 +1,88 @@
-import { Bot, ClipboardList, Users } from "lucide-react";
-
 import { FadeIn } from "~/components/animations/fade-in";
-
-const features = [
-  {
-    title: "Kanban Boards",
-    description:
-      "Create and customize boards for different projects. Organize tasks with drag-and-drop simplicity.",
-    icon: <ClipboardList className="h-8 w-8 text-primary" />,
-  },
-  {
-    title: "Team Collaboration",
-    description:
-      "Invite team members, assign tasks, and track progress together in real-time.",
-    icon: <Users className="h-8 w-8 text-primary" />,
-  },
-  {
-    title: "AI-Powered",
-    description:
-      "Generate tasks and organize your work with our AI assistant, streamlining your project planning.",
-    icon: <Bot className="h-8 w-8 text-primary" />,
-  },
-] as const;
 
 export function FeaturesSection() {
   return (
     <section
-      className="w-full bg-gradient-to-b from-background to-muted/10 py-24"
+      id="features"
+      className="w-full py-24"
       aria-labelledby="features-heading"
     >
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
-        <FadeIn className="mb-16 text-center">
-          <h2
-            id="features-heading"
-            className="bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-3xl font-bold tracking-tight text-transparent sm:text-4xl"
-          >
-            Everything you need to manage projects
-          </h2>
-          <p className="mt-4 text-muted-foreground">
-            Powerful features to help your team succeed
-          </p>
-        </FadeIn>
+      <FadeIn>
+        <h2
+          id="features-heading"
+          className="text-3xl font-semibold tracking-tight sm:text-4xl"
+        >
+          Everything it does.
+        </h2>
 
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((feature) => (
-            <FadeIn
-              key={feature.title}
-              className="group flex flex-col gap-3 rounded-xl border p-6 transition-all hover:scale-[1.03] hover:border-primary/30 hover:bg-primary/5 hover:shadow-lg"
-            >
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  {feature.icon}
+        <div className="mt-8 grid gap-px bg-border md:grid-cols-3">
+          <div className="bg-background p-8 md:col-span-2">
+            <h3 className="text-xl font-semibold tracking-tight">
+              Realtime by default
+            </h3>
+            <p className="mt-2 max-w-sm leading-relaxed text-muted-foreground">
+              Every drag, edit, and comment lands on every screen the moment
+              it happens. The board is the standup.
+            </p>
+            <div className="mt-6 grid max-w-lg gap-2 sm:grid-cols-2">
+              <div className="border border-border border-l-2 border-l-destructive p-3">
+                <p className="text-[13px] leading-snug text-card-foreground">
+                  Fix drag preview offset in Safari
+                </p>
+                <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-muted-foreground">
+                  <span>Bug</span>
+                  <span>DO</span>
                 </div>
-                <h3 className="text-xl font-semibold">{feature.title}</h3>
               </div>
-              <p className="text-muted-foreground">{feature.description}</p>
-            </FadeIn>
-          ))}
+              <div className="border border-border border-l-2 border-l-muted-foreground p-3">
+                <p className="text-[13px] leading-snug text-card-foreground">
+                  Live column reorder for all
+                </p>
+                <div className="mt-2 flex items-center justify-between font-mono text-[10px] text-muted-foreground">
+                  <span>Feature</span>
+                  <span>YT</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-background p-8">
+            <h3 className="text-xl font-semibold tracking-tight">
+              Draft a board with AI
+            </h3>
+            <p className="mt-2 leading-relaxed text-muted-foreground">
+              Describe the work in a sentence and get columns and cards to
+              start from.
+            </p>
+            <p className="mt-6 border border-border px-3 py-2 font-mono text-xs text-muted-foreground">
+              &ldquo;Plan a product launch&rdquo;
+            </p>
+          </div>
+
+          <div className="bg-background p-8">
+            <h3 className="text-xl font-semibold tracking-tight">
+              Invite with one link
+            </h3>
+            <p className="mt-2 leading-relaxed text-muted-foreground">
+              Share a link and the whole team is on the board.
+            </p>
+            <p className="mt-6 inline-block border border-border px-3 py-2 font-mono text-xs text-muted-foreground">
+              cardboards.app/i/new-team
+            </p>
+          </div>
+
+          <div className="bg-background p-8 md:col-span-2">
+            <div className="h-0.5 w-10 bg-primary" />
+            <h3 className="mt-5 text-xl font-semibold tracking-tight">
+              No setup
+            </h3>
+            <p className="mt-2 max-w-md leading-relaxed text-muted-foreground">
+              Name a few columns and you are running. No workflow builder, no
+              onboarding call, no step two.
+            </p>
+          </div>
         </div>
-      </div>
+      </FadeIn>
     </section>
   );
 }

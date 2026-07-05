@@ -8,7 +8,7 @@ import { TabsContent } from "~/components/ui/tabs";
 export default function Loading() {
   return (
     <TabsContent value="activity" className="space-y-4">
-      <Card className="overflow-hidden border shadow-sm transition-all hover:shadow">
+      <Card className="overflow-hidden border  transition-all ">
         <SectionHeader title="Project Activity" icon={ActivityIcon} />
         <CardContent className="p-0">
           <div>
@@ -17,7 +17,7 @@ export default function Loading() {
                 key={i}
                 className="flex items-start gap-4 border-b p-4 last:border-b-0"
               >
-                <Skeleton className="h-10 w-10 rounded-full" />
+                <Skeleton className="h-10 w-10 rounded-none" />
                 <div className="flex-1 space-y-2 pt-0.5">
                   <Skeleton className="h-4 w-full max-w-md" />
                   <Skeleton className="h-3 w-[100px]" />

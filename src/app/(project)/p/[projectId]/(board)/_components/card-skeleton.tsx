@@ -35,7 +35,7 @@ export function CardSkeleton() {
               <Skeleton className="h-4 w-4" />
               <Skeleton className="h-3 w-12" />
             </div>
-            <Skeleton className="h-7 w-7 rounded-full" />
+            <Skeleton className="h-7 w-7 rounded-none" />
           </div>
         </div>
       </div>

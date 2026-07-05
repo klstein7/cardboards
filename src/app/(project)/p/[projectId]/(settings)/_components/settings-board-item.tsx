@@ -114,7 +114,7 @@ export function SettingsBoardItem({ board }: SettingsBoardItemProps) {
         <div className="flex cursor-pointer items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3">
           <div className="flex flex-1 items-center gap-2 overflow-hidden sm:gap-3">
             <div
-              className="h-3 w-3 shrink-0 rounded-full sm:h-4 sm:w-4"
+              className="h-3 w-3 shrink-0 rounded-none sm:h-4 sm:w-4"
               style={{ backgroundColor: board.color }}
             />
             <span className="truncate font-medium">{board.name}</span>

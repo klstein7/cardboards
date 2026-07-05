@@ -16,10 +16,10 @@ export function SectionHeader({
 }: SectionHeaderProps) {
   return (
     <>
-      <CardHeader className="bg-muted/40 px-4 py-4 sm:px-6">
+      <CardHeader className="px-4 py-4 sm:px-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="rounded-full bg-primary/10 p-1.5 shadow-sm">
+            <div className="border-l-2 border-primary pl-2.5">
               <Icon className="h-4 w-4 text-primary" />
             </div>
             <CardTitle>{title}</CardTitle>

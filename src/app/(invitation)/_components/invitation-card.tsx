@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDistanceToNow } from "date-fns";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Mail } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -51,8 +51,8 @@ export default function InvitationCard({ invitationId }: InvitationCardProps) {
     <Card className="w-full max-w-md">
       <CardHeader>
         <div className="space-y-2 text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-            <span className="text-2xl">✉️</span>
+          <div className="mx-auto flex h-16 w-16 items-center justify-center border border-primary/40">
+            <Mail className="h-7 w-7 text-primary" strokeWidth={1.5} />
           </div>
           <h1 className="text-2xl font-bold text-foreground">
             You&apos;re Invited!
@@ -64,8 +64,8 @@ export default function InvitationCard({ invitationId }: InvitationCardProps) {
       </CardHeader>
       <CardContent className="space-y-4">
         {!accepted && (
-          <div className="rounded-lg bg-secondary p-4">
-            <p className="text-center text-sm text-secondary-foreground">
+          <div className="border border-border p-4">
+            <p className="text-center text-sm text-muted-foreground">
               Click below to join and get started
             </p>
           </div>
@@ -73,7 +73,7 @@ export default function InvitationCard({ invitationId }: InvitationCardProps) {
 
         {!accepted ? (
           <Button
-            className="w-full"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
             onClick={handleAccept}
             isLoading={acceptInvitationMutation.isPending}
           >
@@ -81,8 +81,8 @@ export default function InvitationCard({ invitationId }: InvitationCardProps) {
           </Button>
         ) : (
           <div className="space-y-2 text-center">
-            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-              <Check className="h-6 w-6 text-primary" />
+            <div className="mx-auto flex h-12 w-12 items-center justify-center border border-primary/40">
+              <Check className="h-6 w-6 text-primary" strokeWidth={1.5} />
             </div>
             <p className="text-sm text-muted-foreground">
               Invitation accepted!

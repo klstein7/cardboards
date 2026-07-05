@@ -53,12 +53,12 @@ export function CardDetailsCommentItem({ comment }: { comment: CardComment }) {
 
   return (
     <AlertDialog>
-      <div className="relative overflow-hidden rounded-md border border-border/40 bg-card/30 p-4 shadow-md transition-all hover:bg-card/50">
+      <div className="relative overflow-hidden rounded-md border border-border/40 bg-card/30 p-4  transition-all hover:bg-card/50">
         <div className="absolute inset-y-0 left-0 w-1 bg-primary/40"></div>
 
         <div className="flex items-start justify-between gap-3">
           <div className="flex w-full items-start gap-3">
-            <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+            <Avatar className="h-9 w-9 border-2 border-background ">
               <AvatarImage
                 src={comment.projectUser.user.imageUrl ?? undefined}
               />

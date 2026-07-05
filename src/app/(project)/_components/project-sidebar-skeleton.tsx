@@ -40,7 +40,7 @@ export function ProjectSidebarSkeleton() {
           </div>
           <Skeleton className="h-10 w-full rounded-md" />
           <div className="flex justify-center py-2 lg:justify-start">
-            <Skeleton className="h-8 w-8 rounded-full" />
+            <Skeleton className="h-8 w-8" />
           </div>
         </div>
       </div>

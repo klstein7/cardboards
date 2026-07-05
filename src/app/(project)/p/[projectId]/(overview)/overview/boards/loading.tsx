@@ -8,7 +8,7 @@ import { TabsContent } from "~/components/ui/tabs";
 export default function Loading() {
   return (
     <TabsContent value="boards" className="space-y-4">
-      <Card className="rounded-lg border bg-card shadow-sm">
+      <Card className="rounded-lg border bg-card ">
         <SectionHeader title="Project Boards" icon={KanbanIcon} />
         <CardContent className="p-6">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">

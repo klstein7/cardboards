@@ -1,8 +1,5 @@
 "use client";
 
-import { FileText, LayoutGridIcon, UsersIcon } from "lucide-react";
-
-import { Card, CardContent } from "~/components/ui/card";
 import {
   useBoardCountByProjectId,
   useCardCountByProjectId,
@@ -22,49 +19,43 @@ export function ProjectStats({ projectId, className }: ProjectStatsProps) {
 
   return (
     <div
-      className={cn("mb-6 grid grid-cols-2 gap-4 md:grid-cols-3", className)}
+      className={cn(
+        "grid grid-cols-1 gap-x-8 gap-y-8 sm:grid-cols-3",
+        className,
+      )}
     >
-      <StatCard
-        icon={<LayoutGridIcon className="h-5 w-5 text-primary" />}
-        value={boardCount.data ?? 0}
-        label="Active boards"
-      />
-      <StatCard
-        icon={<UsersIcon className="h-5 w-5 text-blue-500" />}
-        value={memberCount.data ?? 0}
-        label="Team members"
-      />
-      <StatCard
-        icon={<FileText className="h-5 w-5 text-purple-500" />}
-        value={cardCount.data ?? 0}
-        label="Total cards"
-      />
+      <Stat label="Active boards" value={boardCount.data ?? 0} />
+      <Stat label="Team members" value={memberCount.data ?? 0} />
+      <Stat label="Total cards" value={cardCount.data ?? 0} accent />
     </div>
   );
 }
 
-interface StatCardProps {
-  icon: React.ReactNode;
+interface StatProps {
   label: string;
   value: number;
+  accent?: boolean;
 }
 
-function StatCard({ icon, label, value }: StatCardProps) {
+function Stat({ label, value, accent }: StatProps) {
   return (
-    <Card className="bg-card/50 backdrop-blur-sm transition-all duration-200 hover:shadow-md">
-      <CardContent className="flex p-6">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted/50">
-          {icon}
-        </div>
-        <div className="ml-4 flex flex-col justify-center">
-          <span className="text-sm font-medium text-muted-foreground">
-            {label}
-          </span>
-          <span className="mt-0.5 text-2xl font-bold">
-            {value.toLocaleString()}
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+    <div
+      className={cn(
+        "border-t-2 pt-5",
+        accent ? "border-primary" : "border-border",
+      )}
+    >
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-2 text-4xl font-extralight tracking-tight tabular-nums md:text-5xl",
+          accent && "text-primary",
+        )}
+      >
+        {value.toLocaleString()}
+      </p>
+    </div>
   );
 }

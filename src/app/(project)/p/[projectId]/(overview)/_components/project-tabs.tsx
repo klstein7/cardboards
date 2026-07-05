@@ -24,10 +24,9 @@ export function ProjectTabs({
 
   return (
     <Tabs value={value} className={cn("w-full space-y-4", className)}>
-      <TabsList className="mb-4 w-full max-w-md">
+      <TabsList className="mb-4 w-full">
         <TabsTrigger
           value="boards"
-          className="flex-1"
           onClick={() =>
             router.push(`/p/${projectId}/overview/boards`, { scroll: false })
           }
@@ -36,7 +35,6 @@ export function ProjectTabs({
         </TabsTrigger>
         <TabsTrigger
           value="activity"
-          className="flex-1"
           onClick={() =>
             router.push(`/p/${projectId}/overview/activity`, { scroll: false })
           }
@@ -45,7 +43,6 @@ export function ProjectTabs({
         </TabsTrigger>
         <TabsTrigger
           value="members"
-          className="flex-1"
           onClick={() =>
             router.push(`/p/${projectId}/overview/members`, { scroll: false })
           }

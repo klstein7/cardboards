@@ -21,7 +21,7 @@ export function ColorPicker({
   return (
     <div
       className={cn(
-        "flex flex-wrap gap-1.5 rounded-md bg-secondary/10 p-3",
+        "flex flex-wrap gap-1.5 border border-border p-3",
         disabled && "cursor-not-allowed opacity-50",
         className,
       )}
@@ -31,7 +31,7 @@ export function ColorPicker({
           key={name}
           type="button"
           className={cn(
-            "relative h-7 w-7 rounded-full transition-transform hover:scale-105 active:scale-95",
+            "relative h-7 w-7 rounded-none transition-transform hover:scale-105 active:scale-95",
             color === hex && "ring-2 ring-offset-2",
             disabled && "cursor-not-allowed hover:scale-100 active:scale-100",
           )}

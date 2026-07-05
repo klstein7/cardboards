@@ -11,7 +11,7 @@ interface CardDragPreviewProps {
 
 export function CardDragPreview({ card, isCompleted }: CardDragPreviewProps) {
   return (
-    <div className="w-[325px] max-w-[325px] rotate-1 transform opacity-95 shadow-xl">
+    <div className="w-[325px] max-w-[325px] rotate-1 transform opacity-95 ">
       <CardBase
         card={card}
         isDragging={true}

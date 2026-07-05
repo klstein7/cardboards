@@ -45,7 +45,7 @@ function CardTitle({ title }: { title: string }) {
     <TooltipProvider delayDuration={300}>
       <Tooltip>
         <TooltipTrigger asChild>
-          <span className="mx-1 inline-flex items-center gap-1.5 break-all rounded-md bg-muted/70 px-2.5 py-0.5 text-xs font-medium shadow-sm transition-all duration-200 ease-in-out group-hover:bg-muted group-hover:shadow">
+          <span className="mx-1 inline-flex items-center gap-1.5 break-all rounded-md bg-muted/70 px-2.5 py-0.5 text-xs font-medium  transition-all duration-200 ease-in-out group-hover:bg-muted ">
             <FileText className="h-3 w-3 shrink-0 text-primary/70 opacity-80 transition-colors duration-200 ease-in-out group-hover:text-primary/90" />
             <span className="line-clamp-1">{title}</span>
           </span>
@@ -75,8 +75,8 @@ export function ActivityItem({ item }: ActivityItemProps) {
   const ActionIcon = actionIcons[item.action];
 
   return (
-    <div className="group flex items-start gap-4 border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:bg-muted/50 hover:shadow-sm">
-      <Avatar className="h-10 w-10 shrink-0 border border-border/50 shadow-sm transition-all duration-200 ease-in-out group-hover:border-border/80 group-hover:shadow-md">
+    <div className="group flex items-start gap-4 border-b p-4 transition-all duration-200 ease-in-out last:border-b-0 hover:bg-muted/50 ">
+      <Avatar className="h-10 w-10 shrink-0 border border-border/50  transition-all duration-200 ease-in-out group-hover:border-border/80 ">
         <AvatarImage
           src={user?.imageUrl ?? undefined}
           alt={user?.name ?? "User"}
@@ -99,7 +99,7 @@ export function ActivityItem({ item }: ActivityItemProps) {
               <span className="inline-flex flex-wrap items-center gap-1.5">
                 <span
                   className={cn(
-                    "inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium shadow-sm transition-all duration-200 ease-in-out group-hover:shadow",
+                    "inline-flex items-center gap-1 rounded-md px-2 py-0.5 font-medium  transition-all duration-200 ease-in-out ",
                     actionColor,
                   )}
                 >

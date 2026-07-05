@@ -82,7 +82,7 @@ export function BaseHeader({ items, actions }: BaseHeaderProps) {
                   <div className="flex items-center gap-1">
                     {item?.color && (
                       <div
-                        className="h-2 w-2 shrink-0 rounded-full"
+                        className="h-2 w-2 shrink-0 rounded-none"
                         style={{ backgroundColor: item.color }}
                       />
                     )}

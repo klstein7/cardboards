@@ -1,5 +1,4 @@
 // src/app/(project)/_types.ts
-import { type ChartConfig } from "~/components/ui/chart";
 import { type RouterOutputs } from "~/trpc/init";
 
 export type Card = RouterOutputs["card"]["list"][number];
@@ -10,14 +9,6 @@ export type Board = RouterOutputs["board"]["list"][number];
 export type Project = RouterOutputs["project"]["list"][number];
 export type ProjectDetail = RouterOutputs["project"]["get"];
 export type ProjectUser = RouterOutputs["projectUser"]["list"][number];
-
-export type AnalyticsData = {
-  config: ChartConfig;
-  series: Array<{
-    name: string;
-    data: Array<{ name: string; value: number }>;
-  }>;
-};
 
 export type Position = "first" | "last" | "middle" | "only";
 

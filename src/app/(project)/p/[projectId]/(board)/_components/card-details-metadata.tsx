@@ -36,7 +36,7 @@ export function CardDetailsMetadata({
   onPriorityChange,
 }: CardDetailsMetadataProps) {
   return (
-    <div className="rounded-lg border bg-card/50 p-4 shadow-sm backdrop-blur-[2px]">
+    <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
       <div className="mb-3 text-sm font-medium">Details</div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
@@ -60,7 +60,7 @@ export function CardDetailsMetadata({
             >
               {dueDate ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 rounded-full bg-primary"></span>
+                  <span className="inline-block h-2 w-2 bg-primary"></span>
                   {format(dueDate, "MMM d, yyyy")}
                 </span>
               ) : (

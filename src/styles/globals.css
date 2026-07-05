@@ -4,36 +4,36 @@
 
 @layer base {
   :root {
-    /* Light mode - Neutral Tones - Increased Contrast */
-    --background: 0 0% 98%; /* Lighter neutral-50 */
-    --foreground: 0 0% 7%; /* Darker neutral-900 */
-    --muted: 0 0% 92%; /* Lighter neutral-100/200 */
-    --muted-foreground: 0 0% 35%; /* Darker neutral-600/700 */
-    --popover: 0 0% 100%; /* white */
-    --popover-foreground: 0 0% 7%; /* Darker neutral-900 */
-    --card: 0 0% 100%; /* white */
-    --card-foreground: 0 0% 7%; /* Darker neutral-900 */
-    --border: 0 0% 80%; /* Darker neutral-300/400 */
-    --input: 0 0% 80%; /* Darker neutral-300/400 */
+    /* Light mode - kept minimal; the app is locked to dark for now. */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 7%;
+    --muted: 0 0% 94%;
+    --muted-foreground: 0 0% 40%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 7%;
+    /* Volt - cards are outlined, not filled: card surface equals the page ground. */
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 7%;
+    --border: 0 0% 82%;
+    --input: 0 0% 82%;
 
-    /* Primary - Blue */
-    --primary: 210 70% 40%;
-    --primary-foreground: 210 100% 98%;
+    /* Primary - Acid lime */
+    --primary: 82 85% 55%;
+    --primary-foreground: 0 0% 7%;
 
-    /* Secondary - Neutral Grey */
-    --secondary: 0 0% 40%; /* neutral-600 */
-    --secondary-foreground: 0 0% 98%; /* neutral-50 */
+    --secondary: 0 0% 94%;
+    --secondary-foreground: 0 0% 12%;
 
-    /* Accent - Matching Primary Blue */
-    --accent: 210 70% 40%;
-    --accent-foreground: 210 100% 98%;
+    --accent: 0 0% 92%;
+    --accent-foreground: 0 0% 12%;
 
-    /* Destructive */
-    --destructive: 0 85% 45%; /* Slightly darker red for better contrast */
+    --destructive: 0 84% 52%;
     --destructive-foreground: 0 0% 100%;
-    --ring: 210 70% 40%; /* Match primary blue */
+    --ring: 82 85% 45%;
 
-    /* Enhanced chart colors - Adjusted for light theme contrast */
+    --radius: 0rem;
+
+    /* Chart colors */
     --chart-blue: 210 75% 45%;
     --chart-green: 150 80% 35%;
     --chart-purple: 255 75% 50%;
@@ -42,31 +42,28 @@
     --chart-cyan: 182 80% 38%;
     --chart-indigo: 235 75% 48%;
     --chart-pink: 330 85% 55%;
-    --chart-lime: 85 80% 35%;
+    --chart-lime: 82 70% 40%;
     --chart-emerald: 160 80% 30%;
 
-    /* Priority colors - Adjusted for light theme contrast */
-    --priority-low: 150 60% 40%; /* Darker Green */
-    --priority-medium: 210 70% 40%; /* Blue */
-    --priority-high: 15 90% 45%; /* Orange */
-    --priority-urgent: 0 90% 45%; /* Red */
-    --priority-none: 227 10% 50%; /* Darker Grey */
+    /* Priority colors */
+    --priority-low: 150 60% 40%;
+    --priority-medium: 210 70% 40%;
+    --priority-high: 30 90% 45%;
+    --priority-urgent: 0 84% 52%;
+    --priority-none: 0 0% 50%;
 
-    /* Due date colors - Adjusted for light theme contrast */
-    --due-overdue: 0 90% 45%;
-    --due-today: 210 70% 40%;
-    --due-week: 150 80% 35%; /* Darker original chart green */
-    --due-later: 0 0% 40%; /* Secondary Neutral Grey */
-    --due-none: 227 10% 45%; /* Darker Grey */
+    /* Due date colors */
+    --due-overdue: 0 84% 52%;
+    --due-today: 82 70% 40%;
+    --due-week: 150 80% 35%;
+    --due-later: 0 0% 45%;
+    --due-none: 0 0% 45%;
 
-    --radius: 0.5rem;
-
-    /* Color variables (HSL format) - Adjusted for light theme contrast */
     --priority-low-color: hsl(150 60% 40%);
     --priority-medium-color: hsl(210 70% 40%);
-    --priority-high-color: hsl(15 90% 45%);
-    --priority-urgent-color: hsl(0 90% 45%);
-    --priority-none-color: hsl(227 10% 50%);
+    --priority-high-color: hsl(30 90% 45%);
+    --priority-urgent-color: hsl(0 84% 52%);
+    --priority-none-color: hsl(0 0% 50%);
 
     --chart-blue-color: hsl(210 75% 45%);
     --chart-green-color: hsl(150 80% 35%);
@@ -76,57 +73,54 @@
     --chart-cyan-color: hsl(182 80% 38%);
     --chart-indigo-color: hsl(235 75% 48%);
     --chart-pink-color: hsl(330 85% 55%);
-    --primary-color: hsl(210 70% 40%); /* Blue */
+    --primary-color: hsl(82 85% 55%);
 
-    /* Sidebar Colors - Adjusted for light neutral theme */
-    --sidebar-background: 0 0% 96%; /* neutral-100 */
-    --sidebar-foreground: 0 0% 9%; /* neutral-900 */
-    --sidebar-primary: 210 70% 40%;
-    --sidebar-primary-foreground: 210 100% 98%;
-    --sidebar-accent: 0 0% 90%; /* neutral-200 */
-    --sidebar-accent-foreground: 0 0% 20%; /* Darker for better contrast */
-    --sidebar-border: 0 0% 83%; /* neutral-300 */
-    --sidebar-ring: 210 70% 40%;
+    --sidebar-background: 0 0% 96%;
+    --sidebar-foreground: 0 0% 9%;
+    --sidebar-primary: 82 85% 45%;
+    --sidebar-primary-foreground: 0 0% 7%;
+    --sidebar-accent: 0 0% 90%;
+    --sidebar-accent-foreground: 0 0% 20%;
+    --sidebar-border: 0 0% 85%;
+    --sidebar-ring: 82 85% 45%;
 
-    /* Navigation badge background and text - NEW */
     --nav-badge-bg: 0 0% 85%;
     --nav-badge-text: 0 0% 20%;
 
-    /* Animation keyframes for fadeIn effect */
     --animate-duration: 0.3s;
   }
 
   .dark {
-    /* Dark mode - Neutral Tones - Increased Contrast */
-    --background: 0 0% 7%; /* Darker neutral-900/950 */
-    --foreground: 0 0% 100%; /* Lighter neutral-0/white */
-    --muted: 0 0% 13%; /* Darker neutral-800/850 */
-    --muted-foreground: 0 0% 70%; /* Lighter neutral-400/300 */
-    --popover: 0 0% 10%; /* Darker than bg */
-    --popover-foreground: 0 0% 100%; /* Lighter neutral-0/white */
-    --card: 0 0% 10%; /* Darker than bg */
-    --card-foreground: 0 0% 100%; /* Lighter neutral-0/white */
-    --border: 0 0% 25%; /* Lighter neutral-700/600 */
-    --input: 0 0% 25%; /* Lighter neutral-700/600 */
+    /* Acid - dark, grayscale base with a single lime accent. */
+    --background: 0 0% 4%; /* neutral-950 */
+    --foreground: 0 0% 96%; /* neutral-100 */
+    --muted: 0 0% 13%; /* between neutral-900 and 800 */
+    --muted-foreground: 0 0% 58%; /* neutral-400/500 */
+    --popover: 0 0% 7%; /* overlays sit just above the ground so they read as raised */
+    --popover-foreground: 0 0% 96%;
+    /* Volt - cards are outlined, not filled: card surface equals the page ground. */
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 96%;
+    --border: 0 0% 17%; /* neutral-800, a hair brighter so wire hairlines carry */
+    --input: 0 0% 17%;
 
-    /* Primary - Blue */
-    --primary: 210 70% 65%;
-    --primary-foreground: 210 35% 10%;
+    /* Primary - lime-300 */
+    --primary: 82 85% 67%;
+    --primary-foreground: 0 0% 4%;
 
-    /* Secondary - Neutral Grey */
-    --secondary: 0 0% 63%; /* neutral-400 */
-    --secondary-foreground: 0 0% 9%; /* neutral-900 */
+    /* Secondary - quiet neutral surface */
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 0 0% 96%;
 
-    /* Accent - Matching Primary Blue */
-    --accent: 210 70% 65%;
-    --accent-foreground: 210 35% 10%;
+    /* Accent - neutral hover surface (NOT lime, so ghost hovers stay quiet) */
+    --accent: 0 0% 15%;
+    --accent-foreground: 0 0% 96%;
 
-    /* Destructive (adjusted dark mode) */
-    --destructive: 0 85% 65%;
-    --destructive-foreground: 0 100% 5%; /* Darker text */
-    --ring: 210 70% 65%; /* Match primary blue */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --ring: 82 85% 67%;
 
-    /* Enhanced chart colors for dark mode - Adjusted */
+    /* Chart colors */
     --chart-blue: 210 75% 65%;
     --chart-green: 150 75% 55%;
     --chart-purple: 255 80% 70%;
@@ -135,29 +129,28 @@
     --chart-cyan: 182 85% 60%;
     --chart-indigo: 235 80% 70%;
     --chart-pink: 330 85% 70%;
-    --chart-lime: 85 85% 60%;
+    --chart-lime: 82 85% 67%;
     --chart-emerald: 160 80% 50%;
 
-    /* Priority colors - Adjusted */
-    --priority-low: 150 50% 60%; /* Darker Green */
-    --priority-medium: 210 70% 65%; /* Blue */
-    --priority-high: 15 85% 65%; /* Orange */
-    --priority-urgent: 0 90% 65%; /* Red */
-    --priority-none: 227 10% 75%; /* Lighter Grey */
+    /* Priority colors - semantic, tuned for the dark base */
+    --priority-low: 150 55% 60%;
+    --priority-medium: 210 70% 65%;
+    --priority-high: 30 90% 62%;
+    --priority-urgent: 0 84% 62%;
+    --priority-none: 0 0% 55%;
 
-    /* Due date colors - Adjusted */
-    --due-overdue: 0 90% 65%;
-    --due-today: 210 70% 65%;
-    --due-week: 150 75% 55%; /* Original chart green */
-    --due-later: 0 0% 63%; /* Secondary Neutral Grey */
-    --due-none: 227 10% 75%;
+    /* Due date colors */
+    --due-overdue: 0 84% 62%;
+    --due-today: 82 85% 67%;
+    --due-week: 150 75% 55%;
+    --due-later: 0 0% 58%;
+    --due-none: 0 0% 55%;
 
-    /* Color variables (HSL format) - Adjusted */
-    --priority-low-color: hsl(150 50% 60%);
+    --priority-low-color: hsl(150 55% 60%);
     --priority-medium-color: hsl(210 70% 65%);
-    --priority-high-color: hsl(15 85% 65%);
-    --priority-urgent-color: hsl(0 90% 65%);
-    --priority-none-color: hsl(227 10% 75%);
+    --priority-high-color: hsl(30 90% 62%);
+    --priority-urgent-color: hsl(0 84% 62%);
+    --priority-none-color: hsl(0 0% 55%);
 
     --chart-blue-color: hsl(210 75% 65%);
     --chart-green-color: hsl(150 75% 55%);
@@ -167,21 +160,20 @@
     --chart-cyan-color: hsl(182 85% 60%);
     --chart-indigo-color: hsl(235 80% 70%);
     --chart-pink-color: hsl(330 85% 70%);
-    --primary-color: hsl(210 70% 65%); /* Blue */
+    --primary-color: hsl(82 85% 67%);
 
-    /* Sidebar Colors - Adjusted for dark neutral theme */
-    --sidebar-background: 0 0% 12%; /* Match card/popover */
-    --sidebar-foreground: 0 0% 98%; /* neutral-50 */
-    --sidebar-primary: 210 70% 65%; /* Match primary blue */
-    --sidebar-primary-foreground: 210 35% 10%; /* Match primary-foreground */
-    --sidebar-accent: 0 0% 15%; /* neutral-800 */
-    --sidebar-accent-foreground: 0 0% 85%; /* Lighter for better contrast */
-    --sidebar-border: 0 0% 20%; /* neutral-700 */
-    --sidebar-ring: 210 70% 65%; /* Match ring blue */
+    /* Sidebar - same base as the app, separated by a hairline border */
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 96%;
+    --sidebar-primary: 82 85% 67%;
+    --sidebar-primary-foreground: 0 0% 4%;
+    --sidebar-accent: 0 0% 13%;
+    --sidebar-accent-foreground: 0 0% 96%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 82 85% 67%;
 
-    /* Navigation badge background and text - NEW */
-    --nav-badge-bg: 0 0% 30%;
-    --nav-badge-text: 0 0% 95%;
+    --nav-badge-bg: 0 0% 15%;
+    --nav-badge-text: 0 0% 90%;
   }
 }
 
@@ -209,7 +201,6 @@
   cursor: grabbing !important;
 }
 
-/* Smoother animation for a more polished feel */
 .animate-fade-in {
   animation: fadeIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
@@ -224,17 +215,18 @@
 
 .dark .bg-grid-pattern {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+    linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
 }
 
-/* Navigation badge styles - NEW */
+/* Navigation badge styles */
 .nav-badge {
-  background-color: hsl(var(--nav-badge-bg));
+  background-color: transparent;
   color: hsl(var(--nav-badge-text));
-  padding: 0.15rem 0.5rem;
-  border-radius: 1rem;
-  font-size: 0.75rem;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 

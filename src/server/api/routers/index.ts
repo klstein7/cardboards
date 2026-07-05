@@ -3,8 +3,6 @@ import { z } from "zod";
 import { baseProcedure, createTRPCRouter } from "~/trpc/init";
 
 // Import domain-specific routers
-import { aiInsightRouter } from "./ai-insight.router";
-import { analyticsRouter } from "./analytics.router";
 import { boardRouter } from "./board.router";
 import { cardRouter } from "./card.router";
 import { cardCommentRouter } from "./card-comment.router";
@@ -30,8 +28,6 @@ export const appRouter = createTRPCRouter({
     }),
 
   // Domain-specific routers with authorization checks
-  aiInsight: aiInsightRouter,
-  analytics: analyticsRouter,
   board: boardRouter,
   card: cardRouter,
   cardComment: cardCommentRouter,

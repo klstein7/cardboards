@@ -48,11 +48,11 @@ export function ProjectItem({ project }: { project: Project }) {
   const getActivityColor = () => {
     switch (activityLevel) {
       case "high":
-        return "text-emerald-600 dark:text-emerald-400";
+        return "text-primary";
       case "medium":
-        return "text-amber-600 dark:text-amber-400";
+        return "text-foreground";
       case "low":
-        return "text-rose-600 dark:text-rose-400";
+        return "text-muted-foreground";
     }
   };
 
@@ -75,15 +75,15 @@ export function ProjectItem({ project }: { project: Project }) {
     >
       <Card
         className={cn(
-          "relative flex h-full flex-col overflow-hidden border-border/80 bg-card transition-all duration-200",
-          "hover:border-primary/80 hover:shadow-md dark:border-border dark:hover:border-primary/50",
+          "relative flex h-full flex-col overflow-hidden border-border bg-transparent transition-colors duration-200",
+          "hover:border-primary/60",
         )}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {isFavorite && (
           <div className="absolute right-3 top-3">
-            <StarIcon className="h-4 w-4 fill-amber-500 text-amber-500 dark:fill-amber-300 dark:text-amber-300" />
+            <StarIcon className="h-4 w-4 fill-primary text-primary" />
           </div>
         )}
 
@@ -131,35 +131,39 @@ export function ProjectItem({ project }: { project: Project }) {
             </div>
           </div>
 
-          <div className="mt-auto grid grid-cols-2 gap-3">
-            <div className="flex flex-col rounded-md border border-border/80 bg-card/90 p-3 shadow-sm transition-all group-hover:border-border dark:border-border/60 dark:bg-background/30 dark:group-hover:border-border/60">
+          <div className="mt-auto grid grid-cols-2 divide-x divide-border border-t border-border">
+            <div className="flex flex-col py-3 pr-3">
               <div className="flex items-center gap-2">
-                <LayoutGridIcon className="h-4 w-4 text-primary-foreground dark:text-primary/90" />
-                <span className="text-sm font-medium">{boardCount}</span>
+                <LayoutGridIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-lg font-light tabular-nums">
+                  {boardCount}
+                </span>
               </div>
-              <div className="mt-0.5 text-[10px] text-muted-foreground/90">
+              <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                 {boardCount === 1 ? "Board" : "Boards"}
               </div>
             </div>
 
-            <div className="flex flex-col rounded-md border border-border/80 bg-card/90 p-3 shadow-sm transition-all group-hover:border-border dark:border-border/60 dark:bg-background/30 dark:group-hover:border-border/60">
+            <div className="flex flex-col py-3 pl-3">
               <div className="flex items-center gap-2">
-                <UsersIcon className="h-4 w-4 text-primary-foreground dark:text-primary/90" />
-                <span className="text-sm font-medium">{userCount}</span>
+                <UsersIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-lg font-light tabular-nums">
+                  {userCount}
+                </span>
               </div>
-              <div className="mt-0.5 text-[10px] text-muted-foreground/90">
+              <div className="mt-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                 {userCount === 1 ? "Member" : "Members"}
               </div>
             </div>
           </div>
         </CardContent>
 
-        <CardFooter className="border-t border-border/80 p-3 dark:border-border/60">
+        <CardFooter className="border-t border-border p-3">
           <div className="flex w-full items-center justify-end">
             <span
               className={cn(
-                "flex items-center gap-1 text-xs font-medium text-muted-foreground/90 transition-colors",
-                isHovered && "text-primary-foreground dark:text-primary/90",
+                "flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors",
+                isHovered && "text-primary",
               )}
             >
               View details

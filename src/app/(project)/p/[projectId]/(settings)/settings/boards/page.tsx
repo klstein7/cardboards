@@ -20,7 +20,7 @@ export default async function ProjectSettingsBoardsPage({
   return (
     <HydrateClient>
       <div className="space-y-4 sm:space-y-6">
-        <div className="rounded-lg border bg-card shadow-sm">
+        <div className="rounded-lg border bg-card ">
           <div className="flex flex-col gap-3 border-b p-3 sm:flex-row sm:items-center sm:justify-between sm:p-4 md:p-6">
             <div>
               <h2 className="text-lg font-semibold tracking-tight sm:text-xl">
