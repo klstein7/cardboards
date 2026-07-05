@@ -72,7 +72,7 @@ export function BrandIcon({
             width="76"
             height="124"
             rx="18"
-            fill="#2E2E30"
+            fill="#48484C"
             mask={`url(#${cutMid})`}
           />
           <rect
@@ -81,10 +81,10 @@ export function BrandIcon({
             width="76"
             height="124"
             rx="18"
-            fill="#55555A"
+            fill="#8E8E93"
             mask={`url(#${cutFront})`}
           />
-          <rect x="6" y="6" width="76" height="124" rx="18" fill="#4C93F6" />
+          <rect x="6" y="6" width="76" height="124" rx="18" fill="#FAFAFA" />
         </g>
       </svg>
     </div>
