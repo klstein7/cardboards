@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, CheckCircle, Loader2, Trash } from "lucide-react";
+import { CheckCircle, Loader2, Trash } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "~/components/ui/button";
@@ -72,38 +72,29 @@ export function Notifications({
 
         <div className="flex h-full flex-col">
           <div className="border-b p-6 pb-4">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center border border-primary/40">
-                <Bell className="h-4.5 w-4.5 text-primary" />
-              </div>
-              <h2 className="text-lg font-semibold text-foreground">
-                Notifications
-              </h2>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
+            <h2 className="text-xl font-light tracking-tight">
+              Notifications
+            </h2>
+            <p className="mt-1.5 text-sm text-muted-foreground">
               Stay updated on activity in your projects and assigned tasks.
             </p>
           </div>
 
-          <div className="border-b px-6 py-3">
-            <div className="flex items-center gap-2 border border-border p-1">
-              <Button
-                size="sm"
-                variant={filter === "all" ? "secondary" : "ghost"}
-                onClick={() => setFilter("all")}
-                className="flex-1 justify-center"
+          <div className="flex items-center gap-5 border-b px-6">
+            {(["all", "unread"] as const).map((option) => (
+              <button
+                key={option}
+                onClick={() => setFilter(option)}
+                className={cn(
+                  "relative flex h-10 items-center text-sm font-medium capitalize transition-colors after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full",
+                  filter === option
+                    ? "text-foreground after:bg-primary"
+                    : "text-muted-foreground after:bg-transparent hover:text-foreground",
+                )}
               >
-                All
-              </Button>
-              <Button
-                size="sm"
-                variant={filter === "unread" ? "secondary" : "ghost"}
-                onClick={() => setFilter("unread")}
-                className="flex-1 justify-center"
-              >
-                Unread
-              </Button>
-            </div>
+                {option}
+              </button>
+            ))}
           </div>
 
           <div className="flex items-center justify-between gap-4 border-b px-6 py-3">
@@ -137,7 +128,7 @@ export function Notifications({
             </Button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 px-2">
+          <div className="flex-1 overflow-y-auto px-6">
             {isLoading ? (
               <NotificationsLoading />
             ) : error ? (
@@ -157,12 +148,11 @@ export function Notifications({
                 }
               />
             ) : (
-              <div className="grid grid-cols-1 gap-2">
-                {notifications.map((notification, index) => (
+              <div className="divide-y divide-border">
+                {notifications.map((notification) => (
                   <NotificationCard
                     key={notification.id}
                     notification={notification}
-                    index={index}
                   />
                 ))}
               </div>

@@ -29,7 +29,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Separator } from "~/components/ui/separator";
 import { useDeleteProject, useUpdateProject } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { type ProjectUpdate, ProjectUpdateSchema } from "~/server/zod";
@@ -107,20 +106,15 @@ export function SettingsGeneralForm({ project }: SettingsGeneralFormProps) {
       </Form>
 
       {isAdmin && (
-        <div className="space-y-6">
-          <div>
-            <h3 className="text-lg font-medium">Danger Zone</h3>
-            <p className="text-sm text-muted-foreground">
-              Irreversible and destructive actions
-            </p>
-          </div>
+        <div className="border-t border-border pt-6">
+          <h3 className="text-[11px] font-medium uppercase tracking-[0.14em] text-destructive">
+            Danger zone
+          </h3>
 
-          <Separator className="my-4" />
-
-          <div className="rounded-lg border border-destructive/50 p-4">
-            <div className="flex items-center justify-between">
+          <div className="mt-5">
+            <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="space-y-1">
-                <h4 className="text-sm font-medium">Delete Project</h4>
+                <h4 className="text-sm font-medium">Delete project</h4>
                 <p className="text-sm text-muted-foreground">
                   Permanently delete this project and all of its data
                 </p>

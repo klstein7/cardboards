@@ -1,11 +1,10 @@
 "use client";
 
-import { LayoutGridIcon, PlusIcon, Search } from "lucide-react";
+import { LayoutGridIcon, PlusIcon, Search, X } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import { CreateBoardDialog } from "~/app/(project)/_components/create-board-dialog";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -13,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Skeleton } from "~/components/ui/skeleton";
 import { useBoards } from "~/lib/hooks";
 
 import { BoardItem } from "./board-item";
@@ -90,24 +90,43 @@ export function BoardList({ projectId }: BoardListProps) {
   }, []);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search boards..."
-            className="pl-9"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+        <div className="flex items-baseline gap-3">
+          <h2 className="text-2xl font-light tracking-tight">Boards</h2>
+          {totalBoards > 0 && (
+            <span className="font-mono text-xs text-muted-foreground">
+              {hasFilters ? `${filteredCount} of ${totalBoards}` : totalBoards}{" "}
+              {totalBoards === 1 ? "board" : "boards"}
+            </span>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-5">
+          <label className="flex w-44 items-center gap-2 border-b border-border pb-1 transition-colors focus-within:border-foreground/60">
+            <Search className="size-3.5 shrink-0 text-muted-foreground" />
+            <input
+              placeholder="Search boards"
+              className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
+            {hasFilters && (
+              <button
+                className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
+                onClick={handleClearSearch}
+              >
+                <X className="size-3" />
+                <span className="sr-only">Clear search</span>
+              </button>
+            )}
+          </label>
+
           <Select
             value={sortOption}
             onValueChange={(value) => handleSortChange(value as SortOption)}
           >
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="h-auto w-auto gap-1.5 border-0 border-b border-border px-0 pb-1 text-sm text-muted-foreground focus:ring-0">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -121,46 +140,28 @@ export function BoardList({ projectId }: BoardListProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-medium">Boards</h2>
-          {totalBoards > 0 && (
-            <span className="nav-badge">
-              {hasFilters ? `${filteredCount}/${totalBoards}` : totalBoards}
-            </span>
-          )}
-        </div>
-
-        {hasFilters && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleClearSearch}
-            className="h-8 px-2 text-xs"
-          >
-            Clear filters
-          </Button>
-        )}
-      </div>
-
       {boards.isPending ? (
-        <div className="grid place-items-center rounded-lg border border-dashed py-10">
-          <div className="flex flex-col items-center gap-2">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-            <p className="text-sm text-muted-foreground">Loading boards...</p>
-          </div>
+        <div className="divide-y divide-border border-t border-border">
+          {[1, 2, 3].map((row) => (
+            <div key={row} className="flex items-baseline justify-between py-5">
+              <Skeleton className="h-6 w-48" />
+              <Skeleton className="h-3 w-24" />
+            </div>
+          ))}
         </div>
       ) : boards.error ? (
-        <div className="grid place-items-center rounded-lg border border-dashed py-10 text-destructive">
+        <div className="grid place-items-center border border-dashed border-border py-10 text-destructive">
           <p className="text-sm">Error loading boards. Please try again.</p>
         </div>
       ) : sortedBoards.length === 0 ? (
         hasFilters ? (
-          <div className="grid place-items-center rounded-lg border border-dashed py-10">
+          <div className="grid place-items-center border border-dashed border-border py-10">
             <div className="flex flex-col items-center">
-              <h3 className="text-base font-medium">No matching boards</h3>
-              <p className="mb-3 mt-1 text-center text-sm text-muted-foreground">
-                No boards match your search criteria.
+              <h3 className="text-lg font-light tracking-tight">
+                No matching boards
+              </h3>
+              <p className="mb-4 mt-1 text-center text-sm text-muted-foreground">
+                No boards match your search.
               </p>
               <Button variant="outline" size="sm" onClick={handleClearSearch}>
                 Clear search
@@ -183,17 +184,17 @@ export function BoardList({ projectId }: BoardListProps) {
 
 function EmptyState({ projectId }: { projectId: string }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-dashed bg-muted/10 px-6 py-10 text-center">
+    <div className="flex flex-col items-center justify-center border border-dashed border-border px-6 py-12 text-center">
       <LayoutGridIcon className="mb-3 h-8 w-8 text-muted-foreground/60" />
-      <h3 className="text-base font-medium">No boards yet</h3>
-      <p className="mb-4 mt-1 max-w-sm text-sm text-muted-foreground">
+      <h3 className="text-2xl font-light tracking-tight">No boards yet</h3>
+      <p className="mb-5 mt-2 max-w-sm text-sm text-muted-foreground">
         Create your first board to start organizing your project tasks.
       </p>
       <CreateBoardDialog
         trigger={
-          <Button size="sm" className="gap-1">
-            <PlusIcon className="h-3.5 w-3.5" />
-            <span>Create Board</span>
+          <Button className="gap-1.5">
+            <PlusIcon className="h-4 w-4" />
+            <span>New board</span>
           </Button>
         }
         projectId={projectId}

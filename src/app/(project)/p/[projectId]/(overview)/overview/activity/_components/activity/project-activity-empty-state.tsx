@@ -1,25 +1,13 @@
 import { ActivityIcon } from "lucide-react";
 
-import { Card, CardContent } from "~/components/ui/card";
-
 export function ProjectActivityEmptyState() {
   return (
-    <Card className="overflow-hidden border  transition-all">
-      <CardContent className="pt-6">
-        <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
-          <div className="border border-border p-3.5 ">
-            <ActivityIcon className="h-7 w-7 text-muted-foreground/70" />
-          </div>
-          <div className="max-w-xs space-y-1.5">
-            <p className="font-medium text-foreground/90">
-              No activity recorded yet
-            </p>
-            <p className="text-sm text-muted-foreground/80">
-              Activity will appear here as changes are made to the project
-            </p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col items-center justify-center border border-dashed border-border px-6 py-16 text-center">
+      <ActivityIcon className="mb-3 h-8 w-8 text-muted-foreground/60" />
+      <h3 className="text-2xl font-light tracking-tight">No activity yet</h3>
+      <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+        Changes you and your team make to this project will appear here.
+      </p>
+    </div>
   );
 }

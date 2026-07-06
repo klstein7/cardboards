@@ -3,7 +3,6 @@
 import { SearchIcon, XIcon } from "lucide-react";
 import { useCallback } from "react";
 
-import { Input } from "~/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -32,30 +31,30 @@ export function SearchBar({
   }, [setSearchQuery]);
 
   return (
-    <div className="flex flex-wrap items-center gap-3">
-      <div className="relative min-w-[200px] flex-1">
-        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search projects..."
-          className="pl-9"
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+      <label className="flex min-w-[200px] max-w-xs flex-1 items-center gap-2 border-b border-border pb-1 transition-colors focus-within:border-foreground/60">
+        <SearchIcon className="size-3.5 shrink-0 text-muted-foreground" />
+        <input
+          placeholder="Search projects"
+          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
         {searchQuery && (
           <button
             onClick={handleClearSearch}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
             aria-label="Clear search"
           >
-            <XIcon className="h-4 w-4" />
+            <XIcon className="size-3" />
           </button>
         )}
-      </div>
+      </label>
       <Select
         value={sortOption}
         onValueChange={(value) => setSortOption(value as ProjectSortOption)}
       >
-        <SelectTrigger className="w-[150px]">
+        <SelectTrigger className="h-auto w-auto gap-1.5 border-0 border-b border-border px-0 pb-1 text-sm text-muted-foreground focus:ring-0">
           <SelectValue placeholder="Sort by" />
         </SelectTrigger>
         <SelectContent>

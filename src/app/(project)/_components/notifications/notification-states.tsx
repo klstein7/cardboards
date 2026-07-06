@@ -52,7 +52,7 @@ export function NotificationsError({ className, onRetry }: ErrorStateProps) {
   return (
     <StateContainer className={className}>
       <ServerCrash className="h-10 w-10 text-destructive/80" />
-      <h3 className="mt-4 text-lg font-semibold text-foreground">
+      <h3 className="mt-4 text-lg font-light tracking-tight text-foreground">
         Failed to load notifications
       </h3>
       <p className="mt-1 text-sm text-muted-foreground">
@@ -96,7 +96,9 @@ export function NotificationsEmpty({
   return (
     <StateContainer className={className}>
       <BellOff className="h-10 w-10 text-muted-foreground/80" />
-      <h3 className="mt-4 text-lg font-semibold text-foreground">{title}</h3>
+      <h3 className="mt-4 text-lg font-light tracking-tight text-foreground">
+        {title}
+      </h3>
       <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       {onRefetch && (
         <Button

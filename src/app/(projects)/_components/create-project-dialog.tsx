@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -13,7 +12,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "~/components/ui/dialog";
 import {
   Form,
@@ -29,7 +27,7 @@ import { useCreateProject } from "~/lib/hooks";
 import { type ProjectCreate, ProjectCreateSchema } from "~/server/zod";
 
 interface CreateProjectDialogProps {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
@@ -51,23 +49,7 @@ export function CreateProjectDialog({ children }: CreateProjectDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      {children ?? (
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="h-auto w-full max-w-[450px] rounded-lg border-2 border-dashed bg-background p-8 hover:border-primary hover:bg-secondary/10"
-          >
-            <div className="flex items-center gap-4">
-              <div className="border border-primary/40 p-2.5">
-                <Plus className="h-6 w-6 text-primary" />
-              </div>
-              <span className="text-xl font-medium text-muted-foreground">
-                Create new project
-              </span>
-            </div>
-          </Button>
-        </DialogTrigger>
-      )}
+      {children}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create a new project</DialogTitle>

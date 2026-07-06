@@ -23,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Input } from "~/components/ui/input";
 import {
   Pagination,
   PaginationContent,
@@ -33,6 +32,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "~/components/ui/pagination";
+import { Skeleton } from "~/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -144,11 +144,16 @@ export function ProjectMembersDataTable({
 
   if (projectUsers.isPending) {
     return (
-      <div className="flex items-center justify-center p-8">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
-          <p className="text-sm text-muted-foreground">Loading members...</p>
-        </div>
+      <div className="divide-y divide-border border-t border-border">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="flex items-center gap-3 py-4">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <div className="space-y-1.5">
+              <Skeleton className="h-4 w-32" />
+              <Skeleton className="h-3 w-44" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
@@ -215,26 +220,30 @@ export function ProjectMembersDataTable({
   return (
     <div className={cn("space-y-4", className)}>
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative min-w-[200px] flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search members..."
-            className="pl-9"
+        <label className="flex w-64 max-w-full items-center gap-2 border-b border-border pb-1 transition-colors focus-within:border-foreground/60">
+          <Search className="size-3.5 shrink-0 text-muted-foreground" />
+          <input
+            placeholder="Search members"
+            className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             value={searchQuery}
             onChange={(e) => {
               setSearchQuery(e.target.value);
               setPageIndex(0); // Reset to first page on search
             }}
           />
-        </div>
+        </label>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative h-8 w-8 text-muted-foreground hover:text-foreground"
+              aria-label="Filter members"
+            >
               <Filter className="h-4 w-4" />
-              Filters
               {activeFiltersCount > 0 && (
-                <span className="ml-1 border border-primary/40 px-1.5 py-0.5 font-mono text-xs text-primary">
+                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] font-medium text-primary-foreground">
                   {activeFiltersCount}
                 </span>
               )}
@@ -273,7 +282,7 @@ export function ProjectMembersDataTable({
         </DropdownMenu>
       </div>
 
-      <div className="rounded-md border">
+      <div className="border-t border-border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -340,25 +349,21 @@ export function ProjectMembersDataTable({
       </div>
 
       <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-        <div className="text-sm text-muted-foreground">
+        <div className="flex items-center gap-4 font-mono text-xs text-muted-foreground">
           <span>
             Page {table.getState().pagination.pageIndex + 1} of{" "}
             {table.getPageCount() || 1}
           </span>
-          <span className="mx-2">|</span>
           <span>{table.getFilteredRowModel().rows.length} members</span>
           {(searchQuery || roleFilter.length > 0) && (
-            <>
-              <span className="mx-2">|</span>
-              <Button
-                variant="link"
-                size="sm"
-                className="h-auto p-0 text-xs"
-                onClick={handleClearFilters}
-              >
-                Clear filters
-              </Button>
-            </>
+            <Button
+              variant="link"
+              size="sm"
+              className="h-auto p-0 font-mono text-xs"
+              onClick={handleClearFilters}
+            >
+              Clear filters
+            </Button>
           )}
         </div>
 

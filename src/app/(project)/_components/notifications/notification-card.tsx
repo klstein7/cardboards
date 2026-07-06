@@ -3,7 +3,6 @@
 import { CheckCircle2, Trash2 } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import { Card } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
 import {
   useDeleteNotification,
@@ -16,20 +15,13 @@ import { timeAgo } from "./notification-utils";
 
 interface NotificationCardProps {
   notification: Notification;
-  index?: number;
 }
 
-export function NotificationCard({
-  notification,
-  index = 0,
-}: NotificationCardProps) {
+export function NotificationCard({ notification }: NotificationCardProps) {
   const { mutate: markAsRead } = useMarkNotificationAsRead();
   const { mutate: deleteNotification } = useDeleteNotification();
 
   const isUnread = !notification.isRead;
-
-  // Calculate staggered animation delay based on index
-  const animationDelay = `${index * 50}ms`;
 
   const handleMarkAsRead = () => {
     if (notification.isRead) return;
@@ -42,95 +34,76 @@ export function NotificationCard({
   };
 
   return (
-    <Card
-      className={cn(
-        "motion-safe:animate-fadeIn group relative cursor-pointer select-none overflow-hidden border",
-        "border-border/40 bg-card transition-all duration-200 hover:bg-muted/50",
-        isUnread ? "bg-card" : "bg-card/70", // Slightly dimmer background once read
-      )}
-      style={{
-        animationDelay,
-        animationFillMode: "both",
-      }}
+    <div
+      className="group relative cursor-pointer select-none py-4 pl-4 pr-14"
       onClick={handleMarkAsRead}
     >
-      <div className="flex items-start gap-3 p-3">
-        <div className={cn("flex-1 space-y-1")}>
-          <h3
-            className={cn(
-              "text-sm leading-tight",
-              isUnread
-                ? "font-semibold text-foreground"
-                : "font-normal text-muted-foreground",
-            )}
-          >
-            {notification.title}
-          </h3>
+      {isUnread && (
+        <span
+          className="absolute left-0 top-[21px] h-3.5 w-0.5 bg-primary"
+          aria-hidden
+        />
+      )}
 
-          <p
-            className={cn(
-              "text-xs",
-              isUnread ? "text-foreground/90" : "text-muted-foreground/80",
-            )}
-          >
-            {notification.content}
-          </p>
+      <h3
+        className={cn(
+          "text-sm leading-snug",
+          isUnread ? "font-medium text-foreground" : "text-muted-foreground",
+        )}
+      >
+        {notification.title}
+      </h3>
 
-          <p className="pt-1 text-xs text-muted-foreground/70">
-            {timeAgo(new Date(notification.createdAt))}
-          </p>
-        </div>
+      <p
+        className={cn(
+          "mt-1 text-xs leading-relaxed",
+          isUnread ? "text-foreground/80" : "text-muted-foreground/80",
+        )}
+      >
+        {notification.content}
+      </p>
 
-        {/* Action Buttons - Appear on Hover */}
-        <div
-          className={cn(
-            "absolute right-2 top-1/2 flex -translate-y-1/2 flex-col items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100",
-          )}
-        >
-          {isUnread && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleMarkAsRead();
-              }}
-              title="Mark as read"
-            >
-              <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
-            </Button>
-          )}
+      <p className="mt-1.5 font-mono text-[10px] text-muted-foreground">
+        {timeAgo(new Date(notification.createdAt))}
+      </p>
+
+      <div className="absolute right-0 top-1/2 flex -translate-y-1/2 flex-col items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100">
+        {isUnread && (
           <Button
             variant="ghost"
             size="icon"
-            className="h-6 w-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
-            onClick={handleDelete}
-            title="Delete notification"
+            className="h-6 w-6"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleMarkAsRead();
+            }}
+            title="Mark as read"
           >
-            <Trash2 className="h-3.5 w-3.5" />
+            <CheckCircle2 className="h-3.5 w-3.5 text-muted-foreground" />
           </Button>
-        </div>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-6 w-6 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+          onClick={handleDelete}
+          title="Delete notification"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
       </div>
-    </Card>
+    </div>
   );
 }
 
 export function NotificationCardSkeleton() {
   return (
-    <Card className="border-border/40 bg-card/80">
-      <div className="flex items-start gap-3 p-3">
-        <div className="flex-1 space-y-2">
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-3 w-full" />
-          <Skeleton className="h-3 w-1/2" />
-        </div>
-        <div className="flex shrink-0 flex-col gap-1 opacity-0">
-          {/* Keep structure for spacing, but invisible */}
-          <Skeleton className="h-6 w-6" />
-          <Skeleton className="h-6 w-6" />
-        </div>
+    <div className="py-4 pl-4 pr-14">
+      <div className="space-y-2">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-16" />
       </div>
-    </Card>
+    </div>
   );
 }

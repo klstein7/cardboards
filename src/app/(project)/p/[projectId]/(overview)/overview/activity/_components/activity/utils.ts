@@ -31,24 +31,6 @@ export function formatEntityType(type: EntityType): string {
 }
 
 /**
- * Get action color based on action type
- */
-export function getActionColor(action: ActionType): string {
-  switch (action) {
-    case "create":
-      return "text-emerald-500";
-    case "update":
-      return "text-blue-500";
-    case "delete":
-      return "text-rose-500";
-    case "move":
-      return "text-amber-500";
-    default:
-      return "";
-  }
-}
-
-/**
  * Parse changes and get relevant details for display
  */
 export function getChangeDetailsForDisplay(
@@ -115,7 +97,7 @@ export function getChangeDetailsForDisplay(
 
       // Only proceed if we have a valid string
       if (typeof nameValue === "string" && nameValue) {
-        return { text: ` "${nameValue}"` };
+        return { text: ` “${nameValue}”` };
       }
     }
 

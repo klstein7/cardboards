@@ -8,8 +8,4 @@ export type {
   ChangeDetails,
   EntityType,
 } from "./types";
-export {
-  formatEntityType,
-  getActionColor,
-  getChangeDetailsForDisplay,
-} from "./utils";
+export { formatEntityType, getChangeDetailsForDisplay } from "./utils";

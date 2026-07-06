@@ -5,8 +5,7 @@ import { format } from "date-fns";
 
 import { type ProjectUser } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Badge } from "~/components/ui/badge";
-import { getInitials } from "~/lib/utils";
+import { cn, getInitials } from "~/lib/utils";
 
 import { ProjectMembersTableActions } from "./project-members-table-actions";
 
@@ -43,12 +42,16 @@ export const columns: ColumnDef<ProjectUser>[] = [
     cell: ({ row }) => {
       const role = row.original.role;
       return (
-        <Badge
-          variant={role === "admin" ? "default" : "outline"}
-          className="capitalize"
+        <span
+          className={cn(
+            "border px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em]",
+            role === "admin"
+              ? "border-primary text-primary"
+              : "border-border text-muted-foreground",
+          )}
         >
           {role}
-        </Badge>
+        </span>
       );
     },
   },
@@ -57,7 +60,7 @@ export const columns: ColumnDef<ProjectUser>[] = [
     header: "Joined",
     cell: ({ row }) => {
       return (
-        <span className="text-sm text-muted-foreground">
+        <span className="font-mono text-xs text-muted-foreground">
           {format(new Date(row.original.createdAt), "MMM d, yyyy")}
         </span>
       );

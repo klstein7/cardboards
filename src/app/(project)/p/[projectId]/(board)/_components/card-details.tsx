@@ -11,7 +11,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
-import { Separator } from "~/components/ui/separator";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
 import { type Priority } from "~/lib/utils";
@@ -141,7 +140,7 @@ export function CardDetails() {
                 }}
               />
 
-              <div className="rounded-lg border bg-card/50 p-3 backdrop-blur-[2px] sm:p-4">
+              <div className="border-t border-border pt-4 sm:pt-5">
                 <CardDetailsMetadata
                   dueDate={card.data?.dueDate}
                   assignedToId={card.data?.assignedToId}
@@ -208,10 +207,10 @@ export function CardDetails() {
                 />
               </div>
 
-              <Separator className="my-1" />
-
-              <div className="rounded-lg border bg-card/50 p-3 backdrop-blur-[2px] sm:p-4">
-                <h3 className="mb-4 text-sm font-medium">Comments</h3>
+              <div className="border-t border-border pt-4 sm:pt-5">
+                <h3 className="mb-4 text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                  Comments
+                </h3>
                 <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
                 <div className="mt-4">
                   <CardDetailsCommentList cardId={Number(selectedCardId)} />
