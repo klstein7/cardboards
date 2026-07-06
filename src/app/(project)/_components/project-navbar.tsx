@@ -84,7 +84,7 @@ export function ProjectNavbar({ projectId, projectName }: ProjectNavbarProps) {
       <AppHeaderShell className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 md:gap-6">
         <div className="col-start-1 flex min-w-0 items-center gap-3 justify-self-start">
           <BrandHome />
-          <div className="h-6 w-px" aria-hidden />
+          <div className="h-6 w-px bg-border" aria-hidden />
           <div className="min-w-0 max-w-[calc(100vw-13rem)] lg:max-w-[22rem]">
             <ProjectSelector
               projectId={projectId}
