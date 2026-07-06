@@ -187,7 +187,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
       className={cn(
         "flex h-full w-full flex-col overflow-hidden transition-all duration-200",
         isDropping && "bg-primary/[0.04]",
-        column.isCompleted && "bg-primary/5",
         justMoved && "animate-column-moved",
       )}
       style={{
@@ -310,13 +309,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
         />
       </div>
 
-      <div
-        ref={cardListRef}
-        className={cn(
-          "flex-1 overflow-y-auto p-2",
-          column.isCompleted && "bg-primary/5",
-        )}
-      >
+      <div ref={cardListRef} className="flex-1 overflow-y-auto p-2">
         <CardList columnId={column.id} isCompleted={column.isCompleted} />
       </div>
 
