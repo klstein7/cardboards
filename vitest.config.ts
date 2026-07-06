@@ -21,9 +21,4 @@ export default defineConfig({
     },
     include: ["src/**/*.{test,spec}.{js,ts,tsx}"],
   },
-  // resolve: {
-  //   alias: {
-  //     "~": resolve(__dirname, "./src"),
-  //   },
-  // },
 });

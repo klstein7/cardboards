@@ -5,7 +5,6 @@ import {
   ArrowRightIcon,
   ArrowUpIcon,
 } from "lucide-react";
-import { customAlphabet } from "nanoid";
 import { twMerge } from "tailwind-merge";
 
 interface RetryFlashOptions {
@@ -19,12 +18,6 @@ interface RetryFlashOptions {
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-const nanoid = customAlphabet("123456789ABCDEFGHJKLMNPQRSTUVWXYZ", 8);
-
-export function generateId() {
-  return nanoid();
 }
 
 export const PRIORITIES = [
