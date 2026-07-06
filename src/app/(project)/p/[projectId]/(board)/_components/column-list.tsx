@@ -125,7 +125,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
           {columns.data.map((column) => (
             <div
               key={column.id}
-              className="h-full w-[calc(100vw-8px)] flex-shrink-0 sm:w-[300px]"
+              className="h-full w-[calc(100vw-8px)] flex-shrink-0 sm:w-[340px]"
             >
               <ColumnItem column={column} />
             </div>

@@ -142,7 +142,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
 
   if (cards.isPending)
     return (
-      <div className="flex flex-col space-y-4 p-2">
+      <div className="flex flex-col space-y-6 pt-1">
         <CardSkeleton />
         <CardSkeleton />
         <CardSkeleton />
@@ -152,29 +152,15 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   if (!cards.data.length)
     return (
       <div
-        className="group/empty relative mx-1 flex min-h-40 overflow-hidden border border-dashed border-border/70 bg-secondary/[0.08] px-4 py-5 text-muted-foreground transition-colors duration-200 hover:border-border hover:bg-secondary/[0.12]"
+        className="flex min-h-32 items-center gap-3 border border-dashed border-border/70 px-4 py-5 text-muted-foreground transition-colors hover:border-border"
         aria-label={emptyTitle}
       >
-        <div
-          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent opacity-70"
-          aria-hidden
-        />
-        <div
-          className="pointer-events-none absolute -right-8 top-5 h-24 w-24 border border-border/30 bg-background/20 opacity-20"
-          aria-hidden
-        />
-        <div className="flex w-full items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border/80 bg-background/40 text-muted-foreground transition-colors duration-200 group-hover/empty:border-primary/50 group-hover/empty:text-primary">
-            <Inbox className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-foreground/80">
-              {emptyTitle}
-            </p>
-            <p className="mt-1 max-w-56 text-xs leading-5 text-muted-foreground">
-              {emptyDescription}
-            </p>
-          </div>
+        <Inbox className="h-4 w-4 shrink-0" />
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-foreground/80">{emptyTitle}</p>
+          <p className="mt-1 max-w-56 text-xs leading-5 text-muted-foreground">
+            {emptyDescription}
+          </p>
         </div>
       </div>
     );
@@ -182,7 +168,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const sortedCards = cards.data.sort((a, b) => a.order - b.order);
 
   return (
-    <div className="flex max-w-full flex-col px-3 pb-3">
+    <div className="flex max-w-full flex-col pb-2">
       <AnimatePresence initial={false}>
         {sortedCards.map((card, index) => (
           <motion.div
@@ -192,7 +178,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              index < sortedCards.length - 1 ? "mb-2" : "",
+              index < sortedCards.length - 1 ? "mb-5" : "",
               moveCardMutation.isPending && "opacity-80",
             )}
           >

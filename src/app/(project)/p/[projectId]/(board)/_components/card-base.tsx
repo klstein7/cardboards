@@ -1,7 +1,6 @@
 "use client";
 
 import { format, isPast } from "date-fns";
-import { CheckIcon } from "lucide-react";
 import { memo } from "react";
 
 import { type Card } from "~/app/(project)/_types";
@@ -39,62 +38,55 @@ export const CardBase = memo(
     return (
       <div
         className={cn(
-          "group relative flex cursor-grab select-none flex-col gap-2 border border-border border-l-2 bg-transparent p-3 transition-colors",
-          "hover:border-muted-foreground/40",
+          "group/card relative flex cursor-grab select-none flex-col pl-4 transition-colors",
           activeCard?.id === card.id && !isDragging && "opacity-50",
-          isCompleted && "opacity-60",
           isDragging && "pointer-events-none select-none",
           className,
         )}
-        style={{ borderLeftColor: priorityColor, ...style }}
+        style={style}
         onClick={onClick}
       >
-        {isCompleted && (
-          <div className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center bg-primary text-primary-foreground">
-            <CheckIcon className="h-2.5 w-2.5" />
-          </div>
-        )}
+        <span
+          className="absolute left-0 top-[3px] h-3.5 w-0.5"
+          style={{
+            backgroundColor: isCompleted
+              ? "hsl(var(--border))"
+              : priorityColor,
+          }}
+          aria-hidden
+        />
         {children}
 
         <h3
           className={cn(
-            "line-clamp-3 text-[13px] font-medium leading-snug text-card-foreground",
-            isCompleted && "text-muted-foreground line-through",
+            "line-clamp-3 text-[13px] font-medium leading-snug text-card-foreground transition-colors group-hover/card:text-primary",
+            isCompleted &&
+              "text-muted-foreground line-through group-hover/card:text-muted-foreground",
           )}
         >
           {card.title}
         </h3>
 
-        {card.labels && card.labels.length > 0 && (
-          <div className="flex flex-wrap gap-1">
-            {card.labels.map((label, index) => (
-              <span
-                key={index}
-                className="bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
-              >
-                {label}
-              </span>
+        {(card.labels?.length ?? 0) > 0 || dueDate || card.assignedTo ? (
+          <div className="mt-1.5 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
+            {card.labels?.map((label, index) => (
+              <span key={index}>{label}</span>
             ))}
-          </div>
-        )}
-
-        <div className="flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
-          {dueDate && (
-            <span className={cn(isOverdue && "text-destructive")}>
-              {format(dueDate, "MMM d")}
-            </span>
-          )}
-          <span className="ml-auto flex items-center gap-2.5">
+            {dueDate && (
+              <span className={cn(isOverdue && "text-destructive")}>
+                {format(dueDate, "MMM d")}
+              </span>
+            )}
             {card.assignedTo && (
-              <Avatar className="h-4 w-4">
+              <Avatar className="ml-auto h-5 w-5">
                 <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-                <AvatarFallback className="text-[8px]">
+                <AvatarFallback className="text-[9px]">
                   {card.assignedTo.user.name?.[0] ?? ""}
                 </AvatarFallback>
               </Avatar>
             )}
-          </span>
-        </div>
+          </div>
+        ) : null}
       </div>
     );
   },

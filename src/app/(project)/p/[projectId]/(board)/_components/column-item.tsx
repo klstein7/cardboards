@@ -205,7 +205,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
       }}
       aria-describedby={`${column.name}-column`}
     >
-      <div className="flex items-center justify-between px-3 pb-3 pt-4">
+      <div className="flex items-center justify-between px-6 pb-4 pt-5">
         <div className="flex items-center gap-2">
           {column.isCompleted && (
             <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
@@ -309,17 +309,17 @@ export function ColumnItem({ column }: ColumnItemProps) {
         />
       </div>
 
-      <div ref={cardListRef} className="flex-1 overflow-y-auto p-2">
+      <div ref={cardListRef} className="flex-1 overflow-y-auto px-6">
         <CardList columnId={column.id} isCompleted={column.isCompleted} />
       </div>
 
       {!column.isCompleted && (
-        <div className="px-3 pb-3 pt-1">
+        <div className="px-6 pb-5 pt-3">
           <CreateCardDialog
             trigger={
               <Button
                 variant="ghost"
-                className="h-8 w-full justify-start gap-1.5 px-1 text-sm text-muted-foreground hover:bg-transparent hover:text-primary"
+                className="h-8 w-full justify-start gap-1.5 px-0 text-sm text-muted-foreground hover:bg-transparent hover:text-primary"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span>Add card</span>
@@ -330,7 +330,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
         </div>
       )}
       {column.isCompleted && (
-        <div className="flex items-center gap-1.5 px-3 pb-3 pt-1 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
+        <div className="flex items-center gap-1.5 px-6 pb-5 pt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
           <CheckCircle2 className="h-3 w-3" />
           <span>Completed</span>
         </div>

@@ -11,7 +11,7 @@ export default async function BoardLayout({
 
   return (
     <div className="relative flex h-full flex-col overflow-hidden">
-      <div className="flex w-full shrink-0 border-b px-4 py-3 sm:px-6">
+      <div className="flex w-full shrink-0 border-b px-4 py-4 sm:px-6 sm:py-5">
         <BoardToolbar boardId={boardId} />
       </div>
 

@@ -10,8 +10,8 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { BaseToolbar } from "~/components/shared/base-toolbar";
 import { BoardSelector } from "~/components/shared/board-selector";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -35,7 +35,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useBoardSafe, useStrictCurrentProjectId } from "~/lib/hooks";
+import {
+  useBoardSafe,
+  useCachedCardsByCurrentBoard,
+  useColumns,
+  useProjectUsers,
+  useStrictCurrentProjectId,
+} from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
 import { BoardFilters } from "./board-filters";
@@ -56,13 +62,35 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   const [createColumnOpen, setCreateColumnOpen] = useState(false);
   const [deleteBoardOpen, setDeleteBoardOpen] = useState(false);
 
+  const cards = useCachedCardsByCurrentBoard();
+  const columns = useColumns(boardId);
+  const projectUsers = useProjectUsers(projectId);
+
+  const completedColumnIds = new Set(
+    (columns.data ?? [])
+      .filter((column) => column.isCompleted)
+      .map((column) => column.id),
+  );
+  const doneCount = cards.filter((card) =>
+    completedColumnIds.has(card.columnId),
+  ).length;
+
+  const memberList = projectUsers.data ?? [];
+  const visibleMembers = memberList.slice(0, 5);
+  const extraMembers = memberList.length - visibleMembers.length;
+
   const boardContext = (
-    <BoardSelector
-      projectId={projectId}
-      boardId={boardId}
-      label={board?.name ?? "Board"}
-      className="font-medium"
-    />
+    <div className="flex min-w-0 items-baseline gap-4">
+      <BoardSelector
+        projectId={projectId}
+        boardId={boardId}
+        label={board?.name ?? "Board"}
+      />
+      <span className="hidden shrink-0 font-mono text-xs text-muted-foreground md:inline">
+        {cards.length} {cards.length === 1 ? "card" : "cards"} · {doneCount}{" "}
+        done
+      </span>
+    </div>
   );
 
   const mobileFilters = (
@@ -98,17 +126,41 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
     </div>
   );
 
+  const memberStack = memberList.length > 0 && (
+    <div className="hidden items-center md:flex">
+      <div className="flex -space-x-1.5">
+        {visibleMembers.map((projectUser) => (
+          <Avatar
+            key={projectUser.id}
+            title={projectUser.user.name}
+            className="h-6 w-6 ring-2 ring-background"
+          >
+            <AvatarImage src={projectUser.user.imageUrl ?? undefined} />
+            <AvatarFallback className="text-[9px]">
+              {projectUser.user.name.charAt(0)}
+            </AvatarFallback>
+          </Avatar>
+        ))}
+      </div>
+      {extraMembers > 0 && (
+        <span className="ml-2 font-mono text-[10px] text-muted-foreground">
+          +{extraMembers}
+        </span>
+      )}
+    </div>
+  );
+
   const boardSettingsButton = (
     <Button
-      variant="outline"
+      variant="ghost"
       size="sm"
-      className="h-9 shrink-0 gap-1.5 px-3"
+      className="h-8 shrink-0 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
       disabled={!isAdmin}
       aria-label="Board settings"
     >
       <SlidersHorizontal className="h-4 w-4" />
       <span className="hidden sm:inline">Board settings</span>
-      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+      <ChevronDown className="h-3.5 w-3.5" />
     </Button>
   );
 
@@ -178,16 +230,16 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   );
 
   return (
-    <BaseToolbar
-      left={
-        <>
-          <div className="shrink-0">{boardContext}</div>
-          {mobileFilters}
-          {desktopFilters}
-        </>
-      }
-      right={boardActions}
-      className="flex-wrap"
-    />
+    <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
+      <div className="flex min-w-0 flex-1 items-center gap-8">
+        {boardContext}
+        {mobileFilters}
+        {desktopFilters}
+      </div>
+      <div className="ml-auto flex shrink-0 items-center gap-5">
+        {memberStack}
+        {boardActions}
+      </div>
+    </div>
   );
 }

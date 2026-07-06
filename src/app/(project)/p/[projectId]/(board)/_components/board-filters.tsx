@@ -6,7 +6,6 @@ import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { MultiSelect } from "~/components/ui/multi-select";
 import {
   Popover,
@@ -53,10 +52,11 @@ export function BoardFilters() {
   return (
     <div className="flex w-full items-center justify-between gap-4">
       {/* Search input */}
-      <div className="relative w-full max-w-xs flex-shrink">
-        <Input
-          className="h-9 pl-9 pr-8"
-          placeholder="Search"
+      <label className="flex w-full max-w-xs flex-shrink items-center gap-2 border-b border-border pb-1 transition-colors focus-within:border-foreground/60">
+        <Search className="size-3.5 shrink-0 text-muted-foreground" />
+        <input
+          className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          placeholder="Search cards"
           value={search ?? ""}
           onChange={(e) => {
             if (e.target.value === "") {
@@ -66,19 +66,16 @@ export function BoardFilters() {
             }
           }}
         />
-        <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
         {search && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute right-2 top-1/2 size-5 -translate-y-1/2 p-0"
+          <button
+            className="shrink-0 text-muted-foreground transition-colors hover:text-foreground"
             onClick={handleClearSearch}
           >
             <X className="size-3" />
             <span className="sr-only">Clear search</span>
-          </Button>
+          </button>
         )}
-      </div>
+      </label>
 
       {/* Filters */}
       <div className="flex flex-shrink-0 items-center gap-3">

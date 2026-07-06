@@ -11,12 +11,12 @@ interface CardDragPreviewProps {
 
 export function CardDragPreview({ card, isCompleted }: CardDragPreviewProps) {
   return (
-    <div className="w-[325px] max-w-[325px] rotate-1 transform opacity-95 ">
+    <div className="w-[300px] max-w-[300px] rotate-1 transform opacity-95">
       <CardBase
         card={card}
         isDragging={true}
         isCompleted={isCompleted}
-        className="border-2 border-primary/20"
+        className="border border-primary/40 bg-popover p-3 pl-4"
       />
     </div>
   );

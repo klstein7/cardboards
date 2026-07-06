@@ -32,9 +32,13 @@ export function BoardSelector({
 
   if (!boards || boards.length === 0) {
     return (
-      <div className="flex h-9 min-w-0 items-center gap-2 border border-border bg-muted/20 px-2.5">
-        <Kanban className="h-4 w-4 shrink-0 text-muted-foreground" />
-        <span className={cn("min-w-0 truncate text-sm font-medium", className)}>
+      <div className="flex min-w-0 items-center gap-2">
+        <span
+          className={cn(
+            "min-w-0 truncate text-2xl font-light tracking-tight",
+            className,
+          )}
+        >
           {label}
         </span>
       </div>
@@ -43,26 +47,22 @@ export function BoardSelector({
 
   // Sort boards alphabetically
   const sortedBoards = [...boards].sort((a, b) => a.name.localeCompare(b.name));
-  const activeBoard = boardId
-    ? boards.find((board) => board.id === boardId)
-    : undefined;
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex h-9 min-w-0 max-w-full items-center gap-2 border border-border bg-muted/20 px-2.5 text-left transition-colors data-[state=open]:border-primary/70 data-[state=open]:bg-muted/60 hover:border-foreground/25 hover:bg-muted/50 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        className="group flex min-w-0 max-w-full items-center gap-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:text-primary"
         aria-label="Switch board"
       >
-        <Kanban
-          className="h-4 w-4 shrink-0 text-muted-foreground transition-colors group-data-[state=open]:text-primary"
-          style={activeBoard ? { color: activeBoard.color } : undefined}
-        />
         <span
-          className={cn("min-w-0 truncate text-sm font-semibold", className)}
+          className={cn(
+            "min-w-0 truncate text-2xl font-light tracking-tight",
+            className,
+          )}
         >
           {label}
         </span>
-        <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64 p-1.5">
         <DropdownMenuLabel className="px-2 py-1 text-xs font-medium text-muted-foreground">
