@@ -14,7 +14,6 @@ export const env = createEnv({
     CLERK_SECRET_KEY: z.string(),
     WEBHOOK_SECRET: z.string(),
     GOOGLE_GENERATIVE_AI_API_KEY: z.string(),
-    OPENAI_API_KEY: z.string(),
     PUSHER_SECRET: z.string(),
   },
 
@@ -42,7 +41,6 @@ export const env = createEnv({
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     WEBHOOK_SECRET: process.env.WEBHOOK_SECRET,
     GOOGLE_GENERATIVE_AI_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-    OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     PUSHER_SECRET: process.env.PUSHER_SECRET,
     NEXT_PUBLIC_PUSHER_APP_ID: process.env.NEXT_PUBLIC_PUSHER_APP_ID,
     NEXT_PUBLIC_PUSHER_KEY: process.env.NEXT_PUBLIC_PUSHER_KEY,

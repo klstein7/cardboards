@@ -8,16 +8,16 @@ To run the tests, use the following commands:
 
 ```bash
 # Run all tests
-pnpm test
+bun run test
 
 # Run tests in watch mode (continuous)
-pnpm test:watch
+bun run test:watch
 
 # Run tests with the UI
-pnpm test:ui
+bun run test:ui
 
 # Run tests with coverage reporting
-pnpm test:coverage
+bun run test:coverage
 ```
 
 ## Test Organization
@@ -92,4 +92,4 @@ Follow the pattern established for the AuthService to create tests for additiona
 
 ## Coverage Report
 
-The coverage report is available after running `pnpm test:coverage`. The HTML report can be found in `coverage/index.html`.
+The coverage report is available after running `bun run test:coverage`. The HTML report can be found in `coverage/index.html`.

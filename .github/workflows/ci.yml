@@ -14,7 +14,6 @@ jobs:
       CLERK_SECRET_KEY: "sk_test_dummy_key"
       WEBHOOK_SECRET: "whsec_test_dummy_secret"
       GOOGLE_GENERATIVE_AI_API_KEY: "test_google_ai_key"
-      OPENAI_API_KEY: "test_openai_key"
       PUSHER_SECRET: "test_pusher_secret"
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_dummy_key"
       NEXT_PUBLIC_PUSHER_APP_ID: "test_pusher_app_id"
@@ -23,27 +22,22 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: "9.9.0"
+          bun-version: "1.3.9"
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: Run type check
-        run: pnpm typecheck
+        run: bun run typecheck
 
       - name: Run Lint
-        run: pnpm lint
+        run: bun run lint
 
       - name: Run tests
-        run: pnpm test
+        run: bun run test
 
   build:
     runs-on: ubuntu-latest
@@ -53,7 +47,6 @@ jobs:
       CLERK_SECRET_KEY: "sk_test_dummy_key"
       WEBHOOK_SECRET: "whsec_test_dummy_secret"
       GOOGLE_GENERATIVE_AI_API_KEY: "test_google_ai_key"
-      OPENAI_API_KEY: "test_openai_key"
       PUSHER_SECRET: "test_pusher_secret"
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: "pk_test_dummy_key"
       NEXT_PUBLIC_PUSHER_APP_ID: "test_pusher_app_id"
@@ -62,21 +55,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: "20"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: "9.9.0"
+          bun-version: "1.3.9"
 
       - name: Install dependencies
-        run: pnpm install
+        run: bun install --frozen-lockfile
 
       - name: Build
-        run: pnpm build
+        run: bun run build
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}

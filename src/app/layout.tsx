@@ -11,6 +11,7 @@ import Providers from "./providers";
 const font = Jost({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  variable: "--font-sans",
 });
 
 export default function RootLayout({
@@ -19,7 +20,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${font.className} dark`}
+      className={`${font.variable} font-sans dark`}
       suppressHydrationWarning
     >
       <body className="h-full overflow-hidden">

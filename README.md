@@ -42,7 +42,7 @@
 * **Authentication:** [Clerk](https://clerk.com/)
 * **UI:** [Tailwind CSS](https://tailwindcss.com/), [Shadcn/UI](https://ui.shadcn.com/)
 * **Real-time:** [Pusher](https://pusher.com/)
-* **AI:** Google Gemini / OpenAI via Vercel AI SDK
+* **AI:** Google Gemini via Vercel AI SDK
 * **Testing:** [Vitest](https://vitest.dev/)
 
 ## 🚀 Getting Started
@@ -51,8 +51,7 @@ Follow these instructions to get a local copy up and running.
 
 ### Prerequisites
 
-* Node.js (v20.x or later recommended)
-* pnpm (v9.x or later recommended)
+* Bun (v1.x or later recommended)
 * Docker (for running PostgreSQL locally)
 
 ### Installation
@@ -72,7 +71,7 @@ Follow these instructions to get a local copy up and running.
 
 3. **Install dependencies:**
    ```bash
-   pnpm install
+   bun install
    ```
 
 4. **Set up the database:**
@@ -82,12 +81,12 @@ Follow these instructions to get a local copy up and running.
      ```
    * Run Drizzle migrations:
      ```bash
-     pnpm db:migrate
+     bun run db:migrate
      ```
 
 5. **Run the development server:**
    ```bash
-   pnpm dev
+   bun run dev
    ```
    The application should now be running on [http://localhost:3000](http://localhost:3000).
 
@@ -95,12 +94,12 @@ Follow these instructions to get a local copy up and running.
 
 To run the test suite:
 ```bash
-pnpm test
+bun run test
 ```
 
 For coverage reports:
 ```bash
-pnpm test:coverage
+bun run test:coverage
 ```
 
 ## 🤝 Contributing
