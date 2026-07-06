@@ -30,7 +30,7 @@
 * **Modern User Experience:**
   * Secure authentication with Clerk.
   * Real-time notifications.
-  * Responsive design with Dark/Light mode.
+  * Responsive, dark, typographic interface following the [Ledger design language](DESIGN.md).
 
 ## 🛠️ Tech Stack
 
