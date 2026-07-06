@@ -3,6 +3,7 @@
 import { Filter } from "lucide-react";
 
 import { BaseToolbar } from "~/components/shared/base-toolbar";
+import { BoardSelector } from "~/components/shared/board-selector";
 import { Button } from "~/components/ui/button";
 import {
   Drawer,
@@ -12,6 +13,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "~/components/ui/drawer";
+import { useBoardSafe, useStrictCurrentProjectId } from "~/lib/hooks";
 
 import { BoardFilters } from "./board-filters";
 import { FilterIndicator } from "./filter-indicator";
@@ -20,8 +22,19 @@ interface BoardToolbarProps {
   boardId: string;
 }
 
-export function BoardToolbar({ boardId: _boardId }: BoardToolbarProps) {
-  // Mobile filters
+export function BoardToolbar({ boardId }: BoardToolbarProps) {
+  const projectId = useStrictCurrentProjectId();
+  const { data: board } = useBoardSafe(boardId);
+
+  const boardContext = (
+    <BoardSelector
+      projectId={projectId}
+      boardId={boardId}
+      label={board?.name ?? "Board"}
+      className="font-medium"
+    />
+  );
+
   const mobileFilters = (
     <div className="flex items-center gap-2 sm:hidden">
       <Drawer>
@@ -49,7 +62,6 @@ export function BoardToolbar({ boardId: _boardId }: BoardToolbarProps) {
     </div>
   );
 
-  // Desktop filters
   const desktopFilters = (
     <div className="hidden grow sm:block">
       <BoardFilters />
@@ -60,6 +72,8 @@ export function BoardToolbar({ boardId: _boardId }: BoardToolbarProps) {
     <BaseToolbar
       left={
         <>
+          <div className="shrink-0">{boardContext}</div>
+          <div className="mx-1 hidden h-5 w-px bg-border sm:block" />
           {mobileFilters}
           {desktopFilters}
         </>

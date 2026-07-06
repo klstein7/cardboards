@@ -4,7 +4,6 @@ import { HydrateClient, trpc } from "~/trpc/server";
 
 import { ProjectHeader } from "./_components/project-header";
 import { ProjectStats } from "./_components/project-stats";
-import { ProjectTabs } from "./_components/project-tabs";
 
 type Params = Promise<{ projectId: string }>;
 
@@ -47,9 +46,7 @@ export default async function OverviewLayout({
               <ProjectStats projectId={projectId} />
             </div>
 
-            <div className="mt-14">
-              <ProjectTabs projectId={projectId}>{children}</ProjectTabs>
-            </div>
+            <div className="mt-12">{children}</div>
           </div>
         </main>
       </div>

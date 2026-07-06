@@ -1,5 +1,3 @@
-import { TabsContent } from "~/components/ui/tabs";
-
 import { ProjectActivity } from "./_components/activity";
 
 type Params = Promise<{ projectId: string }>;
@@ -16,8 +14,8 @@ export default async function ProjectActivityPage({
   const { page = "1" } = await searchParams;
 
   return (
-    <TabsContent value="activity" className="space-y-4">
+    <div className="space-y-4">
       <ProjectActivity projectId={projectId} currentPage={Number(page)} />
-    </TabsContent>
+    </div>
   );
 }

@@ -7,7 +7,6 @@ import {
 } from "~/app/(project)/_components/project-members-table";
 import { SectionHeader } from "~/components/shared/section-header";
 import { Card, CardContent } from "~/components/ui/card";
-import { TabsContent } from "~/components/ui/tabs";
 import { HydrateClient, trpc } from "~/trpc/server";
 
 type Params = Promise<{ projectId: string }>;
@@ -23,8 +22,8 @@ export default async function ProjectMembersPage({
   await trpc.project.get.prefetch(projectId);
 
   return (
-    <TabsContent value="members" className="space-y-6">
-      <Card className="rounded-lg border bg-card ">
+    <div className="space-y-6">
+      <Card className="border bg-card">
         <SectionHeader
           title="Project Members"
           icon={UsersIcon}
@@ -36,6 +35,6 @@ export default async function ProjectMembersPage({
           </HydrateClient>
         </CardContent>
       </Card>
-    </TabsContent>
+    </div>
   );
 }

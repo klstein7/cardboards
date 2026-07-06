@@ -28,7 +28,7 @@ export default async function SettingsLayout({
   return (
     <HydrateClient>
       <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex w-full shrink-0 border-b border-t px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex w-full shrink-0 border-b px-4 py-3 sm:px-6 lg:px-8">
           <SettingsToolbar projectId={projectId} className="max-w-7xl" />
         </div>
 

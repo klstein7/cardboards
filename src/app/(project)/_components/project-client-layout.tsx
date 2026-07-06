@@ -1,13 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
-import { cn } from "~/lib/utils";
-
-import { DynamicHeader } from "./dynamic-header";
-import { MobileNav } from "./mobile-nav";
+import { ProjectNavbar } from "./project-navbar";
 import { ProjectRealtimeProvider } from "./project-realtime-provider";
-import { ProjectSidebar } from "./project-sidebar";
 
 interface ProjectClientLayoutProps {
   children: React.ReactNode;
@@ -20,32 +16,11 @@ export function ProjectClientLayout({
   projectId,
   project,
 }: ProjectClientLayoutProps) {
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
-
   return (
-    <div
-      className="flex h-[100dvh] w-full overflow-hidden"
-      style={{ "--header-height": "40px" } as React.CSSProperties}
-    >
-      <ProjectSidebar
-        projectId={projectId}
-        isExpanded={isSidebarExpanded}
-        setIsExpanded={setIsSidebarExpanded}
-      />
-
-      <div
-        className={cn(
-          "h-full flex-1 overflow-hidden transition-all duration-500 ease-in-out",
-          isSidebarExpanded ? "sm:ml-[240px]" : "sm:ml-[60px]",
-        )}
-      >
-        <div className="sticky top-0 z-10 w-full border-b border-border bg-background">
-          <DynamicHeader projectId={projectId} projectName={project.name} />
-        </div>
-        <MobileNav projectId={projectId} />
-        <div className="h-[calc(100%-var(--header-height))] overflow-y-auto">
-          <ProjectRealtimeProvider>{children}</ProjectRealtimeProvider>
-        </div>
+    <div className="flex h-[100dvh] w-full flex-col overflow-hidden">
+      <ProjectNavbar projectId={projectId} projectName={project.name} />
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <ProjectRealtimeProvider>{children}</ProjectRealtimeProvider>
       </div>
     </div>
   );
