@@ -10,7 +10,7 @@ export function ProjectItem({ project }: { project: Project }) {
 
   return (
     <Link
-      href={`/p/${project.id}/overview/boards`}
+      href={`/p/${project.id}`}
       className="group flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2 py-5 focus-visible:outline-none"
       aria-label={`Open ${project.name} project`}
     >
