@@ -121,7 +121,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
         )}
         tabIndex={0}
       >
-        <div className="flex h-full w-fit items-stretch divide-x divide-border">
+        <div className="mx-auto flex h-full w-fit items-stretch divide-x divide-border">
           {columns.data.map((column) => (
             <div
               key={column.id}

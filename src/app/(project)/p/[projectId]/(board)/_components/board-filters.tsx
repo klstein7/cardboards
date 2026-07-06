@@ -1,23 +1,15 @@
 "use client";
 
-import { Filter, Search, X } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { Button } from "~/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "~/components/ui/popover";
 import {
   useCachedCardsByCurrentBoard,
   useProjectUsers,
   useStrictCurrentProjectId,
 } from "~/lib/hooks";
 import { cn } from "~/lib/utils";
-
-import { FilterIndicator } from "./filter-indicator";
 
 export function BoardSearch({ className }: { className?: string }) {
   const [search, setSearch] = useQueryState("search", parseAsString);
@@ -152,27 +144,6 @@ function FilterControls() {
         )}
       </div>
     </div>
-  );
-}
-
-export function BoardFilterMenu() {
-  return (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative h-8 w-8 text-muted-foreground hover:text-foreground"
-          aria-label="Filter cards"
-        >
-          <Filter className="h-4 w-4" />
-          <FilterIndicator className="absolute -right-1 -top-1" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-72 p-4" align="end">
-        <FilterControls />
-      </PopoverContent>
-    </Popover>
   );
 }
 

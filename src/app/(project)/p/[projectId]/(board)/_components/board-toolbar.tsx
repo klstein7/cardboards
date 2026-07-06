@@ -37,7 +37,7 @@ import {
 } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
-import { BoardFilterMenu, BoardFilters, BoardSearch } from "./board-filters";
+import { BoardFilters, BoardSearch } from "./board-filters";
 import { CreateCardDialog } from "./create-card-dialog";
 import { CreateColumnDialog } from "./create-column-dialog";
 import { DeleteBoardDialog } from "./delete-board-dialog";
@@ -119,9 +119,8 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   );
 
   const desktopFilters = (
-    <div className="hidden items-center gap-1 sm:flex">
+    <div className="hidden items-center sm:flex">
       <BoardSearch className="w-44" />
-      <BoardFilterMenu />
     </div>
   );
 
