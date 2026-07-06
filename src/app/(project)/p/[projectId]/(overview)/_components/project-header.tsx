@@ -73,7 +73,7 @@ export function ProjectHeader({ projectId, className }: ProjectHeaderProps) {
 
       <div className="flex items-center gap-2">
         {isAdmin && (
-          <Link href={`/p/${projectId}/settings/members`}>
+          <Link href={`/p/${projectId}/overview/members`}>
             <Button variant="outline" size="sm" className="gap-2">
               <UserPlus className="h-4 w-4" />
               <span className="hidden sm:inline">Invite</span>

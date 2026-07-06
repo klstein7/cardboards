@@ -2,9 +2,6 @@ import { type Metadata } from "next";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { SettingsSidebar } from "../_components/settings-sidebar";
-import { SettingsToolbar } from "../_components/settings-toolbar";
-
 type Params = Promise<{ projectId: string }>;
 
 export const metadata: Metadata = {
@@ -27,17 +24,21 @@ export default async function SettingsLayout({
 
   return (
     <HydrateClient>
-      <div className="flex h-full flex-col overflow-hidden">
-        <div className="flex w-full shrink-0 border-b px-4 py-3 sm:px-6 lg:px-8">
-          <SettingsToolbar projectId={projectId} className="max-w-7xl" />
-        </div>
+      <div className="flex h-full w-full flex-col overflow-hidden">
+        <main className="flex-1 overflow-auto px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-5xl">
+            <div className="pt-10 md:pt-14">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Project
+              </p>
+              <h1 className="mt-2 text-4xl font-extralight tracking-tight md:text-5xl">
+                Settings
+              </h1>
+            </div>
 
-        <div className="flex flex-1 overflow-hidden md:flex-row">
-          <SettingsSidebar projectId={projectId} className="shrink-0" />
-          <main className="max-w-5xl flex-1 overflow-auto px-4 pb-6 pt-6 sm:px-6 lg:px-8">
-            {children}
-          </main>
-        </div>
+            <div className="mt-12">{children}</div>
+          </div>
+        </main>
       </div>
     </HydrateClient>
   );
