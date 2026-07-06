@@ -1,12 +1,10 @@
 "use client";
 
-import { Nunito } from "next/font/google";
 import Link from "next/link";
 
+import { brandFont } from "~/components/brand/brand-font";
 import { BrandIcon } from "~/components/brand/brand-icon";
 import { cn } from "~/lib/utils";
-
-const nunito = Nunito({ subsets: ["latin"], weight: ["800"] });
 
 interface BrandHomeProps {
   onNavigate?: () => void;
@@ -26,7 +24,10 @@ export function BrandHome({ onNavigate, className }: BrandHomeProps) {
     >
       <BrandIcon variant="xsmall" />
       <span
-        className={cn("hidden text-lg font-extrabold sm:inline", nunito.className)}
+        className={cn(
+          "hidden text-lg font-bold tracking-[-0.025em] sm:inline",
+          brandFont.className,
+        )}
       >
         cardboards
       </span>

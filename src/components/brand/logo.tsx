@@ -1,14 +1,9 @@
-import { Nunito } from "next/font/google";
 import { type HTMLAttributes } from "react";
 
 import { cn } from "~/lib/utils";
 
+import { brandFont } from "./brand-font";
 import { BrandIcon } from "./brand-icon";
-
-const nunito = Nunito({
-  subsets: ["latin"],
-  weight: ["400", "700", "800", "900", "1000"],
-});
 
 interface LogoProps extends HTMLAttributes<HTMLDivElement> {
   variant?: "default" | "large" | "small";
@@ -39,9 +34,9 @@ export function Logo({
       {showText && (
         <span
           className={cn(
-            "font-extrabold text-foreground dark:text-foreground",
+            "font-bold tracking-[-0.035em] text-foreground dark:text-foreground",
             textSizeClasses[variant],
-            nunito.className,
+            brandFont.className,
           )}
         >
           cardboards

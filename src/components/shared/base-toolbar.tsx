@@ -25,8 +25,12 @@ export function BaseToolbar({
         className,
       )}
     >
-      {left && <div className="flex items-center gap-2">{left}</div>}
-      {right && <div className="ml-auto flex items-center gap-2">{right}</div>}
+      {left && (
+        <div className="flex min-w-0 flex-1 items-center gap-4">{left}</div>
+      )}
+      {right && (
+        <div className="ml-auto flex shrink-0 items-center gap-2">{right}</div>
+      )}
     </div>
   );
 }

@@ -3,12 +3,11 @@ import { ActivityIcon } from "lucide-react";
 import { SectionHeader } from "~/components/shared/section-header";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { TabsContent } from "~/components/ui/tabs";
 
 export default function Loading() {
   return (
-    <TabsContent value="activity" className="space-y-4">
-      <Card className="overflow-hidden border  transition-all ">
+    <div className="space-y-4">
+      <Card className="overflow-hidden border transition-all">
         <SectionHeader title="Project Activity" icon={ActivityIcon} />
         <CardContent className="p-0">
           <div>
@@ -27,6 +26,6 @@ export default function Loading() {
           </div>
         </CardContent>
       </Card>
-    </TabsContent>
+    </div>
   );
 }

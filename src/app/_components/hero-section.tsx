@@ -2,8 +2,10 @@ import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { FadeIn } from "~/components/animations/fade-in";
+import { brandFont } from "~/components/brand/brand-font";
 import { BrandIcon } from "~/components/brand/brand-icon";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 import { LandingBoardPreview } from "./landing-board-preview";
 
@@ -16,7 +18,12 @@ export function HeroSection() {
       <FadeIn>
         <div className="flex items-center gap-2">
           <BrandIcon variant="small" />
-          <span className="text-lg font-semibold tracking-tight">
+          <span
+            className={cn(
+              "text-lg font-bold tracking-[-0.025em]",
+              brandFont.className,
+            )}
+          >
             cardboards
           </span>
         </div>

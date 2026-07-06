@@ -1,12 +1,9 @@
 "use client";
 
-import { FileText } from "lucide-react";
-import Link from "next/link";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "~/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -17,8 +14,6 @@ import {
 import { Separator } from "~/components/ui/separator";
 import { useCard } from "~/lib/hooks";
 import { useUpdateCard } from "~/lib/hooks/card/use-update-card";
-import { useCurrentBoardId } from "~/lib/hooks/utils/use-current-board-id";
-import { useCurrentProjectId } from "~/lib/hooks/utils/use-current-project-id";
 import { type Priority } from "~/lib/utils";
 
 import { CardDetailsCommentList } from "./card-details-comment-list";
@@ -34,8 +29,6 @@ export function CardDetails() {
   const [selectedCardId, setSelectedCardId] = useQueryState("cardId");
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
-  const projectId = useCurrentProjectId();
-  const boardId = useCurrentBoardId();
 
   const card = useCard(selectedCardId ? Number(selectedCardId) : null);
   const updateCardMutation = useUpdateCard();
@@ -113,34 +106,13 @@ export function CardDetails() {
         ) : (
           <>
             <DialogHeader className="pb-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <DialogTitle className="sr-only">
-                    Card Details - CARD-{card.data?.id}
-                  </DialogTitle>
-                  <CardDetailsHeader
-                    id={card.data?.id}
-                    priority={card.data?.priority}
-                  />
-                </div>
-                <div className="flex items-center gap-2">
-                  {selectedCardId && projectId && boardId && (
-                    <Link
-                      href={`/p/${projectId}/b/${boardId}/c/${selectedCardId}`}
-                      className="hidden sm:ml-auto sm:block"
-                    >
-                      <Button
-                        variant="outline"
-                        size={"sm"}
-                        className="mr-6 w-full gap-1.5 text-xs sm:w-auto"
-                      >
-                        <FileText className="h-4 w-4" />
-                        View full page
-                      </Button>
-                    </Link>
-                  )}
-                </div>
-              </div>
+              <DialogTitle className="sr-only">
+                Card Details - CARD-{card.data?.id}
+              </DialogTitle>
+              <CardDetailsHeader
+                id={card.data?.id}
+                priority={card.data?.priority}
+              />
               <DialogDescription className="mt-1.5">
                 View or edit card details below
               </DialogDescription>
@@ -169,7 +141,7 @@ export function CardDetails() {
                 }}
               />
 
-              <div className="rounded-lg border bg-card/50 p-3  backdrop-blur-[2px] sm:p-4">
+              <div className="rounded-lg border bg-card/50 p-3 backdrop-blur-[2px] sm:p-4">
                 <CardDetailsMetadata
                   dueDate={card.data?.dueDate}
                   assignedToId={card.data?.assignedToId}
@@ -238,7 +210,7 @@ export function CardDetails() {
 
               <Separator className="my-1" />
 
-              <div className="rounded-lg border bg-card/50 p-3  backdrop-blur-[2px] sm:p-4">
+              <div className="rounded-lg border bg-card/50 p-3 backdrop-blur-[2px] sm:p-4">
                 <h3 className="mb-4 text-sm font-medium">Comments</h3>
                 <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
                 <div className="mt-4">

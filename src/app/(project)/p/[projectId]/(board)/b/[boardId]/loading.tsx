@@ -12,7 +12,7 @@ export default function BoardPageSkeleton() {
         <div className="relative h-full w-full">
           {/* Left scroll button */}
           <button
-            className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background  sm:flex"
+            className="absolute left-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background sm:flex"
             disabled
           >
             <ChevronLeft className="h-6 w-6 text-muted-foreground" />
@@ -27,7 +27,7 @@ export default function BoardPageSkeleton() {
                   key={i}
                   className="h-full w-[calc(100vw-24px)] flex-shrink-0 sm:w-[325px]"
                 >
-                  <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card/30 ">
+                  <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card/30">
                     {/* Column header */}
                     <div className="flex items-center justify-between border-b bg-card/50 p-3">
                       <div className="flex items-center gap-2">
@@ -43,7 +43,7 @@ export default function BoardPageSkeleton() {
                         {[1, 2].map((j) => (
                           <div
                             key={j}
-                            className="group relative flex flex-col gap-3 rounded-lg border border-l-4 bg-card/50 p-4 "
+                            className="group relative flex flex-col gap-3 rounded-lg border border-l-4 bg-card/50 p-4"
                           >
                             {/* Card header */}
                             <div className="flex items-center justify-between text-xs">
@@ -89,20 +89,12 @@ export default function BoardPageSkeleton() {
                   </div>
                 </div>
               ))}
-
-              {/* Add column button */}
-              <div className="flex h-11 w-[325px] flex-shrink-0 items-center justify-center rounded-md border border-dashed bg-card/20 p-3">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-5 w-5 rounded-none" />
-                  <Skeleton className="h-5 w-28 rounded" />
-                </div>
-              </div>
             </div>
           </div>
 
           {/* Right scroll button */}
           <button
-            className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background  sm:flex"
+            className="absolute right-2 top-1/2 z-10 hidden h-10 w-10 -translate-y-1/2 items-center justify-center border border-border bg-background sm:flex"
             disabled
           >
             <ChevronRight className="h-6 w-6 text-muted-foreground" />
@@ -118,7 +110,7 @@ export default function BoardPageSkeleton() {
         {/* Card Details Skeleton - Hidden by default but included for structure matching */}
         <div className="hidden">
           <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-            <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6  duration-200 sm:rounded-lg">
+            <div className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 duration-200 sm:rounded-lg">
               {/* Header skeleton */}
               <div className="flex items-center gap-2 pb-4">
                 <Skeleton className="h-6 w-20 rounded-md" />
@@ -128,7 +120,7 @@ export default function BoardPageSkeleton() {
 
               <div className="flex flex-col gap-6">
                 {/* Title skeleton */}
-                <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
+                <div className="rounded-lg border bg-card/50 p-4 backdrop-blur-[2px]">
                   <div className="flex flex-col gap-1">
                     <Skeleton className="h-4 w-12" />
                     <Skeleton className="h-8 w-full" />
@@ -136,7 +128,7 @@ export default function BoardPageSkeleton() {
                 </div>
 
                 {/* Description skeleton */}
-                <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
+                <div className="rounded-lg border bg-card/50 p-4 backdrop-blur-[2px]">
                   <div className="flex flex-col gap-1">
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-24 w-full" />
@@ -144,7 +136,7 @@ export default function BoardPageSkeleton() {
                 </div>
 
                 {/* Metadata skeleton */}
-                <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
+                <div className="rounded-lg border bg-card/50 p-4 backdrop-blur-[2px]">
                   <Skeleton className="mb-3 h-5 w-16" />
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="flex flex-col gap-1">

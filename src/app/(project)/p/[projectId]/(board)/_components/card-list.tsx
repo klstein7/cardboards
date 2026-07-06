@@ -5,7 +5,7 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { FileText, Plus } from "lucide-react";
+import { Inbox } from "lucide-react";
 import { useEffect } from "react";
 
 import {
@@ -15,7 +15,6 @@ import {
   type ColumnDropData,
   type DragData,
 } from "~/app/(project)/_types";
-import { Button } from "~/components/ui/button";
 import { useCards, useMoveCard } from "~/lib/hooks";
 import { cn, triggerPostMoveFlash } from "~/lib/utils";
 import { useTRPC } from "~/trpc/client";
@@ -33,6 +32,10 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const moveCardMutation = useMoveCard();
   const queryClient = useQueryClient();
   const trpc = useTRPC();
+  const emptyTitle = isCompleted ? "Nothing completed yet" : "No cards yet";
+  const emptyDescription = isCompleted
+    ? "Finished cards will collect here."
+    : "Drop cards here or add one below.";
 
   useEffect(() => {
     return monitorForElements({
@@ -148,19 +151,31 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
 
   if (!cards.data.length)
     return (
-      <div className="flex h-36 flex-1 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-muted bg-card/20 px-3 py-6 text-xs text-muted-foreground transition-all hover:border-muted/70 hover:bg-card/30 sm:px-4 sm:py-8 sm:text-sm">
-        <FileText className="h-6 w-6 opacity-50 sm:h-8 sm:w-8" />
-        <p className="text-center font-medium">No cards in this column</p>
-        {!isCompleted && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="mt-1 h-8 text-xs font-medium text-muted-foreground hover:bg-secondary/60"
-          >
-            <Plus className="mr-1.5 h-3.5 w-3.5" />
-            Add card
-          </Button>
-        )}
+      <div
+        className="group/empty relative mx-1 flex min-h-40 overflow-hidden border border-dashed border-border/70 bg-secondary/[0.08] px-4 py-5 text-muted-foreground transition-colors duration-200 hover:border-border hover:bg-secondary/[0.12]"
+        aria-label={emptyTitle}
+      >
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/45 to-transparent opacity-70"
+          aria-hidden
+        />
+        <div
+          className="pointer-events-none absolute -right-8 top-5 h-24 w-24 border border-border/30 bg-background/20 opacity-20"
+          aria-hidden
+        />
+        <div className="flex w-full items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center border border-border/80 bg-background/40 text-muted-foreground transition-colors duration-200 group-hover/empty:border-primary/50 group-hover/empty:text-primary">
+            <Inbox className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-foreground/80">
+              {emptyTitle}
+            </p>
+            <p className="mt-1 max-w-56 text-xs leading-5 text-muted-foreground">
+              {emptyDescription}
+            </p>
+          </div>
+        </div>
       </div>
     );
 

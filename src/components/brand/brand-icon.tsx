@@ -1,6 +1,4 @@
-"use client";
-
-import { type HTMLAttributes, useId } from "react";
+import { type HTMLAttributes } from "react";
 
 import { cn } from "~/lib/utils";
 
@@ -20,11 +18,6 @@ export function BrandIcon({
   className,
   ...props
 }: BrandIconProps) {
-  const rawId = useId();
-  const id = rawId.replace(/:/g, "");
-  const cutFront = `${id}-cutFront`;
-  const cutMid = `${id}-cutMid`;
-
   return (
     <div
       className={cn("relative shrink-0", sizeClassName[variant], className)}
@@ -37,54 +30,40 @@ export function BrandIcon({
         role="img"
         aria-label="cardboards"
       >
-        <defs>
-          <mask id={cutFront}>
-            <rect x="-100" y="-100" width="500" height="500" fill="white" />
-            <rect
-              x="6"
-              y="6"
-              width="76"
-              height="124"
-              rx="18"
-              fill="black"
-              stroke="black"
-              strokeWidth="12"
-            />
-          </mask>
-          <mask id={cutMid}>
-            <rect x="-100" y="-100" width="500" height="500" fill="white" />
-            <rect
-              x="38"
-              y="-0.8"
-              width="76"
-              height="124"
-              rx="18"
-              fill="black"
-              stroke="black"
-              strokeWidth="12"
-            />
-          </mask>
-        </defs>
-        <g transform="skewY(12)">
+        <g transform="translate(3 1)">
           <rect
-            x="70"
-            y="-7.6"
-            width="76"
-            height="124"
-            rx="18"
-            fill="#48484C"
-            mask={`url(#${cutMid})`}
+            x="82"
+            y="19"
+            width="50"
+            height="86"
+            rx="13"
+            fill="#3F3F46"
+            stroke="hsl(var(--background))"
+            strokeWidth="7"
+            transform="rotate(11 107 62)"
           />
           <rect
-            x="38"
-            y="-0.8"
-            width="76"
-            height="124"
-            rx="18"
-            fill="#8E8E93"
-            mask={`url(#${cutFront})`}
+            x="50"
+            y="31"
+            width="58"
+            height="96"
+            rx="14"
+            fill="hsl(var(--primary))"
+            stroke="hsl(var(--background))"
+            strokeWidth="7"
+            transform="rotate(11 79 79)"
           />
-          <rect x="6" y="6" width="76" height="124" rx="18" fill="#FAFAFA" />
+          <rect
+            x="18"
+            y="45"
+            width="72"
+            height="92"
+            rx="15"
+            fill="#FAFAFA"
+            stroke="hsl(var(--background))"
+            strokeWidth="7"
+            transform="rotate(11 54 91)"
+          />
         </g>
       </svg>
     </div>

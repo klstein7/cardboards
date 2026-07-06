@@ -34,14 +34,20 @@ import { type ColumnCreate, ColumnCreateSchema } from "~/server/zod";
 interface CreateColumnDialogProps {
   boardId: string;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function CreateColumnDialog({
   boardId,
   trigger,
+  open,
+  onOpenChange,
 }: CreateColumnDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const isAdmin = useIsAdmin();
+  const dialogOpen = open ?? internalOpen;
+  const setDialogOpen = onOpenChange ?? setInternalOpen;
 
   const form = useForm<ColumnCreate>({
     resolver: zodResolver(ColumnCreateSchema),
@@ -62,23 +68,28 @@ export function CreateColumnDialog({
       ...data,
       description: data.description ?? undefined,
     });
-    setOpen(false);
+    setDialogOpen(false);
   }
 
+  const triggerContent =
+    trigger === undefined ? (
+      <Button
+        variant="outline"
+        className="flex items-center justify-center gap-2 bg-muted/25 py-6 hover:bg-muted/50"
+        disabled={!isAdmin}
+      >
+        <Plus className="size-4" />
+        Add column
+      </Button>
+    ) : (
+      trigger
+    );
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button
-            variant="outline"
-            className="flex items-center justify-center gap-2 bg-muted/25 py-6 hover:bg-muted/50"
-            disabled={!isAdmin}
-          >
-            <Plus className="size-4" />
-            Add column
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      {triggerContent && (
+        <DialogTrigger asChild>{triggerContent}</DialogTrigger>
+      )}
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Create a new column</DialogTitle>
@@ -159,7 +170,7 @@ export function CreateColumnDialog({
           </form>
         </Form>
         <DialogFooter>
-          <Button variant="secondary" onClick={() => setOpen(false)}>
+          <Button variant="secondary" onClick={() => setDialogOpen(false)}>
             Cancel
           </Button>
           <Button

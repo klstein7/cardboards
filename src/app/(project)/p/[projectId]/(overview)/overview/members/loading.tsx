@@ -3,12 +3,11 @@ import { UsersIcon } from "lucide-react";
 import { SectionHeader } from "~/components/shared/section-header";
 import { Card, CardContent } from "~/components/ui/card";
 import { Skeleton } from "~/components/ui/skeleton";
-import { TabsContent } from "~/components/ui/tabs";
 
 export default function Loading() {
   return (
-    <TabsContent value="members" className="space-y-6">
-      <Card className="rounded-lg border bg-card ">
+    <div className="space-y-6">
+      <Card className="rounded-lg border bg-card">
         <SectionHeader
           title="Project Members"
           icon={UsersIcon}
@@ -46,6 +45,6 @@ export default function Loading() {
           </div>
         </CardContent>
       </Card>
-    </TabsContent>
+    </div>
   );
 }
