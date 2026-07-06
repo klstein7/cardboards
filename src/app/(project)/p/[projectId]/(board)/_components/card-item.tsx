@@ -35,17 +35,10 @@ import {
 } from "~/components/ui/context-menu";
 import { DropIndicator } from "~/components/ui/drop-indicator";
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "~/components/ui/tooltip";
-import {
   useAssignToCurrentUser,
   useDeleteCard,
   useDuplicateCard,
 } from "~/lib/hooks";
-import { useIsMobile } from "~/lib/hooks/utils";
 import { cn } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
@@ -74,9 +67,7 @@ export function CardItem({
     useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
-  const [isHovered, setIsHovered] = useState(false);
   const [dragState, setDragState] = useState<DragState>({ type: "idle" });
-  const isMobile = useIsMobile();
 
   const [, setSelectedCardId] = useQueryState("cardId");
 
@@ -182,42 +173,13 @@ export function CardItem({
     <div
       ref={cardElementRef}
       className={cn(
-        "relative flex cursor-grab select-none flex-col gap-2.5 p-0.5 transition-all duration-300",
+        "relative flex cursor-grab select-none flex-col transition-all duration-300",
         activeCard?.id === card.id && "cursor-grabbing opacity-50",
       )}
       onClick={() => setSelectedCardId(card.id.toString())}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
       data-card-id={card.id}
       aria-label={`Card: ${card.title}`}
     >
-      {isHovered && !activeCard && !isMobile && (
-        <div
-          className="absolute -right-2 -top-2 z-10 flex gap-1.5 opacity-0 transition-all duration-200 group-hover:opacity-100"
-          style={{
-            opacity: isHovered ? 1 : 0,
-            transform: isHovered ? "translateY(0)" : "translateY(-5px)",
-          }}
-        >
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="flex h-7 w-7 items-center justify-center border border-border bg-background text-muted-foreground transition-colors duration-200 hover:border-foreground/60 hover:text-foreground"
-                onClick={async (e) => {
-                  e.stopPropagation();
-                  await setSelectedCardId(card.id.toString());
-                }}
-              >
-                <Edit className="h-3.5 w-3.5" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="font-medium">
-              Edit Card
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      )}
-
       <CardBase
         card={card}
         isDragging={activeCard?.id === card.id}
@@ -235,87 +197,85 @@ export function CardItem({
   );
 
   return (
-    <TooltipProvider>
-      <AlertDialog>
-        <ContextMenu modal={false}>
-          <ContextMenuTrigger
-            asChild
-            disabled={
-              dragState.type === "preview" || dragState.type === "dragging"
+    <AlertDialog>
+      <ContextMenu modal={false}>
+        <ContextMenuTrigger
+          asChild
+          disabled={
+            dragState.type === "preview" || dragState.type === "dragging"
+          }
+        >
+          {cardContent}
+        </ContextMenuTrigger>
+
+        <ContextMenuContent className="min-w-[220px] border-border p-2 backdrop-blur-sm">
+          <ContextMenuItem
+            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            onClick={() => setSelectedCardId(card.id.toString())}
+          >
+            <Edit className="size-4 text-muted-foreground" />
+            <span>Edit card</span>
+          </ContextMenuItem>
+
+          <ContextMenuItem
+            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            onClick={() =>
+              assignToCurrentUserMutation.mutate({ cardId: card.id })
             }
           >
-            {cardContent}
-          </ContextMenuTrigger>
+            <UserCircle className="size-4 text-muted-foreground" />
+            <span>Assign to me</span>
+          </ContextMenuItem>
 
-          <ContextMenuContent className="min-w-[220px] border-border p-2 backdrop-blur-sm">
+          <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+          <ContextMenuItem
+            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
+          >
+            <Copy className="size-4 text-muted-foreground" />
+            <span>Duplicate</span>
+          </ContextMenuItem>
+
+          <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
+
+          <AlertDialogTrigger asChild>
             <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
-              onClick={() => setSelectedCardId(card.id.toString())}
+              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
+              onSelect={(e) => e.preventDefault()}
             >
-              <Edit className="size-4 text-muted-foreground" />
-              <span>Edit card</span>
+              <Trash className="size-4" />
+              <span>Delete</span>
             </ContextMenuItem>
+          </AlertDialogTrigger>
+        </ContextMenuContent>
+      </ContextMenu>
 
-            <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
-              onClick={() =>
-                assignToCurrentUserMutation.mutate({ cardId: card.id })
-              }
-            >
-              <UserCircle className="size-4 text-muted-foreground" />
-              <span>Assign to me</span>
-            </ContextMenuItem>
+      {/* Custom Drag Preview Portal */}
+      {dragState.type === "preview" &&
+        createPortal(
+          <CardDragPreview card={card} isCompleted={isCompleted} />,
+          dragState.container,
+        )}
 
-            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
-              onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
-            >
-              <Copy className="size-4 text-muted-foreground" />
-              <span>Duplicate</span>
-            </ContextMenuItem>
-
-            <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
-
-            <AlertDialogTrigger asChild>
-              <ContextMenuItem
-                className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
-                onSelect={(e) => e.preventDefault()}
-              >
-                <Trash className="size-4" />
-                <span>Delete</span>
-              </ContextMenuItem>
-            </AlertDialogTrigger>
-          </ContextMenuContent>
-        </ContextMenu>
-
-        {/* Custom Drag Preview Portal */}
-        {dragState.type === "preview" &&
-          createPortal(
-            <CardDragPreview card={card} isCompleted={isCompleted} />,
-            dragState.container,
-          )}
-
-        <AlertDialogContent className="max-w-md backdrop-blur-sm">
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete card</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this card? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => deleteCardMutation.mutate({ cardId: card.id })}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </TooltipProvider>
+      <AlertDialogContent className="max-w-md backdrop-blur-sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete card</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete this card? This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => deleteCardMutation.mutate({ cardId: card.id })}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

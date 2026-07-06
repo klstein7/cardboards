@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  Filter,
-  Pencil,
-  Plus,
-  SlidersHorizontal,
-  Trash2,
-} from "lucide-react";
+import { Filter, Pencil, Plus, SlidersHorizontal, Trash2 } from "lucide-react";
 import { useState } from "react";
 
 import { BoardSelector } from "~/components/shared/board-selector";
@@ -44,7 +37,8 @@ import {
 } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
-import { BoardFilters } from "./board-filters";
+import { BoardFilterMenu, BoardFilters, BoardSearch } from "./board-filters";
+import { CreateCardDialog } from "./create-card-dialog";
 import { CreateColumnDialog } from "./create-column-dialog";
 import { DeleteBoardDialog } from "./delete-board-dialog";
 import { EditBoardDialog } from "./edit-board-dialog";
@@ -75,6 +69,10 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
     completedColumnIds.has(card.columnId),
   ).length;
 
+  const firstOpenColumn = [...(columns.data ?? [])]
+    .filter((column) => !column.isCompleted)
+    .sort((a, b) => a.order - b.order)[0];
+
   const memberList = projectUsers.data ?? [];
   const visibleMembers = memberList.slice(0, 5);
   const extraMembers = memberList.length - visibleMembers.length;
@@ -98,13 +96,13 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
       <Drawer>
         <DrawerTrigger asChild>
           <Button
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1.5"
+            variant="ghost"
+            size="icon"
+            className="relative h-8 w-8 text-muted-foreground hover:text-foreground"
+            aria-label="Filter cards"
           >
             <Filter className="h-4 w-4" />
-            <span>Filters</span>
-            <FilterIndicator className="ml-1.5" />
+            <FilterIndicator className="absolute -right-1 -top-1" />
           </Button>
         </DrawerTrigger>
         <DrawerContent className="px-4 pb-6">
@@ -121,8 +119,9 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   );
 
   const desktopFilters = (
-    <div className="hidden grow sm:block">
-      <BoardFilters />
+    <div className="hidden items-center gap-1 sm:flex">
+      <BoardSearch className="w-44" />
+      <BoardFilterMenu />
     </div>
   );
 
@@ -150,17 +149,27 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
     </div>
   );
 
+  const newCardButton = firstOpenColumn && (
+    <CreateCardDialog
+      columnId={firstOpenColumn.id}
+      trigger={
+        <Button className="h-8 shrink-0 gap-1.5 px-3 text-sm font-medium">
+          <Plus className="h-3.5 w-3.5" />
+          <span>New card</span>
+        </Button>
+      }
+    />
+  );
+
   const boardSettingsButton = (
     <Button
       variant="ghost"
-      size="sm"
-      className="h-8 shrink-0 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
+      size="icon"
+      className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
       disabled={!isAdmin}
       aria-label="Board settings"
     >
       <SlidersHorizontal className="h-4 w-4" />
-      <span className="hidden sm:inline">Board settings</span>
-      <ChevronDown className="h-3.5 w-3.5" />
     </Button>
   );
 
@@ -231,13 +240,12 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
 
   return (
     <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
-      <div className="flex min-w-0 flex-1 items-center gap-8">
-        {boardContext}
+      {boardContext}
+      <div className="ml-auto flex shrink-0 items-center gap-6">
         {mobileFilters}
         {desktopFilters}
-      </div>
-      <div className="ml-auto flex shrink-0 items-center gap-5">
         {memberStack}
+        {newCardButton}
         {boardActions}
       </div>
     </div>

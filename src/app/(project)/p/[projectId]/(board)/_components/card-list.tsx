@@ -178,7 +178,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
             className={cn(
-              index < sortedCards.length - 1 ? "mb-5" : "",
+              index < sortedCards.length - 1 ? "mb-6" : "",
               moveCardMutation.isPending && "opacity-80",
             )}
           >

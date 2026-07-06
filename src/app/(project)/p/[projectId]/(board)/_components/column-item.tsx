@@ -185,7 +185,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex h-full w-full flex-col overflow-hidden transition-all duration-200",
+        "group/column flex h-full w-full flex-col overflow-hidden transition-all duration-200",
         isDropping && "bg-primary/[0.04]",
         justMoved && "animate-column-moved",
       )}
@@ -205,7 +205,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
       }}
       aria-describedby={`${column.name}-column`}
     >
-      <div className="flex items-center justify-between px-6 pb-4 pt-5">
+      <div className="flex items-center justify-between px-6 pb-3 pt-5">
         <div className="flex items-center gap-2">
           {column.isCompleted && (
             <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
@@ -238,7 +238,12 @@ export function ColumnItem({ column }: ColumnItemProps) {
             }}
           >
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover/column:opacity-100 data-[state=open]:opacity-100 max-sm:opacity-100"
+                aria-label={`Column options for ${column.name}`}
+              >
                 <Ellipsis className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>

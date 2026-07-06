@@ -2,7 +2,6 @@
 
 import { useSearchParams } from "next/navigation";
 
-import { Badge } from "~/components/ui/badge";
 import { cn } from "~/lib/utils";
 
 interface FilterIndicatorProps {
@@ -33,11 +32,13 @@ export function FilterIndicator({ className }: FilterIndicatorProps) {
   }
 
   return (
-    <Badge
-      variant="secondary"
-      className={cn("text-xs font-semibold", className)}
+    <span
+      className={cn(
+        "flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] font-medium text-primary-foreground",
+        className,
+      )}
     >
       {activeFilterCount}
-    </Badge>
+    </span>
   );
 }
