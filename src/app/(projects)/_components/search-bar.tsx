@@ -1,9 +1,8 @@
 "use client";
 
-import { SearchIcon, SlidersHorizontal, XIcon } from "lucide-react";
+import { SearchIcon, XIcon } from "lucide-react";
 import { useCallback } from "react";
 
-import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
   Select,
@@ -20,9 +19,6 @@ interface SearchBarProps {
   setSearchQuery: (query: string) => void;
   sortOption: ProjectSortOption;
   setSortOption: (option: ProjectSortOption) => void;
-  totalProjects: number;
-  filteredCount: number;
-  hasFilters: boolean;
 }
 
 export function SearchBar({
@@ -30,91 +26,45 @@ export function SearchBar({
   setSearchQuery,
   sortOption,
   setSortOption,
-  totalProjects,
-  filteredCount,
-  hasFilters,
 }: SearchBarProps) {
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchQuery(e.target.value);
-    },
-    [setSearchQuery],
-  );
-
-  const handleSortChange = useCallback(
-    (value: ProjectSortOption) => {
-      setSortOption(value);
-    },
-    [setSortOption],
-  );
-
   const handleClearSearch = useCallback(() => {
     setSearchQuery("");
   }, [setSearchQuery]);
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-foreground">Projects</h2>
-          {totalProjects > 0 && (
-            <span className="border border-primary/40 px-2 py-0.5 font-mono text-xs text-primary">
-              {hasFilters ? `${filteredCount}/${totalProjects}` : totalProjects}
-            </span>
-          )}
-        </div>
-
-        {hasFilters && (
-          <Button
-            variant="outline"
-            size="sm"
+    <div className="flex flex-wrap items-center gap-3">
+      <div className="relative min-w-[200px] flex-1">
+        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          placeholder="Search projects..."
+          className="pl-9"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        {searchQuery && (
+          <button
             onClick={handleClearSearch}
-            className="h-8 border-border text-xs font-medium text-foreground hover:bg-muted/50"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+            aria-label="Clear search"
           >
-            Clear filters
-          </Button>
+            <XIcon className="h-4 w-4" />
+          </button>
         )}
       </div>
-
-      <div className="flex flex-col gap-3 border border-border p-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/70" />
-          <Input
-            placeholder="Search projects..."
-            className="h-10 border-border bg-background pl-9 text-foreground focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
-            value={searchQuery}
-            onChange={handleSearchChange}
-          />
-          {searchQuery && (
-            <button
-              onClick={handleClearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground/70 hover:text-foreground"
-              aria-label="Clear search"
-            >
-              <XIcon className="h-4 w-4" />
-            </button>
-          )}
-        </div>
-        <div>
-          <Select
-            value={sortOption}
-            onValueChange={(value) =>
-              handleSortChange(value as ProjectSortOption)
-            }
-          >
-            <SelectTrigger className="h-10 w-[160px] border-border bg-background">
-              <SlidersHorizontal className="mr-2 h-3.5 w-3.5 text-foreground/70" />
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Most recent</SelectItem>
-              <SelectItem value="name">Name</SelectItem>
-              <SelectItem value="members">Most members</SelectItem>
-              <SelectItem value="boards">Most boards</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
+      <Select
+        value={sortOption}
+        onValueChange={(value) => setSortOption(value as ProjectSortOption)}
+      >
+        <SelectTrigger className="w-[150px]">
+          <SelectValue placeholder="Sort by" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="recent">Most recent</SelectItem>
+          <SelectItem value="name">Name</SelectItem>
+          <SelectItem value="members">Most members</SelectItem>
+          <SelectItem value="boards">Most boards</SelectItem>
+        </SelectContent>
+      </Select>
     </div>
   );
 }

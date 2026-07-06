@@ -1,14 +1,13 @@
 "use client";
 
-import { Star } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 
 import { type Project } from "~/app/(project)/_types";
 import { useProjects } from "~/lib/hooks";
+import { cn } from "~/lib/utils";
 
 import { ProjectItem } from "../project-item";
 import { type ProjectSortOption, SearchBar } from "../search-bar";
-import { CreateProjectCard } from "./create-project-card";
 import { EmptyState } from "./empty-state";
 import { ErrorState } from "./error-state";
 import { LoadingState } from "./loading-state";
@@ -29,16 +28,6 @@ export function ProjectList() {
     );
   }, [projects.data, searchQuery]);
 
-  // Split projects into favorite and regular
-  const favoriteProjects = useMemo(() => {
-    return filteredProjects.filter((p) => p.isFavorite);
-  }, [filteredProjects]);
-
-  const regularProjects = useMemo(() => {
-    return filteredProjects.filter((p) => !p.isFavorite);
-  }, [filteredProjects]);
-
-  // Sort both lists based on the selected sort option
   const sortProjects = useCallback(
     (projectsList: Project[]) => {
       const projectsCopy = [...projectsList];
@@ -54,11 +43,11 @@ export function ProjectList() {
         case "members":
           return projectsCopy.sort(
             (a, b) =>
-              (b.projectUsers?.length || 0) - (a.projectUsers?.length || 0),
+              (b.projectUsers?.length ?? 0) - (a.projectUsers?.length ?? 0),
           );
         case "boards":
           return projectsCopy.sort(
-            (a, b) => (b.boards?.length || 0) - (a.boards?.length || 0),
+            (a, b) => (b.boards?.length ?? 0) - (a.boards?.length ?? 0),
           );
         default:
           return projectsCopy;
@@ -68,19 +57,13 @@ export function ProjectList() {
   );
 
   const sortedFavorites = useMemo(
-    () => sortProjects(favoriteProjects),
-    [favoriteProjects, sortProjects],
+    () => sortProjects(filteredProjects.filter((p) => p.isFavorite)),
+    [filteredProjects, sortProjects],
   );
   const sortedRegulars = useMemo(
-    () => sortProjects(regularProjects),
-    [regularProjects, sortProjects],
+    () => sortProjects(filteredProjects.filter((p) => !p.isFavorite)),
+    [filteredProjects, sortProjects],
   );
-
-  const hasFavorites = sortedFavorites.length > 0;
-  const totalProjects = projects.data?.length ?? 0;
-  const filteredCount = filteredProjects.length;
-  const hasFilters = searchQuery.trim() !== "";
-  const hasProjects = totalProjects > 0;
 
   if (projects.isError) {
     return <ErrorState error={projects.error} refetch={projects.refetch} />;
@@ -90,95 +73,113 @@ export function ProjectList() {
     return <LoadingState />;
   }
 
-  if (!hasProjects) {
+  if (projects.data.length === 0) {
     return <EmptyState />;
   }
 
-  return (
-    <div className="w-full">
-      {/* Search and Filter */}
-      <SearchBar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        sortOption={sortOption}
-        setSortOption={setSortOption}
-        totalProjects={totalProjects}
-        filteredCount={filteredCount}
-        hasFilters={hasFilters}
-      />
+  const totalBoards = projects.data.reduce(
+    (sum, project) => sum + (project.boards?.length ?? 0),
+    0,
+  );
+  const totalFavorites = projects.data.filter((p) => p.isFavorite).length;
+  const hasFavorites = sortedFavorites.length > 0;
+  const hasFilters = searchQuery.trim() !== "";
+  const noMatches = hasFilters && filteredProjects.length === 0;
 
-      {/* Content Area */}
-      <div className="mt-8">
-        {hasFilters && filteredProjects.length === 0 ? (
-          <div className="grid place-items-center border border-border py-16">
-            <div className="flex flex-col items-center px-4 text-center">
-              <h3 className="text-lg font-semibold text-foreground">
+  return (
+    <div className="space-y-12">
+      <div className="grid grid-cols-3 gap-x-8">
+        <Stat label="Projects" value={projects.data.length} />
+        <Stat label="Favorites" value={totalFavorites} />
+        <Stat label="Boards" value={totalBoards} accent />
+      </div>
+
+      <div className="space-y-8">
+        <SearchBar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sortOption={sortOption}
+          setSortOption={setSortOption}
+        />
+
+        {noMatches ? (
+          <div className="grid place-items-center border border-dashed border-border py-16 text-center">
+            <div className="flex flex-col items-center px-4">
+              <h3 className="text-lg font-light tracking-tight">
                 No matching projects
               </h3>
-              <p className="mb-6 mt-2 max-w-md text-sm text-foreground/70">
-                No projects match your search criteria. Try adjusting your
-                search.
+              <p className="mb-4 mt-1 max-w-sm text-sm text-muted-foreground">
+                No projects match your search.
               </p>
               <button
                 onClick={() => setSearchQuery("")}
-                className="inline-flex h-10 items-center justify-center border border-primary bg-transparent px-5 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="border border-primary px-4 py-2 text-sm font-medium text-primary transition-colors hover:bg-primary hover:text-primary-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
               >
                 Clear search
               </button>
             </div>
           </div>
         ) : (
-          <div className="space-y-12">
-            {/* Favorites Section */}
+          <div className="space-y-10">
             {hasFavorites && (
-              <section className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-border py-2">
-                  <Star className="h-4 w-4 fill-primary text-primary" />
-                  <h3 className="text-sm font-semibold text-foreground">
-                    Favorites
-                  </h3>
-                  <div className="border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
-                    {sortedFavorites.length}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {sortedFavorites.map((project) => (
-                    <div key={project.id} className="group h-full">
-                      <ProjectItem project={project} />
-                    </div>
-                  ))}
-                </div>
-              </section>
+              <ProjectSection title="Favorites" projects={sortedFavorites} />
             )}
-
-            {/* Projects Section */}
-            <section className="space-y-4">
-              <div className="flex items-center gap-2 border-b border-border py-2">
-                <h3 className="text-sm font-semibold text-foreground">
-                  {hasFavorites ? "All Projects" : "Projects"}
-                </h3>
-                <div className="border border-border px-2 py-0.5 font-mono text-xs text-muted-foreground">
-                  {sortedRegulars.length + (!hasFilters ? 1 : 0)}{" "}
-                  {/* +1 for create card */}
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                {!hasFilters && (
-                  <div className="group h-full">
-                    <CreateProjectCard />
-                  </div>
-                )}
-
-                {sortedRegulars.map((project) => (
-                  <div key={project.id} className="group h-full">
-                    <ProjectItem project={project} />
-                  </div>
-                ))}
-              </div>
-            </section>
+            <ProjectSection
+              title={hasFavorites ? "All projects" : "Projects"}
+              projects={sortedRegulars}
+            />
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  accent,
+}: {
+  label: string;
+  value: number;
+  accent?: boolean;
+}) {
+  return (
+    <div className={cn("border-t-2 pt-5", accent ? "border-primary" : "border-border")}>
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={cn(
+          "mt-2 text-4xl font-extralight tracking-tight tabular-nums md:text-5xl",
+          accent && "text-primary",
+        )}
+      >
+        {value.toLocaleString()}
+      </p>
+    </div>
+  );
+}
+
+function ProjectSection({
+  title,
+  projects,
+}: {
+  title: string;
+  projects: Project[];
+}) {
+  if (projects.length === 0) return null;
+
+  return (
+    <section>
+      <h2 className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+        {title}
+      </h2>
+      <div className="mt-2 divide-y divide-border border-t border-border">
+        {projects.map((project) => (
+          <ProjectItem key={project.id} project={project} />
+        ))}
+      </div>
+    </section>
   );
 }

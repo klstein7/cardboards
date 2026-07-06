@@ -1,70 +1,27 @@
-import { motion } from "framer-motion";
-import { FolderKanbanIcon, LightbulbIcon, Plus } from "lucide-react";
+import { FolderKanbanIcon, Plus } from "lucide-react";
 
 import { Button } from "~/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "~/components/ui/card";
 import { DialogTrigger } from "~/components/ui/dialog";
 
 import { CreateProjectDialog } from "../create-project-dialog";
 
 export function EmptyState() {
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center py-10">
-      <motion.div
-        className="w-full max-w-2xl"
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <Card className="border-2 border-dashed">
-          <CardHeader className="flex flex-row items-center justify-center pt-8">
-            <motion.div
-              className="border border-primary/40 p-6"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.1, duration: 0.5 }}
-            >
-              <FolderKanbanIcon className="h-12 w-12 text-primary" />
-            </motion.div>
-          </CardHeader>
-          <CardContent className="px-8 pb-4 pt-4 text-center">
-            <h2 className="text-2xl font-semibold tracking-tight">
-              Welcome to Cardboards
-            </h2>
-            <p className="mt-3 text-muted-foreground">
-              Create your first project to get started with your kanban boards.
-              Projects help you organize your work and collaborate with team
-              members.
-            </p>
-          </CardContent>
-          <CardFooter className="flex justify-center pb-8">
-            <CreateProjectDialog>
-              <DialogTrigger asChild>
-                <Button size="lg" className="gap-2 font-medium">
-                  <Plus className="h-5 w-5" />
-                  <span>Create Your First Project</span>
-                </Button>
-              </DialogTrigger>
-            </CreateProjectDialog>
-          </CardFooter>
-        </Card>
-
-        <div className="mt-8 flex items-center gap-4">
-          <div className="flex-shrink-0 border border-primary/40 p-2">
-            <LightbulbIcon className="h-6 w-6 text-primary" />
-          </div>
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium text-foreground">Pro tip:</span>{" "}
-            Projects can be used for teams, departments, or personal workspaces.
-            Create a structure that works best for your workflow.
-          </p>
-        </div>
-      </motion.div>
+    <div className="flex min-h-[50vh] flex-col items-center justify-center border border-dashed border-border py-16 text-center">
+      <FolderKanbanIcon className="mb-4 h-8 w-8 text-muted-foreground/60" />
+      <h2 className="text-2xl font-light tracking-tight">No projects yet</h2>
+      <p className="mb-6 mt-2 max-w-sm text-sm text-muted-foreground">
+        Create your first project to start organizing boards and collaborating
+        with your team.
+      </p>
+      <CreateProjectDialog>
+        <DialogTrigger asChild>
+          <Button className="gap-1.5">
+            <Plus className="h-4 w-4" />
+            New project
+          </Button>
+        </DialogTrigger>
+      </CreateProjectDialog>
     </div>
   );
 }
