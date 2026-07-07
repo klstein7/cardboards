@@ -7,22 +7,22 @@ export const metadata: Metadata = {
 
 const variants = [
   {
-    name: "Ledger",
-    href: "/design-variants/board-ledger",
+    name: "Marquee",
+    href: "/design-variants/board-marquee",
     concept:
-      "The typographic extreme of the app's outlined ethos: no card containers at all. Cards are text entries with a priority tick, columns are wide editorial lanes divided by hairlines.",
+      "Airy and editorial. A masthead gives the board a real identity: an extralight title, a segmented progress meter, and the member stack, above wide hairline-divided columns of typographic entries that breathe.",
   },
   {
-    name: "Slab",
-    href: "/design-variants/board-slab",
+    name: "Lanes",
+    href: "/design-variants/board-lanes",
     concept:
-      "The tactile counterpoint: cards become filled slabs with a priority notch on the top edge, sitting in quiet recessed column wells with visible seams between lanes.",
+      "Dense and operational. Each column is a status lane with a colored stage rail, a WIP count, and rich card rows that carry a label chip, due date, and comment count. Hovering highlights the whole lane row.",
   },
   {
-    name: "Atlas",
-    href: "/design-variants/board-atlas",
+    name: "Frame",
+    href: "/design-variants/board-frame",
     concept:
-      "A structural rethink: board name, figures, members, and a column index move into a left spine rail, and open columns float on the app's grid-pattern canvas.",
+      "The material leap. Cards become sharp hairline-outlined tiles with a colored priority top-edge, laid out in gapped tracks instead of divided lanes, for a lighter, more tactile board.",
   },
 ];
 

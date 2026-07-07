@@ -47,6 +47,68 @@ export function BoardSearch({ className }: { className?: string }) {
   );
 }
 
+export function BoardLabelFilter({ className }: { className?: string }) {
+  const [labels, setLabels] = useQueryState(
+    "labels",
+    parseAsArrayOf(parseAsString),
+  );
+
+  const cards = useCachedCardsByCurrentBoard();
+
+  const uniqueLabels = cards
+    .flatMap((card) => card.labels)
+    .filter((label): label is string => Boolean(label))
+    .reduce(
+      (unique, label) => (unique.includes(label) ? unique : [...unique, label]),
+      [] as string[],
+    )
+    .sort();
+
+  if (uniqueLabels.length === 0) {
+    return null;
+  }
+
+  const toggleLabel = (label: string) => {
+    if (labels?.includes(label)) {
+      const remaining = labels.filter((value) => value !== label);
+      void setLabels(remaining.length > 0 ? remaining : null);
+    } else {
+      void setLabels([...(labels ?? []), label]);
+    }
+  };
+
+  return (
+    <div className={cn("flex flex-wrap items-center gap-1.5", className)}>
+      {uniqueLabels.map((label) => {
+        const isActive = labels?.includes(label) ?? false;
+        return (
+          <button
+            key={label}
+            onClick={() => toggleLabel(label)}
+            className={cn(
+              "border px-1.5 py-0.5 font-mono text-[10px] transition-colors",
+              isActive
+                ? "border-primary text-primary"
+                : "border-border text-muted-foreground hover:text-foreground",
+            )}
+          >
+            {label}
+          </button>
+        );
+      })}
+      {labels && labels.length > 0 && (
+        <button
+          onClick={() => void setLabels(null)}
+          className="flex items-center gap-1 px-1 font-mono text-[10px] text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <X className="size-3" />
+          Clear
+        </button>
+      )}
+    </div>
+  );
+}
+
 function FilterControls() {
   const projectId = useStrictCurrentProjectId();
 

@@ -39,6 +39,15 @@ interface ColumnItemProps {
   column: Column;
 }
 
+// Stage-rail hues drawn from the app's existing priority palette, assigned by
+// column position. Red is intentionally omitted (reserved for errors/overdue).
+const RAIL_PALETTE = [
+  "hsl(var(--primary))",
+  "var(--priority-high-color)",
+  "var(--priority-low-color)",
+  "var(--priority-medium-color)",
+];
+
 export function ColumnItem({ column }: ColumnItemProps) {
   const columnRef = useRef<HTMLDivElement>(null);
   const cardListRef = useRef<HTMLDivElement>(null);
@@ -176,6 +185,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const isLast = column.order === (columns.data ?? []).length - 1;
 
   const cardCount = cards.data?.length ?? 0;
+  const railColor = RAIL_PALETTE[column.order % RAIL_PALETTE.length];
 
   if (cards.isError) {
     return <div>Error: {cards.error.message}</div>;
@@ -185,11 +195,12 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "group/column flex h-full w-full flex-col overflow-hidden transition-all duration-200",
+        "group/column flex h-full w-full flex-col overflow-hidden border-t-2 transition-all duration-200",
         isDropping && "bg-primary/[0.04]",
         justMoved && "animate-column-moved",
       )}
       style={{
+        borderTopColor: railColor,
         ...(isDropping
           ? {
               boxShadow: `0 0 0 2px hsl(var(--primary)), 0 0 0 4px var(--background)`,
@@ -218,12 +229,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
           >
             {column.name}
           </span>
-          <span
-            className={cn(
-              "font-mono text-[11px] text-primary",
-              column.isCompleted && "text-primary",
-            )}
-          >
+          <span className="flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] text-primary-foreground">
             {cardCount}
           </span>
         </div>

@@ -182,6 +182,7 @@ export function CardItem({
     >
       <CardBase
         card={card}
+        asRow
         isDragging={activeCard?.id === card.id}
         isCompleted={isCompleted}
       />

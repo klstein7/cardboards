@@ -142,10 +142,12 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
 
   if (cards.isPending)
     return (
-      <div className="flex flex-col space-y-6 pt-1">
-        <CardSkeleton />
-        <CardSkeleton />
-        <CardSkeleton />
+      <div className="flex flex-col pt-1">
+        {[0, 1, 2].map((index) => (
+          <div key={index} className="py-3">
+            <CardSkeleton />
+          </div>
+        ))}
       </div>
     );
 
@@ -177,10 +179,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className={cn(
-              index < sortedCards.length - 1 ? "mb-6" : "",
-              moveCardMutation.isPending && "opacity-80",
-            )}
+            className={cn(moveCardMutation.isPending && "opacity-80")}
           >
             <CardItem
               card={card}

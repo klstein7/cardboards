@@ -37,7 +37,7 @@ import {
 } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 
-import { BoardFilters, BoardSearch } from "./board-filters";
+import { BoardFilters, BoardLabelFilter } from "./board-filters";
 import { CreateCardDialog } from "./create-card-dialog";
 import { CreateColumnDialog } from "./create-column-dialog";
 import { DeleteBoardDialog } from "./delete-board-dialog";
@@ -78,7 +78,7 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   const extraMembers = memberList.length - visibleMembers.length;
 
   const boardContext = (
-    <div className="flex min-w-0 items-baseline gap-4">
+    <div className="flex min-w-0 items-baseline gap-3">
       <BoardSelector
         projectId={projectId}
         boardId={boardId}
@@ -115,12 +115,6 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
           <BoardFilters />
         </DrawerContent>
       </Drawer>
-    </div>
-  );
-
-  const desktopFilters = (
-    <div className="hidden items-center sm:flex">
-      <BoardSearch className="w-44" />
     </div>
   );
 
@@ -238,11 +232,11 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
   );
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-x-8 gap-y-4">
+    <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-3">
       {boardContext}
-      <div className="ml-auto flex shrink-0 items-center gap-6">
+      <BoardLabelFilter className="hidden min-w-0 md:flex" />
+      <div className="ml-auto flex shrink-0 items-center gap-4">
         {mobileFilters}
-        {desktopFilters}
         {memberStack}
         {newCardButton}
         {boardActions}

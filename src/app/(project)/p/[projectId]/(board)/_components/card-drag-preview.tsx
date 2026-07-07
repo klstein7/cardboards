@@ -16,7 +16,7 @@ export function CardDragPreview({ card, isCompleted }: CardDragPreviewProps) {
         card={card}
         isDragging={true}
         isCompleted={isCompleted}
-        className="border border-primary/40 bg-popover p-3 pl-4"
+        className="border border-primary/40 bg-popover p-3"
       />
     </div>
   );

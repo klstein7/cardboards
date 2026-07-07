@@ -16,10 +16,10 @@ import {
 import { VariantShell } from "../_lib/variant-shell";
 
 export const metadata: Metadata = {
-  title: "Ledger board variant | cardboards",
+  title: "Frame board variant | cardboards",
 };
 
-function LedgerEntry({
+function FrameTile({
   card,
   isCompleted,
 }: {
@@ -27,15 +27,15 @@ function LedgerEntry({
   isCompleted?: boolean;
 }) {
   return (
-    <div className="group relative cursor-pointer pl-4">
-      <span
-        className="absolute left-0 top-[3px] h-3.5 w-0.5"
-        style={{
-          backgroundColor: isCompleted
-            ? "hsl(var(--border))"
-            : priorityColor[card.priority],
-        }}
-      />
+    <div
+      className="group cursor-pointer border border-border bg-background p-3 transition-all duration-150 hover:-translate-y-px hover:border-foreground/40"
+      style={{
+        borderTopWidth: "2px",
+        borderTopColor: isCompleted
+          ? "hsl(var(--border))"
+          : priorityColor[card.priority],
+      }}
+    >
       <h3
         className={cn(
           "text-[13px] font-medium leading-snug transition-colors group-hover:text-primary",
@@ -44,7 +44,7 @@ function LedgerEntry({
       >
         {card.title}
       </h3>
-      <div className="mt-1.5 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
+      <div className="mt-2.5 flex items-center gap-3 font-mono text-[10px] text-muted-foreground">
         <span>{card.label}</span>
         {card.due && (
           <span className={cn(card.overdue && "text-destructive")}>
@@ -59,7 +59,7 @@ function LedgerEntry({
         )}
         {card.assignee && (
           <span
-            className="ml-auto flex h-4 w-4 items-center justify-center rounded-full text-[8px]"
+            className="ml-auto flex h-5 w-5 items-center justify-center rounded-full text-[9px]"
             style={avatarStyle(card.assignee)}
           >
             {card.assignee.initials}
@@ -70,11 +70,11 @@ function LedgerEntry({
   );
 }
 
-export default function BoardLedgerPage() {
+export default function BoardFramePage() {
   return (
-    <VariantShell active="ledger">
+    <VariantShell active="frame">
       <div className="flex h-full flex-col">
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-border px-6 py-5">
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-4 border-b border-border px-6 py-5 md:px-8">
           <div className="flex items-baseline gap-4">
             <h1 className="text-2xl font-light tracking-tight">{boardName}</h1>
             <span className="font-mono text-xs text-muted-foreground">
@@ -82,16 +82,15 @@ export default function BoardLedgerPage() {
             </span>
           </div>
 
-          <div className="ml-auto flex items-center gap-6">
-            <label className="hidden items-center gap-2 border-b border-border pb-1 text-muted-foreground focus-within:border-foreground/60 sm:flex">
+          <div className="ml-auto flex items-center gap-5">
+            <label className="hidden items-center gap-2 border-b border-border pb-1 text-muted-foreground transition-colors focus-within:border-foreground/60 sm:flex">
               <Search className="h-3.5 w-3.5" />
               <input
                 placeholder="Search cards"
                 className="w-44 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </label>
-
-            <div className="flex -space-x-1.5">
+            <div className="hidden -space-x-1.5 sm:flex">
               {members.map((person) => (
                 <span
                   key={person.initials}
@@ -103,22 +102,21 @@ export default function BoardLedgerPage() {
                 </span>
               ))}
             </div>
-
-            <button className="flex h-8 items-center gap-1.5 bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            <button className="flex h-8 items-center gap-1.5 bg-primary px-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90">
               <Plus className="h-3.5 w-3.5" />
               New card
             </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-x-auto">
-          <div className="flex h-full w-fit items-stretch divide-x divide-border">
+        <div className="flex-1 overflow-x-auto px-4 py-5 md:px-6">
+          <div className="flex h-full w-fit items-stretch gap-4">
             {boardColumns.map((column) => (
               <div
                 key={column.name}
-                className="flex h-full w-[min(100vw,340px)] shrink-0 flex-col px-6 py-5"
+                className="flex h-full w-[85vw] shrink-0 flex-col sm:w-[300px]"
               >
-                <div className="flex items-center gap-2 pb-5">
+                <div className="flex items-center gap-2 px-1 pb-4">
                   {column.isCompleted && (
                     <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
                   )}
@@ -130,27 +128,38 @@ export default function BoardLedgerPage() {
                   >
                     {column.name}
                   </span>
-                  <span className="font-mono text-[11px] text-primary">
+                  <span className="flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] text-primary-foreground">
                     {column.cards.length}
                   </span>
                 </div>
 
-                <div className="flex-1 space-y-6 overflow-y-auto">
-                  {column.cards.map((card) => (
-                    <LedgerEntry
-                      key={card.title}
-                      card={card}
-                      isCompleted={column.isCompleted}
-                    />
-                  ))}
-                </div>
+                <div className="flex flex-1 flex-col gap-2.5 overflow-y-auto pb-2">
+                  {column.cards.length > 0 ? (
+                    column.cards.map((card) => (
+                      <FrameTile
+                        key={card.title}
+                        card={card}
+                        isCompleted={column.isCompleted}
+                      />
+                    ))
+                  ) : (
+                    <div className="flex flex-col items-center gap-1.5 border border-dashed border-border px-4 py-10 text-center">
+                      <p className="text-sm font-light tracking-tight">
+                        No blockers
+                      </p>
+                      <p className="max-w-[22ch] text-[11px] leading-relaxed text-muted-foreground">
+                        Stalled cards surface here as their own frame.
+                      </p>
+                    </div>
+                  )}
 
-                {!column.isCompleted && (
-                  <button className="mt-5 flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary">
-                    <Plus className="h-3.5 w-3.5" />
-                    Add card
-                  </button>
-                )}
+                  {!column.isCompleted && (
+                    <button className="flex items-center justify-center gap-1.5 border border-dashed border-border py-2.5 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+                      <Plus className="h-3.5 w-3.5" />
+                      Add card
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>

@@ -130,6 +130,10 @@ export const boardColumns: MockColumn[] = [
     ],
   },
   {
+    name: "Blocked",
+    cards: [],
+  },
+  {
     name: "In review",
     cards: [
       {
