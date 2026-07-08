@@ -15,7 +15,8 @@ The canonical implementation is the board route
 - **Radius**: `--radius: 0rem`. Everything is sharp. The only intentional
   curve in the app is `rounded-full` on avatars.
 - **Type**: Jost (`font-sans`) for UI, the system mono stack (`font-mono`) for
-  metadata, Space Grotesk (`~/components/brand/brand-font`) for the wordmark.
+  metadata, IBM Plex Mono medium (`~/components/brand/brand-font`) for the
+  lowercase wordmark — the brand speaks in the register's own voice.
 
 ## Type scale
 

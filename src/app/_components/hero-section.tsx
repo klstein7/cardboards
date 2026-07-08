@@ -20,7 +20,7 @@ export function HeroSection() {
           <BrandIcon variant="small" />
           <span
             className={cn(
-              "text-lg font-bold tracking-[-0.025em]",
+              "text-lg font-medium",
               brandFont.className,
             )}
           >

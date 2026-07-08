@@ -25,7 +25,7 @@ export function BrandHome({ onNavigate, className }: BrandHomeProps) {
       <BrandIcon variant="xsmall" />
       <span
         className={cn(
-          "hidden text-lg font-bold tracking-[-0.025em] sm:inline",
+          "hidden text-lg font-medium sm:inline",
           brandFont.className,
         )}
       >

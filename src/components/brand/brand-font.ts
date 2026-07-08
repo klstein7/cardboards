@@ -1,6 +1,6 @@
-import { Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono } from "next/font/google";
 
-export const brandFont = Space_Grotesk({
+export const brandFont = IBM_Plex_Mono({
   subsets: ["latin"],
-  weight: ["600", "700"],
+  weight: ["500"],
 });

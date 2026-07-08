@@ -34,7 +34,7 @@ export function Logo({
       {showText && (
         <span
           className={cn(
-            "font-bold tracking-[-0.035em] text-foreground dark:text-foreground",
+            "font-medium text-foreground",
             textSizeClasses[variant],
             brandFont.className,
           )}
