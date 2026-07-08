@@ -46,11 +46,11 @@ export function ProjectSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex min-w-0 max-w-full items-center gap-1.5 text-left text-sm font-medium transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:text-primary"
+        className="group flex min-w-0 max-w-full items-center gap-1.5 border-b border-border pb-0.5 text-left text-sm font-medium transition-colors hover:border-foreground/60 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:border-foreground/60 data-[state=open]:text-primary"
         aria-label="Switch project"
       >
         <span className={cn("min-w-0 truncate", className)}>{label}</span>
-        <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+        <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground transition-colors group-hover:text-primary group-data-[state=open]:text-primary" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64 p-1.5">
         <DropdownMenuLabel className="px-2 py-1 text-xs font-medium text-muted-foreground">

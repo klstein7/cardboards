@@ -51,7 +51,7 @@ export function BoardSelector({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className="group flex min-w-0 max-w-full items-center gap-2 text-left transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:text-primary"
+        className="group flex min-w-0 max-w-full items-center gap-2 border-b border-border pb-1 text-left transition-colors hover:border-foreground/60 hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring data-[state=open]:border-foreground/60 data-[state=open]:text-primary"
         aria-label="Switch board"
       >
         <span
@@ -62,7 +62,7 @@ export function BoardSelector({
         >
           {label}
         </span>
-        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 group-hover:text-primary group-data-[state=open]:rotate-180 group-data-[state=open]:text-primary" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-64 p-1.5">
         <DropdownMenuLabel className="px-2 py-1 text-xs font-medium text-muted-foreground">
