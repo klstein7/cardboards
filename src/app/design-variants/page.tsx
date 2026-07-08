@@ -7,22 +7,22 @@ export const metadata: Metadata = {
 
 const variants = [
   {
-    name: "Broadsheet",
-    href: "/design-variants/board-broadsheet",
+    name: "Folio",
+    href: "/design-variants/board-folio",
     concept:
-      "The lanes own the page. Columns stretch to divide the full viewport edge to edge, hairlines running top to bottom, so a wide screen buys wider lanes instead of empty margins.",
+      "One tall masthead carries every control: the board title set large, filters and members on the line beneath it. The lanes float in open space below, with whitespace doing the work of borders.",
   },
   {
-    name: "Index",
-    href: "/design-variants/board-index",
+    name: "Ledger",
+    href: "/design-variants/board-ledger",
     concept:
-      "The margin becomes the overview. A fixed left rail absorbs the toolbar: board title, a stage index with counts, label filters, and members, while the lanes divide every remaining pixel.",
+      "A single command strip absorbs the whole toolbar, and the lanes tighten into spreadsheet rows: one line per card, hairline rules, counts everywhere. Built for seeing the entire board at once.",
   },
   {
-    name: "Dossier",
-    href: "/design-variants/board-dossier",
+    name: "Baseline",
+    href: "/design-variants/board-baseline",
     concept:
-      "Spend the width on depth. Lanes keep their reading width while a persistent detail panel fills the right side with the selected card's metadata, description, and comments, replacing the overlay dialog.",
+      "The chrome sinks to the bottom edge. Cards own the top of the screen, and a dock along the baseline holds the title, a stage map that jumps across lanes, and every action.",
   },
 ];
 
@@ -34,10 +34,11 @@ export default function DesignVariantsPage() {
           Board design variants
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Round two: three ways the board page can fill a wide screen instead
-          of centering a fixed strip of columns. Static mockups with shared
-          sample data; nothing links here from the app, and the whole tree is
-          safe to delete once a direction is picked.
+          Round three: the kanban lanes stay, the chrome is rethought. Each
+          direction answers the same question differently: where should the
+          board&apos;s header live, and how much room does it deserve? Static
+          mockups with shared sample data; nothing links here from the app,
+          and the whole tree is safe to delete once a direction is picked.
         </p>
 
         <div className="mt-10 divide-y divide-border border-t border-border">
