@@ -111,7 +111,6 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           label={board?.name ?? "Board"}
           compact
         />
-        <BoardSettingsMenu boardId={boardId} />
       </div>
 
       <div className="hidden items-center gap-4 whitespace-nowrap px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:flex">
@@ -164,6 +163,10 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           )}
         </div>
       )}
+
+      <div className="flex w-12 items-center justify-center border-l border-border">
+        <BoardSettingsMenu boardId={boardId} />
+      </div>
 
       <div className="flex items-center border-l border-border">
         <Button
