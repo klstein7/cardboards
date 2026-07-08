@@ -8,9 +8,13 @@ import { cn } from "~/lib/utils";
 import { avatarStyle, maren, projectName } from "./mock-data";
 
 const VARIANTS = [
-  { key: "marquee", label: "Marquee", href: "/design-variants/board-marquee" },
-  { key: "lanes", label: "Lanes", href: "/design-variants/board-lanes" },
-  { key: "frame", label: "Frame", href: "/design-variants/board-frame" },
+  {
+    key: "broadsheet",
+    label: "Broadsheet",
+    href: "/design-variants/board-broadsheet",
+  },
+  { key: "index", label: "Index", href: "/design-variants/board-index" },
+  { key: "dossier", label: "Dossier", href: "/design-variants/board-dossier" },
 ] as const;
 
 type VariantKey = (typeof VARIANTS)[number]["key"];

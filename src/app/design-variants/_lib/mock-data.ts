@@ -73,6 +73,44 @@ export const members: MockPerson[] = [maren, tomas, aisha, dana, yuki];
 export const boardName = "Launch checklist";
 export const projectName = "Skylight";
 
+export interface MockComment {
+  author: MockPerson;
+  timeAgo: string;
+  body: string;
+}
+
+export const dossierCard: MockCard = {
+  title: "Fix drag preview offset in Safari",
+  label: "Bug",
+  priority: "urgent",
+  assignee: dana,
+  due: "Due Fri",
+  comments: 3,
+};
+
+export const dossierDescription: string[] = [
+  "Dragging a card in Safari renders the preview about forty pixels below the pointer once the board has scrolled. The offset compounds with every auto-scroll tick, so long boards drift further the longer you drag.",
+  "The fix should read the card rect inside the drag frame callback instead of caching it on drag start, then re-anchor the preview to the pointer on every frame.",
+];
+
+export const dossierComments: MockComment[] = [
+  {
+    author: tomas,
+    timeAgo: "2d ago",
+    body: "Reproduced on Safari 17.4. It only happens after the column has scrolled at least once.",
+  },
+  {
+    author: dana,
+    timeAgo: "1d ago",
+    body: "Root cause found: we measure the offset before auto-scroll adjusts scrollTop. Patch in progress on the drag layer.",
+  },
+  {
+    author: maren,
+    timeAgo: "3h ago",
+    body: "While you are in there, the preview hairline reads heavier than the resting entry. Can we match the border weight?",
+  },
+];
+
 export const boardColumns: MockColumn[] = [
   {
     name: "Backlog",
@@ -106,14 +144,7 @@ export const boardColumns: MockColumn[] = [
   {
     name: "In progress",
     cards: [
-      {
-        title: "Fix drag preview offset in Safari",
-        label: "Bug",
-        priority: "urgent",
-        assignee: dana,
-        due: "Due Fri",
-        comments: 4,
-      },
+      dossierCard,
       {
         title: "Inline due date picker on the card face",
         label: "Feature",

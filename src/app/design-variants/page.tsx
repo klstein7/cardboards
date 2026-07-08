@@ -7,22 +7,22 @@ export const metadata: Metadata = {
 
 const variants = [
   {
-    name: "Marquee",
-    href: "/design-variants/board-marquee",
+    name: "Broadsheet",
+    href: "/design-variants/board-broadsheet",
     concept:
-      "Airy and editorial. A masthead gives the board a real identity: an extralight title, a segmented progress meter, and the member stack, above wide hairline-divided columns of typographic entries that breathe.",
+      "The lanes own the page. Columns stretch to divide the full viewport edge to edge, hairlines running top to bottom, so a wide screen buys wider lanes instead of empty margins.",
   },
   {
-    name: "Lanes",
-    href: "/design-variants/board-lanes",
+    name: "Index",
+    href: "/design-variants/board-index",
     concept:
-      "Dense and operational. Each column is a status lane with a colored stage rail, a WIP count, and rich card rows that carry a label chip, due date, and comment count. Hovering highlights the whole lane row.",
+      "The margin becomes the overview. A fixed left rail absorbs the toolbar: board title, a stage index with counts, label filters, and members, while the lanes divide every remaining pixel.",
   },
   {
-    name: "Frame",
-    href: "/design-variants/board-frame",
+    name: "Dossier",
+    href: "/design-variants/board-dossier",
     concept:
-      "The material leap. Cards become sharp hairline-outlined tiles with a colored priority top-edge, laid out in gapped tracks instead of divided lanes, for a lighter, more tactile board.",
+      "Spend the width on depth. Lanes keep their reading width while a persistent detail panel fills the right side with the selected card's metadata, description, and comments, replacing the overlay dialog.",
   },
 ];
 
@@ -34,9 +34,10 @@ export default function DesignVariantsPage() {
           Board design variants
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Static mockups exploring the board page with shared sample data. This
-          is a scratch tree: nothing links to it from the app, and it is safe
-          to delete once a direction is picked.
+          Round two: three ways the board page can fill a wide screen instead
+          of centering a fixed strip of columns. Static mockups with shared
+          sample data; nothing links here from the app, and the whole tree is
+          safe to delete once a direction is picked.
         </p>
 
         <div className="mt-10 divide-y divide-border border-t border-border">
