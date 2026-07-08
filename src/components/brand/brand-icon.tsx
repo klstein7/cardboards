@@ -24,47 +24,46 @@ export function BrandIcon({
       {...props}
     >
       <svg
-        viewBox="0 0 156 156"
+        viewBox="0 0 24 24"
         xmlns="http://www.w3.org/2000/svg"
         className="h-full w-full"
         role="img"
         aria-label="cardboards"
       >
-        <g transform="translate(3 1)">
-          <rect
-            x="82"
-            y="19"
-            width="50"
-            height="86"
-            rx="13"
-            fill="#3F3F46"
-            stroke="hsl(var(--background))"
-            strokeWidth="7"
-            transform="rotate(11 107 62)"
-          />
-          <rect
-            x="50"
-            y="31"
-            width="58"
-            height="96"
-            rx="14"
-            fill="hsl(var(--primary))"
-            stroke="hsl(var(--background))"
-            strokeWidth="7"
-            transform="rotate(11 79 79)"
-          />
-          <rect
-            x="18"
-            y="45"
-            width="72"
-            height="92"
-            rx="15"
-            fill="#FAFAFA"
-            stroke="hsl(var(--background))"
-            strokeWidth="7"
-            transform="rotate(11 54 91)"
-          />
-        </g>
+        <rect
+          x="9"
+          y="1.5"
+          width="12"
+          height="15"
+          fill="#3F3F46"
+          stroke="hsl(var(--background))"
+          strokeWidth="1"
+        />
+        <rect
+          x="6"
+          y="4.5"
+          width="12"
+          height="15"
+          fill="#71717A"
+          stroke="hsl(var(--background))"
+          strokeWidth="1"
+        />
+        <rect
+          x="3"
+          y="7.5"
+          width="12"
+          height="15"
+          fill="hsl(var(--foreground))"
+          stroke="hsl(var(--background))"
+          strokeWidth="1"
+        />
+        <rect
+          x="3.5"
+          y="10"
+          width="1.75"
+          height="5"
+          fill="hsl(var(--primary))"
+        />
       </svg>
     </div>
   );
