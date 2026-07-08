@@ -11,7 +11,7 @@ export type MockPriority = "urgent" | "high" | "medium" | "low";
 
 export interface MockCard {
   title: string;
-  label: string;
+  label?: string;
   priority: MockPriority;
   assignee?: MockPerson;
   due?: string;
@@ -181,6 +181,19 @@ export const boardColumns: MockColumn[] = [
     ],
   },
 ];
+
+export const labelOptions = ["Bug", "Design", "Feature", "Idea", "Performance"];
+
+export const openColumns = boardColumns.filter((column) => !column.isCompleted);
+
+export const priorityLabel: Record<MockPriority, string> = {
+  urgent: "Urgent",
+  high: "High",
+  medium: "Medium",
+  low: "Low",
+};
+
+export const dueOptions = ["Today", "Tomorrow", "Due Fri", "Next week"];
 
 export const totalCards = boardColumns.reduce(
   (sum, column) => sum + column.cards.length,

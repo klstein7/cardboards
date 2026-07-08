@@ -1,10 +1,9 @@
 import { Bell, ChevronsUpDown, Plus } from "lucide-react";
-import { type Metadata } from "next";
 
 import { BrandIcon } from "~/components/brand/brand-icon";
 import { cn } from "~/lib/utils";
 
-import { MemberAvatar, MemberStack } from "../_lib/bits";
+import { MemberAvatar, MemberStack } from "./bits";
 import {
   boardColumns,
   boardName,
@@ -16,12 +15,7 @@ import {
   priorityColor,
   projectName,
   totalCards,
-} from "../_lib/mock-data";
-import { VariantSwitcher } from "../_lib/switcher";
-
-export const metadata: Metadata = {
-  title: "Ledger | Board design variants",
-};
+} from "./mock-data";
 
 const labelFilters = ["Bug", "Design", "Feature", "Performance"];
 const donePercent = Math.round((doneCards / totalCards) * 100);
@@ -63,14 +57,13 @@ function LedgerRow({
           {card.due}
         </span>
       )}
-      <span className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[9px] leading-none text-muted-foreground">
-        {card.label}
-      </span>
+      {card.label && (
+        <span className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[9px] leading-none text-muted-foreground">
+          {card.label}
+        </span>
+      )}
       {card.assignee ? (
-        <MemberAvatar
-          person={card.assignee}
-          className="h-4 w-4 text-[8px]"
-        />
+        <MemberAvatar person={card.assignee} className="h-4 w-4 text-[8px]" />
       ) : (
         <span className="h-4 w-4 shrink-0" aria-hidden />
       )}
@@ -78,8 +71,16 @@ function LedgerRow({
   );
 }
 
-function LedgerLane({ column }: { column: MockColumn }) {
-  const count = column.cards.length;
+function LedgerLane({
+  column,
+  extras,
+  onAdd,
+}: {
+  column: MockColumn;
+  extras: MockCard[];
+  onAdd: () => void;
+}) {
+  const cards = [...column.cards, ...extras];
   return (
     <section className="flex h-full min-w-0 flex-col">
       <header className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
@@ -87,12 +88,12 @@ function LedgerLane({ column }: { column: MockColumn }) {
           {column.name}
         </span>
         <span className="font-mono text-[10px] text-muted-foreground">
-          {String(count).padStart(2, "0")}
+          {String(cards.length).padStart(2, "0")}
         </span>
       </header>
       <div className="min-h-0 flex-1 divide-y divide-border/60 overflow-y-auto">
-        {count > 0 ? (
-          column.cards.map((card) => (
+        {cards.length > 0 ? (
+          cards.map((card) => (
             <LedgerRow
               key={card.title}
               card={card}
@@ -106,7 +107,10 @@ function LedgerLane({ column }: { column: MockColumn }) {
         )}
       </div>
       <footer className="shrink-0 border-t border-border">
-        <button className="flex h-8 w-full items-center gap-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary">
+        <button
+          onClick={onAdd}
+          className="flex h-8 w-full items-center gap-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground transition-colors hover:text-primary"
+        >
           <Plus className="h-3 w-3" />
           Add
         </button>
@@ -115,7 +119,13 @@ function LedgerLane({ column }: { column: MockColumn }) {
   );
 }
 
-export default function LedgerPage() {
+export function BoardBackdrop({
+  onNewCard,
+  extraCards = {},
+}: {
+  onNewCard: () => void;
+  extraCards?: Partial<Record<string, MockCard[]>>;
+}) {
   return (
     <div className="flex h-dvh flex-col bg-background text-foreground">
       <header className="flex h-12 shrink-0 items-stretch border-b border-border">
@@ -156,7 +166,10 @@ export default function LedgerPage() {
           <Bell className="h-4 w-4" />
         </button>
         <div className="flex items-center border-l border-border px-3">
-          <button className="flex h-8 items-center gap-1.5 bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90">
+          <button
+            onClick={onNewCard}
+            className="flex h-8 items-center gap-1.5 bg-primary px-3 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          >
             <Plus className="h-3.5 w-3.5" />
             New card
           </button>
@@ -169,12 +182,15 @@ export default function LedgerPage() {
       <main className="min-h-0 flex-1 overflow-x-auto">
         <div className="grid h-full auto-cols-[minmax(280px,1fr)] grid-flow-col divide-x divide-border">
           {boardColumns.map((column) => (
-            <LedgerLane key={column.name} column={column} />
+            <LedgerLane
+              key={column.name}
+              column={column}
+              extras={extraCards[column.name] ?? []}
+              onAdd={onNewCard}
+            />
           ))}
         </div>
       </main>
-
-      <VariantSwitcher active="ledger" />
     </div>
   );
 }

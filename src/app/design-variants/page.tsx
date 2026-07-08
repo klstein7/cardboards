@@ -2,27 +2,27 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Board design variants | cardboards",
+  title: "Create card design variants | cardboards",
 };
 
 const variants = [
   {
-    name: "Folio",
-    href: "/design-variants/board-folio",
+    name: "Slip",
+    href: "/design-variants/create-slip",
     concept:
-      "One tall masthead carries every control: the board title set large, filters and members on the line beneath it. The lanes float in open space below, with whitespace doing the work of borders.",
+      "A quiet centered composer: the title gets a bare writing surface, and every piece of metadata shrinks to a small chip you only open if you need it. The fastest path from thought to filed card.",
   },
   {
-    name: "Ledger",
-    href: "/design-variants/board-ledger",
+    name: "Register",
+    href: "/design-variants/create-register",
     concept:
-      "A single command strip absorbs the whole toolbar, and the lanes tighten into spreadsheet rows: one line per card, hairline rules, counts everywhere. Built for seeing the entire board at once.",
+      "A right-hand sheet of labeled ledger rows: column, title, priority, due, assignee, labels — every field visible at once, no disclosure, filled in beside the board instead of over it.",
   },
   {
-    name: "Baseline",
-    href: "/design-variants/board-baseline",
+    name: "Docket",
+    href: "/design-variants/create-docket",
     concept:
-      "The chrome sinks to the bottom edge. Cards own the top of the screen, and a dock along the baseline holds the title, a stage map that jumps across lanes, and every action.",
+      "A wide two-panel desk: the writing surface gets the room on the left, the facts pin to a rail on the right, and the exact ledger row you are about to file previews along the bottom.",
   },
 ];
 
@@ -31,14 +31,16 @@ export default function DesignVariantsPage() {
     <div className="h-dvh overflow-y-auto bg-background text-foreground">
       <div className="mx-auto max-w-2xl px-6 py-16">
         <h1 className="text-3xl font-light tracking-tight">
-          Board design variants
+          Create card design variants
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Round three: the kanban lanes stay, the chrome is rethought. Each
-          direction answers the same question differently: where should the
-          board&apos;s header live, and how much room does it deserve? Static
-          mockups with shared sample data; nothing links here from the app,
-          and the whole tree is safe to delete once a direction is picked.
+          Round four: the create card dialog, rebuilt in the Ledger language.
+          AI-assisted generation is gone; each direction answers the same
+          question differently — how much of the card&apos;s metadata deserves
+          to be on screen while you are still writing the title? Every mockup
+          opens over the live board treatment, and creating actually files a row
+          into the lane. Nothing links here from the app; the whole tree is safe
+          to delete once a direction is picked.
         </p>
 
         <div className="mt-10 divide-y divide-border border-t border-border">

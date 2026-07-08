@@ -3,13 +3,13 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 
 const VARIANTS = [
-  { key: "folio", label: "Folio", href: "/design-variants/board-folio" },
-  { key: "ledger", label: "Ledger", href: "/design-variants/board-ledger" },
+  { key: "slip", label: "Slip", href: "/design-variants/create-slip" },
   {
-    key: "baseline",
-    label: "Baseline",
-    href: "/design-variants/board-baseline",
+    key: "register",
+    label: "Register",
+    href: "/design-variants/create-register",
   },
+  { key: "docket", label: "Docket", href: "/design-variants/create-docket" },
 ] as const;
 
 export type VariantKey = (typeof VARIANTS)[number]["key"];
@@ -19,13 +19,15 @@ export function VariantSwitcher({
   placement = "bottom",
 }: {
   active: VariantKey;
-  placement?: "bottom" | "top";
+  placement?: "bottom" | "top" | "bottom-left";
 }) {
   return (
     <nav
       className={cn(
-        "fixed right-4 z-50 flex items-center gap-4 border border-border bg-background px-3.5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em]",
-        placement === "bottom" ? "bottom-4" : "top-4",
+        "pointer-events-auto fixed z-[60] flex items-center gap-4 border border-border bg-background px-3.5 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em]",
+        placement === "bottom" && "bottom-4 right-4",
+        placement === "top" && "right-4 top-4",
+        placement === "bottom-left" && "bottom-4 left-4",
       )}
       aria-label="Design variants"
     >
