@@ -121,7 +121,7 @@ export function ColumnList({ boardId }: ColumnListProps) {
         )}
         tabIndex={0}
       >
-        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(320px,1fr)]">
+        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(280px,1fr)]">
           {columns.data.map((column) => (
             <div
               key={column.id}

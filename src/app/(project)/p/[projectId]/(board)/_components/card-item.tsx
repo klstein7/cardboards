@@ -182,17 +182,12 @@ export function CardItem({
     >
       <CardBase
         card={card}
-        asRow
         isDragging={activeCard?.id === card.id}
         isCompleted={isCompleted}
       />
 
       {closestEdge && (
-        <DropIndicator
-          edge={closestEdge}
-          gap={3.5}
-          color="hsl(var(--primary))"
-        />
+        <DropIndicator edge={closestEdge} gap={1} color="hsl(var(--primary))" />
       )}
     </div>
   );

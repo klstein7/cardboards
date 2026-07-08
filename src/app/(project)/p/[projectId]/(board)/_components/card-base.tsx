@@ -9,12 +9,13 @@ import { cn, getColor } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
 
+const MAX_VISIBLE_LABELS = 2;
+
 interface CardBaseProps {
   card: Card;
   className?: string;
   isDragging?: boolean;
   isCompleted?: boolean;
-  asRow?: boolean;
   onClick?: () => void;
   style?: React.CSSProperties;
   children?: React.ReactNode;
@@ -26,7 +27,6 @@ export const CardBase = memo(
     className,
     isDragging,
     isCompleted,
-    asRow,
     onClick,
     style,
     children,
@@ -37,11 +37,14 @@ export const CardBase = memo(
     const dueDate = card.dueDate ? new Date(card.dueDate) : null;
     const isOverdue = dueDate ? isPast(dueDate) && !isCompleted : false;
 
+    const labels = card.labels ?? [];
+    const visibleLabels = labels.slice(0, MAX_VISIBLE_LABELS);
+    const extraLabels = labels.length - visibleLabels.length;
+
     return (
       <div
         className={cn(
-          "group/card relative flex cursor-grab select-none flex-col transition-colors",
-          asRow && "-mx-6 px-6 py-3 hover:bg-primary/[0.04]",
+          "group/card relative flex cursor-grab select-none items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/50",
           activeCard?.id === card.id && !isDragging && "opacity-50",
           isDragging && "pointer-events-none select-none",
           className,
@@ -49,54 +52,60 @@ export const CardBase = memo(
         style={style}
         onClick={onClick}
       >
-        <div className="relative pl-4">
-          <span
-            className="absolute left-0 top-[3px] h-3.5 w-0.5"
-            style={{
-              backgroundColor: isCompleted
-                ? "hsl(var(--border))"
-                : priorityColor,
-            }}
-            aria-hidden
-          />
-          {children}
+        <span
+          className="h-3 w-0.5 shrink-0"
+          style={{
+            backgroundColor: isCompleted ? "hsl(var(--border))" : priorityColor,
+          }}
+          aria-hidden
+        />
+        {children}
 
-          <h3
+        <h3
+          className={cn(
+            "min-w-0 flex-1 truncate text-[12.5px] text-card-foreground transition-colors group-hover/card:text-primary",
+            isCompleted &&
+              "text-muted-foreground line-through group-hover/card:text-muted-foreground",
+          )}
+        >
+          {card.title}
+        </h3>
+
+        {dueDate && (
+          <span
             className={cn(
-              "line-clamp-3 text-[13px] font-medium leading-snug text-card-foreground transition-colors group-hover/card:text-primary",
-              isCompleted &&
-                "text-muted-foreground line-through group-hover/card:text-muted-foreground",
+              "shrink-0 font-mono text-[9px]",
+              isOverdue ? "text-destructive" : "text-muted-foreground",
             )}
           >
-            {card.title}
-          </h3>
+            {format(dueDate, "MMM d")}
+          </span>
+        )}
 
-          {(card.labels?.length ?? 0) > 0 || dueDate || card.assignedTo ? (
-            <div className="mt-2 flex items-center gap-2 font-mono text-[10px] text-muted-foreground">
-              {card.labels?.map((label, index) => (
-                <span
-                  key={index}
-                  className="border border-border px-1.5 py-0.5 leading-none"
-                >
-                  {label}
-                </span>
-              ))}
-              {dueDate && (
-                <span className={cn("px-0.5", isOverdue && "text-destructive")}>
-                  {format(dueDate, "MMM d")}
-                </span>
-              )}
-              {card.assignedTo && (
-                <Avatar className="ml-auto h-5 w-5">
-                  <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-                  <AvatarFallback className="text-[9px]">
-                    {card.assignedTo.user.name?.[0] ?? ""}
-                  </AvatarFallback>
-                </Avatar>
-              )}
-            </div>
-          ) : null}
-        </div>
+        {visibleLabels.map((label, index) => (
+          <span
+            key={index}
+            className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[9px] leading-none text-muted-foreground"
+          >
+            {label}
+          </span>
+        ))}
+        {extraLabels > 0 && (
+          <span className="shrink-0 font-mono text-[9px] text-muted-foreground">
+            +{extraLabels}
+          </span>
+        )}
+
+        {card.assignedTo ? (
+          <Avatar className="h-4 w-4 shrink-0">
+            <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
+            <AvatarFallback className="text-[8px]">
+              {card.assignedTo.user.name?.[0] ?? ""}
+            </AvatarFallback>
+          </Avatar>
+        ) : (
+          <span className="h-4 w-4 shrink-0" aria-hidden />
+        )}
       </div>
     );
   },

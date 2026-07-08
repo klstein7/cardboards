@@ -5,7 +5,6 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { extractClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
-import { Inbox } from "lucide-react";
 import { useEffect } from "react";
 
 import {
@@ -32,10 +31,7 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
   const moveCardMutation = useMoveCard();
   const queryClient = useQueryClient();
   const trpc = useTRPC();
-  const emptyTitle = isCompleted ? "Nothing completed yet" : "No cards yet";
-  const emptyDescription = isCompleted
-    ? "Finished cards will collect here."
-    : "Drop cards here or add one below.";
+  const emptyLabel = isCompleted ? "Nothing completed" : "No entries";
 
   useEffect(() => {
     return monitorForElements({
@@ -142,35 +138,24 @@ export function CardList({ columnId, isCompleted }: CardListProps) {
 
   if (cards.isPending)
     return (
-      <div className="flex flex-col pt-1">
+      <div className="flex flex-col divide-y divide-border/60">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="py-3">
-            <CardSkeleton />
-          </div>
+          <CardSkeleton key={index} />
         ))}
       </div>
     );
 
   if (!cards.data.length)
     return (
-      <div
-        className="flex min-h-32 items-center gap-3 border border-dashed border-border/70 px-4 py-5 text-muted-foreground transition-colors hover:border-border"
-        aria-label={emptyTitle}
-      >
-        <Inbox className="h-4 w-4 shrink-0" />
-        <div className="min-w-0">
-          <p className="text-sm font-medium text-foreground/80">{emptyTitle}</p>
-          <p className="mt-1 max-w-56 text-xs leading-5 text-muted-foreground">
-            {emptyDescription}
-          </p>
-        </div>
-      </div>
+      <p className="px-3 py-2.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+        {emptyLabel}
+      </p>
     );
 
   const sortedCards = cards.data.sort((a, b) => a.order - b.order);
 
   return (
-    <div className="flex max-w-full flex-col pb-2">
+    <div className="flex max-w-full flex-col divide-y divide-border/60">
       <AnimatePresence initial={false}>
         {sortedCards.map((card, index) => (
           <motion.div

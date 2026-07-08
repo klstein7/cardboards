@@ -39,15 +39,6 @@ interface ColumnItemProps {
   column: Column;
 }
 
-// Stage-rail hues drawn from the app's existing priority palette, assigned by
-// column position. Red is intentionally omitted (reserved for errors/overdue).
-export const RAIL_PALETTE = [
-  "hsl(var(--primary))",
-  "var(--priority-high-color)",
-  "var(--priority-low-color)",
-  "var(--priority-medium-color)",
-];
-
 export function ColumnItem({ column }: ColumnItemProps) {
   const columnRef = useRef<HTMLDivElement>(null);
   const cardListRef = useRef<HTMLDivElement>(null);
@@ -185,7 +176,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const isLast = column.order === (columns.data ?? []).length - 1;
 
   const cardCount = cards.data?.length ?? 0;
-  const railColor = RAIL_PALETTE[column.order % RAIL_PALETTE.length];
 
   if (cards.isError) {
     return <div>Error: {cards.error.message}</div>;
@@ -195,46 +185,34 @@ export function ColumnItem({ column }: ColumnItemProps) {
     <div
       ref={columnRef}
       className={cn(
-        "group/column flex h-full w-full flex-col overflow-hidden border-t-2 transition-all duration-200",
+        "group/column flex h-full w-full flex-col overflow-hidden transition-all duration-200",
         isDropping && "bg-primary/[0.04]",
         justMoved && "animate-column-moved",
       )}
-      style={{
-        borderTopColor: railColor,
-        ...(isDropping
-          ? {
-              boxShadow: `0 0 0 2px hsl(var(--primary)), 0 0 0 4px var(--background)`,
-              borderColor: "hsl(var(--primary))",
-              backgroundColor: "hsl(var(--primary) / 0.1)",
-            }
-          : {}),
-        ...(justMoved
+      style={
+        justMoved
           ? ({
               "--column-color-rgb": "var(--primary)",
             } as React.CSSProperties)
-          : {}),
-      }}
+          : undefined
+      }
       aria-describedby={`${column.name}-column`}
     >
-      <div className="flex items-center justify-between px-6 pb-3 pt-5">
-        <div className="flex items-center gap-2">
+      <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
+        <div className="flex min-w-0 items-center gap-2">
           {column.isCompleted && (
-            <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+            <CheckCircle2 className="h-3 w-3 shrink-0 text-primary" />
           )}
-          <span
-            className={cn(
-              "text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground",
-              column.isCompleted && "text-primary",
-            )}
-          >
+          <span className="truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
             {column.name}
-          </span>
-          <span className="flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] text-primary-foreground">
-            {cardCount}
           </span>
         </div>
 
-        {isAdmin && (
+        <div className="flex shrink-0 items-center gap-1.5">
+          <span className="font-mono text-[10px] text-muted-foreground">
+            {String(cardCount).padStart(2, "0")}
+          </span>
+          {isAdmin && (
           <DropdownMenu
             modal={false}
             open={isDropdownOpen}
@@ -305,7 +283,8 @@ export function ColumnItem({ column }: ColumnItemProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        )}
+          )}
+        </div>
 
         <EditColumnDialog
           column={column}
@@ -320,20 +299,20 @@ export function ColumnItem({ column }: ColumnItemProps) {
         />
       </div>
 
-      <div ref={cardListRef} className="flex-1 overflow-y-auto px-6">
+      <div ref={cardListRef} className="flex-1 overflow-y-auto">
         <CardList columnId={column.id} isCompleted={column.isCompleted} />
       </div>
 
       {!column.isCompleted && (
-        <div className="px-6 pb-5 pt-3">
+        <div className="shrink-0 border-t border-border">
           <CreateCardDialog
             trigger={
               <Button
                 variant="ghost"
-                className="h-8 w-full justify-start gap-1.5 px-0 text-sm text-muted-foreground hover:bg-transparent hover:text-primary"
+                className="h-8 w-full justify-start gap-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground hover:bg-transparent hover:text-primary"
               >
-                <Plus className="h-3.5 w-3.5" />
-                <span>Add card</span>
+                <Plus className="h-3 w-3" />
+                <span>Add</span>
               </Button>
             }
             columnId={column.id}
@@ -341,7 +320,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
         </div>
       )}
       {column.isCompleted && (
-        <div className="flex items-center gap-1.5 px-6 pb-5 pt-3 text-[11px] font-medium uppercase tracking-[0.14em] text-primary">
+        <div className="flex h-8 shrink-0 items-center gap-1.5 border-t border-border px-3 font-mono text-[10px] uppercase tracking-[0.14em] text-primary">
           <CheckCircle2 className="h-3 w-3" />
           <span>Completed</span>
         </div>
