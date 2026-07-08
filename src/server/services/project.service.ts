@@ -171,7 +171,11 @@ export class ProjectService extends BaseService {
         orderBy: (projects, { desc }) => [desc(projects.createdAt)],
         with: {
           boards: true,
-          projectUsers: true,
+          projectUsers: {
+            with: {
+              user: true,
+            },
+          },
         },
       });
 

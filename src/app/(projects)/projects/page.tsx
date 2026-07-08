@@ -2,9 +2,8 @@ import { type Metadata } from "next";
 
 import { HydrateClient, trpc } from "~/trpc/server";
 
-import { ProjectList } from "../_components/project-list";
-import { ProjectsPageHeader } from "../_components/projects-page-header";
-import { ProjectsTitle } from "../_components/projects-title";
+import { ProjectShelf } from "../_components/project-shelf/project-shelf";
+import { ProjectsCommandStrip } from "../_components/projects-command-strip";
 
 export const metadata: Metadata = {
   title: "Projects | cardboards",
@@ -16,17 +15,14 @@ export default async function ProjectsPage() {
 
   return (
     <HydrateClient>
-      <div className="flex h-[100dvh] flex-col overflow-hidden bg-background">
-        <ProjectsPageHeader />
+      <div className="flex h-dvh flex-col overflow-hidden bg-background">
+        <div className="shrink-0 border-b border-border">
+          <ProjectsCommandStrip />
+        </div>
 
-        <main className="flex-1 overflow-y-auto px-4 pb-16 sm:px-6 lg:px-8">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="pt-10 md:pt-14">
-              <ProjectsTitle />
-            </div>
-            <div className="mt-12">
-              <ProjectList />
-            </div>
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
+            <ProjectShelf />
           </div>
         </main>
       </div>

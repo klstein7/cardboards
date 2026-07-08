@@ -7,8 +7,11 @@ import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { useState } from "react";
 
 import { Notifications } from "~/app/(project)/_components/notifications";
-import { BrandIcon } from "~/components/brand/brand-icon";
 import { BoardSelector } from "~/components/shared/board-selector";
+import {
+  CommandStrip,
+  CommandStripBrand,
+} from "~/components/shared/command-strip";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -84,14 +87,8 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
   };
 
   return (
-    <div className="flex h-12 w-full items-stretch">
-      <Link
-        href="/projects"
-        aria-label="All projects"
-        className="flex shrink-0 items-center border-r border-border px-3.5 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-      >
-        <BrandIcon variant="xsmall" />
-      </Link>
+    <CommandStrip>
+      <CommandStripBrand />
 
       <div className="flex min-w-0 items-center gap-2 border-r border-border px-4">
         {project && (
@@ -207,6 +204,6 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
         open={notificationsOpen}
         onOpenChange={setNotificationsOpen}
       />
-    </div>
+    </CommandStrip>
   );
 }
