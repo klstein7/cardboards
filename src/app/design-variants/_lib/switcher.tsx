@@ -3,13 +3,17 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 
 const VARIANTS = [
-  { key: "slip", label: "Slip", href: "/design-variants/create-slip" },
   {
-    key: "register",
-    label: "Register",
-    href: "/design-variants/create-register",
+    key: "manifest",
+    label: "Manifest",
+    href: "/design-variants/projects-manifest",
   },
-  { key: "docket", label: "Docket", href: "/design-variants/create-docket" },
+  {
+    key: "cabinet",
+    label: "Cabinet",
+    href: "/design-variants/projects-cabinet",
+  },
+  { key: "shelf", label: "Shelf", href: "/design-variants/projects-shelf" },
 ] as const;
 
 export type VariantKey = (typeof VARIANTS)[number]["key"];

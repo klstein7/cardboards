@@ -2,27 +2,27 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Create card design variants | cardboards",
+  title: "Projects page design variants | cardboards",
 };
 
 const variants = [
   {
-    name: "Slip",
-    href: "/design-variants/create-slip",
+    name: "Manifest",
+    href: "/design-variants/projects-manifest",
     concept:
-      "A quiet centered composer: the title gets a bare writing surface, and every piece of metadata shrinks to a small chip you only open if you need it. The fastest path from thought to filed card.",
+      "The whole workspace as one scannable ledger: a row per project with boards, cards, members, and freshness in columns, favorites pinned at the top of the table.",
   },
   {
-    name: "Register",
-    href: "/design-variants/create-register",
+    name: "Cabinet",
+    href: "/design-variants/projects-cabinet",
     concept:
-      "A right-hand sheet of labeled ledger rows: column, title, priority, due, assignee, labels — every field visible at once, no disclosure, filled in beside the board instead of over it.",
+      "A file cabinet: project names down a left rail, and the selected project's full dossier — boards, members, actions — opens on the right, so you can step straight into any board.",
   },
   {
-    name: "Docket",
-    href: "/design-variants/create-docket",
+    name: "Shelf",
+    href: "/design-variants/projects-shelf",
     concept:
-      "A wide two-panel desk: the writing surface gets the room on the left, the facts pin to a rail on the right, and the exact ledger row you are about to file previews along the bottom.",
+      "Every project is a miniature lane in a hairline grid: its boards stack as rows inside, and the workspace reads like a board of boards.",
   },
 ];
 
@@ -31,16 +31,15 @@ export default function DesignVariantsPage() {
     <div className="h-dvh overflow-y-auto bg-background text-foreground">
       <div className="mx-auto max-w-2xl px-6 py-16">
         <h1 className="text-3xl font-light tracking-tight">
-          Create card design variants
+          Projects page design variants
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-          Round four: the create card dialog, rebuilt in the Ledger language.
-          AI-assisted generation is gone; each direction answers the same
-          question differently — how much of the card&apos;s metadata deserves
-          to be on screen while you are still writing the title? Every mockup
-          opens over the live board treatment, and creating actually files a row
-          into the lane. Nothing links here from the app; the whole tree is safe
-          to delete once a direction is picked.
+          Round five: the projects page joins the Ledger direction. All three
+          directions swap the old oversized title for the command-strip header;
+          they differ in how the workspace itself is organized — one flat table,
+          one master-detail cabinet, one spatial grid. Static mockups with
+          shared sample data; nothing links here from the app, and the whole
+          tree is safe to delete once a direction is picked.
         </p>
 
         <div className="mt-10 divide-y divide-border border-t border-border">
