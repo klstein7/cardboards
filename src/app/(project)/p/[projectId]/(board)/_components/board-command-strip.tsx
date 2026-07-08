@@ -1,8 +1,13 @@
 "use client";
 
-import { Filter, Plus } from "lucide-react";
+import { Bell, Filter, Plus } from "lucide-react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
+import { useState } from "react";
 
+import { Notifications } from "~/app/(project)/_components/notifications";
+import { BrandIcon } from "~/components/brand/brand-icon";
 import { BoardSelector } from "~/components/shared/board-selector";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
@@ -18,15 +23,27 @@ import {
   useBoardSafe,
   useCachedCardsByCurrentBoard,
   useColumns,
+  useProject,
   useProjectUsers,
   useStrictCurrentProjectId,
 } from "~/lib/hooks";
+import { useNotificationUnreadCount } from "~/lib/hooks/notification";
 import { cn } from "~/lib/utils";
 
 import { BoardFilters, BoardLabelFilter, BoardSearch } from "./board-filters";
 import { BoardSettingsMenu } from "./board-settings-menu";
 import { CreateCardDialog } from "./create-card-dialog";
 import { FilterIndicator } from "./filter-indicator";
+
+const UserButton = dynamic(
+  () => import("@clerk/nextjs").then((mod) => mod.UserButton),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="h-7 w-7 rounded-full border border-border bg-muted" />
+    ),
+  },
+);
 
 interface BoardCommandStripProps {
   boardId: string;
@@ -35,6 +52,9 @@ interface BoardCommandStripProps {
 export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
   const projectId = useStrictCurrentProjectId();
   const { data: board } = useBoardSafe(boardId);
+  const { data: project } = useProject(projectId);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
   const cards = useCachedCardsByCurrentBoard();
   const columns = useColumns(boardId);
@@ -74,7 +94,26 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
 
   return (
     <div className="flex h-12 w-full items-stretch">
-      <div className="flex min-w-0 items-center border-r border-border px-4">
+      <Link
+        href="/projects"
+        aria-label="All projects"
+        className="flex shrink-0 items-center border-r border-border px-3.5 transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+      >
+        <BrandIcon variant="xsmall" />
+      </Link>
+
+      <div className="flex min-w-0 items-center gap-2 border-r border-border px-4">
+        {project && (
+          <>
+            <Link
+              href={`/p/${projectId}/overview/boards`}
+              className="min-w-0 max-w-32 truncate text-sm text-muted-foreground transition-colors hover:text-foreground sm:max-w-52"
+            >
+              {project.name}
+            </Link>
+            <span className="shrink-0 text-border">/</span>
+          </>
+        )}
         <BoardSelector
           projectId={projectId}
           boardId={boardId}
@@ -97,7 +136,7 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
         <BoardSearch className="w-40" />
       </div>
 
-      <div className="scrollbar-none hidden max-w-md items-center overflow-x-auto px-4 lg:flex">
+      <div className="hidden max-w-md items-center overflow-x-auto px-4 scrollbar-none lg:flex">
         <BoardLabelFilter className="flex-nowrap" />
       </div>
 
@@ -167,6 +206,23 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
         <BoardSettingsMenu boardId={boardId} />
       </div>
 
+      <div className="flex items-center border-l border-border">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative h-full w-12 text-muted-foreground hover:text-foreground"
+          onClick={() => setNotificationsOpen(true)}
+          aria-label="Notifications"
+        >
+          <Bell className="h-4 w-4" />
+          {unreadCount > 0 && (
+            <span className="absolute right-1.5 top-1.5 flex h-4 min-w-4 items-center justify-center bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </Button>
+      </div>
+
       {firstOpenColumn && (
         <div className="flex items-center border-l border-border px-3">
           <CreateCardDialog
@@ -180,6 +236,15 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           />
         </div>
       )}
+
+      <div className="flex items-center border-l border-border px-3">
+        <UserButton afterSignOutUrl="/" />
+      </div>
+
+      <Notifications
+        open={notificationsOpen}
+        onOpenChange={setNotificationsOpen}
+      />
     </div>
   );
 }
