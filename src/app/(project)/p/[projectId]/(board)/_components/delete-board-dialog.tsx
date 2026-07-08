@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
@@ -34,16 +34,13 @@ export function DeleteBoardDialog({
   onOpenChange,
 }: DeleteBoardDialogProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const deleteBoardMutation = useDeleteBoard();
   const isDeleting = deleteBoardMutation.isPending;
 
   const handleDeleteBoard = async () => {
     try {
       const deletedBoard = await deleteBoardMutation.mutateAsync(board.id);
-      if (pathname.includes(`/b/${board.id}`)) {
-        router.replace(`/p/${deletedBoard.projectId}/overview/boards`);
-      }
+      router.replace(`/p/${deletedBoard.projectId}/overview/boards`);
       toast.success(`Board "${board.name}" deleted successfully`);
       onOpenChange(false);
     } catch (error) {

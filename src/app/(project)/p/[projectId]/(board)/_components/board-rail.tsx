@@ -16,6 +16,7 @@ import {
 import { cn } from "~/lib/utils";
 
 import { BoardLabelFilter, BoardSearch } from "./board-filters";
+import { BoardSettingsMenu } from "./board-settings-menu";
 import { RAIL_PALETTE } from "./column-item";
 import { CreateCardDialog } from "./create-card-dialog";
 
@@ -67,11 +68,14 @@ export function BoardRail({ boardId }: BoardRailProps) {
     <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border lg:flex">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-5 pb-5 pt-6">
-          <BoardSelector
-            projectId={projectId}
-            boardId={boardId}
-            label={board?.name ?? "Board"}
-          />
+          <div className="flex items-center justify-between gap-2">
+            <BoardSelector
+              projectId={projectId}
+              boardId={boardId}
+              label={board?.name ?? "Board"}
+            />
+            <BoardSettingsMenu boardId={boardId} />
+          </div>
           <p className="mt-1.5 font-mono text-xs text-muted-foreground">
             {cards.length} {cards.length === 1 ? "card" : "cards"} ·{" "}
             {doneCount} done
