@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Filter, Plus } from "lucide-react";
+import { Bell, Plus } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
@@ -12,14 +12,6 @@ import { BoardSelector } from "~/components/shared/board-selector";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "~/components/ui/drawer";
-import {
   useBoardSafe,
   useCachedCardsByCurrentBoard,
   useColumns,
@@ -30,10 +22,9 @@ import {
 import { useNotificationUnreadCount } from "~/lib/hooks/notification";
 import { cn } from "~/lib/utils";
 
-import { BoardFilters, BoardLabelFilter, BoardSearch } from "./board-filters";
+import { BoardLabelFilter } from "./board-filters";
 import { BoardSettingsMenu } from "./board-settings-menu";
 import { CreateCardDialog } from "./create-card-dialog";
-import { FilterIndicator } from "./filter-indicator";
 
 const UserButton = dynamic(
   () => import("@clerk/nextjs").then((mod) => mod.UserButton),
@@ -120,6 +111,7 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           label={board?.name ?? "Board"}
           compact
         />
+        <BoardSettingsMenu boardId={boardId} />
       </div>
 
       <div className="hidden items-center gap-4 whitespace-nowrap px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:flex">
@@ -132,16 +124,12 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
 
       <div className="min-w-0 flex-1" />
 
-      <div className="hidden items-center px-4 lg:flex">
-        <BoardSearch className="w-40" />
-      </div>
-
-      <div className="hidden max-w-md items-center overflow-x-auto px-4 scrollbar-none lg:flex">
+      <div className="hidden max-w-md items-center overflow-x-auto px-4 scrollbar-none md:flex">
         <BoardLabelFilter className="flex-nowrap" />
       </div>
 
       {memberList.length > 0 && (
-        <div className="hidden items-center border-l border-border px-4 xl:flex">
+        <div className="hidden items-center border-l border-border px-4 md:flex">
           <div className="flex -space-x-1.5">
             {visibleMembers.map((projectUser) => {
               const isActive = assignedTo?.includes(projectUser.id) ?? false;
@@ -176,35 +164,6 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           )}
         </div>
       )}
-
-      <div className="flex items-center border-l border-border xl:hidden">
-        <Drawer>
-          <DrawerTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative h-full w-12 text-muted-foreground hover:text-foreground"
-              aria-label="Filter cards"
-            >
-              <Filter className="h-4 w-4" />
-              <FilterIndicator className="absolute right-1.5 top-1.5" />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent className="px-4 pb-6">
-            <DrawerHeader>
-              <DrawerTitle>Filter Board</DrawerTitle>
-              <DrawerDescription>
-                Filter cards by label, assignee, or search.
-              </DrawerDescription>
-            </DrawerHeader>
-            <BoardFilters />
-          </DrawerContent>
-        </Drawer>
-      </div>
-
-      <div className="flex items-center border-l border-border px-2">
-        <BoardSettingsMenu boardId={boardId} />
-      </div>
 
       <div className="flex items-center border-l border-border">
         <Button
