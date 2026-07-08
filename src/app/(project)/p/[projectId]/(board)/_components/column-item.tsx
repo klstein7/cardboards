@@ -41,7 +41,7 @@ interface ColumnItemProps {
 
 // Stage-rail hues drawn from the app's existing priority palette, assigned by
 // column position. Red is intentionally omitted (reserved for errors/overdue).
-const RAIL_PALETTE = [
+export const RAIL_PALETTE = [
   "hsl(var(--primary))",
   "var(--priority-high-color)",
   "var(--priority-low-color)",

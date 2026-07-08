@@ -121,11 +121,12 @@ export function ColumnList({ boardId }: ColumnListProps) {
         )}
         tabIndex={0}
       >
-        <div className="mx-auto flex h-full w-fit items-stretch divide-x divide-border">
+        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(340px,1fr)]">
           {columns.data.map((column) => (
             <div
               key={column.id}
-              className="h-full w-[calc(100vw-8px)] flex-shrink-0 sm:w-[340px]"
+              id={`board-column-${column.id}`}
+              className="min-w-0"
             >
               <ColumnItem column={column} />
             </div>
