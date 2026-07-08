@@ -22,7 +22,6 @@ import {
 } from "~/lib/hooks";
 
 import { BoardFilters, BoardLabelFilter } from "./board-filters";
-import { BoardSettingsMenu } from "./board-settings-menu";
 import { CreateCardDialog } from "./create-card-dialog";
 import { FilterIndicator } from "./filter-indicator";
 
@@ -140,7 +139,6 @@ export function BoardToolbar({ boardId }: BoardToolbarProps) {
         {mobileFilters}
         {memberStack}
         {newCardButton}
-        <BoardSettingsMenu boardId={boardId} />
       </div>
     </div>
   );

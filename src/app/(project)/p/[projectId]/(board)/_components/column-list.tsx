@@ -1,13 +1,15 @@
 "use client";
 
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { useColumns } from "~/lib/hooks";
+import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
 import { ColumnItem } from "./column-item";
+import { CreateColumnDialog } from "./create-column-dialog";
 
 interface ColumnListProps {
   boardId: string;
@@ -16,6 +18,7 @@ interface ColumnListProps {
 export function ColumnList({ boardId }: ColumnListProps) {
   const ref = useRef<HTMLDivElement>(null);
   const columns = useColumns(boardId);
+  const isAdmin = useIsAdmin();
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
   const [showLeftButton, setShowLeftButton] = useState(false);
   const [showRightButton, setShowRightButton] = useState(false);
@@ -121,16 +124,30 @@ export function ColumnList({ boardId }: ColumnListProps) {
         )}
         tabIndex={0}
       >
-        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(340px,1fr)]">
+        <div className="flex h-full items-stretch divide-x divide-border">
           {columns.data.map((column) => (
             <div
               key={column.id}
               id={`board-column-${column.id}`}
-              className="min-w-0"
+              className="w-[calc(100vw-8px)] shrink-0 sm:w-auto sm:min-w-[340px] sm:flex-1"
             >
               <ColumnItem column={column} />
             </div>
           ))}
+          {isAdmin && (
+            <CreateColumnDialog
+              boardId={boardId}
+              trigger={
+                <button
+                  className="flex w-12 shrink-0 justify-center pt-[22px] text-muted-foreground transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                  aria-label="New column"
+                  title="New column"
+                >
+                  <Plus className="h-4 w-4" />
+                </button>
+              }
+            />
+          )}
         </div>
       </div>
 
