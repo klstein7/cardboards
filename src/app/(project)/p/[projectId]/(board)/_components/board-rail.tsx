@@ -65,7 +65,7 @@ export function BoardRail({ boardId }: BoardRailProps) {
   };
 
   return (
-    <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border lg:flex">
+    <aside className="hidden w-[260px] shrink-0 flex-col border-r border-border xl:flex">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="px-5 pb-5 pt-6">
           <div className="flex items-center justify-between gap-2">

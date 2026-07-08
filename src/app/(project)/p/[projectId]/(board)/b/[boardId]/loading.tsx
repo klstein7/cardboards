@@ -8,7 +8,7 @@ export default function BoardPageSkeleton() {
   return (
     <div className="flex h-full w-full flex-col">
       <main className="relative flex-1 overflow-hidden">
-        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(340px,1fr)]">
+        <div className="grid h-full auto-cols-[calc(100vw-8px)] grid-flow-col grid-rows-[minmax(0,1fr)] divide-x divide-border sm:auto-cols-[minmax(320px,1fr)]">
           {[1, 2, 3, 4].map((columnIndex) => (
             <div
               key={columnIndex}
