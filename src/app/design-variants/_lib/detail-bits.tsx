@@ -4,6 +4,8 @@
 // identical DNA across all three directions (facts, thread entries, the
 // composer). Each variant composes these differently; none restyles them.
 
+import { ChevronDown } from "lucide-react";
+
 import { cn } from "~/lib/utils";
 
 import { MemberAvatar } from "./bits";
@@ -32,6 +34,30 @@ export function MicroLabel({
     >
       {children}
     </span>
+  );
+}
+
+export function EditableValue({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={cn(
+        "group/edit flex w-fit items-center gap-1.5 text-left transition-colors hover:text-primary focus-visible:text-primary focus-visible:outline-none",
+        className,
+      )}
+    >
+      {children}
+      <ChevronDown
+        className="h-3 w-3 shrink-0 text-muted-foreground transition-colors group-hover/edit:text-primary"
+        aria-hidden
+      />
+    </button>
   );
 }
 

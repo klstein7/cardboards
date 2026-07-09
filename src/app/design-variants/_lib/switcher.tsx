@@ -3,20 +3,17 @@ import Link from "next/link";
 import { cn } from "~/lib/utils";
 
 const VARIANTS = [
-  { key: "sheet", label: "Sheet", href: "/design-variants/card-sheet" },
   {
-    key: "inspector",
-    label: "Inspector",
-    href: "/design-variants/card-inspector",
+    key: "topsheet",
+    label: "Topsheet",
+    href: "/design-variants/panel-topsheet",
   },
-  { key: "dossier", label: "Dossier", href: "/design-variants/card-dossier" },
   {
-    key: "workbench",
-    label: "Workbench",
-    href: "/design-variants/card-workbench",
+    key: "worksheet",
+    label: "Worksheet",
+    href: "/design-variants/panel-worksheet",
   },
-  { key: "queue", label: "Queue", href: "/design-variants/card-queue" },
-  { key: "docket", label: "Docket", href: "/design-variants/card-docket" },
+  { key: "logbook", label: "Logbook", href: "/design-variants/panel-logbook" },
 ] as const;
 
 export type VariantKey = (typeof VARIANTS)[number]["key"];
