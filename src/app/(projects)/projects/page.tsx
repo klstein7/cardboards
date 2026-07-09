@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   description: "Manage and organize your projects in one place",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function ProjectsPage() {
   await trpc.project.list.prefetch();
 
