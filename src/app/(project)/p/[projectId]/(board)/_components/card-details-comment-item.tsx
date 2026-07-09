@@ -39,7 +39,6 @@ export function CardDetailsCommentItem({ comment }: { comment: CardComment }) {
   const updateCardCommentMutation = useUpdateCardComment();
 
   const handleSaveComment = async () => {
-    // Only update if content has changed
     if (editedContent !== comment.content) {
       await updateCardCommentMutation.mutateAsync({
         cardCommentId: comment.id,
@@ -53,99 +52,92 @@ export function CardDetailsCommentItem({ comment }: { comment: CardComment }) {
 
   return (
     <AlertDialog>
-      <div className="relative overflow-hidden rounded-md border border-border/40 bg-card/30 p-4  transition-all hover:bg-card/50">
-        <div className="absolute inset-y-0 left-0 w-1 bg-primary/40"></div>
+      <div className="group/comment flex gap-3 py-4">
+        <Avatar className="h-5 w-5 shrink-0">
+          <AvatarImage src={comment.projectUser.user.imageUrl ?? undefined} />
+          <AvatarFallback className="text-[9px] font-medium">
+            {comment.projectUser.user.name?.[0]}
+          </AvatarFallback>
+        </Avatar>
 
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex w-full items-start gap-3">
-            <Avatar className="h-9 w-9 border-2 border-background ">
-              <AvatarImage
-                src={comment.projectUser.user.imageUrl ?? undefined}
-              />
-              <AvatarFallback className="text-xs font-medium">
-                {comment.projectUser.user.name?.[0]}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex w-full flex-1 flex-col">
-              <div className="flex flex-wrap items-baseline gap-2">
-                <div className="text-sm font-semibold text-primary">
-                  {comment.projectUser.user.name}
-                </div>
-                <div className="text-xs text-muted-foreground">
-                  {formatDistance(comment.createdAt, new Date(), {
-                    addSuffix: true,
-                  })}
-                </div>
-              </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-baseline gap-3">
+            <span className="min-w-0 truncate text-[13px] font-medium">
+              {comment.projectUser.user.name}
+            </span>
+            <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+              {formatDistance(comment.createdAt, new Date(), {
+                addSuffix: true,
+              })}
+            </span>
 
-              {isEditing ? (
-                <div className="mt-3 flex w-full flex-col gap-3">
-                  <Textarea
-                    value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
-                    className="w-full resize-none border-border/40 bg-background text-sm"
-                    rows={3}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && !e.shiftKey) {
-                        e.preventDefault();
-                        void handleSaveComment();
-                      }
-                    }}
-                  />
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setIsEditing(false);
-                        setEditedContent(comment.content);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={handleSaveComment}
-                      disabled={updateCardCommentMutation.isPending}
-                    >
-                      Save
-                    </Button>
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-2 whitespace-pre-wrap pl-0.5 text-sm leading-relaxed text-foreground">
-                  {comment.content}
-                </div>
-              )}
-            </div>
+            {isCommentAuthor && !isEditing && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="ml-auto h-6 w-6 shrink-0 self-center text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover/comment:opacity-100 data-[state=open]:opacity-100 max-sm:opacity-100"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Comment actions</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setIsEditing(true)}>
+                    <PencilIcon className="mr-2 h-4 w-4" />
+                    Edit
+                  </DropdownMenuItem>
+                  <AlertDialogTrigger asChild>
+                    <DropdownMenuItem className="text-destructive focus:text-destructive">
+                      <TrashIcon className="mr-2 h-4 w-4" />
+                      Delete
+                    </DropdownMenuItem>
+                  </AlertDialogTrigger>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
 
-          {isCommentAuthor && !isEditing && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
+          {isEditing ? (
+            <div className="mt-2 flex w-full flex-col gap-2">
+              <Textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full resize-none text-sm"
+                rows={3}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSaveComment();
+                  }
+                }}
+              />
+              <div className="flex items-center justify-end gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 flex-shrink-0 p-0 opacity-70 hover:opacity-100"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setEditedContent(comment.content);
+                  }}
                 >
-                  <MoreHorizontal className="h-4 w-4" />
-                  <span className="sr-only">Comment actions</span>
+                  Cancel
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                  <PencilIcon className="mr-2 h-4 w-4" />
-                  Edit
-                </DropdownMenuItem>
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive focus:text-destructive">
-                    <TrashIcon className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </AlertDialogTrigger>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleSaveComment}
+                  disabled={updateCardCommentMutation.isPending}
+                >
+                  Save
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-muted-foreground">
+              {comment.content}
+            </p>
           )}
         </div>
       </div>

@@ -24,8 +24,10 @@ export function CardDetailsLabels({
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
-    <div className="mt-4 flex flex-col gap-1">
-      <span className="text-xs font-medium text-muted-foreground">Labels</span>
+    <div className="flex flex-col gap-1.5">
+      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        Labels
+      </span>
       {isPending ? (
         <Skeleton className="h-9 w-full" />
       ) : (
@@ -36,10 +38,13 @@ export function CardDetailsLabels({
           setTags={setTags}
           className="w-full"
           styleClasses={{
-            input: "h-9",
-            inlineTagsContainer: "pl-1 py-0.5",
+            input: "h-8 rounded-none text-sm",
+            inlineTagsContainer: "rounded-none pl-1 py-0.5",
+            tag: {
+              body: "rounded-none border border-border bg-transparent pl-2 font-mono text-[10px] text-muted-foreground",
+            },
           }}
-          placeholder="Enter a topic"
+          placeholder="Add a label"
           maxTags={5}
           onTagAdd={async (tag) => {
             const currentTags = tags.map((t) => t.text);

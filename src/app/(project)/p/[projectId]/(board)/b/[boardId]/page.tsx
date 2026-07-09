@@ -33,13 +33,11 @@ export default async function BoardPage({ params }: { params: Params }) {
     <HydrateClient>
       <BoardRealtimeProvider>
         <BoardStateProvider>
-          <div className="flex h-full w-full flex-col">
-            <main className="relative flex flex-1 flex-col overflow-hidden">
-              <div className="flex-1 overflow-hidden">
-                <ColumnList boardId={boardId} />
-                <CardDetails />
-              </div>
+          <div className="flex h-full w-full">
+            <main className="relative min-w-0 flex-1 overflow-hidden">
+              <ColumnList boardId={boardId} />
             </main>
+            <CardDetails boardId={boardId} />
           </div>
         </BoardStateProvider>
       </BoardRealtimeProvider>

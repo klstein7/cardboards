@@ -22,6 +22,14 @@ interface CardDetailsMetadataProps {
   onPriorityChange: (value: string) => Promise<void>;
 }
 
+function FieldLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+      {children}
+    </span>
+  );
+}
+
 export function CardDetailsMetadata({
   dueDate,
   assignedToId,
@@ -36,70 +44,55 @@ export function CardDetailsMetadata({
   onPriorityChange,
 }: CardDetailsMetadataProps) {
   return (
-    <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
-      <div className="mb-3 text-sm font-medium">Details</div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Due date
-          </span>
-          {isEditingDueDate ? (
-            isPendingDueDate ? (
-              <Skeleton className="h-10 w-full" />
-            ) : (
-              <DatePicker
-                value={dueDate ?? undefined}
-                onChange={onDueDateChange}
-              />
-            )
-          ) : (
-            <div
-              role="button"
-              onClick={onEditDueDate}
-              className="rounded-md py-1 transition-colors hover:bg-muted/50"
-            >
-              {dueDate ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <span className="inline-block h-2 w-2 bg-primary"></span>
-                  {format(dueDate, "MMM d, yyyy")}
-                </span>
-              ) : (
-                <span className="italic text-muted-foreground">
-                  Set due date
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Assignee
-          </span>
-          {isPendingAssignee ? (
-            <Skeleton className="h-9 w-full" />
-          ) : (
-            <ProjectUserSelect
-              value={assignedToId ?? ""}
-              onChange={onAssigneeChange}
-            />
-          )}
-        </div>
-
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Priority
-          </span>
-          {isPendingPriority ? (
-            <Skeleton className="h-9 w-full" />
-          ) : (
-            <CardPrioritySelect
-              value={priority ?? ""}
-              onChange={onPriorityChange}
-            />
-          )}
-        </div>
+    <>
+      <div className="flex flex-col gap-1.5">
+        <FieldLabel>Priority</FieldLabel>
+        {isPendingPriority ? (
+          <Skeleton className="h-9 w-full" />
+        ) : (
+          <CardPrioritySelect
+            value={priority ?? ""}
+            onChange={onPriorityChange}
+          />
+        )}
       </div>
-    </div>
+
+      <div className="flex flex-col gap-1.5">
+        <FieldLabel>Assignee</FieldLabel>
+        {isPendingAssignee ? (
+          <Skeleton className="h-9 w-full" />
+        ) : (
+          <ProjectUserSelect
+            value={assignedToId ?? ""}
+            onChange={onAssigneeChange}
+          />
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <FieldLabel>Due</FieldLabel>
+        {isEditingDueDate ? (
+          isPendingDueDate ? (
+            <Skeleton className="h-9 w-full" />
+          ) : (
+            <DatePicker value={dueDate ?? undefined} onChange={onDueDateChange} />
+          )
+        ) : (
+          <button
+            type="button"
+            onClick={onEditDueDate}
+            className="w-fit text-left transition-colors hover:text-primary focus-visible:text-primary focus-visible:outline-none"
+          >
+            {dueDate ? (
+              <span className="font-mono text-xs">
+                {format(dueDate, "EEE, MMM d")}
+              </span>
+            ) : (
+              <span className="text-sm text-muted-foreground">No due date</span>
+            )}
+          </button>
+        )}
+      </div>
+    </>
   );
 }

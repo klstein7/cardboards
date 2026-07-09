@@ -18,32 +18,46 @@ export function CardDetailsDescription({
   onEdit,
   onBlur,
 }: CardDetailsDescriptionProps) {
+  const isEmpty = description === "<p></p>" || !description;
+
   return (
-    <div className="rounded-lg border bg-card/50 p-4  backdrop-blur-[2px]">
-      <div className="flex flex-col gap-1">
-        <span className="text-xs font-medium text-muted-foreground">
-          Description
-        </span>
-        {isEditing ? (
-          isPending ? (
-            <Skeleton className="h-[150px] w-full" />
-          ) : (
-            <Tiptap value={description ?? ""} onBlur={onBlur} autoFocus />
-          )
+    <div className="mt-6 flex flex-col gap-3">
+      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        Description
+      </span>
+
+      {isEditing ? (
+        isPending ? (
+          <Skeleton className="h-36 w-full" />
         ) : (
-          <div
-            role="button"
-            className="prose max-w-none rounded-md py-1 transition-colors dark:prose-invert hover:bg-muted/50"
-            onClick={onEdit}
-            dangerouslySetInnerHTML={{
-              __html:
-                description === "<p></p>" || !description
-                  ? "<p class='text-muted-foreground italic'>Click to edit description</p>"
-                  : description,
-            }}
-          />
-        )}
-      </div>
+          <Tiptap value={description ?? ""} onBlur={onBlur} autoFocus />
+        )
+      ) : isEmpty ? (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onEdit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onEdit();
+          }}
+          className="border border-dashed border-border px-4 py-6 transition-colors hover:border-foreground/40 focus-visible:border-foreground/40 focus-visible:outline-none"
+        >
+          <p className="text-sm text-muted-foreground">
+            No description yet. Click to add one.
+          </p>
+        </div>
+      ) : (
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={onEdit}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onEdit();
+          }}
+          className="prose prose-sm max-w-[65ch] cursor-text dark:prose-invert focus-visible:outline-none"
+          dangerouslySetInnerHTML={{ __html: description }}
+        />
+      )}
     </div>
   );
 }
