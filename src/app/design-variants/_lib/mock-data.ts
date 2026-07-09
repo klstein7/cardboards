@@ -1,4 +1,4 @@
-// Illustrative mock data for the /design-variants card-detail mockups.
+// Illustrative mock data for the /design-variants studies.
 // Sample values only; nothing here is read by the real app.
 
 export interface MockPerson {

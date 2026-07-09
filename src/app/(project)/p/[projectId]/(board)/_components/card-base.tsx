@@ -5,7 +5,7 @@ import { memo } from "react";
 
 import { type Card } from "~/app/(project)/_types";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { cn, getColor } from "~/lib/utils";
+import { cn, getColor, getPriorityByValue } from "~/lib/utils";
 
 import { useBoardState } from "./board-state-provider";
 
@@ -28,7 +28,9 @@ interface CardBaseProps {
   card: Card;
   className?: string;
   isDragging?: boolean;
+  isSettling?: boolean;
   isCompleted?: boolean;
+  isSelected?: boolean;
   onClick?: () => void;
   style?: React.CSSProperties;
 }
@@ -38,13 +40,16 @@ export const CardBase = memo(
     card,
     className,
     isDragging,
+    isSettling,
     isCompleted,
+    isSelected,
     onClick,
     style,
   }: CardBaseProps) => {
     const { activeCard } = useBoardState();
 
     const priorityColor = getColor(card.priority);
+    const priority = getPriorityByValue(card.priority);
     const dueDate = card.dueDate ? new Date(card.dueDate) : null;
     const isOverdue = dueDate ? isPast(dueDate) && !isCompleted : false;
 
@@ -55,14 +60,21 @@ export const CardBase = memo(
     const labels = card.labels ?? [];
     const visibleLabels = labels.slice(0, MAX_VISIBLE_LABELS);
     const extraLabels = labels.length - visibleLabels.length;
-    const hasMeta = dueDate !== null || labels.length > 0 || !!card.assignedTo;
+    const hasMeta =
+      !!isCompleted ||
+      priority !== null ||
+      dueDate !== null ||
+      labels.length > 0 ||
+      !!card.assignedTo;
 
     return (
       <div
         className={cn(
           "group/card relative flex cursor-grab select-none items-stretch gap-3 px-3.5 py-3 transition-colors hover:bg-accent/50",
           activeCard?.id === card.id && !isDragging && "opacity-50",
+          isSelected && "bg-accent/50",
           isDragging && "pointer-events-none select-none",
+          isSettling && "animate-card-settled motion-reduce:animate-none",
           className,
         )}
         style={style}
@@ -82,6 +94,7 @@ export const CardBase = memo(
               "line-clamp-2 text-sm leading-snug text-card-foreground transition-colors group-hover/card:text-primary",
               isCompleted &&
                 "text-muted-foreground line-through group-hover/card:text-muted-foreground",
+              isSelected && !isCompleted && "text-primary",
             )}
           >
             {card.title}
@@ -95,6 +108,18 @@ export const CardBase = memo(
 
           {hasMeta && (
             <div className="mt-0.5 flex items-center gap-2">
+              {isCompleted ? (
+                <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+                  Completed
+                </span>
+              ) : (
+                priority && (
+                  <span className="shrink-0 font-mono text-[9px] uppercase tracking-[0.08em] text-muted-foreground">
+                    {priority.label}
+                  </span>
+                )
+              )}
+
               {dueDate && (
                 <span
                   className={cn(

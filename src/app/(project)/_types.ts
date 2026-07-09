@@ -9,6 +9,8 @@ export type Board = RouterOutputs["board"]["list"][number];
 export type Project = RouterOutputs["project"]["list"][number];
 export type ProjectDetail = RouterOutputs["project"]["get"];
 export type ProjectUser = RouterOutputs["projectUser"]["list"][number];
+export type RecentProjectHistory =
+  RouterOutputs["history"]["getRecent"][number];
 
 export type Position = "first" | "last" | "middle" | "only";
 
@@ -17,12 +19,12 @@ export interface CardDragData {
   payload: Card;
   index: number;
   columnId: string;
-  instanceId: symbol;
 }
 
 export interface CardDropData {
   type: "card";
   payload: Card;
+  index: number;
   columnId: string;
 }
 

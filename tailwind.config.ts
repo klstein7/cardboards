@@ -94,12 +94,28 @@ export default {
           "0%, 100%": { opacity: "1" },
           "50%": { opacity: "0.5" },
         },
+        "card-settled": {
+          "0%": {
+            transform: "scale(0.992)",
+            backgroundColor: "hsl(var(--primary) / 0.12)",
+          },
+          "48%": {
+            transform: "scale(1.004)",
+            backgroundColor: "hsl(var(--primary) / 0.06)",
+          },
+          "100%": {
+            transform: "scale(1)",
+            backgroundColor: "transparent",
+          },
+        },
       },
       animation: {
         "collapsible-down": "collapsible-down 0.2s ease-out",
         "collapsible-up": "collapsible-up 0.2s ease-out",
         "column-moved": "column-pulse 1.5s ease-in-out",
         "pulse-slow": "pulse-slow 3s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        "card-settled":
+          "card-settled 0.4s cubic-bezier(0.16, 1, 0.3, 1) both",
       },
     },
   },

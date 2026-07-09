@@ -7,7 +7,7 @@ import { CreateProjectDialog } from "../create-project-dialog";
 
 export function EmptyState() {
   return (
-    <div className="flex min-h-[50vh] flex-col items-center justify-center border border-border py-16 text-center">
+    <div className="flex min-h-[50vh] flex-col items-center justify-center border border-dashed border-border py-16 text-center">
       <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
         Workspace empty
       </p>

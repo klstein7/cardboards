@@ -29,6 +29,7 @@ vi.mock("~/server/services/container", async (importOriginal) => {
     services: {
       ...original.services,
       historyService: {
+        listRecentForCurrentUser: vi.fn(),
         listByEntity: vi.fn(),
         listByProject: vi.fn(),
         listByProjectPaginated: vi.fn(),
@@ -287,6 +288,29 @@ describe("History Router", () => {
         TRPCError,
       );
       expect(services.historyService.listByEntity).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("history.getRecent", () => {
+    it("should return recent history for accessible projects", async () => {
+      const mockHistoryEntries = [
+        createMockHistoryEntry("hist-1", "card-1", "card", "move", {
+          projectId: "project-1",
+        }),
+        createMockHistoryEntry("hist-2", "board-1", "board", "update", {
+          projectId: "project-2",
+        }),
+      ];
+      vi.mocked(
+        services.historyService.listRecentForCurrentUser,
+      ).mockResolvedValue(mockHistoryEntries as any);
+
+      const result = await caller.history.getRecent({ limit: 20 });
+
+      expect(result).toEqual(mockHistoryEntries);
+      expect(
+        services.historyService.listRecentForCurrentUser,
+      ).toHaveBeenCalledWith(20);
     });
   });
 

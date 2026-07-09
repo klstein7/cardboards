@@ -16,7 +16,7 @@ export function ErrorState({ error, refetch }: ErrorStateProps) {
       : "Unable to load projects at this time";
 
   return (
-    <div className="flex min-h-60 flex-col items-center justify-center gap-4 border border-destructive/40 p-8 text-center">
+    <div className="flex min-h-60 flex-col items-center justify-center gap-4 border border-dashed border-destructive/40 p-8 text-center">
       <div>
         <h2 className="text-2xl font-light tracking-tight text-destructive">
           Error loading projects

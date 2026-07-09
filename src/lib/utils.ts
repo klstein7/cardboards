@@ -7,15 +7,6 @@ import {
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 
-interface RetryFlashOptions {
-  maxRetries?: number;
-  initialDelay?: number;
-  backoffFactor?: number;
-  isCrossColumnMove?: boolean;
-  getElement: (cardId: number) => HTMLElement | undefined | null;
-  color?: string;
-}
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -152,79 +143,6 @@ export function getColor(value: number | string | null | undefined): string {
       return "var(--chart-cyan-color)";
     default:
       return "var(--primary-color)";
-  }
-}
-
-export function triggerPostMoveFlash(element: HTMLElement, color?: string) {
-  setTimeout(() => {
-    requestAnimationFrame(() => {
-      if (element && document.body.contains(element)) {
-        element.animate(
-          [
-            {
-              transform: "scale(1.005)",
-              backgroundColor: color
-                ? `${color}15`
-                : "hsl(var(--secondary)/0.1)",
-              boxShadow: "0 2px 6px rgba(0, 0, 0, 0.05)",
-            },
-            {
-              transform: "scale(0.998)",
-              backgroundColor: color
-                ? `${color}08`
-                : "hsl(var(--secondary)/0.05)",
-              boxShadow: "0 1px 3px rgba(0, 0, 0, 0.03)",
-              offset: 0.65,
-            },
-            {
-              transform: "scale(1)",
-              backgroundColor: "transparent",
-              boxShadow: "0 1px 2px rgba(0, 0, 0, 0.02)",
-            },
-          ],
-          {
-            duration: 400,
-            easing: "cubic-bezier(0.16, 0.1, 0.16, 1.0)",
-            iterations: 1,
-          },
-        );
-      }
-    });
-  }, 50);
-}
-
-export function retryFlash(
-  cardId: number,
-  {
-    maxRetries = 5,
-    initialDelay = 50,
-    backoffFactor = 1.5,
-    isCrossColumnMove = false,
-    getElement,
-    color,
-  }: RetryFlashOptions,
-) {
-  const attempt = (retriesLeft: number, currentDelay: number) => {
-    const element = getElement(cardId);
-
-    if (element) {
-      triggerPostMoveFlash(element, color);
-    } else if (retriesLeft > 0) {
-      const nextDelay =
-        isCrossColumnMove && retriesLeft === maxRetries
-          ? 150
-          : currentDelay * backoffFactor;
-
-      setTimeout(() => {
-        attempt(retriesLeft - 1, nextDelay);
-      }, nextDelay);
-    }
-  };
-
-  if (isCrossColumnMove) {
-    setTimeout(() => attempt(maxRetries, initialDelay), 100);
-  } else {
-    attempt(maxRetries, initialDelay);
   }
 }
 

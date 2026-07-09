@@ -3,6 +3,7 @@
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { preserveOffsetOnSource } from "@atlaskit/pragmatic-drag-and-drop/element/preserve-offset-on-source";
 import { setCustomNativeDragPreview } from "@atlaskit/pragmatic-drag-and-drop/element/set-custom-native-drag-preview";
 import {
   attachClosestEdge,
@@ -54,7 +55,7 @@ interface CardItemProps {
 
 type DragState =
   | { type: "idle" }
-  | { type: "preview"; container: HTMLElement }
+  | { type: "preview"; container: HTMLElement; width: number }
   | { type: "dragging" };
 
 export function CardItem({
@@ -63,13 +64,12 @@ export function CardItem({
   isCompleted,
   columnId,
 }: CardItemProps) {
-  const { activeCard, setActiveCard, registerCard, unregisterCard } =
-    useBoardState();
+  const { activeCard, setActiveCard, settledCardId } = useBoardState();
   const cardElementRef = useRef<HTMLDivElement>(null);
   const [closestEdge, setClosestEdge] = useState<Edge | null>(null);
   const [dragState, setDragState] = useState<DragState>({ type: "idle" });
 
-  const [, setSelectedCardId] = useQueryState("cardId");
+  const [selectedCardId, setSelectedCardId] = useQueryState("cardId");
 
   const deleteCardMutation = useDeleteCard();
   const assignToCurrentUserMutation = useAssignToCurrentUser();
@@ -77,6 +77,7 @@ export function CardItem({
 
   useEffect(() => {
     return () => {
+      document.body.classList.remove("dragging-card");
       setActiveCard(null);
       setDragState({ type: "idle" });
     };
@@ -88,8 +89,6 @@ export function CardItem({
 
     cardElement.classList.add("card-draggable");
 
-    registerCard(card.id, cardElement);
-
     return combine(
       draggable({
         element: cardElement,
@@ -99,11 +98,19 @@ export function CardItem({
           index,
           columnId,
         }),
-        onGenerateDragPreview({ nativeSetDragImage }) {
+        onGenerateDragPreview({ location, nativeSetDragImage }) {
           setCustomNativeDragPreview({
             nativeSetDragImage,
+            getOffset: preserveOffsetOnSource({
+              element: cardElement,
+              input: location.current.input,
+            }),
             render({ container }) {
-              setDragState({ type: "preview", container });
+              setDragState({
+                type: "preview",
+                container,
+                width: cardElement.getBoundingClientRect().width,
+              });
               return () => setDragState({ type: "dragging" });
             },
           });
@@ -116,12 +123,6 @@ export function CardItem({
           document.body.classList.remove("dragging-card");
           setActiveCard(null);
           setDragState({ type: "idle" });
-
-          setTimeout(() => {
-            if (cardElementRef.current) {
-              cardElementRef.current.classList.remove("no-drag");
-            }
-          }, 10);
         },
       }),
       dropTargetForElements({
@@ -134,6 +135,7 @@ export function CardItem({
             {
               type: "card",
               payload: card,
+              index,
               columnId,
             },
             {
@@ -163,27 +165,37 @@ export function CardItem({
           setClosestEdge(null);
         },
       }),
-      () => {
-        unregisterCard(card.id);
-      },
     );
-  }, [card, index, columnId, setActiveCard, registerCard, unregisterCard]);
+  }, [card, index, columnId, setActiveCard]);
+
+  const openCard = () => void setSelectedCardId(card.id.toString());
+  const isSelected = selectedCardId === card.id.toString();
 
   const cardContent = (
     <div
       ref={cardElementRef}
       className={cn(
-        "relative flex cursor-grab select-none flex-col transition-all duration-300",
+        "relative flex cursor-grab select-none flex-col transition-opacity duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-ring motion-reduce:transition-none",
         activeCard?.id === card.id && "cursor-grabbing opacity-50",
       )}
-      onClick={() => setSelectedCardId(card.id.toString())}
+      onClick={openCard}
+      onKeyDown={(event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        openCard();
+      }}
       data-card-id={card.id}
-      aria-label={`Card: ${card.title}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      aria-label={`${card.title}. Drag to move; press Enter to open.`}
     >
       <CardBase
         card={card}
         isDragging={activeCard?.id === card.id}
         isCompleted={isCompleted}
+        isSelected={isSelected}
+        isSettling={settledCardId === card.id}
       />
 
       {closestEdge && (
@@ -204,9 +216,9 @@ export function CardItem({
           {cardContent}
         </ContextMenuTrigger>
 
-        <ContextMenuContent className="min-w-[220px] border-border p-2 backdrop-blur-sm">
+        <ContextMenuContent className="min-w-[220px] border-border p-2">
           <ContextMenuItem
-            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
             onClick={() => setSelectedCardId(card.id.toString())}
           >
             <Edit className="size-4 text-muted-foreground" />
@@ -214,7 +226,7 @@ export function CardItem({
           </ContextMenuItem>
 
           <ContextMenuItem
-            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
             onClick={() =>
               assignToCurrentUserMutation.mutate({ cardId: card.id })
             }
@@ -226,7 +238,7 @@ export function CardItem({
           <ContextMenuSeparator className="my-1.5 h-px bg-border/60" />
 
           <ContextMenuItem
-            className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
+            className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground focus:bg-muted focus:text-foreground"
             onClick={() => duplicateCardMutation.mutate({ cardId: card.id })}
           >
             <Copy className="size-4 text-muted-foreground" />
@@ -237,7 +249,7 @@ export function CardItem({
 
           <AlertDialogTrigger asChild>
             <ContextMenuItem
-              className="flex cursor-pointer items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
+              className="flex cursor-pointer items-center gap-2.5 px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
               onSelect={(e) => e.preventDefault()}
             >
               <Trash className="size-4" />
@@ -250,11 +262,15 @@ export function CardItem({
       {/* Custom Drag Preview Portal */}
       {dragState.type === "preview" &&
         createPortal(
-          <CardDragPreview card={card} isCompleted={isCompleted} />,
+          <CardDragPreview
+            card={card}
+            isCompleted={isCompleted}
+            width={dragState.width}
+          />,
           dragState.container,
         )}
 
-      <AlertDialogContent className="max-w-md backdrop-blur-sm">
+      <AlertDialogContent className="max-w-md">
         <AlertDialogHeader>
           <AlertDialogTitle>Delete card</AlertDialogTitle>
           <AlertDialogDescription>

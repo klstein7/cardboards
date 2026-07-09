@@ -1,10 +1,10 @@
 import "server-only";
 
 import { auth } from "@clerk/nextjs/server";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 
 import { type Database, type Transaction } from "../db";
-import { history } from "../db/schema";
+import { history, projectUsers } from "../db/schema";
 import { type HistoryCreate } from "../zod";
 import { BaseService } from "./base.service";
 import { type ProjectUserService } from "./project-user.service";
@@ -126,6 +126,39 @@ export class HistoryService extends BaseService {
         where: eq(history.projectId, projectId),
         orderBy: desc(history.createdAt),
         with: {
+          performedBy: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+    }, tx ?? this.db);
+  }
+
+  /** List recent history across every project the current user can access. */
+  async listRecentForCurrentUser(limit = 40, tx?: Transaction | Database) {
+    return this.executeWithTx(async (txOrDb) => {
+      const { userId } = await auth();
+
+      if (!userId) {
+        throw new Error("Unauthorized: User not authenticated");
+      }
+
+      const accessibleProjects = await txOrDb
+        .select({ projectId: projectUsers.projectId })
+        .from(projectUsers)
+        .where(eq(projectUsers.userId, userId));
+      const projectIds = accessibleProjects.map(({ projectId }) => projectId);
+
+      if (projectIds.length === 0) return [];
+
+      return txOrDb.query.history.findMany({
+        where: inArray(history.projectId, projectIds),
+        orderBy: desc(history.createdAt),
+        limit,
+        with: {
+          project: true,
           performedBy: {
             with: {
               user: true,

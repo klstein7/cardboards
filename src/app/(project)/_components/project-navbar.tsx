@@ -53,6 +53,7 @@ export function ProjectNavbar({ projectId, projectName }: ProjectNavbarProps) {
   const boards = useBoards(projectId);
   const isAdmin = useIsAdmin();
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
+  const projectsHref = `/projects?project=${encodeURIComponent(projectId)}`;
 
   const navItems = [
     {
@@ -83,7 +84,7 @@ export function ProjectNavbar({ projectId, projectName }: ProjectNavbarProps) {
     <>
       <AppHeaderShell className="grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] gap-3 md:gap-6">
         <div className="col-start-1 flex min-w-0 items-center gap-3 justify-self-start">
-          <BrandHome />
+          <BrandHome href={projectsHref} label="Back to project activity" />
           <div className="h-6 w-px bg-border" aria-hidden />
           <div className="min-w-0 max-w-[calc(100vw-13rem)] lg:max-w-[22rem]">
             <ProjectSelector
@@ -154,16 +155,13 @@ export function ProjectNavbar({ projectId, projectName }: ProjectNavbarProps) {
               <SheetHeader className="border-b border-border px-4 py-4 text-left">
                 <SheetTitle asChild>
                   <Link
-                    href="/projects"
+                    href={projectsHref}
                     className="flex items-center gap-2"
                     onClick={() => setMenuOpen(false)}
                   >
                     <BrandIcon variant="xsmall" />
                     <span
-                      className={cn(
-                        "text-lg font-medium",
-                        brandFont.className,
-                      )}
+                      className={cn("text-lg font-medium", brandFont.className)}
                     >
                       cardboards
                     </span>

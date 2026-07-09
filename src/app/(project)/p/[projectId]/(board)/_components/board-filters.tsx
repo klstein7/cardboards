@@ -46,7 +46,7 @@ export function BoardLabelFilter({ className }: { className?: string }) {
             onClick={() => toggleLabel(label)}
             aria-pressed={isActive}
             className={cn(
-              "border px-1.5 py-1 font-mono text-[9px] uppercase leading-none tracking-wider transition-colors",
+              "min-h-7 border px-1.5 py-1 font-mono text-[9px] uppercase leading-none tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
               isActive
                 ? "border-primary text-primary"
                 : "border-border text-muted-foreground hover:border-foreground/60 hover:text-foreground",
@@ -59,7 +59,7 @@ export function BoardLabelFilter({ className }: { className?: string }) {
       {labels && labels.length > 0 && (
         <button
           onClick={() => void setLabels(null)}
-          className="flex items-center gap-1 px-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
+          className="flex min-h-7 items-center gap-1 px-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
         >
           <X className="size-3" />
           Clear

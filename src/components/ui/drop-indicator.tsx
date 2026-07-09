@@ -4,11 +4,11 @@ import { type CSSProperties } from "react";
 import { cn } from "~/lib/utils";
 
 export const line = {
-  borderRadius: 8,
-  thickness: 3,
+  borderRadius: 2,
+  thickness: 2,
 };
 
-const terminalSize = 14;
+const terminalSize = 8;
 const offsetToAlignTerminalWithLine = (line.thickness - terminalSize) / 2;
 
 type Orientation = "horizontal" | "vertical";
@@ -41,11 +41,9 @@ const Terminal = ({ edge, color }: { edge: Edge; color?: string }) => {
     width: terminalSize,
     height: terminalSize,
     position: "absolute",
-    borderRadius: "50%",
+    borderRadius: 2,
     backgroundColor: bgColor,
-    border: "2px solid rgba(255, 255, 255, 0.8)",
-    boxShadow:
-      "0 2px 6px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2)",
+    transform: "rotate(45deg)",
     ...styleMap[orientation],
   };
 
@@ -68,21 +66,19 @@ export function DropIndicator({
 
   let positionStyle: CSSProperties = {};
 
+  const offset = -(gap + line.thickness / 2);
+
   if (edge === "top") {
-    positionStyle = { top: -6 };
+    positionStyle = { top: offset };
   } else if (edge === "bottom") {
-    positionStyle = { bottom: -6 };
+    positionStyle = { bottom: offset };
   } else if (edge === "left") {
-    positionStyle = { left: -6 };
+    positionStyle = { left: offset };
   } else {
-    positionStyle = { right: -6 };
+    positionStyle = { right: offset };
   }
 
   const bgColor = color ?? "hsl(var(--primary))";
-
-  const glowColor = color
-    ? `${color.split(")")[0]}, 0.25)`
-    : "hsla(var(--primary), 0.25)";
 
   const style: CSSProperties = {
     position: "absolute",
@@ -90,15 +86,17 @@ export function DropIndicator({
     ...positionStyle,
     borderRadius: line.borderRadius,
     backgroundColor: bgColor,
-    backgroundImage: `linear-gradient(to bottom, ${bgColor}, ${bgColor})`,
-    boxShadow: `0 1px 4px rgba(0, 0, 0, 0.15), 0 0 12px ${glowColor}`,
     opacity: 1,
+    pointerEvents: "none",
     zIndex: 10,
   };
 
   return (
     <div
-      className={cn("duration-200 animate-in fade-in zoom-in-95", className)}
+      className={cn(
+        "duration-100 animate-in fade-in zoom-in-95 motion-reduce:animate-none",
+        className,
+      )}
       style={{
         ...initialStyle,
         ...style,

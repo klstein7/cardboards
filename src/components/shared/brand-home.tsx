@@ -7,16 +7,23 @@ import { BrandIcon } from "~/components/brand/brand-icon";
 import { cn } from "~/lib/utils";
 
 interface BrandHomeProps {
+  href?: string;
+  label?: string;
   onNavigate?: () => void;
   className?: string;
 }
 
-export function BrandHome({ onNavigate, className }: BrandHomeProps) {
+export function BrandHome({
+  href = "/projects",
+  label = "All projects",
+  onNavigate,
+  className,
+}: BrandHomeProps) {
   return (
     <Link
-      href="/projects"
+      href={href}
       onClick={onNavigate}
-      aria-label="All projects"
+      aria-label={label}
       className={cn(
         "flex shrink-0 items-center gap-2 outline-none focus-visible:ring-1 focus-visible:ring-ring",
         className,

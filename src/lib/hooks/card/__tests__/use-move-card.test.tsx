@@ -1,81 +1,28 @@
 import React from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor, act } from "@testing-library/react";
-import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { act, renderHook, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useMoveCard } from "../use-move-card";
 
-// Mock the board state provider
-vi.mock(
-  "~/app/(project)/p/[projectId]/(board)/_components/board-state-provider",
-  () => ({
-    useBoardState: () => ({
-      getCard: () => document.createElement("div"),
-    }),
-  }),
-);
-
-// Mock next/navigation
-vi.mock("next/navigation", () => ({
-  useParams: () => ({ boardId: "test-board-id" }),
-}));
-
-// Mock utils
-vi.mock("~/lib/utils", () => ({
-  retryFlash: vi.fn(),
-}));
-
-// Mock tRPC client functions that are CALLED by the hook or its dependencies
 const mockMutateAsync = vi.fn();
-const mockBoardGetQueryFn = vi.fn().mockResolvedValue({
-  id: "test-board-id",
-  color: "blue",
-  name: "Test Board",
-});
 
 vi.mock("~/trpc/client", () => ({
   useTRPC: () => ({
-    // Provide the structure needed by useMoveCard and useBoard
     card: {
-      // useMoveCard directly calls trpc.card.move.mutationOptions
-      // So we need to mock that part of the structure
       move: {
-        // This is what useMoveCard calls inside itself
-        mutationOptions: (options: any) => options, // Pass options through
+        mutationOptions: (options: any = {}) => ({
+          ...options,
+          mutationKey: ["card", "move"],
+          mutationFn: mockMutateAsync,
+        }),
       },
       list: {
         queryKey: (columnId: string) => ["cards", "list", columnId],
       },
     },
-    board: {
-      get: {
-        // Provide queryOptions needed by useBoard
-        queryOptions: (boardId: string) => ({
-          queryKey: ["board", "get", boardId],
-          queryFn: () => mockBoardGetQueryFn(boardId),
-        }),
-      },
-    },
   }),
 }));
-
-// Mock useMutation from react-query
-vi.mock("@tanstack/react-query", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@tanstack/react-query")>();
-  return {
-    ...actual,
-    useMutation: (options: any) => {
-      // Replace the actual mutation function with our mock
-      const mockedOptions = {
-        ...options,
-        mutationFn: mockMutateAsync, // Intercept the actual mutation call
-      };
-      // Call the *original* useMutation with the modified options
-      // This preserves the hook's onMutate, onError, onSettled logic
-      return actual.useMutation(mockedOptions);
-    },
-  };
-});
 
 const mockInvalidateQueries = vi.fn();
 const mockCancelQueries = vi.fn();
@@ -130,19 +77,7 @@ describe("useMoveCard", () => {
           ];
         }
       }
-      // Provide mock data for the board query needed by useCurrentBoard -> retryFlash
-      if (queryType === "board" && entityType === "get") {
-        return { id: "test-board-id", color: "blue", name: "Test Board" };
-      }
-      // Important: Return undefined if no mock data exists for the key
       return undefined;
-    });
-
-    // Ensure the mocked board query resolves immediately for useCurrentBoard
-    mockBoardGetQueryFn.mockResolvedValue({
-      id: "test-board-id",
-      color: "blue",
-      name: "Test Board",
     });
   });
 
@@ -165,14 +100,14 @@ describe("useMoveCard", () => {
     });
 
     // Assert: Check mocks AFTER mutation settles (onMutate/onSettled run by react-query)
-    expect(mockCancelQueries).toHaveBeenCalledTimes(2);
+    expect(mockCancelQueries).toHaveBeenCalledTimes(1);
     expect(mockGetQueryData).toHaveBeenCalledWith(["cards", "list", "col-1"]);
     expect(mockSetQueryData).toHaveBeenCalledTimes(1);
 
     await waitFor(() => {
       expect(mockInvalidateQueries).toHaveBeenCalledWith({
         queryKey: ["cards", "list", "col-1"],
-        refetchType: "inactive",
+        refetchType: "active",
       });
     });
     expect(mockInvalidateQueries).toHaveBeenCalledTimes(1); // Only one column invalidation
@@ -205,11 +140,11 @@ describe("useMoveCard", () => {
     await waitFor(() => {
       expect(mockInvalidateQueries).toHaveBeenCalledWith({
         queryKey: ["cards", "list", "col-1"],
-        refetchType: "inactive",
+        refetchType: "active",
       });
       expect(mockInvalidateQueries).toHaveBeenCalledWith({
         queryKey: ["cards", "list", "col-2"],
-        refetchType: "inactive",
+        refetchType: "active",
       });
     });
     expect(mockInvalidateQueries).toHaveBeenCalledTimes(2); // Both columns invalidated
@@ -261,8 +196,11 @@ describe("useMoveCard", () => {
       );
     });
 
-    // Assert: Ensure invalidate was NOT called on error
-    expect(mockInvalidateQueries).not.toHaveBeenCalled();
+    // Reconcile active queries after the rollback in case the request outcome
+    // was ambiguous at the network boundary.
+    await waitFor(() => {
+      expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
+    });
   });
 
   // Verify basic hook structure
@@ -273,6 +211,192 @@ describe("useMoveCard", () => {
     // Verify the hook provides the expected interface
     expect(result.current.mutate).toBeInstanceOf(Function);
     expect(result.current.mutateAsync).toBeInstanceOf(Function);
-    expect(result.current.mutateImmediate).toBeInstanceOf(Function);
+  });
+
+  it("starts the standard mutate path without a debounce timer", async () => {
+    const wrapper = createWrapper();
+    mockMutateAsync.mockResolvedValue({ id: 1, order: 1, columnId: "col-1" });
+    const { result } = renderHook(() => useMoveCard(), { wrapper });
+
+    await act(async () => {
+      result.current.mutate({
+        cardId: 1,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 1,
+      });
+      await Promise.resolve();
+    });
+
+    expect(mockMutateAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not reconcile a lane while another optimistic move still affects it", async () => {
+    const firstRequest = deferred<{
+      id: number;
+      order: number;
+      columnId: string;
+    }>();
+    const secondRequest = deferred<{
+      id: number;
+      order: number;
+      columnId: string;
+    }>();
+    mockMutateAsync.mockImplementation(({ cardId }: { cardId: number }) =>
+      cardId === 1 ? firstRequest.promise : secondRequest.promise,
+    );
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useMoveCard(), { wrapper });
+
+    let firstMove!: Promise<unknown>;
+    let secondMove!: Promise<unknown>;
+    await act(async () => {
+      firstMove = result.current.mutateAsync({
+        cardId: 1,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 1,
+      });
+      secondMove = result.current.mutateAsync({
+        cardId: 2,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 0,
+      });
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      secondRequest.resolve({ id: 2, order: 0, columnId: "col-1" });
+      await secondMove;
+    });
+
+    expect(mockInvalidateQueries).not.toHaveBeenCalled();
+
+    await act(async () => {
+      firstRequest.resolve({ id: 1, order: 1, columnId: "col-1" });
+      await firstMove;
+    });
+
+    await waitFor(() => {
+      expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+      expect(mockInvalidateQueries).toHaveBeenCalledWith({
+        queryKey: ["cards", "list", "col-1"],
+        refetchType: "active",
+      });
+    });
+  });
+
+  it("serializes rapid server requests for the same card", async () => {
+    const firstRequest = deferred<{
+      id: number;
+      order: number;
+      columnId: string;
+    }>();
+    const secondRequest = deferred<{
+      id: number;
+      order: number;
+      columnId: string;
+    }>();
+    mockMutateAsync
+      .mockImplementationOnce(() => firstRequest.promise)
+      .mockImplementationOnce(() => secondRequest.promise);
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useMoveCard(), { wrapper });
+
+    let firstMove!: Promise<unknown>;
+    let secondMove!: Promise<unknown>;
+    await act(async () => {
+      firstMove = result.current.mutateAsync({
+        cardId: 1,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 1,
+      });
+      secondMove = result.current.mutateAsync({
+        cardId: 1,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 0,
+      });
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(1));
+
+    await act(async () => {
+      firstRequest.resolve({ id: 1, order: 1, columnId: "col-1" });
+      await firstMove;
+    });
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      secondRequest.resolve({ id: 1, order: 0, columnId: "col-1" });
+      await secondMove;
+    });
+  });
+
+  it("does not roll back a newer optimistic move when an overlapping move fails", async () => {
+    const failedRequest = deferred<never>();
+    const successfulRequest = deferred<{
+      id: number;
+      order: number;
+      columnId: string;
+    }>();
+    mockMutateAsync.mockImplementation(({ cardId }: { cardId: number }) =>
+      cardId === 1 ? failedRequest.promise : successfulRequest.promise,
+    );
+    const wrapper = createWrapper();
+    const { result } = renderHook(() => useMoveCard(), { wrapper });
+
+    let failedMove!: Promise<unknown>;
+    let successfulMove!: Promise<unknown>;
+    await act(async () => {
+      failedMove = result.current.mutateAsync({
+        cardId: 1,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 1,
+      });
+      successfulMove = result.current.mutateAsync({
+        cardId: 2,
+        sourceColumnId: "col-1",
+        destinationColumnId: "col-1",
+        newOrder: 0,
+      });
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(mockMutateAsync).toHaveBeenCalledTimes(2));
+    mockSetQueryData.mockClear();
+
+    await act(async () => {
+      successfulRequest.resolve({ id: 2, order: 0, columnId: "col-1" });
+      await successfulMove;
+    });
+
+    expect(mockInvalidateQueries).not.toHaveBeenCalled();
+
+    await act(async () => {
+      failedRequest.reject(new Error("Move failed"));
+      await expect(failedMove).rejects.toThrow("Move failed");
+    });
+
+    expect(mockSetQueryData).not.toHaveBeenCalled();
+
+    await waitFor(() => expect(mockInvalidateQueries).toHaveBeenCalledTimes(1));
   });
 });
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+
+  return { promise, reject, resolve };
+}

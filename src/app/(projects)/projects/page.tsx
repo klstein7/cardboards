@@ -13,7 +13,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
-  await trpc.project.list.prefetch();
+  await Promise.all([
+    trpc.project.list.prefetch(),
+    trpc.history.getRecent.prefetch({ limit: 40 }),
+  ]);
 
   return (
     <HydrateClient>
@@ -22,10 +25,8 @@ export default async function ProjectsPage() {
           <ProjectsCommandStrip />
         </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-            <ProjectShelf />
-          </div>
+        <main className="min-h-0 flex-1 overflow-hidden">
+          <ProjectShelf />
         </main>
       </div>
     </HydrateClient>

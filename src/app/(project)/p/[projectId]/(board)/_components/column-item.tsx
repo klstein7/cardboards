@@ -3,7 +3,6 @@
 import { combine } from "@atlaskit/pragmatic-drag-and-drop/combine";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { autoScrollForElements } from "@atlaskit/pragmatic-drag-and-drop-auto-scroll/element";
-import { attachClosestEdge } from "@atlaskit/pragmatic-drag-and-drop-hitbox/closest-edge";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -26,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { useCards, useColumns, useMoveCard, useShiftColumn } from "~/lib/hooks";
+import { useCards, useColumns, useShiftColumn } from "~/lib/hooks";
 import { useIsAdmin } from "~/lib/hooks/project-user/use-is-admin";
 import { cn } from "~/lib/utils";
 
@@ -50,7 +49,6 @@ export function ColumnItem({ column }: ColumnItemProps) {
   const isAdmin = useIsAdmin();
 
   const cards = useCards(column.id);
-  const moveCardMutation = useMoveCard();
   const shiftColumnMutation = useShiftColumn();
   const columns = useColumns(column.boardId);
 
@@ -81,10 +79,13 @@ export function ColumnItem({ column }: ColumnItemProps) {
           const columnCenter = columnElement.offsetLeft + columnRect.width / 2;
           const containerCenter = containerRect.width / 2;
           const newScrollLeft = columnCenter - containerCenter;
+          const reduceMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+          ).matches;
 
           scrollContainer.scrollTo({
             left: newScrollLeft,
-            behavior: "smooth",
+            behavior: reduceMotion ? "auto" : "smooth",
           });
         }
       } catch (error) {
@@ -103,20 +104,11 @@ export function ColumnItem({ column }: ColumnItemProps) {
         canDrop({ source }) {
           return source.data.type === "card";
         },
-        getData({ input }) {
-          return attachClosestEdge(
-            {
-              type: "column",
-              payload: column,
-              columnId: column.id,
-            },
-            {
-              element: columnElement,
-              input,
-              allowedEdges: ["top", "bottom"],
-            },
-          );
-        },
+        getData: () => ({
+          type: "column",
+          payload: column,
+          columnId: column.id,
+        }),
         onDragEnter() {
           setIsDropping(true);
         },
@@ -130,7 +122,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
     );
 
     return cleanup;
-  }, [column, moveCardMutation]);
+  }, [column]);
 
   useEffect(() => {
     const cardListElement = cardListRef.current;
@@ -177,17 +169,13 @@ export function ColumnItem({ column }: ColumnItemProps) {
 
   const cardCount = cards.data?.length ?? 0;
 
-  if (cards.isError) {
-    return <div>Error: {cards.error.message}</div>;
-  }
-
   return (
     <div
       ref={columnRef}
       className={cn(
-        "group/column flex h-full w-full flex-col overflow-hidden transition-all duration-200",
-        isDropping && "bg-primary/[0.04]",
-        justMoved && "animate-column-moved",
+        "group/column flex h-full w-full flex-col overflow-hidden transition-all duration-200 motion-reduce:transition-none",
+        isDropping && "bg-primary/[0.035] ring-1 ring-inset ring-primary/15",
+        justMoved && "animate-column-moved motion-reduce:animate-none",
       )}
       style={
         justMoved
@@ -196,93 +184,98 @@ export function ColumnItem({ column }: ColumnItemProps) {
             } as React.CSSProperties)
           : undefined
       }
-      aria-describedby={`${column.name}-column`}
+      role="region"
+      aria-labelledby={`board-column-title-${column.id}`}
     >
-      <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
+      <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-3.5">
         <div className="flex min-w-0 items-center gap-2">
           {column.isCompleted && (
             <CheckCircle2 className="h-3 w-3 shrink-0 text-primary" />
           )}
-          <span className="truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+          <h2
+            id={`board-column-title-${column.id}`}
+            className="truncate text-[11px] font-medium uppercase tracking-[0.13em] text-muted-foreground"
+          >
             {column.name}
-          </span>
+          </h2>
         </div>
 
         <div className="flex shrink-0 items-center gap-1.5">
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="flex h-4 min-w-4 items-center justify-center bg-primary px-1 font-mono text-[9px] text-primary-foreground">
             {String(cardCount).padStart(2, "0")}
           </span>
           {isAdmin && (
-          <DropdownMenu
-            modal={false}
-            open={isDropdownOpen}
-            onOpenChange={(open) => {
-              if (!open && isMovingColumn) return;
-              setIsDropdownOpen(open);
-            }}
-          >
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 text-muted-foreground opacity-0 transition-opacity hover:text-foreground focus-visible:opacity-100 group-hover/column:opacity-100 data-[state=open]:opacity-100 max-sm:opacity-100"
-                aria-label={`Column options for ${column.name}`}
-              >
-                <Ellipsis className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => setIsEditOpen(true)}
-                disabled={isMovingColumn}
-              >
-                <Pencil className="mr-2 h-4 w-4" />
-                <span>Edit column</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={async (e) => {
-                  e.preventDefault();
-                  if (!isFirst && !isMovingColumn) {
-                    await handleShiftColumn("up");
-                  }
-                }}
-                disabled={isFirst || isMovingColumn}
-              >
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                <span>Move left</span>
-                {isMovingColumn &&
-                  shiftColumnMutation.variables?.data.direction === "up" && (
-                    <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={async (e) => {
-                  e.preventDefault();
-                  if (!isLast && !isMovingColumn) {
-                    await handleShiftColumn("down");
-                  }
-                }}
-                disabled={isLast || isMovingColumn}
-              >
-                <ChevronRight className="mr-2 h-4 w-4" />
-                <span>Move right</span>
-                {isMovingColumn &&
-                  shiftColumnMutation.variables?.data.direction === "down" && (
-                    <Loader2 className="ml-2 h-3 w-3 animate-spin" />
-                  )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                disabled={isMovingColumn}
-                onClick={() => setIsDeleteDialogOpen(true)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                <span>Delete column</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            <DropdownMenu
+              modal={false}
+              open={isDropdownOpen}
+              onOpenChange={(open) => {
+                if (!open && isMovingColumn) return;
+                setIsDropdownOpen(open);
+              }}
+            >
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-7 w-7 text-muted-foreground opacity-0 transition-opacity group-hover/column:opacity-100 data-[state=open]:opacity-100 hover:text-foreground focus-visible:opacity-100 max-sm:opacity-100"
+                  aria-label={`Column options for ${column.name}`}
+                >
+                  <Ellipsis className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="end" className="w-48">
+                <DropdownMenuItem
+                  onClick={() => setIsEditOpen(true)}
+                  disabled={isMovingColumn}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  <span>Edit column</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!isFirst && !isMovingColumn) {
+                      await handleShiftColumn("up");
+                    }
+                  }}
+                  disabled={isFirst || isMovingColumn}
+                >
+                  <ChevronLeft className="mr-2 h-4 w-4" />
+                  <span>Move left</span>
+                  {isMovingColumn &&
+                    shiftColumnMutation.variables?.data.direction === "up" && (
+                      <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                    )}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async (e) => {
+                    e.preventDefault();
+                    if (!isLast && !isMovingColumn) {
+                      await handleShiftColumn("down");
+                    }
+                  }}
+                  disabled={isLast || isMovingColumn}
+                >
+                  <ChevronRight className="mr-2 h-4 w-4" />
+                  <span>Move right</span>
+                  {isMovingColumn &&
+                    shiftColumnMutation.variables?.data.direction ===
+                      "down" && (
+                      <Loader2 className="ml-2 h-3 w-3 animate-spin" />
+                    )}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-destructive focus:text-destructive"
+                  disabled={isMovingColumn}
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Delete column</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
 
@@ -312,7 +305,7 @@ export function ColumnItem({ column }: ColumnItemProps) {
                 className="h-8 w-full justify-start gap-1.5 px-3 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground hover:bg-transparent hover:text-primary"
               >
                 <Plus className="h-3 w-3" />
-                <span>Add</span>
+                <span>Add card</span>
               </Button>
             }
             columnId={column.id}

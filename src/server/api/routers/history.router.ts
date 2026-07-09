@@ -11,6 +11,17 @@ import {
 import { authedProcedure, createTRPCRouter } from "~/trpc/init";
 
 export const historyRouter = createTRPCRouter({
+  /** Get recent activity across the current user's accessible projects. */
+  getRecent: authedProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).default(40),
+      }),
+    )
+    .query(({ input }) => {
+      return services.historyService.listRecentForCurrentUser(input.limit);
+    }),
+
   /**
    * Get history entries for a specific entity
    */

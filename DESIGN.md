@@ -3,6 +3,9 @@
 Ledger is the app-wide design system, distilled from the board page redesign.
 The canonical implementation is the board route
 (`src/app/(project)/p/[projectId]/(board)`); when in doubt, match it.
+The production board uses the Panorama composition: a compact command strip,
+a real-data masthead, and stable weighted lanes that keep the full workflow in
+view on wide screens.
 
 ## Foundations
 
@@ -39,19 +42,48 @@ panels, `bg-card`, or `backdrop-blur` containers.
 - List rows are typographic entries: title line plus a mono meta line,
   separated by row padding (`py-4`/`py-5`), never by boxes.
 - Board cards are entries with a 2px priority tick
-  (`absolute left-0 top-[3px] h-3.5 w-0.5`, colored by `--priority-*`),
+  (`w-0.5 shrink-0`, colored by `--priority-*`),
   a title that shifts to `text-primary` on hover, and a mono meta line
-  (labels as plain text, due date, avatar). Completed entries are muted with
-  `line-through` and a border-colored tick.
+  (priority name, labels as plain text, due date, avatar). Completed entries
+  are muted with `line-through`, a border-colored tick, and a text status.
 - The same tick communicates unread state in notifications (primary color).
+
+## Board composition: Panorama
+
+- The command strip carries project and board context, filters, members,
+  settings, notifications, and the single primary action.
+- The masthead below it owns the large board name, live card figures, and a
+  compact stage line. It reflows cleanly when the card workbench docks.
+- Lanes are edge-to-edge and fill the available width. The first two open
+  stages receive slightly more width, middle stages remain steady, and a
+  completed stage is narrower. These weights depend on stable position and
+  stage meaning, not live card counts, so moving a card never shifts the board.
+- Below `sm`, every lane becomes nearly viewport-wide with horizontal snap.
+  Left and Right Arrow keys move the board by one readable lane interval.
+- The selected card receives a quiet neutral surface and primary title color.
+  Selection never relies on color alone; the focused entry remains keyboard
+  reachable and exposes its full text content to assistive technology.
+
+## Projects composition: Pulse
+
+- The projects page is a live operational view rather than a grid of detached
+  project cards. The command strip owns search and the single primary action.
+- A compact project rail filters the page. Each project exposes its board
+  count and an honest activity signal derived from its latest project or board
+  update: active today, active this week, or quiet. Selection is URL-backed via
+  `?project=<id>` so project and board routes can return to the same context.
+- The center column is a chronological activity pulse across accessible
+  projects, grouped by day. Entries use real history, actors, project context,
+  and changed entity details; never invent progress, health, or status data.
+- The right summary keeps one project in view with its real members and boards,
+  then links directly into the project or a board. On narrow screens, the rail
+  becomes horizontal and the summary follows the activity feed.
 
 ## Inputs
 
-- Search and filter inputs on pages are hairline underlines: a `label` with
-  `flex items-center gap-2 border-b border-border pb-1
-  focus-within:border-foreground/60`, a bare transparent `input`, and an
-  optional clear button. Underline `SelectTrigger`
-  (`border-0 border-b px-0 pb-1`) pairs with it for sorts.
+- Search and filter inputs on pages use hairline underlines that strengthen on
+  focus, a bare transparent input, and an optional clear button. Underline
+  selects use the same visual language.
 - Form fields inside dialogs and settings forms keep boxed shadcn `Input`
   components with label above and description below. Underline inputs are for
   finding things; boxed inputs are for entering data.
@@ -60,10 +92,9 @@ panels, `bg-card`, or `backdrop-blur` containers.
 
 - One primary (`bg-primary`) action per bar, with a `Plus` and a short label
   ("New card", "New project").
-- Everything secondary is a quiet ghost: `text-muted-foreground
-  hover:text-foreground`, icon-only where the meaning is clear, revealed on
-  hover for row/column-level actions (`opacity-0 group-hover:opacity-100`,
-  always visible on touch via `max-sm:opacity-100`).
+- Everything secondary is a quiet ghost. Icon-only controls appear where the
+  meaning is clear, and row or column actions reveal on hover while remaining
+  visible on touch.
 - Count indicators are small accent squares:
   `h-4 min-w-4 bg-primary px-1 font-mono text-[9px] text-primary-foreground`.
 - Chips (labels, roles) are hairline mono chips:
@@ -85,3 +116,13 @@ panels, `bg-card`, or `backdrop-blur` containers.
 Quiet and functional only: color/opacity transitions, a 1px hover lift at
 most, hover-revealed actions. No decorative animation loops or staggered
 entrance effects.
+
+Dragging is the deliberate exception because motion communicates spatial
+change. The drag preview preserves the card's source width and pointer offset;
+the source remains as a translucent placeholder; a 2px primary insertion line
+marks the exact destination. On drop, cached order changes immediately, nearby
+entries settle with a tightly damped layout spring, and the moved entry gets a
+single 400ms primary-tinted settle pulse. Do not rotate previews, dim an entire
+lane while saving, stack multiple completion effects, or wait for the server
+before moving the entry. Reduced-motion mode keeps the state changes and
+removes spatial animation.

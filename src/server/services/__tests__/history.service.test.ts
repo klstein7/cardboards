@@ -1,9 +1,9 @@
 import { auth } from "@clerk/nextjs/server";
 import { describe, beforeEach, it, expect, vi } from "vitest";
-import { and, count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq, inArray } from "drizzle-orm";
 
 import { mockDb, mockTx } from "../../../../test/mocks";
-import { history } from "../../db/schema";
+import { history, projectUsers } from "../../db/schema";
 import { HistoryService } from "../history.service";
 
 // Mock Clerk auth
@@ -341,6 +341,85 @@ describe("HistoryService", () => {
           },
         },
       });
+    });
+  });
+
+  describe("listRecentForCurrentUser", () => {
+    it("should list recent history across the user's accessible projects", async () => {
+      const historyEntries = [
+        {
+          id: "history-1",
+          projectId: "project-1",
+          entityType: "card",
+          action: "move",
+          createdAt: new Date(),
+        },
+        {
+          id: "history-2",
+          projectId: "project-2",
+          entityType: "board",
+          action: "update",
+          createdAt: new Date(),
+        },
+      ];
+      const where = vi
+        .fn()
+        .mockResolvedValue([
+          { projectId: "project-1" },
+          { projectId: "project-2" },
+        ]);
+      const from = vi.fn().mockReturnValue({ where });
+
+      mockDb.select.mockReturnValue({ from } as any);
+      mockDb.query = {
+        history: {
+          findMany: vi.fn().mockResolvedValue(historyEntries),
+        },
+      } as any;
+
+      const result = await historyService.listRecentForCurrentUser(20);
+
+      expect(result).toEqual(historyEntries);
+      expect(mockDb.select).toHaveBeenCalledWith({
+        projectId: projectUsers.projectId,
+      });
+      expect(from).toHaveBeenCalledWith(projectUsers);
+      expect(where).toHaveBeenCalledWith(eq(projectUsers.userId, "user-123"));
+      expect(mockDb.query.history.findMany).toHaveBeenCalledWith({
+        where: inArray(history.projectId, ["project-1", "project-2"]),
+        orderBy: desc(history.createdAt),
+        limit: 20,
+        with: {
+          project: true,
+          performedBy: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      });
+    });
+
+    it("should return no history when the user has no accessible projects", async () => {
+      const where = vi.fn().mockResolvedValue([]);
+      const from = vi.fn().mockReturnValue({ where });
+      const findMany = vi.fn();
+
+      mockDb.select.mockReturnValue({ from } as any);
+      mockDb.query = { history: { findMany } } as any;
+
+      await expect(historyService.listRecentForCurrentUser()).resolves.toEqual(
+        [],
+      );
+      expect(findMany).not.toHaveBeenCalled();
+    });
+
+    it("should reject unauthenticated requests", async () => {
+      vi.mocked(auth).mockReturnValue({ userId: null } as any);
+
+      await expect(historyService.listRecentForCurrentUser()).rejects.toThrow(
+        "Unauthorized: User not authenticated",
+      );
     });
   });
 

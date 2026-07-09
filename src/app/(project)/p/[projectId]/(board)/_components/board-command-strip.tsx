@@ -16,7 +16,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   useBoardSafe,
-  useCachedCardsByCurrentBoard,
   useColumns,
   useProject,
   useProjectUsers,
@@ -50,24 +49,12 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { data: unreadCount = 0 } = useNotificationUnreadCount();
 
-  const cards = useCachedCardsByCurrentBoard();
   const columns = useColumns(boardId);
   const projectUsers = useProjectUsers(projectId);
   const [assignedTo, setAssignedTo] = useQueryState(
     "assignedTo",
     parseAsArrayOf(parseAsString),
   );
-
-  const completedColumnIds = new Set(
-    (columns.data ?? [])
-      .filter((column) => column.isCompleted)
-      .map((column) => column.id),
-  );
-  const doneCount = cards.filter((card) =>
-    completedColumnIds.has(card.columnId),
-  ).length;
-  const donePercent =
-    cards.length > 0 ? Math.round((doneCount / cards.length) * 100) : 0;
 
   const firstOpenColumn = [...(columns.data ?? [])]
     .filter((column) => !column.isCompleted)
@@ -76,6 +63,7 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
   const memberList = projectUsers.data ?? [];
   const visibleMembers = memberList.slice(0, 5);
   const extraMembers = memberList.length - visibleMembers.length;
+  const projectsHref = `/projects?project=${encodeURIComponent(projectId)}`;
 
   const toggleAssignee = (projectUserId: string) => {
     if (assignedTo?.includes(projectUserId)) {
@@ -88,13 +76,13 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
 
   return (
     <CommandStrip>
-      <CommandStripBrand />
+      <CommandStripBrand href={projectsHref} label="Back to project activity" />
 
       <div className="flex min-w-0 items-center gap-2 border-r border-border px-4">
         {project && (
           <>
             <Link
-              href={`/p/${projectId}/overview/boards`}
+              href={projectsHref}
               className="min-w-0 max-w-32 truncate text-sm text-muted-foreground transition-colors hover:text-foreground sm:max-w-52"
             >
               {project.name}
@@ -108,14 +96,6 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           label={board?.name ?? "Board"}
           compact
         />
-      </div>
-
-      <div className="hidden items-center gap-4 whitespace-nowrap px-4 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground md:flex">
-        <span>
-          {cards.length} {cards.length === 1 ? "card" : "cards"}
-        </span>
-        <span>{doneCount} done</span>
-        <span className="text-primary">{donePercent}%</span>
       </div>
 
       <div className="min-w-0 flex-1" />
@@ -171,7 +151,11 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           size="icon"
           className="relative h-full w-12 text-muted-foreground hover:text-foreground"
           onClick={() => setNotificationsOpen(true)}
-          aria-label="Notifications"
+          aria-label={
+            unreadCount > 0
+              ? `Notifications, ${unreadCount} unread`
+              : "Notifications"
+          }
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
@@ -187,7 +171,10 @@ export function BoardCommandStrip({ boardId }: BoardCommandStripProps) {
           <CreateCardDialog
             columnId={firstOpenColumn.id}
             trigger={
-              <Button className="h-8 shrink-0 gap-1.5 bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90">
+              <Button
+                aria-label="New card"
+                className="h-8 shrink-0 gap-1.5 bg-primary px-3 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+              >
                 <Plus className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">New card</span>
               </Button>

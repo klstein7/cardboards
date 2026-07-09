@@ -1,129 +1,105 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef } from "react";
+import { useRef } from "react";
+import { toast } from "sonner";
 
 import { type Card } from "~/app/(project)/_types";
-import { useBoardState } from "~/app/(project)/p/[projectId]/(board)/_components/board-state-provider";
-import { retryFlash } from "~/lib/utils";
 import { useTRPC } from "~/trpc/client";
 
-import { useCurrentBoard } from "../board";
-
-// Debounce delay in milliseconds
-const MOVE_DEBOUNCE_DELAY = 50;
+import { applyOptimisticCardMove } from "./card-move";
 
 export function useMoveCard() {
   const trpc = useTRPC();
-  const board = useCurrentBoard();
   const queryClient = useQueryClient();
-  const { getCard } = useBoardState();
+  const mutationSequenceRef = useRef(0);
+  const latestMutationRef = useRef<Record<number, number>>({});
+  const latestMutationByColumnRef = useRef<Map<string, number>>(new Map());
+  const pendingMovesByColumnRef = useRef<Map<string, number>>(new Map());
+  const moveRequestChainsRef = useRef<Map<number, Promise<void>>>(new Map());
 
-  // Track the latest mutation timestamp for each card
-  const latestMutationTimestampRef = useRef<Record<string, number>>({});
-  // Debounce timer for each card
-  const debounceTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
+  const mutationOptions = trpc.card.move.mutationOptions({
+    onMutate: async (variables) => {
+      const mutationSequence = ++mutationSequenceRef.current;
+      latestMutationRef.current[variables.cardId] = mutationSequence;
+      const affectedColumnIds = [
+        ...new Set([variables.sourceColumnId, variables.destinationColumnId]),
+      ];
 
-  const mutationResult = useMutation(
-    trpc.card.move.mutationOptions({
-      onMutate: async (variables) => {
-        // Record the timestamp of this mutation for this card
-        const currentTimestamp = Date.now();
-        latestMutationTimestampRef.current[variables.cardId] = currentTimestamp;
+      affectedColumnIds.forEach((columnId) => {
+        const pendingMoves = pendingMovesByColumnRef.current.get(columnId);
+        pendingMovesByColumnRef.current.set(columnId, (pendingMoves ?? 0) + 1);
+        latestMutationByColumnRef.current.set(columnId, mutationSequence);
+      });
 
-        console.log("Starting optimistic update");
-        console.log(`Looking for card ${variables.cardId}`);
-        console.log(`In source column ${variables.sourceColumnId}`);
+      await Promise.all(
+        affectedColumnIds.map((columnId) =>
+          queryClient.cancelQueries({
+            queryKey: trpc.card.list.queryKey(columnId),
+          }),
+        ),
+      );
 
-        // Cancel any outgoing refetches to avoid overwriting our optimistic update
-        await queryClient.cancelQueries({
-          queryKey: trpc.card.list.queryKey(variables.sourceColumnId),
-        });
+      const previousSourceCards = queryClient.getQueryData<Card[]>(
+        trpc.card.list.queryKey(variables.sourceColumnId),
+      );
+      const previousDestinationCards =
+        variables.sourceColumnId === variables.destinationColumnId
+          ? previousSourceCards
+          : queryClient.getQueryData<Card[]>(
+              trpc.card.list.queryKey(variables.destinationColumnId),
+            );
 
-        await queryClient.cancelQueries({
-          queryKey: trpc.card.list.queryKey(variables.destinationColumnId),
-        });
+      const canApplyOptimisticMove =
+        previousSourceCards &&
+        (variables.sourceColumnId === variables.destinationColumnId ||
+          previousDestinationCards);
+      const optimisticMove = canApplyOptimisticMove
+        ? applyOptimisticCardMove({
+            ...variables,
+            sourceCards: previousSourceCards,
+            destinationCards: previousDestinationCards ?? [],
+          })
+        : null;
 
-        const previousSourceCards = queryClient.getQueryData<Card[]>(
+      if (optimisticMove) {
+        queryClient.setQueryData<Card[]>(
           trpc.card.list.queryKey(variables.sourceColumnId),
-        );
-        const previousDestCards = queryClient.getQueryData<Card[]>(
-          trpc.card.list.queryKey(variables.destinationColumnId),
+          optimisticMove.sourceCards,
         );
 
-        if (!previousSourceCards || !previousDestCards) return;
-
-        const sourceCard = previousSourceCards.find(
-          (card) => card.id === variables.cardId,
-        );
-
-        if (!sourceCard) return;
-
-        if (variables.destinationColumnId !== variables.sourceColumnId) {
-          queryClient.setQueryData<Card[]>(
-            trpc.card.list.queryKey(variables.sourceColumnId),
-            (old = []) => {
-              return old
-                .filter((card) => card.id !== variables.cardId)
-                .map((card, index) => ({ ...card, order: index }));
-            },
-          );
-
+        if (optimisticMove.destinationCards) {
           queryClient.setQueryData<Card[]>(
             trpc.card.list.queryKey(variables.destinationColumnId),
-            (old = []) => {
-              return [
-                ...old.slice(0, variables.newOrder),
-                {
-                  ...sourceCard,
-                  order: variables.newOrder,
-                  columnId: variables.destinationColumnId,
-                },
-                ...old.slice(variables.newOrder),
-              ].map((card, index) => ({ ...card, order: index }));
-            },
-          );
-        } else {
-          queryClient.setQueryData<Card[]>(
-            trpc.card.list.queryKey(variables.sourceColumnId),
-            (old = []) => {
-              const filteredOld = old.filter(
-                (card) => card.id !== variables.cardId,
-              );
-              return [
-                ...filteredOld.slice(0, variables.newOrder),
-                {
-                  ...sourceCard,
-                  order: variables.newOrder,
-                },
-                ...filteredOld.slice(variables.newOrder),
-              ].map((card, index) => ({ ...card, order: index }));
-            },
+            optimisticMove.destinationCards,
           );
         }
+      }
 
-        retryFlash(variables.cardId, {
-          getElement: () => getCard(variables.cardId),
-          isCrossColumnMove:
-            variables.destinationColumnId !== variables.sourceColumnId,
-          color: board.data?.color,
-        });
+      return {
+        previousSourceCards,
+        previousDestinationCards,
+        mutationSequence,
+        affectedColumnIds,
+      };
+    },
+    onError: (error, variables, context) => {
+      if (
+        !context ||
+        latestMutationRef.current[variables.cardId] !== context.mutationSequence
+      ) {
+        return;
+      }
 
-        // Save the mutation context for potential reversion
-        return {
-          previousSourceCards,
-          previousDestCards,
-          timestamp: currentTimestamp,
-        };
-      },
-      onError: (_err, variables, context) => {
-        // Only revert if this error handler is for the latest mutation of this card
-        if (
-          !context ||
-          latestMutationTimestampRef.current[variables.cardId] !==
-            context.timestamp
-        ) {
-          return;
-        }
+      const hasOverlappingMove = context.affectedColumnIds.some(
+        (columnId) => (pendingMovesByColumnRef.current.get(columnId) ?? 0) > 1,
+      );
+      const hasNewerMove = context.affectedColumnIds.some(
+        (columnId) =>
+          (latestMutationByColumnRef.current.get(columnId) ?? 0) >
+          context.mutationSequence,
+      );
+      const shouldDeferRollback = hasOverlappingMove || hasNewerMove;
 
+      if (!shouldDeferRollback) {
         if (context.previousSourceCards) {
           queryClient.setQueryData(
             trpc.card.list.queryKey(variables.sourceColumnId),
@@ -132,70 +108,86 @@ export function useMoveCard() {
         }
 
         if (variables.destinationColumnId !== variables.sourceColumnId) {
-          if (context.previousDestCards) {
+          if (context.previousDestinationCards) {
             queryClient.setQueryData(
               trpc.card.list.queryKey(variables.destinationColumnId),
-              context.previousDestCards,
+              context.previousDestinationCards,
             );
           }
         }
-      },
-      onSettled: (result, error, variables, context) => {
-        if (!result) return;
-
-        // Only invalidate for the most recent mutation of this card
-        if (
-          !context ||
-          latestMutationTimestampRef.current[variables.cardId] !==
-            context.timestamp
-        ) {
-          return;
-        }
-
-        // Use selective invalidation strategies
-        void queryClient.invalidateQueries({
-          queryKey: trpc.card.list.queryKey(variables.sourceColumnId),
-          // Only refetch if there are no active fetches for this query
-          refetchType: "inactive",
-        });
-
-        if (variables.destinationColumnId !== variables.sourceColumnId) {
-          void queryClient.invalidateQueries({
-            queryKey: trpc.card.list.queryKey(variables.destinationColumnId),
-            // Only refetch if there are no active fetches for this query
-            refetchType: "inactive",
-          });
-        }
-      },
-    }),
-  );
-
-  // Wrapper function to debounce card moves
-  const debouncedMoveCard = useCallback(
-    (variables: Parameters<typeof mutationResult.mutate>[0]) => {
-      const cardId = String(variables.cardId);
-
-      // Clear any existing timer for this card
-      if (debounceTimersRef.current[cardId]) {
-        clearTimeout(debounceTimersRef.current[cardId]);
       }
 
-      // Set a new timer
-      debounceTimersRef.current[cardId] = setTimeout(() => {
-        // The actual mutation call happens here after the debounce period
-        mutationResult.mutate(variables);
-        // Clean up the timer reference
-        delete debounceTimersRef.current[cardId];
-      }, MOVE_DEBOUNCE_DELAY);
+      toast.error("Card move failed", {
+        description:
+          error instanceof Error
+            ? `${error.message}. ${shouldDeferRollback ? "Refreshing the affected lanes." : "Your board was restored."}`
+            : shouldDeferRollback
+              ? "Refreshing the affected lanes."
+              : "Your board was restored.",
+      });
     },
-    [mutationResult],
-  );
+    onSettled: (_result, _error, variables, context) => {
+      const affectedColumnIds = context?.affectedColumnIds ?? [
+        ...new Set([variables.sourceColumnId, variables.destinationColumnId]),
+      ];
+      const columnsReadyToReconcile = affectedColumnIds.filter((columnId) => {
+        const remainingMoves = Math.max(
+          0,
+          (pendingMovesByColumnRef.current.get(columnId) ?? 1) - 1,
+        );
 
-  return {
-    ...mutationResult,
-    // Replace the regular mutate with our debounced version
-    mutate: debouncedMoveCard,
-    // Provide the non-debounced version in case it's needed for immediate execution
-    mutateImmediate: mutationResult.mutate,
-  };
+        if (remainingMoves === 0) {
+          pendingMovesByColumnRef.current.delete(columnId);
+          latestMutationByColumnRef.current.delete(columnId);
+          return true;
+        }
+
+        pendingMovesByColumnRef.current.set(columnId, remainingMoves);
+        return false;
+      });
+
+      void Promise.all(
+        columnsReadyToReconcile.map((columnId) =>
+          queryClient.invalidateQueries({
+            queryKey: trpc.card.list.queryKey(columnId),
+            refetchType: "active",
+          }),
+        ),
+      );
+
+      if (
+        context &&
+        latestMutationRef.current[variables.cardId] === context.mutationSequence
+      ) {
+        delete latestMutationRef.current[variables.cardId];
+      }
+    },
+  });
+  const executeMove = mutationOptions.mutationFn;
+
+  return useMutation({
+    ...mutationOptions,
+    mutationFn: async (variables) => {
+      if (!executeMove) throw new Error("Card move mutation is unavailable");
+
+      const previousRequest =
+        moveRequestChainsRef.current.get(variables.cardId) ?? Promise.resolve();
+      const request = previousRequest.then(() => executeMove(variables));
+      const settledRequest = request.then(
+        () => undefined,
+        () => undefined,
+      );
+
+      moveRequestChainsRef.current.set(variables.cardId, settledRequest);
+      void settledRequest.then(() => {
+        if (
+          moveRequestChainsRef.current.get(variables.cardId) === settledRequest
+        ) {
+          moveRequestChainsRef.current.delete(variables.cardId);
+        }
+      });
+
+      return request;
+    },
+  });
 }
