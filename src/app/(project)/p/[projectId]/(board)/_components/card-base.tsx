@@ -11,6 +11,19 @@ import { useBoardState } from "./board-state-provider";
 
 const MAX_VISIBLE_LABELS = 2;
 
+function toPlainTextPreview(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 interface CardBaseProps {
   card: Card;
   className?: string;
@@ -35,9 +48,14 @@ export const CardBase = memo(
     const dueDate = card.dueDate ? new Date(card.dueDate) : null;
     const isOverdue = dueDate ? isPast(dueDate) && !isCompleted : false;
 
+    const descriptionPreview = card.description
+      ? toPlainTextPreview(card.description)
+      : "";
+
     const labels = card.labels ?? [];
     const visibleLabels = labels.slice(0, MAX_VISIBLE_LABELS);
     const extraLabels = labels.length - visibleLabels.length;
+    const hasMeta = dueDate !== null || labels.length > 0 || !!card.assignedTo;
 
     return (
       <div
@@ -58,10 +76,10 @@ export const CardBase = memo(
           aria-hidden
         />
 
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <h3
             className={cn(
-              "truncate text-sm text-card-foreground transition-colors group-hover/card:text-primary",
+              "line-clamp-2 text-sm leading-snug text-card-foreground transition-colors group-hover/card:text-primary",
               isCompleted &&
                 "text-muted-foreground line-through group-hover/card:text-muted-foreground",
             )}
@@ -69,43 +87,49 @@ export const CardBase = memo(
             {card.title}
           </h3>
 
-          <div className="flex items-center gap-2">
-            {dueDate && (
-              <span
-                className={cn(
-                  "shrink-0 font-mono text-[10px]",
-                  isOverdue ? "text-destructive" : "text-muted-foreground",
-                )}
-              >
-                {format(dueDate, "MMM d")}
-              </span>
-            )}
+          {descriptionPreview && !isCompleted && (
+            <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
+              {descriptionPreview}
+            </p>
+          )}
 
-            {visibleLabels.map((label, index) => (
-              <span
-                key={index}
-                className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
-              >
-                {label}
-              </span>
-            ))}
-            {extraLabels > 0 && (
-              <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
-                +{extraLabels}
-              </span>
-            )}
+          {hasMeta && (
+            <div className="mt-0.5 flex items-center gap-2">
+              {dueDate && (
+                <span
+                  className={cn(
+                    "shrink-0 font-mono text-[10px]",
+                    isOverdue ? "text-destructive" : "text-muted-foreground",
+                  )}
+                >
+                  {format(dueDate, "MMM d")}
+                </span>
+              )}
 
-            {card.assignedTo ? (
-              <Avatar className="ml-auto h-5 w-5 shrink-0">
-                <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-                <AvatarFallback className="text-[9px]">
-                  {card.assignedTo.user.name?.[0] ?? ""}
-                </AvatarFallback>
-              </Avatar>
-            ) : (
-              <span className="ml-auto h-5 w-5 shrink-0" aria-hidden />
-            )}
-          </div>
+              {visibleLabels.map((label, index) => (
+                <span
+                  key={index}
+                  className="min-w-0 truncate border border-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
+                >
+                  {label}
+                </span>
+              ))}
+              {extraLabels > 0 && (
+                <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
+                  +{extraLabels}
+                </span>
+              )}
+
+              {card.assignedTo && (
+                <Avatar className="ml-auto h-5 w-5 shrink-0">
+                  <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
+                  <AvatarFallback className="text-[9px]">
+                    {card.assignedTo.user.name?.[0] ?? ""}
+                  </AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+          )}
         </div>
       </div>
     );
