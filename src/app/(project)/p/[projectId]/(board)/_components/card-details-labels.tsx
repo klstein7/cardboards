@@ -4,6 +4,10 @@ import { type Tag, TagInput } from "emblor";
 import { useState } from "react";
 
 import { Skeleton } from "~/components/ui/skeleton";
+import {
+  CARD_LABEL_MAX_COUNT,
+  CARD_LABEL_MAX_LENGTH,
+} from "~/server/zod";
 
 import { CardDetailsFactRow } from "./card-details-fact-row";
 
@@ -41,11 +45,14 @@ export function CardDetailsLabels({
             inlineTagsContainer:
               "rounded-none border-0 bg-transparent p-0 shadow-none",
             tag: {
-              body: "rounded-none border border-border bg-transparent pl-2 font-mono text-[10px] text-muted-foreground",
+              body: "rounded-none border border-border bg-transparent pl-2 font-mono text-[10px] text-muted-foreground whitespace-nowrap",
             },
           }}
           placeholder="Add a label"
-          maxTags={5}
+          maxTags={CARD_LABEL_MAX_COUNT}
+          maxLength={CARD_LABEL_MAX_LENGTH}
+          truncate={CARD_LABEL_MAX_LENGTH}
+          inputProps={{ maxLength: CARD_LABEL_MAX_LENGTH }}
           onTagAdd={async (tag) => {
             const currentTags = tags.map((t) => t.text);
             if (!currentTags.includes(tag)) {

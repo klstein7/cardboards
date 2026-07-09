@@ -109,7 +109,7 @@ export const CardBase = memo(
               {visibleLabels.map((label, index) => (
                 <span
                   key={index}
-                  className="min-w-0 truncate border border-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
+                  className="min-w-0 max-w-40 truncate border border-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
                 >
                   {label}
                 </span>

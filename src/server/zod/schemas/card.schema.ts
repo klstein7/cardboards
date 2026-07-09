@@ -5,18 +5,32 @@ import { cards } from "~/server/db/schema";
 
 export const CardSchema = createSelectSchema(cards);
 
+export const CARD_LABEL_MAX_LENGTH = 24;
+export const CARD_LABEL_MAX_COUNT = 5;
+
+const CardLabelTextSchema = z
+  .string()
+  .trim()
+  .transform((label) => label.slice(0, CARD_LABEL_MAX_LENGTH));
+
 export const CardCreateSchema = createInsertSchema(cards)
   .omit({
     order: true,
     labels: true,
   })
   .extend({
-    labels: z.array(
-      z.object({
-        id: z.string(),
-        text: z.string(),
-      }),
-    ),
+    labels: z
+      .array(
+        z.object({
+          id: z.string(),
+          text: CardLabelTextSchema,
+        }),
+      )
+      .transform((labels) =>
+        labels
+          .filter((label) => label.text.length > 0)
+          .slice(0, CARD_LABEL_MAX_COUNT),
+      ),
   });
 
 export const CardCreateManyPayloadSchema = z.array(
@@ -41,7 +55,17 @@ export const CardUpdatePayloadSchema = createSelectSchema(cards)
   .omit({
     id: true,
   })
-  .partial();
+  .partial()
+  .extend({
+    labels: z
+      .array(CardLabelTextSchema)
+      .transform((labels) =>
+        labels
+          .filter((label) => label.length > 0)
+          .slice(0, CARD_LABEL_MAX_COUNT),
+      )
+      .nullish(),
+  });
 
 export const CardUpdateSchema = z.object({
   cardId: z.number(),
