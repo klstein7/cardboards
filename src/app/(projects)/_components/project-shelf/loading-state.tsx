@@ -2,9 +2,12 @@ import { Skeleton } from "~/components/ui/skeleton";
 
 export function LoadingState() {
   return (
-    <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 border-l border-t border-border sm:grid-cols-2 lg:grid-cols-3">
       {[1, 2, 3, 4, 5, 6].map((panelIndex) => (
-        <div key={panelIndex} className="flex min-h-56 flex-col bg-background">
+        <div
+          key={panelIndex}
+          className="flex min-h-56 flex-col border-b border-r border-border bg-background"
+        >
           <div className="flex h-9 shrink-0 items-center justify-between border-b border-border px-3">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-3 w-5" />

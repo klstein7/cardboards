@@ -24,7 +24,7 @@ const orderedProjects = [
 
 function ProjectPanel({ project }: { project: MockProject }) {
   return (
-    <section className="flex min-h-56 flex-col bg-background">
+    <section className="flex min-h-56 flex-col border-b border-r border-border bg-background">
       <header className="flex h-9 shrink-0 items-center gap-2 border-b border-border px-3">
         {project.isFavorite ? (
           <Star className="h-3 w-3 shrink-0 fill-primary text-primary" />
@@ -114,7 +114,7 @@ export default function ShelfPage() {
 
       <main className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
-          <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 border-l border-t border-border sm:grid-cols-2 lg:grid-cols-3">
             {orderedProjects.map((project) => (
               <ProjectPanel key={project.name} project={project} />
             ))}
