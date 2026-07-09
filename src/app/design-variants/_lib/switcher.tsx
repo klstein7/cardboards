@@ -10,6 +10,13 @@ const VARIANTS = [
     href: "/design-variants/card-inspector",
   },
   { key: "dossier", label: "Dossier", href: "/design-variants/card-dossier" },
+  {
+    key: "workbench",
+    label: "Workbench",
+    href: "/design-variants/card-workbench",
+  },
+  { key: "queue", label: "Queue", href: "/design-variants/card-queue" },
+  { key: "docket", label: "Docket", href: "/design-variants/card-docket" },
 ] as const;
 
 export type VariantKey = (typeof VARIANTS)[number]["key"];
