@@ -44,7 +44,7 @@ export const CardBase = memo(
     return (
       <div
         className={cn(
-          "group/card relative flex cursor-grab select-none items-center gap-2.5 px-3 py-2 transition-colors hover:bg-accent/50",
+          "group/card relative flex cursor-grab select-none items-center gap-3 px-3.5 py-3 transition-colors hover:bg-accent/50",
           activeCard?.id === card.id && !isDragging && "opacity-50",
           isDragging && "pointer-events-none select-none",
           className,
@@ -53,7 +53,7 @@ export const CardBase = memo(
         onClick={onClick}
       >
         <span
-          className="h-3 w-0.5 shrink-0"
+          className="h-3.5 w-0.5 shrink-0"
           style={{
             backgroundColor: isCompleted ? "hsl(var(--border))" : priorityColor,
           }}
@@ -63,7 +63,7 @@ export const CardBase = memo(
 
         <h3
           className={cn(
-            "min-w-0 flex-1 truncate text-[12.5px] text-card-foreground transition-colors group-hover/card:text-primary",
+            "min-w-0 flex-1 truncate text-sm text-card-foreground transition-colors group-hover/card:text-primary",
             isCompleted &&
               "text-muted-foreground line-through group-hover/card:text-muted-foreground",
           )}
@@ -74,7 +74,7 @@ export const CardBase = memo(
         {dueDate && (
           <span
             className={cn(
-              "shrink-0 font-mono text-[9px]",
+              "shrink-0 font-mono text-[10px]",
               isOverdue ? "text-destructive" : "text-muted-foreground",
             )}
           >
@@ -85,26 +85,26 @@ export const CardBase = memo(
         {visibleLabels.map((label, index) => (
           <span
             key={index}
-            className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[9px] leading-none text-muted-foreground"
+            className="shrink-0 border border-border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground"
           >
             {label}
           </span>
         ))}
         {extraLabels > 0 && (
-          <span className="shrink-0 font-mono text-[9px] text-muted-foreground">
+          <span className="shrink-0 font-mono text-[10px] text-muted-foreground">
             +{extraLabels}
           </span>
         )}
 
         {card.assignedTo ? (
-          <Avatar className="h-4 w-4 shrink-0">
+          <Avatar className="h-5 w-5 shrink-0">
             <AvatarImage src={card.assignedTo.user.imageUrl ?? ""} />
-            <AvatarFallback className="text-[8px]">
+            <AvatarFallback className="text-[9px]">
               {card.assignedTo.user.name?.[0] ?? ""}
             </AvatarFallback>
           </Avatar>
         ) : (
-          <span className="h-4 w-4 shrink-0" aria-hidden />
+          <span className="h-5 w-5 shrink-0" aria-hidden />
         )}
       </div>
     );
