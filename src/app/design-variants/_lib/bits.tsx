@@ -22,25 +22,3 @@ export function MemberAvatar({
     </span>
   );
 }
-
-export function MemberStack({
-  people,
-  className,
-  itemClassName,
-}: {
-  people: MockPerson[];
-  className?: string;
-  itemClassName?: string;
-}) {
-  return (
-    <div className={cn("flex -space-x-1.5", className)}>
-      {people.map((person) => (
-        <MemberAvatar
-          key={person.initials}
-          person={person}
-          className={cn("ring-2 ring-background", itemClassName)}
-        />
-      ))}
-    </div>
-  );
-}
