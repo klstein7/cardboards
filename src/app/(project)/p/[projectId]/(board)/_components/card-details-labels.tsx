@@ -5,6 +5,8 @@ import { useState } from "react";
 
 import { Skeleton } from "~/components/ui/skeleton";
 
+import { CardDetailsFactRow } from "./card-details-fact-row";
+
 interface CardDetailsLabelsProps {
   labels: string[] | null | undefined;
   isPending: boolean;
@@ -24,12 +26,9 @@ export function CardDetailsLabels({
   const [activeTagIndex, setActiveTagIndex] = useState<number | null>(null);
 
   return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-        Labels
-      </span>
+    <CardDetailsFactRow label="Labels">
       {isPending ? (
-        <Skeleton className="h-9 w-full" />
+        <Skeleton className="h-8 w-full" />
       ) : (
         <TagInput
           tags={tags}
@@ -38,8 +37,9 @@ export function CardDetailsLabels({
           setTags={setTags}
           className="w-full"
           styleClasses={{
-            input: "h-8 rounded-none text-sm",
-            inlineTagsContainer: "rounded-none pl-1 py-0.5",
+            input: "h-8 rounded-none border-0 px-0 text-sm shadow-none",
+            inlineTagsContainer:
+              "rounded-none border-0 bg-transparent p-0 shadow-none",
             tag: {
               body: "rounded-none border border-border bg-transparent pl-2 font-mono text-[10px] text-muted-foreground",
             },
@@ -60,6 +60,6 @@ export function CardDetailsLabels({
           }}
         />
       )}
-    </div>
+    </CardDetailsFactRow>
   );
 }

@@ -13,15 +13,20 @@ import { useProjectUsers, useStrictCurrentProjectId } from "~/lib/hooks";
 interface ProjectUserSelectProps {
   value: string;
   onChange: (value: string) => void;
+  triggerClassName?: string;
 }
 
-export function ProjectUserSelect({ value, onChange }: ProjectUserSelectProps) {
+export function ProjectUserSelect({
+  value,
+  onChange,
+  triggerClassName,
+}: ProjectUserSelectProps) {
   const projectId = useStrictCurrentProjectId();
   const projectUsers = useProjectUsers(projectId);
 
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger className={triggerClassName}>
         <SelectValue placeholder="Select user" />
       </SelectTrigger>
       <SelectContent>

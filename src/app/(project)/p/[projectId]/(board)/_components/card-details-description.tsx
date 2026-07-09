@@ -21,7 +21,7 @@ export function CardDetailsDescription({
   const isEmpty = description === "<p></p>" || !description;
 
   return (
-    <div className="mt-6 flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
         Description
       </span>

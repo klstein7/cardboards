@@ -1,5 +1,6 @@
 "use client";
 
+import { format } from "date-fns";
 import { X } from "lucide-react";
 import { useQueryState } from "nuqs";
 import { useEffect, useRef, useState } from "react";
@@ -12,6 +13,7 @@ import { type Priority } from "~/lib/utils";
 import { CardDetailsCommentList } from "./card-details-comment-list";
 import { CardDetailsCreateCommentForm } from "./card-details-create-comment-form";
 import { CardDetailsDescription } from "./card-details-description";
+import { CardDetailsFactRow } from "./card-details-fact-row";
 import { CardDetailsLabels } from "./card-details-labels";
 import { CardDetailsMetadata } from "./card-details-metadata";
 import { CardDetailsSkeleton } from "./card-details-skeleton";
@@ -99,11 +101,8 @@ export function CardDetails({ boardId }: { boardId: string }) {
       {card.isPending ? (
         <CardDetailsSkeleton />
       ) : (
-        <div
-          key={selectedCardId}
-          className="grid min-h-0 flex-1 overflow-y-auto md:grid-cols-[1fr_240px] md:divide-x md:divide-border md:overflow-y-visible"
-        >
-          <div className="min-w-0 px-5 py-6 md:overflow-y-auto md:px-7">
+        <div key={selectedCardId} className="min-h-0 flex-1 overflow-y-auto">
+          <div className="px-5 py-6 md:px-8">
             <CardDetailsTitle
               title={card.data?.title}
               isEditing={editing === "title"}
@@ -116,32 +115,9 @@ export function CardDetails({ boardId }: { boardId: string }) {
                 }
               }}
             />
-
-            <CardDetailsDescription
-              description={card.data?.description ?? undefined}
-              isEditing={editing === "description"}
-              isPending={false}
-              onEdit={() => setEditing("description")}
-              onBlur={async (content) => {
-                setEditing(null);
-                if (content !== cardDataRef.current?.description) {
-                  await saveChanges({ description: content });
-                }
-              }}
-            />
-
-            <div className="mt-8 border-t border-border pt-5">
-              <h3 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-                Comments
-              </h3>
-              <CardDetailsCommentList cardId={Number(selectedCardId)} />
-              <div className="mt-4 border-t border-border/60">
-                <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
-              </div>
-            </div>
           </div>
 
-          <aside className="flex flex-col gap-6 border-t border-border px-5 py-6 md:overflow-y-auto md:border-t-0">
+          <dl className="divide-y divide-border/60 border-y border-border">
             <CardDetailsMetadata
               dueDate={card.data?.dueDate}
               assignedToId={card.data?.assignedToId}
@@ -195,7 +171,47 @@ export function CardDetails({ boardId }: { boardId: string }) {
                 }
               }}
             />
-          </aside>
+
+            {card.data?.createdAt && (
+              <CardDetailsFactRow label="Opened">
+                <span className="font-mono text-xs text-muted-foreground">
+                  {format(card.data.createdAt, "MMM d, yyyy")}
+                </span>
+              </CardDetailsFactRow>
+            )}
+            {card.data?.updatedAt && (
+              <CardDetailsFactRow label="Updated">
+                <span className="font-mono text-xs text-muted-foreground">
+                  {format(card.data.updatedAt, "MMM d, yyyy")}
+                </span>
+              </CardDetailsFactRow>
+            )}
+          </dl>
+
+          <div className="px-5 py-6 md:px-8">
+            <CardDetailsDescription
+              description={card.data?.description ?? undefined}
+              isEditing={editing === "description"}
+              isPending={false}
+              onEdit={() => setEditing("description")}
+              onBlur={async (content) => {
+                setEditing(null);
+                if (content !== cardDataRef.current?.description) {
+                  await saveChanges({ description: content });
+                }
+              }}
+            />
+          </div>
+
+          <div className="border-t border-border px-5 py-6 md:px-8">
+            <h3 className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+              Comments
+            </h3>
+            <CardDetailsCommentList cardId={Number(selectedCardId)} />
+            <div className="mt-4 border-t border-border/60">
+              <CardDetailsCreateCommentForm cardId={Number(selectedCardId)} />
+            </div>
+          </div>
         </div>
       )}
     </aside>

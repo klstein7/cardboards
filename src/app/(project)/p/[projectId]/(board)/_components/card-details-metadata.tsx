@@ -6,7 +6,11 @@ import { ProjectUserSelect } from "~/app/(project)/_components/project-user-sele
 import { DatePicker } from "~/components/ui/date-picker";
 import { Skeleton } from "~/components/ui/skeleton";
 
+import { CardDetailsFactRow } from "./card-details-fact-row";
 import { CardPrioritySelect } from "./card-priority-select";
+
+const quietTrigger =
+  "h-auto w-fit gap-1.5 border-0 bg-transparent p-0 shadow-none transition-colors hover:text-primary focus:ring-0 focus:ring-offset-0";
 
 interface CardDetailsMetadataProps {
   dueDate: Date | null | undefined;
@@ -20,14 +24,6 @@ interface CardDetailsMetadataProps {
   onDueDateChange: (date?: Date) => Promise<void>;
   onAssigneeChange: (value: string) => Promise<void>;
   onPriorityChange: (value: string) => Promise<void>;
-}
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[11px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
-      {children}
-    </span>
-  );
 }
 
 export function CardDetailsMetadata({
@@ -45,35 +41,34 @@ export function CardDetailsMetadata({
 }: CardDetailsMetadataProps) {
   return (
     <>
-      <div className="flex flex-col gap-1.5">
-        <FieldLabel>Priority</FieldLabel>
+      <CardDetailsFactRow label="Priority">
         {isPendingPriority ? (
-          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-5 w-28" />
         ) : (
           <CardPrioritySelect
             value={priority ?? ""}
             onChange={onPriorityChange}
+            triggerClassName={quietTrigger}
           />
         )}
-      </div>
+      </CardDetailsFactRow>
 
-      <div className="flex flex-col gap-1.5">
-        <FieldLabel>Assignee</FieldLabel>
+      <CardDetailsFactRow label="Assignee">
         {isPendingAssignee ? (
-          <Skeleton className="h-9 w-full" />
+          <Skeleton className="h-5 w-36" />
         ) : (
           <ProjectUserSelect
             value={assignedToId ?? ""}
             onChange={onAssigneeChange}
+            triggerClassName={quietTrigger}
           />
         )}
-      </div>
+      </CardDetailsFactRow>
 
-      <div className="flex flex-col gap-1.5">
-        <FieldLabel>Due</FieldLabel>
+      <CardDetailsFactRow label="Due">
         {isEditingDueDate ? (
           isPendingDueDate ? (
-            <Skeleton className="h-9 w-full" />
+            <Skeleton className="h-5 w-28" />
           ) : (
             <DatePicker value={dueDate ?? undefined} onChange={onDueDateChange} />
           )
@@ -92,7 +87,7 @@ export function CardDetailsMetadata({
             )}
           </button>
         )}
-      </div>
+      </CardDetailsFactRow>
     </>
   );
 }

@@ -12,15 +12,17 @@ import { PRIORITIES } from "~/lib/utils";
 interface CardPrioritySelectProps {
   value: string;
   onChange: (value: string) => void;
+  triggerClassName?: string;
 }
 
 export function CardPrioritySelect({
   value,
   onChange,
+  triggerClassName,
 }: CardPrioritySelectProps) {
   return (
     <Select value={value} onValueChange={onChange}>
-      <SelectTrigger>
+      <SelectTrigger className={triggerClassName}>
         <SelectValue placeholder="Set priority" />
       </SelectTrigger>
       <SelectContent>
